@@ -1,9 +1,7 @@
 import React from "react";
 import budsImg from "../assets/HeroImage.png";
 
-getbannerimages={
-  
-}
+
 const Hero = () => {
   return (
     <div className="flex justify-between h-[90%] bg-[#E3E6F3]">
