@@ -11,10 +11,10 @@ function App() {
   return (
     <div className="w-full h-screen">
       <Navbar />
-      <Hero/>
-      <FeaturedProduct/>
-      <AdvertisementBanner/>
-      <Footer/>
+      <Hero />
+      <FeaturedProduct />
+      <AdvertisementBanner />
+      <Footer />
     </div>
   );
 }

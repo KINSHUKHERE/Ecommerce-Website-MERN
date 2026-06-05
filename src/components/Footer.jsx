@@ -2,7 +2,8 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <div className="p-14 bg-gray-100 flex flex-wrap justify-between gap-6 text-gray-700">
+    <div className="p-6 md:p-10 bg-gray-100 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 text-gray-700">
+      {/* Brand & Contact Section */}
       <div className="flex flex-col items-start max-w-sm">
         <div className="flex gap-2 mb-5 items-center">
           <svg
@@ -76,13 +77,14 @@ const Footer = () => {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <title>YouTube</title>
-                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93 .502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
               </svg>
             </a>
           </div>
         </div>
       </div>
 
+      {/* About Section */}
       <div className="flex flex-col gap-2 text-sm">
         <h2 className="text-base font-bold text-black mb-1">About</h2>
         <a href="#" className="hover:underline">
@@ -102,6 +104,7 @@ const Footer = () => {
         </a>
       </div>
 
+      {/* My Account Section */}
       <div className="flex flex-col gap-2 text-sm">
         <h2 className="text-base font-bold text-black mb-1">My Account</h2>
         <a href="#" className="hover:underline">
@@ -121,22 +124,23 @@ const Footer = () => {
         </a>
       </div>
 
-      <div className="flex flex-col gap-2 text-sm max-w-xs">
+      {/* Install App Section */}
+      <div className="flex flex-col gap-1 text-sm max-w-xs">
         <h2 className="text-base font-bold text-black mb-1">Install App</h2>
         <p>From App Store or Play Store</p>
-        <div className="flex gap-2 my-2">
+        <div className="flex gap-2">
           <img
-            className="h-10 w-auto object-contain border rounded"
+            className="w-24 object-contain rounded"
             src="https://raw.githubusercontent.com/pioug/google-play-badges/84247f16ddb0ebd9cfc2459085c2b6c7a43f3237/svg/af.svg"
             alt="Google Play"
           />
           <img
-            className="h-10 w-auto object-contain border rounded"
+            className="w-24 object-contain rounded"
             src="https://www.svgrepo.com/show/303128/download-on-the-app-store-apple-logo.svg"
             alt="App Store"
           />
         </div>
-        <p className="mt-2">Secure Payment Gateways</p>
+        <p>Secure Payment Gateways</p>
         <div className="mt-1">
           <img
             className="h-8 w-auto object-contain"
@@ -146,7 +150,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="w-full text-center text-xs text-gray-500 mt-8 pt-4 border-t border-gray-200">
+      <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 text-center text-xs text-gray-500 mt-8 pt-4 border-t border-gray-200">
         <p>©2026 - MERN Ecommerce Project</p>
       </div>
     </div>
