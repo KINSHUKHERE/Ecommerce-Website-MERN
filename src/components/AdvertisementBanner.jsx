@@ -1,6 +1,11 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const AdvertisementBanner = () => {
+  const navigate = useNavigate()
+  const toHome= ()=>{
+    navigate('/products')
+  }
   return (
     <div className='w-full h-72 flex flex-col justify-center items-center text-center gap-4 relative overflow-hidden px-4 select-none'>
       
@@ -21,7 +26,7 @@ const AdvertisementBanner = () => {
           Up to <span className='text-[#ff3902] font-black'>70% Off</span> - All HeadPhones & Other Accessories
         </h2>
         
-        <button className='mt-3 text-white bg-transparent border-2 border-white text-sm font-bold px-8 py-3 rounded-md hover:bg-[#088178] hover:border-[#088178] transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer shadow-md'>
+        <button className='mt-3 text-white bg-transparent border-2 border-white text-sm font-bold px-8 py-3 rounded-md hover:bg-[#088178] hover:border-[#088178] transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer shadow-md' onClick={toHome}>
           Explore More
         </button>
         

@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import EachProduct from "./EachProduct";
+import { Link } from "react-router-dom";
 
-const FeaturedProduct = () => {
+const FeaturedProduct = (props) => {
   const productList = [
     {
       image:
@@ -70,6 +71,19 @@ const FeaturedProduct = () => {
   ];
   return (
     <div className="w-full bg-white py-10">
+      {!props.k && (
+        <div className="px-10 mb-6">
+          <Link
+            to="/"
+            className="group inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full hover:bg-[#088178] hover:text-white hover:border-[#088178] transition-all duration-300 shadow-sm font-semibold text-sm"
+          >
+            <span className="text-lg group-hover:-translate-x-1 transition-transform duration-300">
+              &larr;
+            </span>
+            Back
+          </Link>
+        </div>
+      )}
       <div className="text-center mb-10 flex flex-col gap-2">
         <h2 className="font-bold text-5xl text-[#222]">Featured Products</h2>
         <p className="text-[#465B52] text-base">
@@ -78,21 +92,33 @@ const FeaturedProduct = () => {
       </div>
 
       <div className="flex flex-wrap  gap-8 px-10">
-        {/* Single Product Card */}
-        {productList.map((elem) => {
+        {productList.slice(0, props?.k).map((elem, idx) => {
           return (
-            <div>
+            <div key={idx}>
               <EachProduct
+                numEle={idx}
+                k={props.k}
                 img={elem.image}
                 brand={elem.brand}
                 name={elem.name}
                 price={elem.price}
                 alt={elem.alt}
+                data={elem}
               />
             </div>
           );
         })}
       </div>
+      {props.k && props.k < productList.length && (
+        <div className="text-center mt-10">
+          <Link
+            to="/products"
+            className="px-6 py-3 bg-[#088178] text-white rounded-lg hover:bg-[#06635c] transition"
+          >
+            View All Products
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

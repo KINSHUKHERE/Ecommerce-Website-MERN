@@ -1,20 +1,13 @@
-import { useState } from "react";
 import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import FeaturedProduct from "./components/FeaturedProduct";
-import AdvertisementBanner from "./components/AdvertisementBanner";
-import Footer from "./components/Footer";
+import AppRoutes from "./routes/AppRoutes";
+import ScrollToTop from "./components/ScrollToTop"
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <div className="w-full h-screen">
+      <ScrollToTop />
       <Navbar />
-      <Hero />
-      <FeaturedProduct />
-      <AdvertisementBanner />
-      <Footer />
+      <AppRoutes />
     </div>
   );
 }

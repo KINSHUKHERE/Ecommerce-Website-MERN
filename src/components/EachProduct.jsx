@@ -1,9 +1,17 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const EachProduct = (props) => {
+  const navigate = useNavigate();
+  const productClicked = () => {
+    navigate(`/products/${props.numEle}`);
+  };
   return (
     <div>
-      <div className="w-80 p-3 border border-[#cce7d0] rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 relative group bg-white cursor-pointer">
+      <div
+        className="w-80 p-3 border border-[#cce7d0] rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 relative group bg-white cursor-pointer"
+        onClick={productClicked}
+      >
         <div className="w-full h-64 bg-[#f0f2f5] rounded-2xl p-4 flex justify-center items-center overflow-hidden">
           <img
             src={props.img}
@@ -22,7 +30,9 @@ const EachProduct = (props) => {
           </h5>
 
           <div className="flex justify-between items-center mt-1">
-            <span className="font-bold text-[16px] text-[#088178]">₹{props.price}</span>
+            <span className="font-bold text-[16px] text-[#088178]">
+              ₹{props.price}
+            </span>
 
             <button className="w-10 h-10 bg-[#e8f6ea] rounded-full flex justify-center items-center text-[#088178] hover:bg-[#088178] hover:text-white active:scale-90 transition-all duration-300 absolute bottom-0 right-0">
               <svg
