@@ -7,5 +7,5 @@ export const getProduct = () => {
 };
 
 export const postProduct = (data) => {
-  return axios.post("http://localhost:3000/product-data-send", data)
+  return axios.post("http://localhost:3000/product-data-send", data);
 };

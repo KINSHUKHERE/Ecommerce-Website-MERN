@@ -1,61 +1,155 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Heart, ShoppingCart, Menu, X } from "lucide-react";
+import { ShoppingCart, Menu, X } from "lucide-react";
+import logo from "../assets/logo.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
-  const activeClass = "text-[#15877F] font-bold border-b-2 border-[#15877F]";
-  const inactiveClass = "hover:text-[#15877F] transition-colors";
+
+  const navLink = (path) =>
+    `relative transition-all duration-300 hover:text-[#15877F] ${
+      isActive(path)
+        ? "text-[#15877F] font-semibold after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-[#15877F]"
+        : "text-gray-700"
+    }`;
 
   return (
-    <div className="w-full bg-[#E3E6F3] sticky top-0 z-50 shadow-lg shadow-black/20">
-      <div className="flex justify-between w-full h-18 px-4 md:px-6 py-4 items-center">
-        {/* Logo Section */}
-        <div className="flex gap-2 px-3 items-center">
-          {/* ... SVG Logo ... */}
-          <h1 className="text-xl md:text-2xl font-semibold whitespace-nowrap">ELECTRONIC STORE</h1>
-        </div>
+    <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md">
+      <div className="mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link to="/" className="flex items-center gap-3">
+          <img src={logo} alt="Shopora" className="h-12 w-12 object-contain" />
 
-        {/* Desktop Links & Icons */}
-        <div className="hidden md:flex items-center gap-6 px-4 list-none font-medium">
-          <li className={isActive("/") ? activeClass : inactiveClass}><Link to="/">Home</Link></li>
-          <li className={isActive("/products") ? activeClass : inactiveClass}><Link to="/products">Products</Link></li>
-          <li className={isActive("/about") ? activeClass : inactiveClass}><Link to="/about">About Us</Link></li>
-          <li className={isActive("/contact") ? activeClass : inactiveClass}><Link to="/contact">Contact Us</Link></li>
-          
-          <div className="flex items-center gap-4 border-l pl-6 border-gray-400">
-            <Link to="/wishlist" className="hover:text-[#15877F]"><Heart size={22} /></Link>
-            <Link to="/cart" className="hover:text-[#15877F]"><ShoppingCart size={22} /></Link>
+          <div className="flex flex-col leading-none">
+            <span className="text-xl font-bold text-[#15877F]">Shopora</span>
+            <span className="text-xs tracking-wider text-gray-500">
+              SHOP SMART
+            </span>
           </div>
+        </Link>
+
+        <ul className="hidden md:flex items-center gap-8 font-medium">
+          <li>
+            <Link className={navLink("/")} to="/">
+              Home
+            </Link>
+          </li>
+
+          <li>
+            <Link className={navLink("/products")} to="/products">
+              Products
+            </Link>
+          </li>
+
+          <li>
+            <Link className={navLink("/create-product")} to="/create-product">
+              Create Product
+            </Link>
+          </li>
+
+          <li>
+            <Link className={navLink("/about")} to="/about">
+              About
+            </Link>
+          </li>
+
+          <li>
+            <Link className={navLink("/contact")} to="/contact">
+              Contact
+            </Link>
+          </li>
+        </ul>
+
+        <div className="hidden md:flex items-center gap-5">
+          <Link
+            to="/cart"
+            className="transition-all duration-300 hover:text-[#15877F] hover:scale-110 "
+          >
+            <ShoppingCart size={22} />
+          </Link>
         </div>
 
-        {/* Mobile Toggle */}
-        <div className="md:hidden flex items-center gap-4">
-          <Link to="/cart"><ShoppingCart size={22} /></Link>
+        <div className="flex items-center gap-4 md:hidden">
+          <Link to="/cart">
+            <ShoppingCart size={24} />
+          </Link>
+
           <button onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden bg-[#E3E6F3] border-t border-gray-300 px-6 py-4 transition-all">
-          <ul className="flex flex-col gap-4 font-medium">
-            <li className={isActive("/") ? "text-[#15877F]" : ""}><Link to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
-            <li className={isActive("/products") ? "text-[#15877F]" : ""}><Link to="/products" onClick={() => setIsOpen(false)}>Products</Link></li>
-            <li className={isActive("/about") ? "text-[#15877F]" : ""}><Link to="/about" onClick={() => setIsOpen(false)}>About Us</Link></li>
-            <li className={isActive("/contact") ? "text-[#15877F]" : ""}><Link to="/contact" onClick={() => setIsOpen(false)}>Contact Us</Link></li>
-            <li className="flex gap-4 pt-4 border-t border-gray-300">
-               <Link to="/wishlist" className="flex items-center gap-2"><Heart size={20} /> Wishlist</Link>
-            </li>
-          </ul>
-        </div>
-      )}
-    </div>
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ${
+          isOpen ? "max-h-96 border-t" : "max-h-0"
+        }`}
+      >
+        <ul className="bg-white px-6 py-5 flex flex-col gap-5 font-medium">
+          <li>
+            <Link
+              to="/"
+              className={navLink("/")}
+              onClick={() => setIsOpen(false)}
+            >
+              Home
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              to="/products"
+              className={navLink("/products")}
+              onClick={() => setIsOpen(false)}
+            >
+              Products
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              to="/create-product"
+              className={navLink("/create-product")}
+              onClick={() => setIsOpen(false)}
+            >
+              Create Product
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              to="/about"
+              className={navLink("/about")}
+              onClick={() => setIsOpen(false)}
+            >
+              About
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              to="/contact"
+              className={navLink("/contact")}
+              onClick={() => setIsOpen(false)}
+            >
+              Contact
+            </Link>
+          </li>
+
+          <div className="flex items-center gap-6 border-t pt-4">
+            <Link
+              to="/cart"
+              className="flex items-center gap-2 hover:text-[#15877F]"
+            >
+              <ShoppingCart size={20} />
+              Cart
+            </Link>
+          </div>
+        </ul>
+      </div>
+    </nav>
   );
 };
 

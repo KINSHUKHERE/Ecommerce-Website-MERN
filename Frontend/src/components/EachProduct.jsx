@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getProduct } from "../api/ProductApi";
 
-const EachProduct = (props) => {
+const EachProduct = ({data}) => {
   const navigate = useNavigate();
   const productClicked = () => {
-    navigate(`/products/${props.numEle}`);
+    navigate(`/products/${data._id}`);
   };
+
+  if(!data) return null;
+  
+  
   return (
     <div>
       <div
@@ -14,27 +19,32 @@ const EachProduct = (props) => {
       >
         <div className="w-full h-64 bg-[#f0f2f5] rounded-2xl p-4 flex justify-center items-center overflow-hidden">
           <img
-            src={props.img}
-            alt={props.alt}
+            src={data.imgUrl}
+            alt="Image Invalid"
             className="h-full w-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
           />
         </div>
 
         <div className="pt-3 px-1 pb-1 flex flex-col gap-1.5 relative">
           <span className="text-s font-medium text-[#465B52] tracking-wider">
-            {props.brand}
+            {data.brandName}
           </span>
 
           <h5 className="font-bold text-[#1a1a1a] text-[15px] leading-tight truncate">
-            {props.name}
+            {data.heading}
           </h5>
 
           <div className="flex justify-between items-center mt-1">
             <span className="font-bold text-[16px] text-[#088178]">
-              ₹{props.price}
+              ₹{data.price}
             </span>
 
-            <button className="w-10 h-10 bg-[#e8f6ea] rounded-full flex justify-center items-center text-[#088178] hover:bg-[#088178] hover:text-white active:scale-90 transition-all duration-300 absolute bottom-0 right-0">
+            <button className="w-10 h-10 bg-[#e8f6ea] rounded-full flex justify-center items-center text-[#088178] hover:bg-[#088178] hover:text-white active:scale-90 transition-all duration-300 absolute bottom-0 right-0"
+            onClick={(e)=>{
+               e.stopPropagation();
+               navigate("/cart")
+            }}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
