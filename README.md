@@ -1,6 +1,6 @@
 # Shopora - Modern MERN Stack E-Commerce Platform
 
-Shopora is a premium, responsive E-Commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The application showcases an aesthetic design featuring a product catalog, dynamic product detailed views, a shopping cart placeholder, and an admin interface to add new products to the MongoDB database.
+Shopora is a premium, responsive E-Commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The application showcases an aesthetic design featuring a product catalog, dynamic product detailed views, a shopping cart placeholder, and a fully featured admin management UI alongside user authentication interfaces.
 
 ---
 
@@ -10,6 +10,10 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 *   **Dynamic Product Catalog:** Fetches and displays products dynamically from a MongoDB database with filtering/slicing on the home page.
 *   **Detailed Product Views:** Dedicated product detail routes enabling users to read descriptions, review prices, and inspect high-quality product images.
 *   **Product Creation Portal:** A dedicated page with validation to dynamically add new products (Image URLs, brands, titles, prices, descriptions) into the inventory database.
+*   **Admin Management Dashboard:** Complete statistics panel containing quick cards for Total Products, Users, Orders, Revenue, and Contact Queries. Includes dynamic navbar toggles to switch layouts between customer views and admin dashboard modules.
+*   **Order Management System:** Structured tables listing customer order details, product summaries, payment status badges (Paid/Pending), and shipment statuses (Delivered, Processing, Pending).
+*   **Contact Queries Portal:** A dashboard layout displaying user submissions, contact emails, message descriptions, and timestamps.
+*   **User Onboarding & Auth UI:** Responsive layouts for User Log In and Sign Up/Register forms containing full name, email, phone number, and password fields.
 *   **Responsive Navigation:** Fully optimized for all screen sizes, including custom mobile toggle navigation drawers.
 *   **Seamless Database Connectivity:** Structured backend communicating over REST API to perform CRUD operations on products.
 
@@ -54,16 +58,24 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   │   │   └── ProductApi.js    # Axios API client functions
 │   │   ├── assets/              # App images & icons
 │   │   ├── components/          # Modular React components
-│   │   │   ├── Navbar.jsx       # Header & Navigation
+│   │   │   ├── Navbar.jsx       # Header & Navigation (Admin vs Customer layout toggling)
 │   │   │   ├── Footer.jsx       # Footer layout
 │   │   │   ├── Hero.jsx         # Landing Hero Section
 │   │   │   ├── FeaturedProduct.jsx  # Products Listing Grid
 │   │   │   ├── EachProduct.jsx      # Product Card component
 │   │   │   ├── ProductDetails.jsx   # Detailed Product Page
 │   │   │   ├── CreateProduct.jsx    # Add New Product Form
-│   │   │   └── AddToCart.jsx        # Cart Page placeholder
+│   │   │   ├── AddToCart.jsx        # Cart Page placeholder
+│   │   │   └── ScrollToTop.jsx      # Scroll behavior helper
+│   │   ├── pages/               # Top-level Page layouts
+│   │   │   ├── Login.jsx        # User Login Interface
+│   │   │   ├── SignUp.jsx       # User Registration Interface
+│   │   │   └── admin/           # Administrative Panels
+│   │   │       ├── AdminDashboard.jsx  # Stats overview cards
+│   │   │       ├── ContactDetails.jsx  # Customer enquiries table
+│   │   │       └── OrderDetails.jsx    # Order management and tracking table
 │   │   ├── routes/
-│   │   │   └── AppRoutes.jsx    # React Router definitions
+│   │   │   └── AppRoutes.jsx    # React Router definitions (Client & Admin routes)
 │   │   ├── App.jsx              # Main App entry layout
 │   │   ├── main.jsx             # React DOM root render
 │   │   └── index.css            # Global CSS styles imports
@@ -170,7 +182,9 @@ The client application will start running, usually at `http://localhost:5173`.
 
 ## 🖼️ User Interface Preview
 
-*   **Home / Hero Section:** Welcoming header with curated branding.
+*   **Home / Hero Section:** Welcoming header with curated branding and interactive category slides.
 *   **Featured Grid:** Clean collection cards with brand name, dynamic hover scaling, price displaying in Indian Rupees (₹), and a quick add-to-cart action button.
 *   **Product Detail View:** A dedicated details panel showing image details, clean price styling, and item description.
-*   **Admin Panel:** Clean input fields with dynamic submit logic redirecting to catalog updates.
+*   **Admin Dashboard:** High-level metrics view showing total products count, total users, orders, revenue, and active queries.
+*   **Order & Contact Details:** Clean, readable tables featuring badge-based payment and delivery status indicators for tracking user transactions and queries.
+*   **Onboarding Screens:** User authentication UI pages for Logging In and Registering accounts.
