@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { ShoppingCart, Menu, X, UserStar, User } from "lucide-react";
 import logo from "../assets/logo.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [admin, setAdmin] = useState(false);
+
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
@@ -30,37 +32,69 @@ const Navbar = () => {
           </div>
         </Link>
 
-        <ul className="hidden md:flex items-center gap-8 font-medium">
-          <li>
-            <Link className={navLink("/")} to="/">
-              Home
-            </Link>
-          </li>
+        {!admin && (
+          <ul className="hidden md:flex items-center gap-8 font-medium">
+            <li>
+              <Link className={navLink("/")} to="/">
+                Home
+              </Link>
+            </li>
 
-          <li>
-            <Link className={navLink("/products")} to="/products">
-              Products
-            </Link>
-          </li>
+            <li>
+              <Link className={navLink("/products")} to="/products">
+                Products
+              </Link>
+            </li>
 
-          <li>
-            <Link className={navLink("/create-product")} to="/create-product">
-              Create Product
-            </Link>
-          </li>
+            <li>
+              <Link className={navLink("/about")} to="/about">
+                About
+              </Link>
+            </li>
 
-          <li>
-            <Link className={navLink("/about")} to="/about">
-              About
-            </Link>
-          </li>
+            <li>
+              <Link className={navLink("/contact")} to="/contact">
+                Contact
+              </Link>
+            </li>
+          </ul>
+        )}
+        {admin && (
+          <ul className="hidden md:flex items-center gap-8 font-medium">
+            <li>
+              <Link className={navLink("/admin")} to="/admin">
+                Dashboard
+              </Link>
+            </li>
+            <li>
+              <Link className={navLink("/products")} to="/products">
+                Products
+              </Link>
+            </li>
 
-          <li>
-            <Link className={navLink("/contact")} to="/contact">
-              Contact
-            </Link>
-          </li>
-        </ul>
+            <li>
+              <Link className={navLink("/create-product")} to="/create-product">
+                Create-Product
+              </Link>
+            </li>
+            <li>
+              <Link
+                className={navLink("/contact-details")}
+                to="/contact-details"
+              >
+                Contact Details
+              </Link>
+            </li>
+            <li>
+              <Link
+                className={navLink("/order-details")}
+                to="/order-details"
+              >
+                Order Details
+              </Link>
+            </li>
+          </ul>
+        )}
 
         <div className="hidden md:flex items-center gap-5">
           <Link
@@ -68,6 +102,24 @@ const Navbar = () => {
             className="transition-all duration-300 hover:text-[#15877F] hover:scale-110 "
           >
             <ShoppingCart size={22} />
+          </Link>
+          <Link
+            to="/"
+            onClick={() => {
+              setAdmin(false);
+            }}
+            className="transition-all duration-300 hover:text-[#15877F] hover:scale-110 "
+          >
+            <User size={22} />
+          </Link>
+          <Link
+            to="/admin"
+            onClick={() => {
+              setAdmin(true);
+            }}
+            className="transition-all duration-300 hover:text-[#15877F] hover:scale-110 "
+          >
+            <UserStar size={22} />
           </Link>
         </div>
 
