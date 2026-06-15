@@ -9,6 +9,10 @@ const Navbar = () => {
 
   const location = useLocation();
 
+  const isAuthPage =
+    location.pathname === "/register" || location.pathname === "/login";
+  const displayStyle = isAuthPage ? "none" : "block";
+
   const isActive = (path) => location.pathname === path;
 
   const navLink = (path) =>
@@ -19,7 +23,10 @@ const Navbar = () => {
     }`;
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md">
+    <nav
+      className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md"
+      style={{ display: `${displayStyle}` }}
+    >
       <div className="mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-3">
           <img src={logo} alt="Shopora" className="h-12 w-12 object-contain" />
@@ -86,10 +93,7 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
-              <Link
-                className={navLink("/order-details")}
-                to="/order-details"
-              >
+              <Link className={navLink("/order-details")} to="/order-details">
                 Order Details
               </Link>
             </li>

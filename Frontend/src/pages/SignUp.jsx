@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState  } from "react";
+import {useNavigate} from "react-router-dom";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -7,6 +8,8 @@ const SignUp = () => {
     mobile: "",
     password: "",
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -20,7 +23,7 @@ const SignUp = () => {
 
     console.log(formData);
 
-    alert("Signup Successful");
+    navigate('/login')
   };
 
   return (
@@ -30,15 +33,11 @@ const SignUp = () => {
           Create Account
         </h1>
 
-        <p className="text-center text-gray-500 mb-6">
-          Join Shopora today
-        </p>
+        <p className="text-center text-gray-500 mb-6">Join Shopora today</p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Full Name
-            </label>
+            <label className="block text-sm font-medium mb-2">Full Name</label>
 
             <input
               type="text"
@@ -84,9 +83,7 @@ const SignUp = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Password
-            </label>
+            <label className="block text-sm font-medium mb-2">Password</label>
 
             <input
               type="password"
