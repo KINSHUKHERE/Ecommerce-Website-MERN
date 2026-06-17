@@ -7,14 +7,20 @@ import {
   IndianRupee,
   MessageSquare,
 } from "lucide-react";
+import { getContact } from "../../api/ContactApi";
 
 const AdminDashboard = () => {
   const [totalProducts, setTotalProducts] = useState(0);
+  const [totalContacts, setTotalContacts] = useState(0);
 
   const fetchData = async () => {
     try {
       const result = await getProduct();
       setTotalProducts(result.data.data.length);
+      const totalContact = await getContact()
+      setTotalContacts(totalContact.data.contacts.length)
+      
+
     } catch (error) {
       console.log(error);
     }
@@ -47,7 +53,7 @@ const AdminDashboard = () => {
     },
     {
       title: "Contact Queries",
-      value: 0,
+      value: totalContacts,
       icon: <MessageSquare size={28} />,
     },
   ];

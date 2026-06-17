@@ -1,29 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getContact } from "../../api/ContactApi";
 
 const ContactDetails = () => {
-  const contacts = [
-    {
-      id: 1,
-      name: "Rahul Sharma",
-      email: "rahul@gmail.com",
-      message: "I want to know more about your products.",
-      time: "15 Jun 2026, 10:30 AM",
-    },
-    {
-      id: 2,
-      name: "Priya Verma",
-      email: "priya@gmail.com",
-      message: "My order has not been delivered yet.",
-      time: "15 Jun 2026, 11:15 AM",
-    },
-    {
-      id: 3,
-      name: "Amit Jain",
-      email: "amit@gmail.com",
-      message: "Can you provide bulk order discounts?",
-      time: "15 Jun 2026, 01:45 PM",
-    },
-  ];
+  const [contacts, setContacts] = useState([]);
+
+  useEffect(() => {
+    fetchContact();
+  }, []);
+
+  const fetchContact = async () => {
+    try {
+      const data = await getContact();
+      console.log(data);
+      setContacts(data.data.contacts);
+    } catch (err) {
+      console.log("Unable to fetch the contacts Details");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -59,23 +52,26 @@ const ContactDetails = () => {
               </thead>
 
               <tbody>
-                {contacts.map((contact) => (
+                {contacts.map((contact, idx) => (
                   <tr
-                    key={contact.id}
+                    key={contact._id}
                     className="border-b hover:bg-gray-50 transition"
                   >
-                    <td className="p-4 font-medium">{contact.name}</td>
+                    <td className="p-4 font-medium">{contact.Name}</td>
 
-                    <td className="p-4 text-blue-600">
-                      {contact.email}
-                    </td>
+                    <td className="p-4 text-blue-600">{contact.Email}</td>
 
-                    <td className="p-4 max-w-md">
-                      {contact.message}
-                    </td>
+                    <td className="p-4 max-w-md">{contact.Message}</td>
 
                     <td className="p-4 text-gray-500">
-                      {contact.time}
+                      {new Date(contact.createdAt).toLocaleTimeString("en-US", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
                     </td>
                   </tr>
                 ))}
