@@ -8,19 +8,21 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { getContact } from "../../api/ContactApi";
+import { allUsers } from "../../api/AuthApi";
 
 const AdminDashboard = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalContacts, setTotalContacts] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   const fetchData = async () => {
     try {
       const result = await getProduct();
       setTotalProducts(result.data.data.length);
-      const totalContact = await getContact()
-      setTotalContacts(totalContact.data.contacts.length)
-      
-
+      const totalContact = await getContact();
+      setTotalContacts(totalContact.data.contacts.length);
+      const totalUser = await allUsers();
+      setTotalUsers(totalUser.data.length);
     } catch (error) {
       console.log(error);
     }
@@ -38,7 +40,7 @@ const AdminDashboard = () => {
     },
     {
       title: "Total Users",
-      value: 0,
+      value: (totalUsers-1),
       icon: <Users size={28} />,
     },
     {

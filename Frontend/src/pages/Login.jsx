@@ -1,27 +1,36 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { login } from "../api/AuthApi";
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [isLogin, setIsLogin] = useState(true);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
+    setIsLogin(true);
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const response = await login(formData);
 
-    console.log(formData);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
 
-    navigate('/')
+      navigate("/");
+    } catch (err) {
+      setIsLogin(false);
+      console.log("Unable to Login!!");
+    }
   };
 
   return (
@@ -30,7 +39,13 @@ const Login = () => {
         <h1 className="text-3xl font-bold text-center text-[#15877F] mb-2">
           Welcome Back
         </h1>
-
+        {!isLogin && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+            <p className="text-center text-sm font-medium text-red-600">
+              Unable to Login. Please try again later.
+            </p>
+          </div>
+        )}
         <p className="text-center text-gray-500 mb-6">
           Login to your Shopora account
         </p>

@@ -1,17 +1,20 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, Menu, X, UserStar, User } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ShoppingCart, Menu, X, LogOut } from "lucide-react";
 import logo from "../assets/logo.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [admin, setAdmin] = useState(false);
 
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const isAdmin = user?.role === "admin";
 
   const isAuthPage =
     location.pathname === "/register" || location.pathname === "/login";
-  const displayStyle = isAuthPage ? "none" : "block";
 
   const isActive = (path) => location.pathname === path;
 
@@ -22,24 +25,30 @@ const Navbar = () => {
         : "text-gray-700"
     }`;
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
+  if (isAuthPage) return null;
+
   return (
-    <nav
-      className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md"
-      style={{ display: `${displayStyle}` }}
-    >
+    <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md">
       <div className="mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-3">
           <img src={logo} alt="Shopora" className="h-12 w-12 object-contain" />
 
           <div className="flex flex-col leading-none">
             <span className="text-xl font-bold text-[#15877F]">Shopora</span>
+
             <span className="text-xs tracking-wider text-gray-500">
               SHOP SMART
             </span>
           </div>
         </Link>
 
-        {!admin && (
+        {/* Desktop Menu */}
+        {!isAdmin ? (
           <ul className="hidden md:flex items-center gap-8 font-medium">
             <li>
               <Link className={navLink("/")} to="/">
@@ -65,14 +74,14 @@ const Navbar = () => {
               </Link>
             </li>
           </ul>
-        )}
-        {admin && (
+        ) : (
           <ul className="hidden md:flex items-center gap-8 font-medium">
             <li>
               <Link className={navLink("/admin")} to="/admin">
                 Dashboard
               </Link>
             </li>
+
             <li>
               <Link className={navLink("/products")} to="/products">
                 Products
@@ -81,9 +90,10 @@ const Navbar = () => {
 
             <li>
               <Link className={navLink("/create-product")} to="/create-product">
-                Create-Product
+                Create Product
               </Link>
             </li>
+
             <li>
               <Link
                 className={navLink("/contact-details")}
@@ -92,6 +102,7 @@ const Navbar = () => {
                 Contact Details
               </Link>
             </li>
+
             <li>
               <Link className={navLink("/order-details")} to="/order-details">
                 Order Details
@@ -100,37 +111,55 @@ const Navbar = () => {
           </ul>
         )}
 
-        <div className="hidden md:flex items-center gap-5">
-          <Link
-            to="/cart"
-            className="transition-all duration-300 hover:text-[#15877F] hover:scale-110 "
-          >
-            <ShoppingCart size={22} />
-          </Link>
-          <Link
-            to="/"
-            onClick={() => {
-              setAdmin(false);
-            }}
-            className="transition-all duration-300 hover:text-[#15877F] hover:scale-110 "
-          >
-            <User size={22} />
-          </Link>
-          <Link
-            to="/admin"
-            onClick={() => {
-              setAdmin(true);
-            }}
-            className="transition-all duration-300 hover:text-[#15877F] hover:scale-110 "
-          >
-            <UserStar size={22} />
-          </Link>
+        {/* Right Side */}
+        <div className="hidden md:flex items-center gap-4">
+          {!user ? (
+            <>
+              <Link
+                to="/login"
+                className="px-4 py-2 border border-[#15877F] text-[#15877F] rounded-lg hover:bg-[#15877F] hover:text-white transition"
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/register"
+                className="px-4 py-2 bg-[#15877F] text-white rounded-lg hover:bg-[#126b64] transition"
+              >
+                Sign Up
+              </Link>
+            </>
+          ) : (
+            <>
+              {!isAdmin && (
+                <Link
+                  to="/cart"
+                  className="transition-all duration-300 hover:text-[#15877F]"
+                >
+                  <ShoppingCart size={22} />
+                </Link>
+              )}
+
+              <span className="font-medium text-gray-700">{user.name}</span>
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </>
+          )}
         </div>
 
+        {/* Mobile Menu Button */}
         <div className="flex items-center gap-4 md:hidden">
-          <Link to="/cart">
-            <ShoppingCart size={24} />
-          </Link>
+          {!isAdmin && user && (
+            <Link to="/cart">
+              <ShoppingCart size={24} />
+            </Link>
+          )}
 
           <button onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X size={28} /> : <Menu size={28} />}
@@ -138,71 +167,99 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Mobile Menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ${
           isOpen ? "max-h-96 border-t" : "max-h-0"
         }`}
       >
         <ul className="bg-white px-6 py-5 flex flex-col gap-5 font-medium">
-          <li>
-            <Link
-              to="/"
-              className={navLink("/")}
-              onClick={() => setIsOpen(false)}
-            >
-              Home
-            </Link>
-          </li>
+          {!isAdmin ? (
+            <>
+              <li>
+                <Link
+                  to="/"
+                  className={navLink("/")}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Home
+                </Link>
+              </li>
 
-          <li>
-            <Link
-              to="/products"
-              className={navLink("/products")}
-              onClick={() => setIsOpen(false)}
-            >
-              Products
-            </Link>
-          </li>
+              <li>
+                <Link
+                  to="/products"
+                  className={navLink("/products")}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Products
+                </Link>
+              </li>
 
-          <li>
-            <Link
-              to="/create-product"
-              className={navLink("/create-product")}
-              onClick={() => setIsOpen(false)}
-            >
-              Create Product
-            </Link>
-          </li>
+              <li>
+                <Link
+                  to="/about"
+                  className={navLink("/about")}
+                  onClick={() => setIsOpen(false)}
+                >
+                  About
+                </Link>
+              </li>
 
-          <li>
-            <Link
-              to="/about"
-              className={navLink("/about")}
-              onClick={() => setIsOpen(false)}
-            >
-              About
-            </Link>
-          </li>
+              <li>
+                <Link
+                  to="/contact"
+                  className={navLink("/contact")}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Contact
+                </Link>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <Link to="/admin">Dashboard</Link>
+              </li>
 
-          <li>
-            <Link
-              to="/contact"
-              className={navLink("/contact")}
-              onClick={() => setIsOpen(false)}
-            >
-              Contact
-            </Link>
-          </li>
+              <li>
+                <Link to="/products">Products</Link>
+              </li>
 
-          <div className="flex items-center gap-6 border-t pt-4">
-            <Link
-              to="/cart"
-              className="flex items-center gap-2 hover:text-[#15877F]"
-            >
-              <ShoppingCart size={20} />
-              Cart
-            </Link>
-          </div>
+              <li>
+                <Link to="/create-product">Create Product</Link>
+              </li>
+
+              <li>
+                <Link to="/contact-details">Contact Details</Link>
+              </li>
+
+              <li>
+                <Link to="/order-details">Order Details</Link>
+              </li>
+            </>
+          )}
+
+          {!user ? (
+            <>
+              <li>
+                <Link to="/login">Login</Link>
+              </li>
+
+              <li>
+                <Link to="/register">Sign Up</Link>
+              </li>
+            </>
+          ) : (
+            <li>
+              <button
+                onClick={handleLogout}
+                className="text-red-500 font-medium"
+              >
+                Logout
+              </button>
+            </li>
+          )}
         </ul>
       </div>
     </nav>

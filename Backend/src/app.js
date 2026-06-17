@@ -1,8 +1,10 @@
 const express = require("express");
 const Product = require("./models/productsData");
 const Contact = require("./models/contactDetails");
+const User = require("./models/authDetails");
 const app = express();
 const cors = require("cors");
+const bcrypt = require("bcryptjs");
 
 app.use(cors());
 app.use(express.json());
@@ -71,6 +73,83 @@ app.get("/get-contactdetails", async (req, res) => {
       err,
     });
   }
+});
+
+app.post("/signup", async (req, res) => {
+  try {
+    const { name, role, phoneNumber, email, password } = req.body;
+    const existUser = await User.findOne({ email });
+    console.log(existUser)
+    if (existUser) {
+      return res.status(409).json({
+        msg: "User already Exist",
+      });
+    }
+
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    const data = await User.create({
+      name,
+      role,
+      phoneNumber,
+      email,
+      password: hashPassword,
+    });
+    res.status(201).json({
+      msg: "User Created",
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Error while signup",
+      Error: err.message,
+    });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({
+        msg: "Enter correct login credentials",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        msg: "Enter correct login credentials",
+      });
+    }
+
+    res.status(200).json({
+      msg: "Login successful",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      msg: "Unable to login. Please signup!",
+    });
+  }
+});
+
+app.get("/all-users", async (req, res) => {
+  const users = await User.find();
+
+  console.log(users);
+
+  res.json(users);
 });
 
 module.exports = app;
