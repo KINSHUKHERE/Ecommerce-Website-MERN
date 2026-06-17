@@ -1,6 +1,6 @@
 # Shopora - Modern MERN Stack E-Commerce Platform
 
-Shopora is a premium, responsive E-Commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The application showcases an aesthetic design featuring a product catalog, dynamic product detailed views, a shopping cart placeholder, and a fully featured admin management UI alongside user authentication interfaces.
+Shopora is a premium, responsive E-Commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The application showcases an aesthetic design featuring a product catalog, dynamic product detailed views, an interactive shopping cart, secure user authentication (with hashed passwords), and a fully featured admin management dashboard connected to a backend MongoDB database.
 
 ---
 
@@ -9,13 +9,12 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 *   **Premium UI & UX:** Aesthetic layout featuring modern typography, curated color palettes, interactive hover effects, smooth transitions, and glassmorphism.
 *   **Dynamic Product Catalog:** Fetches and displays products dynamically from a MongoDB database with filtering/slicing on the home page.
 *   **Detailed Product Views:** Dedicated product detail routes enabling users to read descriptions, review prices, and inspect high-quality product images.
-*   **Product Creation Portal:** A dedicated page with validation to dynamically add new products (Image URLs, brands, titles, prices, descriptions) into the inventory database.
+*   **Interactive Shopping Cart:** Full-featured cart drawer (`AddToCart.jsx`) allowing users to increase/decrease item quantities, remove items dynamically, and view real-time subtotal calculations.
+*   **User Onboarding & Secure Auth:** Integrated signup and login forms on the client connected to backend APIs. User passwords are securely hashed using `bcryptjs` before database persistence. Supports roles: `user`, `vendor`, and `admin`.
+*   **Interactive Contact Queries:** Contact page submissions are captured, saved to MongoDB via a REST API, and displayed in real-time on the Admin dashboard.
 *   **Admin Management Dashboard:** Complete statistics panel containing quick cards for Total Products, Users, Orders, Revenue, and Contact Queries. Includes dynamic navbar toggles to switch layouts between customer views and admin dashboard modules.
 *   **Order Management System:** Structured tables listing customer order details, product summaries, payment status badges (Paid/Pending), and shipment statuses (Delivered, Processing, Pending).
-*   **Contact Queries Portal:** A dashboard layout displaying user submissions, contact emails, message descriptions, and timestamps.
-*   **User Onboarding & Auth UI:** Responsive layouts for User Log In and Sign Up/Register forms containing full name, email, phone number, and password fields.
 *   **Responsive Navigation:** Fully optimized for all screen sizes, including custom mobile toggle navigation drawers.
-*   **Seamless Database Connectivity:** Structured backend communicating over REST API to perform CRUD operations on products.
 
 ---
 
@@ -31,6 +30,7 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 ### Backend
 *   **Node.js & Express.js:** Fast, unopinionated, minimalist web framework for building APIs.
 *   **Mongoose & MongoDB:** ODM (Object Data Modeling) library for MongoDB database operations.
+*   **BcryptJS:** Secure hashing algorithm for user passwords.
 *   **Dotenv:** Module to load environment variables from a `.env` file.
 *   **Cors:** Middleware to handle Cross-Origin Resource Sharing.
 *   **Nodemon:** Auto-restarts the server during development on file changes.
@@ -45,8 +45,10 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   │   ├── db/
 │   │   │   └── db.js            # MongoDB database connection logic
 │   │   ├── models/
-│   │   │   └── productsData.js  # Mongoose Schema for Products
-│   │   └── app.js               # Express app setups and routes configuration
+│   │   │   ├── productsData.js  # Mongoose Schema for Products
+│   │   │   ├── authDetails.js   # Mongoose Schema for Users (roles, hashed passwords)
+│   │   │   └── contactDetails.js # Mongoose Schema for Customer Queries
+│   │   └── app.js               # Express API routes and application configuration
 │   ├── server.js                # Server entry point (configures Port and starts server)
 │   ├── package.json             # Backend dependencies & scripts
 │   └── .env                     # Local environment configurations (MongoDB URI)
@@ -55,7 +57,9 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   ├── public/                  # Public assets
 │   ├── src/
 │   │   ├── api/
-│   │   │   └── ProductApi.js    # Axios API client functions
+│   │   │   ├── ProductApi.js    # Product Axios API helper functions
+│   │   │   ├── AuthApi.js       # Signup & Login Axios API helpers
+│   │   │   └── ContactApi.js    # Contact Queries Axios API helpers
 │   │   ├── assets/              # App images & icons
 │   │   ├── components/          # Modular React components
 │   │   │   ├── Navbar.jsx       # Header & Navigation (Admin vs Customer layout toggling)
@@ -65,14 +69,14 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   │   │   ├── EachProduct.jsx      # Product Card component
 │   │   │   ├── ProductDetails.jsx   # Detailed Product Page
 │   │   │   ├── CreateProduct.jsx    # Add New Product Form
-│   │   │   ├── AddToCart.jsx        # Cart Page placeholder
+│   │   │   ├── AddToCart.jsx        # Shopping Cart layout & quantity controls
 │   │   │   └── ScrollToTop.jsx      # Scroll behavior helper
 │   │   ├── pages/               # Top-level Page layouts
-│   │   │   ├── Login.jsx        # User Login Interface
-│   │   │   ├── SignUp.jsx       # User Registration Interface
+│   │   │   ├── Login.jsx        # User Login Interface (integrated with AuthApi)
+│   │   │   ├── SignUp.jsx       # User Registration Interface (integrated with AuthApi)
 │   │   │   └── admin/           # Administrative Panels
 │   │   │       ├── AdminDashboard.jsx  # Stats overview cards
-│   │   │       ├── ContactDetails.jsx  # Customer enquiries table
+│   │   │       ├── ContactDetails.jsx  # Customer enquiries table (integrated with ContactApi)
 │   │   │       └── OrderDetails.jsx    # Order management and tracking table
 │   │   ├── routes/
 │   │   │   └── AppRoutes.jsx    # React Router definitions (Client & Admin routes)
@@ -89,7 +93,9 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 
 All API routes communicate with the backend server running by default on `http://localhost:3000`.
 
-### 1. Get All Products
+### 🛍️ Product Endpoints
+
+#### 1. Get All Products
 *   **Route:** `GET /get-product-data`
 *   **Response:**
     ```json
@@ -108,9 +114,8 @@ All API routes communicate with the backend server running by default on `http:/
     }
     ```
 
-### 2. Add a Product
+#### 2. Add a Product
 *   **Route:** `POST /product-data-send`
-*   **Body Content Type:** `application/json`
 *   **Payload Schema:**
     ```json
     {
@@ -124,6 +129,82 @@ All API routes communicate with the backend server running by default on `http:/
 
 ---
 
+### 🔑 Authentication Endpoints
+
+#### 1. User Signup
+*   **Route:** `POST /signup`
+*   **Payload Schema:**
+    ```json
+    {
+      "name": "John Doe",
+      "role": "user",
+      "phoneNumber": "9876543210",
+      "email": "johndoe@example.com",
+      "password": "mySecurePassword"
+    }
+    ```
+
+#### 2. User Login
+*   **Route:** `POST /login`
+*   **Payload Schema:**
+    ```json
+    {
+      "email": "johndoe@example.com",
+      "password": "mySecurePassword"
+    }
+    ```
+*   **Response:**
+    ```json
+    {
+      "msg": "Login successful",
+      "user": {
+        "_id": "673f4a3e811c...",
+        "name": "John Doe",
+        "email": "johndoe@example.com",
+        "role": "user"
+      }
+    }
+    ```
+
+#### 3. Get All Users
+*   **Route:** `GET /all-users`
+*   **Response:** Array of all registered user documents.
+
+---
+
+### 📞 Contact Endpoints
+
+#### 1. Submit Query
+*   **Route:** `POST /post-contactdetails`
+*   **Payload Schema:**
+    ```json
+    {
+      "Name": "Jane Doe",
+      "Email": "janedoe@example.com",
+      "Message": "I have an issue with my shipment."
+    }
+    ```
+
+#### 2. Get All Queries
+*   **Route:** `GET /get-contactdetails`
+*   **Response:**
+    ```json
+    {
+      "msg": "Contact Details fetched",
+      "contacts": [
+        {
+          "_id": "674f1b2c...",
+          "Name": "Jane Doe",
+          "Email": "janedoe@example.com",
+          "Message": "I have an issue with my shipment.",
+          "createdAt": "2026-06-17T10:00:00.000Z"
+        }
+      ]
+    }
+    ```
+
+---
+
 ## ⚙️ Setup & Installation
 
 Follow these steps to set up and run the project locally.
@@ -131,7 +212,7 @@ Follow these steps to set up and run the project locally.
 ### Prerequisites
 *   Node.js (v18+)
 *   npm or yarn installed
-*   MongoDB Atlas database URL
+*   MongoDB Atlas database URL or local MongoDB server
 
 ### 1. Clone the repository
 ```bash
@@ -147,7 +228,7 @@ cd Backend
 
 Create a `.env` file in the root of the `Backend` directory and define your MongoDB URI connection string:
 ```env
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/ecommerce
+MONGO_URI=mongodb://localhost:27017/Ecommerce
 ```
 
 Install backend dependencies:
@@ -177,14 +258,3 @@ Start the Vite development server:
 npm run dev
 ```
 The client application will start running, usually at `http://localhost:5173`.
-
----
-
-## 🖼️ User Interface Preview
-
-*   **Home / Hero Section:** Welcoming header with curated branding and interactive category slides.
-*   **Featured Grid:** Clean collection cards with brand name, dynamic hover scaling, price displaying in Indian Rupees (₹), and a quick add-to-cart action button.
-*   **Product Detail View:** A dedicated details panel showing image details, clean price styling, and item description.
-*   **Admin Dashboard:** High-level metrics view showing total products count, total users, orders, revenue, and active queries.
-*   **Order & Contact Details:** Clean, readable tables featuring badge-based payment and delivery status indicators for tracking user transactions and queries.
-*   **Onboarding Screens:** User authentication UI pages for Logging In and Registering accounts.
