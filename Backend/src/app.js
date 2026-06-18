@@ -5,6 +5,7 @@ const User = require("./models/authDetails");
 const app = express();
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
+const Cart = require("./models/cartDetails");
 
 app.use(cors());
 app.use(express.json());
@@ -79,7 +80,7 @@ app.post("/signup", async (req, res) => {
   try {
     const { name, role, phoneNumber, email, password } = req.body;
     const existUser = await User.findOne({ email });
-    console.log(existUser)
+    console.log(existUser);
     if (existUser) {
       return res.status(409).json({
         msg: "User already Exist",
@@ -150,6 +151,143 @@ app.get("/all-users", async (req, res) => {
   console.log(users);
 
   res.json(users);
+});
+
+app.post("/add-items-cart", async (req, res) => {
+  try {
+    const { userId, productId, quantity } = req.body;
+
+    const existingItem = await Cart.findOne({
+      userId,
+      productId,
+    });
+
+    // Product already exists in cart
+    if (existingItem) {
+      existingItem.quantity += quantity || 1;
+
+      await existingItem.save();
+
+      return res.status(200).json({
+        msg: "Cart quantity updated",
+        cartItem: existingItem,
+      });
+    }
+
+    // Product not in cart yet
+    const cartItem = await Cart.create({
+      userId,
+      productId,
+      quantity: quantity || 1,
+    });
+
+    res.status(201).json({
+      msg: "Added to cart",
+      cartItem,
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Unable to add product to cart",
+      Error: err.message,
+    });
+  }
+});
+
+app.get("/get-items-cart/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const cartData = await Cart.find({ userId: userId }).populate("productId");
+    res.status(200).json({
+      msg: "Got data from cart",
+      cartData,
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Unable to get data from cart",
+      Error: err.message,
+    });
+  }
+});
+
+app.put("/increase-cart/:cartId", async (req, res) => {
+  try {
+    const { cartId } = req.params;
+
+    const cartItem = await Cart.findById(cartId);
+
+    if (!cartItem) {
+      return res.status(404).json({
+        msg: "Cart item not found",
+      });
+    }
+
+    cartItem.quantity += 1;
+
+    await cartItem.save();
+
+    res.status(200).json({
+      msg: "Quantity increased",
+      cartItem,
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Unable to increase quantity",
+      Error: err.message,
+    });
+  }
+});
+
+app.put("/decrease-cart/:cartId", async (req, res) => {
+  try {
+    const { cartId } = req.params;
+
+    const cartItem = await Cart.findById(cartId);
+
+    if (!cartItem) {
+      return res.status(404).json({
+        msg: "Cart item not found",
+      });
+    }
+
+    if (cartItem.quantity > 1) {
+      cartItem.quantity -= 1;
+      await cartItem.save();
+    }
+
+    res.status(200).json({
+      msg: "Quantity decreased",
+      cartItem,
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Unable to decrease quantity",
+      Error: err.message,
+    });
+  }
+});
+
+app.delete("/delete-cart/:cartId", async (req, res) => {
+  try {
+    const { cartId } = req.params;
+
+    const deletedItem = await Cart.findByIdAndDelete(cartId);
+
+    if (!deletedItem) {
+      return res.status(404).json({
+        msg: "Cart item not found",
+      });
+    }
+
+    res.status(200).json({
+      msg: "Item removed from cart",
+      deletedItem,
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Unable to delete cart item",
+      Error: err.message,
+    });
+  }
 });
 
 module.exports = app;

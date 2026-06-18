@@ -1,15 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, Menu, X, LogOut } from "lucide-react";
 import logo from "../assets/logo.png";
+import { getDataCart } from "../api/CartApi";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-
-  const location = useLocation();
-  const navigate = useNavigate();
-
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const [cartCount, setCartCount] = useState(0);
+  const location = useLocation();
+
+  const fetchCartCount = async () => {
+    try {
+      if (!user) return;
+
+      const response = await getDataCart(user._id);
+
+      const totalItems = response.data.cartData.reduce(
+        (sum, item) => sum + item.quantity,
+        0,
+      );
+
+      setCartCount(totalItems);
+    } catch (err) {
+      console.log("Unable to fetch cart count", err);
+    }
+  };
+
+  const updateCart = () => {
+    fetchCartCount();
+  };
+  useEffect(() => {
+    fetchCartCount();
+
+    const updateCart = () => {
+      fetchCartCount();
+    };
+
+    window.addEventListener("cartUpdated", updateCart);
+
+    return () => {
+      window.removeEventListener("cartUpdated", updateCart);
+    };
+  }, [location.pathname]);
+
+  const navigate = useNavigate();
 
   const isAdmin = user?.role === "admin";
 
@@ -35,7 +71,10 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md">
       <div className="mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-3">
+        <Link
+          className="flex items-center gap-3"
+          to={isAdmin ? "/admin" : "/"}
+        >
           <img src={logo} alt="Shopora" className="h-12 w-12 object-contain" />
 
           <div className="flex flex-col leading-none">
@@ -134,9 +173,15 @@ const Navbar = () => {
               {!isAdmin && (
                 <Link
                   to="/cart"
-                  className="transition-all duration-300 hover:text-[#15877F]"
+                  className="relative transition-all duration-300 hover:text-[#15877F]"
                 >
                   <ShoppingCart size={22} />
+
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-3 min-w-[20px] h-5 px-1 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-md">
+                      {cartCount}
+                    </span>
+                  )}
                 </Link>
               )}
 
@@ -156,8 +201,17 @@ const Navbar = () => {
         {/* Mobile Menu Button */}
         <div className="flex items-center gap-4 md:hidden">
           {!isAdmin && user && (
-            <Link to="/cart">
+            <Link
+              to="/cart"
+              className="relative transition-all duration-300 hover:text-[#15877F]"
+            >
               <ShoppingCart size={24} />
+
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </Link>
           )}
 

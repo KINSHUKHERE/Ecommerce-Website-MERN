@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getProduct } from "../api/ProductApi";
+import { sentToCart } from "../api/CartApi";
 
 const ProductDetails = () => {
   const [product, setProduct] = useState(null);
-  const navigate = useNavigate()
-
-  const cartBtnClicked = ()=>{
-    navigate('/cart')
-  }
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProducts();
@@ -30,8 +27,31 @@ const ProductDetails = () => {
 
   // Agar productId wrong ho ya product na mile
   if (!product) {
-    return <div className="p-10 text-center text-xl">Product not found!</div>;
+    return <div className="p-10 text-center text-xl">Loading...</div>;
   }
+
+  const handleAddToCart = async (product) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user) {
+        alert("Please login first");
+        navigate("/login");
+        return;
+      }
+
+      const cartData = {
+        userId: user._id,
+        productId: product._id,
+        quantity: 1,
+      };
+
+      const response = await sentToCart(cartData);
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      console.log("Unable to add product to cart", err);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8">
@@ -58,9 +78,7 @@ const ProductDetails = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
             {product.heading}
           </h1>
-          <p className="text-2xl font-bold text-indigo-600">
-            ₹{product.price}
-          </p>
+          <p className="text-2xl font-bold text-indigo-600">₹{product.price}</p>
 
           <div className="border-t pt-6 mt-4">
             <h3 className="text-lg font-semibold mb-2">Product Description</h3>
@@ -69,8 +87,9 @@ const ProductDetails = () => {
             </p>
           </div>
 
-          <button className="bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition duration-300 mt-4 cursor-pointer"
-          onClick={cartBtnClicked}
+          <button
+            className="bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition duration-300 mt-4 cursor-pointer"
+            onClick={() => handleAddToCart(product)}
           >
             Add to Cart
           </button>

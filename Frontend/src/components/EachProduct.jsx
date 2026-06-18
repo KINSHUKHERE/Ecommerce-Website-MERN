@@ -1,16 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProduct } from "../api/ProductApi";
+import { sentToCart } from "../api/CartApi";
 
-const EachProduct = ({data}) => {
+const EachProduct = ({ data }) => {
   const navigate = useNavigate();
   const productClicked = () => {
     navigate(`/products/${data._id}`);
   };
 
-  if(!data) return null;
-  
-  
+  if (!data) return null;
+  const handleAddToCart = async (e) => {
+    e.stopPropagation();
+
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user) {
+        alert("Please login first");
+        navigate("/login");
+        return;
+      }
+
+      const cartData = {
+        userId: user._id,
+        productId: data._id,
+        quantity: 1,
+      };
+
+      await sentToCart(cartData);
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      console.log("Unable to add product to cart", err);
+    }
+  };
+
   return (
     <div>
       <div
@@ -39,11 +63,9 @@ const EachProduct = ({data}) => {
               ₹{data.price}
             </span>
 
-            <button className="w-10 h-10 bg-[#e8f6ea] rounded-full flex justify-center items-center text-[#088178] hover:bg-[#088178] hover:text-white active:scale-90 transition-all duration-300 absolute bottom-0 right-0"
-            onClick={(e)=>{
-               e.stopPropagation();
-               navigate("/cart")
-            }}
+            <button
+              className="w-10 h-10 bg-[#e8f6ea] rounded-full flex justify-center items-center text-[#088178] hover:bg-[#088178] hover:text-white active:scale-90 transition-all duration-300 absolute bottom-0 right-0"
+              onClick={handleAddToCart}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

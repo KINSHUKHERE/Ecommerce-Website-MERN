@@ -1,46 +1,67 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
+import {
+  getDataCart,
+  increaseCart,
+  decreaseCart,
+  deleteCart,
+} from "../api/CartApi";
 
 const AddToCart = () => {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "iPhone 16",
-      price: 79999,
-      quantity: 1,
-      image:
-        "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500",
-    },
-    {
-      id: 2,
-      name: "AirPods Pro",
-      price: 24999,
-      quantity: 2,
-      image:
-        "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=500",
-    },
-  ]);
+  const [cartItems, setCartItems] = useState([]);
 
-  const increaseQuantity = (id) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
-      ),
-    );
+  const fetchCartData = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      const response = await getDataCart(user._id);
+
+      const formattedData = response.data.cartData.map((item) => ({
+        id: item._id,
+        name: item.productId.heading,
+        price: item.productId.price,
+        quantity: item.quantity,
+        image: item.productId.imgUrl,
+      }));
+
+      setCartItems(formattedData);
+    } catch (err) {
+      console.log("Unable to fetch cart data", err);
+    }
   };
 
-  const decreaseQuantity = (id) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item,
-      ),
-    );
+  useEffect(() => {
+    fetchCartData();
+  }, []);
+
+  const handleIncrease = async (cartId) => {
+    try {
+      await increaseCart(cartId);
+      fetchCartData();
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      console.log("Unable to increase quantity", err);
+    }
   };
 
-  const removeItem = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  const handleDecrease = async (cartId) => {
+    try {
+      await decreaseCart(cartId);
+      fetchCartData();
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      console.log("Unable to decrease quantity", err);
+    }
+  };
+
+  const handleDelete = async (cartId) => {
+    try {
+      await deleteCart(cartId);
+      fetchCartData();
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      console.log("Unable to delete item", err);
+    }
   };
 
   const totalPrice = cartItems.reduce(
@@ -84,7 +105,7 @@ const AddToCart = () => {
 
                   <div className="flex items-center gap-3 mt-4">
                     <button
-                      onClick={() => decreaseQuantity(item.id)}
+                      onClick={() => handleDecrease(item.id)}
                       className="bg-gray-200 px-3 py-1 rounded"
                     >
                       -
@@ -93,7 +114,7 @@ const AddToCart = () => {
                     <span className="font-semibold">{item.quantity}</span>
 
                     <button
-                      onClick={() => increaseQuantity(item.id)}
+                      onClick={() => handleIncrease(item.id)}
                       className="bg-gray-200 px-3 py-1 rounded"
                     >
                       +
@@ -107,7 +128,7 @@ const AddToCart = () => {
                   </p>
 
                   <button
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => handleDelete(item.id)}
                     className="text-red-500 mt-4 hover:text-red-700"
                   >
                     <Trash2 size={22} />
