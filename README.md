@@ -1,6 +1,6 @@
 # Shopora - Modern MERN Stack E-Commerce Platform
 
-Shopora is a premium, responsive E-Commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The application showcases an aesthetic design featuring a product catalog, dynamic product detailed views, an interactive shopping cart, secure user authentication (with hashed passwords), and a fully featured admin management dashboard connected to a backend MongoDB database.
+Shopora is a premium, responsive E-Commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The application showcases an aesthetic design featuring a product catalog, dynamic product detailed views, a database-backed interactive shopping cart, secure user authentication (with hashed passwords), and a fully featured admin management dashboard connected to a backend MongoDB database.
 
 ---
 
@@ -9,7 +9,8 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 *   **Premium UI & UX:** Aesthetic layout featuring modern typography, curated color palettes, interactive hover effects, smooth transitions, and glassmorphism.
 *   **Dynamic Product Catalog:** Fetches and displays products dynamically from a MongoDB database with filtering/slicing on the home page.
 *   **Detailed Product Views:** Dedicated product detail routes enabling users to read descriptions, review prices, and inspect high-quality product images.
-*   **Interactive Shopping Cart:** Full-featured cart drawer (`AddToCart.jsx`) allowing users to increase/decrease item quantities, remove items dynamically, and view real-time subtotal calculations.
+*   **Database-Backed Shopping Cart:** A fully operational shopping cart synced with MongoDB. Users can add products to their cart (via catalog card buttons or the product detail page), increase or decrease quantities, and remove items. Changes persist directly to the database.
+*   **Real-time Cart Status Badge:** The navigation header displays a real-time badge count of the items currently in the cart. Updates are driven across components using custom event-dispatching listeners (`cartUpdated`).
 *   **User Onboarding & Secure Auth:** Integrated signup and login forms on the client connected to backend APIs. User passwords are securely hashed using `bcryptjs` before database persistence. Supports roles: `user`, `vendor`, and `admin`.
 *   **Interactive Contact Queries:** Contact page submissions are captured, saved to MongoDB via a REST API, and displayed in real-time on the Admin dashboard.
 *   **Admin Management Dashboard:** Complete statistics panel containing quick cards for Total Products, Users, Orders, Revenue, and Contact Queries. Includes dynamic navbar toggles to switch layouts between customer views and admin dashboard modules.
@@ -47,7 +48,8 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   │   ├── models/
 │   │   │   ├── productsData.js  # Mongoose Schema for Products
 │   │   │   ├── authDetails.js   # Mongoose Schema for Users (roles, hashed passwords)
-│   │   │   └── contactDetails.js # Mongoose Schema for Customer Queries
+│   │   │   ├── contactDetails.js # Mongoose Schema for Customer Queries
+│   │   │   └── cartDetails.js   # Mongoose Schema for Shopping Cart items
 │   │   └── app.js               # Express API routes and application configuration
 │   ├── server.js                # Server entry point (configures Port and starts server)
 │   ├── package.json             # Backend dependencies & scripts
@@ -59,17 +61,18 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   │   ├── api/
 │   │   │   ├── ProductApi.js    # Product Axios API helper functions
 │   │   │   ├── AuthApi.js       # Signup & Login Axios API helpers
-│   │   │   └── ContactApi.js    # Contact Queries Axios API helpers
+│   │   │   ├── ContactApi.js    # Contact Queries Axios API helpers
+│   │   │   └── CartApi.js       # Shopping Cart CRUD Axios API helpers
 │   │   ├── assets/              # App images & icons
 │   │   ├── components/          # Modular React components
-│   │   │   ├── Navbar.jsx       # Header & Navigation (Admin vs Customer layout toggling)
+│   │   │   ├── Navbar.jsx       # Header & Navigation (Admin vs Customer, dynamic cart badge)
 │   │   │   ├── Footer.jsx       # Footer layout
 │   │   │   ├── Hero.jsx         # Landing Hero Section
 │   │   │   ├── FeaturedProduct.jsx  # Products Listing Grid
-│   │   │   ├── EachProduct.jsx      # Product Card component
-│   │   │   ├── ProductDetails.jsx   # Detailed Product Page
+│   │   │   ├── EachProduct.jsx      # Product Card component (interactive add-to-cart action)
+│   │   │   ├── ProductDetails.jsx   # Detailed Product Page (add-to-cart trigger)
 │   │   │   ├── CreateProduct.jsx    # Add New Product Form
-│   │   │   ├── AddToCart.jsx        # Shopping Cart layout & quantity controls
+│   │   │   ├── AddToCart.jsx        # Shopping Cart view (DB connection & quantity controls)
 │   │   │   └── ScrollToTop.jsx      # Scroll behavior helper
 │   │   ├── pages/               # Top-level Page layouts
 │   │   │   ├── Login.jsx        # User Login Interface (integrated with AuthApi)
@@ -202,6 +205,55 @@ All API routes communicate with the backend server running by default on `http:/
       ]
     }
     ```
+
+---
+
+### 🛒 Shopping Cart Endpoints
+
+#### 1. Add / Sync Item to Cart
+*   **Route:** `POST /add-items-cart`
+*   **Payload Schema:**
+    ```json
+    {
+      "userId": "673f4a3e811c...",
+      "productId": "673f4e3c988a2c...",
+      "quantity": 1
+    }
+    ```
+
+#### 2. Get Cart Items
+*   **Route:** `GET /get-items-cart/:userId`
+*   **Response:**
+    ```json
+    {
+      "msg": "Got data from cart",
+      "cartData": [
+        {
+          "_id": "675d4e1a...",
+          "userId": "673f4a3e811c...",
+          "productId": {
+            "_id": "673f4e3c988a2c...",
+            "heading": "Air Zoom Pegasus",
+            "price": 8999,
+            "imgUrl": "https://example.com/nike.jpg"
+          },
+          "quantity": 2
+        }
+      ]
+    }
+    ```
+
+#### 3. Increment Cart Item Quantity
+*   **Route:** `PUT /increase-cart/:cartId`
+*   **Response:** Confirms item quantity incremented by 1.
+
+#### 4. Decrement Cart Item Quantity
+*   **Route:** `PUT /decrease-cart/:cartId`
+*   **Response:** Confirms item quantity decremented by 1 (minimum value is 1).
+
+#### 5. Delete Cart Item
+*   **Route:** `DELETE /delete-cart/:cartId`
+*   **Response:** Confirms item deleted and returns the removed item details.
 
 ---
 
