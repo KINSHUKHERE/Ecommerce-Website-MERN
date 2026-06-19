@@ -7,12 +7,22 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 ## 🚀 Key Features
 
 *   **Premium UI & UX:** Aesthetic layout featuring modern typography, curated color palettes, interactive hover effects, smooth transitions, and glassmorphism.
+*   **Soft UI Refinements:** Dashboard widgets, input selectors, and cards styled with clean slate backgrounds, custom drop shadows, glassmorphic headers, and thin borders for a premium SaaS feel.
 *   **Dynamic Product Catalog & Filters:** An advanced catalog search interface (`Products.jsx`) allowing users to filter items dynamically by name search, category selectors, and variant/brand sidebar filters.
+*   **Dedicated Admin Dashboard (`/admin/products`):** A strictly isolated product manager catalog for administrators, wrapped in a dedicated React Router `AdminLayout` showing a vertical navigation sidebar on desktop and collapsible menu drawer on mobile. Features include:
+    *   **Live Metrics Cards**: Top metrics showing total, active, low stock, and out-of-stock product counts.
+    *   **Custom Select Dropdowns**: Custom animated filter selectors (`SoftDropdown`) replacing native select lists.
+    *   **Desktop & Mobile Adaptability**: Table grid layout on desktop viewports and a spacious 1-column card list on mobile screens.
+    *   **"Load More" Pagination**: Interactive scroll paging replacing default page numbers.
+    *   **Timestamps & Descriptions**: Detailed view route (`/admin/products/:productId`) displaying full attributes and dates.
+    *   **Editor Image Preview**: Form-editor route (`/admin/products/edit/:productId`) with a real-time validation preview panel for image URLs.
+    *   **Safe Deletion Flow**: Multi-factor delete flow halting actions behind confirmation modal warnings.
+    *   **Sliding Toast Alerts**: Visual success/error toast popups upon creating, editing, or deleting items.
 *   **Cohesive Loading States:** Integrated modern, smooth Tailwind CSS loading spinners across all API-connected pages (catalog, details, cart, categories, variants, contact queries) to prevent the momentary flashing of empty-state placeholders while data is fetched.
 *   **Mobile & Desktop Responsiveness:** Tailored layouts optimized for viewports ranging from mobile screens (320px) to wide laptops. Includes center-aligning flex grids for cards on mobile, responsive form grids, and auto-scrolling tables.
 *   **Database-Backed Shopping Cart:** A fully operational shopping cart synced with MongoDB. Users can add products to their cart (via catalog card buttons or the product detail page), increase or decrease quantities, and remove items. Changes persist directly to the database.
 *   **Real-time Cart Status Badge:** The navigation header displays a real-time badge count of the items currently in the cart. Updates are driven across components using custom event-dispatching listeners (`cartUpdated`).
-*   **Category & Variant Management:** A fully integrated inventory management system enabling admins to create, update, and soft-delete product categories and sub-variants/brands directly from dedicated management portals.
+*   **Category & Variant Management:** A fully integrated inventory management system enabling admins to create, update, and soft-delete product categories and sub-variants/brands directly from dedicated management portals Portals.
 *   **User Onboarding & Secure Auth:** Integrated signup and login forms on the client connected to backend APIs. User passwords are securely hashed using `bcryptjs` before database persistence. Supports roles: `user`, `vendor`, and `admin`.
 *   **Interactive Contact Queries:** Contact page submissions are captured, saved to MongoDB via a REST API, and displayed in real-time on the Admin dashboard.
 *   **Admin Management Dashboard:** Complete statistics panel containing quick cards for Total Products, Users, Orders, Revenue, and Contact Queries. Includes dynamic navbar toggles to switch layouts between customer views and admin dashboard modules.
@@ -68,20 +78,32 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   │   │   ├── CartApi.js       # Shopping Cart CRUD Axios API helpers
 │   │   │   └── CategoryAndVarientApi.js # Category & Variant Axios API helpers
 │   │   ├── assets/              # App images & icons
-│   │   ├── components/          # Modular React components
-│   │   │   ├── Navbar.jsx       # Header & Navigation (Admin vs Customer, dynamic cart badge)
+│   │   ├── admin/               # Dedicated Admin Dashboard components and pages
+│   │   │   ├── components/
+│   │   │   │   ├── AdminLayout.jsx # Glassmorphic Admin Header and main content layout wrapper
+│   │   │   │   ├── AdminSidebar.jsx # Sidebar links with sub-route highlighting
+│   │   │   │   └── ProductStats.jsx # Stats cards computing Total, Active, Low Stock, Sold counts
+│   │   │   └── pages/
+│   │   │       ├── AdminProducts.jsx # Soft UI All Products Table registry view
+│   │   │       ├── ProductView.jsx # Detailed single product view page
+│   │   │       └── ProductEdit.jsx # Product editor with real-time Image URL validation preview
+│   │   ├── components/          # Reusable UI layout elements
+│   │   │   ├── Navbar.jsx       # Header & Navigation (Customer cart badge, dynamic cart updating)
 │   │   │   ├── Footer.jsx       # Footer layout
 │   │   │   ├── Hero.jsx         # Landing Hero Section
-│   │   │   ├── FeaturedProduct.jsx  # Products Listing Grid (with responsive styling & loaders)
-│   │   │   ├── EachProduct.jsx      # Product Card component (interactive add-to-cart action)
-│   │   │   ├── ProductDetails.jsx   # Detailed Product Page (integrated with animations & loaders)
-│   │   │   ├── AddToCart.jsx        # Shopping Cart view (DB connection & quantity controls)
-│   │   │   ├── Products.jsx         # Shop search and filter catalog page layout
-│   │   │   └── ScrollToTop.jsx      # Scroll behavior helper
+│   │   │   ├── FeaturedProduct.jsx # Featured product grid with skeleton loader states
+│   │   │   ├── EachProduct.jsx  # Individual product catalog card
+│   │   │   └── ScrollToTop.jsx  # Window viewport routing scroll resetter
 │   │   ├── pages/               # Top-level Page layouts
+│   │   │   ├── Home.jsx         # Customer home page view
+│   │   │   ├── About.jsx        # About page view
+│   │   │   ├── Contact.jsx      # Contact page view
+│   │   │   ├── Cart.jsx         # Flipkart-style cart dashboard page
+│   │   │   ├── Products.jsx     # Customer products registry catalog search & filter page
+│   │   │   ├── ProductDetails.jsx # Customer product details page
 │   │   │   ├── Login.jsx        # User Login Interface (integrated with AuthApi)
 │   │   │   ├── SignUp.jsx       # User Registration Interface (integrated with AuthApi)
-│   │   │   └── admin/           # Administrative Panels
+│   │   │   └── admin/           # Admin Category/Variant/Order panels
 │   │   │       ├── AdminDashboard.jsx  # Stats overview cards
 │   │   │       ├── ContactDetails.jsx  # Customer enquiries table (integrated with ContactApi)
 │   │   │       ├── OrderDetails.jsx    # Order management and tracking table
@@ -89,7 +111,7 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   │   │       ├── CategoryManagement.jsx # Category CRUD interface with loaders
 │   │   │       └── VariantManagement.jsx # Variant/Brand CRUD interface with loaders
 │   │   ├── routes/
-│   │   │   └── AppRoutes.jsx    # React Router definitions (Client & Admin routes)
+│   │   │   └── AppRoutes.jsx    # React Router definitions (UserLayout vs AdminLayout separation)
 │   │   ├── App.jsx              # Main App entry layout
 │   │   ├── main.jsx             # React DOM root render
 │   │   └── index.css            # Global CSS styles imports
