@@ -3,6 +3,7 @@ import { getContact } from "../../api/ContactApi";
 
 const ContactDetails = () => {
   const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchContact();
@@ -15,6 +16,8 @@ const ContactDetails = () => {
       setContacts(data.data.contacts);
     } catch (err) {
       console.log("Unable to fetch the contacts Details");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -29,7 +32,12 @@ const ContactDetails = () => {
           View messages submitted by users through the contact form.
         </p>
 
-        {contacts.length === 0 ? (
+        {loading ? (
+          <div className="p-16 flex flex-col items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#15877F]"></div>
+            <p className="text-gray-500 mt-4 animate-pulse">Loading contact queries...</p>
+          </div>
+        ) : contacts.length === 0 ? (
           <div className="text-center py-16">
             <h2 className="text-xl font-semibold text-gray-600">
               No Contact Queries Found

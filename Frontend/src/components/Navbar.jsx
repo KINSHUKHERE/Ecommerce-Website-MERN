@@ -1,41 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart, Menu, X, LogOut } from "lucide-react";
+import { ShoppingCart, Menu, X, LogOut, ChevronDown } from "lucide-react";
 import logo from "../assets/logo.png";
 import { getDataCart } from "../api/CartApi";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user"));
-
+  const [currentUser, setCurrentUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const fetchCartCount = async () => {
+  const fetchCartCount = async (userObj) => {
     try {
-      if (!user) return;
+      if (!userObj) {
+        setCartCount(0);
+        return;
+      }
 
-      const response = await getDataCart(user._id);
-
+      const response = await getDataCart(userObj._id);
       const totalItems = response.data.cartData.reduce(
         (sum, item) => sum + item.quantity,
         0,
       );
-
       setCartCount(totalItems);
     } catch (err) {
       console.log("Unable to fetch cart count", err);
     }
   };
 
-  const updateCart = () => {
-    fetchCartCount();
-  };
   useEffect(() => {
-    fetchCartCount();
+    const userObj = JSON.parse(localStorage.getItem("user"));
+    setCurrentUser(userObj);
+    fetchCartCount(userObj);
 
     const updateCart = () => {
-      fetchCartCount();
+      const freshUser = JSON.parse(localStorage.getItem("user"));
+      fetchCartCount(freshUser);
     };
 
     window.addEventListener("cartUpdated", updateCart);
@@ -45,17 +46,13 @@ const Navbar = () => {
     };
   }, [location.pathname]);
 
-  const navigate = useNavigate();
-
-  const isAdmin = user?.role === "admin";
-
+  const isAdmin = currentUser?.role === "admin";
   const isAuthPage =
     location.pathname === "/register" || location.pathname === "/login";
-
   const isActive = (path) => location.pathname === path;
 
   const navLink = (path) =>
-    `relative transition-all duration-300 hover:text-[#15877F] ${
+    `relative transition-all duration-300 hover:text-[#15877F] py-2 ${
       isActive(path)
         ? "text-[#15877F] font-semibold after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-[#15877F]"
         : "text-gray-700"
@@ -63,6 +60,9 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    setCurrentUser(null);
+    setCartCount(0);
+    setIsOpen(false);
     navigate("/login");
   };
 
@@ -71,15 +71,10 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md">
       <div className="mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link
-          className="flex items-center gap-3"
-          to={isAdmin ? "/admin" : "/"}
-        >
+        <Link className="flex items-center gap-3" to={isAdmin ? "/admin" : "/"}>
           <img src={logo} alt="Shopora" className="h-12 w-12 object-contain" />
-
           <div className="flex flex-col leading-none">
             <span className="text-xl font-bold text-[#15877F]">Shopora</span>
-
             <span className="text-xs tracking-wider text-gray-500">
               SHOP SMART
             </span>
@@ -94,19 +89,16 @@ const Navbar = () => {
                 Home
               </Link>
             </li>
-
             <li>
               <Link className={navLink("/products")} to="/products">
                 Products
               </Link>
             </li>
-
             <li>
               <Link className={navLink("/about")} to="/about">
                 About
               </Link>
             </li>
-
             <li>
               <Link className={navLink("/contact")} to="/contact">
                 Contact
@@ -120,50 +112,67 @@ const Navbar = () => {
                 Dashboard
               </Link>
             </li>
-
             <li>
               <Link className={navLink("/products")} to="/products">
                 Products
               </Link>
             </li>
+            {/* Admin Management Dropdown */}
+            <li className="relative group py-2">
+              <button className="flex items-center gap-1 transition-all duration-300 text-gray-700 hover:text-[#15877F] cursor-pointer font-medium">
+                Admin Panel
+                <ChevronDown size={16} className="transition-transform duration-200 group-hover:rotate-180" />
+              </button>
 
-            <li>
-              <Link className={navLink("/create-product")} to="/create-product">
-                Create Product
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                className={navLink("/contact-details")}
-                to="/contact-details"
-              >
-                Contact Details
-              </Link>
-            </li>
-
-            <li>
-              <Link className={navLink("/order-details")} to="/order-details">
-                Order Details
-              </Link>
+              <div className="absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden group-hover:block transition-all duration-300 z-50">
+                <Link
+                  to="/create-product"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-all"
+                >
+                  Create Product
+                </Link>
+                <Link
+                  to="/categories"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-all"
+                >
+                  Categories
+                </Link>
+                <Link
+                  to="/variants"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-all"
+                >
+                  Variants
+                </Link>
+                <Link
+                  to="/contact-details"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-all"
+                >
+                  Contact Details
+                </Link>
+                <Link
+                  to="/order-details"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-all"
+                >
+                  Order Details
+                </Link>
+              </div>
             </li>
           </ul>
         )}
 
         {/* Right Side */}
-        <div className="hidden md:flex items-center gap-4">
-          {!user ? (
+        <div className="hidden md:flex items-center gap-5">
+          {!currentUser ? (
             <>
               <Link
                 to="/login"
-                className="px-4 py-2 border border-[#15877F] text-[#15877F] rounded-lg hover:bg-[#15877F] hover:text-white transition"
+                className="px-4 py-2 border border-[#15877F] text-[#15877F] rounded-lg hover:bg-[#15877F] hover:text-white transition font-medium"
               >
                 Login
               </Link>
-
               <Link
                 to="/register"
-                className="px-4 py-2 bg-[#15877F] text-white rounded-lg hover:bg-[#126b64] transition"
+                className="px-4 py-2 bg-[#15877F] text-white rounded-lg hover:bg-[#126b64] transition font-medium"
               >
                 Sign Up
               </Link>
@@ -173,97 +182,100 @@ const Navbar = () => {
               {!isAdmin && (
                 <Link
                   to="/cart"
-                  className="relative transition-all duration-300 hover:text-[#15877F]"
+                  className="relative transition-all duration-300 hover:text-[#15877F] p-2 hover:scale-105"
                 >
                   <ShoppingCart size={22} />
-
                   {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-3 min-w-[20px] h-5 px-1 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-md">
+                    <span className="absolute top-0 right-0 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
                       {cartCount}
                     </span>
                   )}
                 </Link>
               )}
 
-              <span className="font-medium text-gray-700">{user.name}</span>
+              {/* User Profile Avatar details */}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
+                  {currentUser.name.charAt(0)}
+                </div>
+                <span className="font-medium text-gray-700 text-sm hidden lg:block max-w-[120px] truncate">
+                  {currentUser.name}
+                </span>
+              </div>
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+                className="flex items-center gap-1.5 bg-red-500 text-white px-3.5 py-2 rounded-lg hover:bg-red-600 transition text-sm font-medium cursor-pointer"
               >
-                <LogOut size={18} />
+                <LogOut size={16} />
                 Logout
               </button>
             </>
           )}
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu Action Row */}
         <div className="flex items-center gap-4 md:hidden">
-          {!isAdmin && user && (
+          {!isAdmin && currentUser && (
             <Link
               to="/cart"
-              className="relative transition-all duration-300 hover:text-[#15877F]"
+              className="relative p-2 transition-all duration-300 hover:text-[#15877F]"
             >
               <ShoppingCart size={24} />
-
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-[18px] h-[18px] rounded-full flex items-center justify-center font-bold">
                   {cartCount}
                 </span>
               )}
             </Link>
           )}
 
-          <button onClick={() => setIsOpen(!isOpen)}>
+          <button onClick={() => setIsOpen(!isOpen)} className="text-gray-700 hover:text-[#15877F] cursor-pointer">
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Drawer */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ${
-          isOpen ? "max-h-96 border-t" : "max-h-0"
+          isOpen ? "max-h-[500px] border-t bg-gray-50" : "max-h-0"
         }`}
       >
-        <ul className="bg-white px-6 py-5 flex flex-col gap-5 font-medium">
+        <ul className="px-6 py-5 flex flex-col gap-4 font-medium text-gray-700">
           {!isAdmin ? (
             <>
               <li>
                 <Link
                   to="/"
-                  className={navLink("/")}
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/") ? "text-[#15877F]" : ""}`}
                   onClick={() => setIsOpen(false)}
                 >
                   Home
                 </Link>
               </li>
-
               <li>
                 <Link
                   to="/products"
-                  className={navLink("/products")}
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/products") ? "text-[#15877F]" : ""}`}
                   onClick={() => setIsOpen(false)}
                 >
                   Products
                 </Link>
               </li>
-
               <li>
                 <Link
                   to="/about"
-                  className={navLink("/about")}
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/about") ? "text-[#15877F]" : ""}`}
                   onClick={() => setIsOpen(false)}
                 >
                   About
                 </Link>
               </li>
-
               <li>
                 <Link
                   to="/contact"
-                  className={navLink("/contact")}
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/contact") ? "text-[#15877F]" : ""}`}
                   onClick={() => setIsOpen(false)}
                 >
                   Contact
@@ -273,46 +285,106 @@ const Navbar = () => {
           ) : (
             <>
               <li>
-                <Link to="/admin">Dashboard</Link>
+                <Link
+                  to="/admin"
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/admin") ? "text-[#15877F]" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Dashboard
+                </Link>
               </li>
-
               <li>
-                <Link to="/products">Products</Link>
+                <Link
+                  to="/products"
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/products") ? "text-[#15877F]" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Products
+                </Link>
               </li>
-
               <li>
-                <Link to="/create-product">Create Product</Link>
+                <Link
+                  to="/create-product"
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/create-product") ? "text-[#15877F]" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Create Product
+                </Link>
               </li>
-
               <li>
-                <Link to="/contact-details">Contact Details</Link>
+                <Link
+                  to="/categories"
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/categories") ? "text-[#15877F]" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Categories
+                </Link>
               </li>
-
               <li>
-                <Link to="/order-details">Order Details</Link>
+                <Link
+                  to="/variants"
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/variants") ? "text-[#15877F]" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Variants
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/contact-details"
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/contact-details") ? "text-[#15877F]" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Contact Details
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/order-details"
+                  className={`block py-1 hover:text-[#15877F] ${isActive("/order-details") ? "text-[#15877F]" : ""}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Order Details
+                </Link>
               </li>
             </>
           )}
 
-          {!user ? (
-            <>
-              <li>
-                <Link to="/login">Login</Link>
-              </li>
+          <hr className="border-gray-200 my-2" />
 
-              <li>
-                <Link to="/register">Sign Up</Link>
-              </li>
-            </>
+          {!currentUser ? (
+            <div className="flex flex-col gap-2 pt-1">
+              <Link
+                to="/login"
+                onClick={() => setIsOpen(false)}
+                className="w-full text-center py-2.5 border border-[#15877F] text-[#15877F] rounded-lg font-semibold hover:bg-gray-100"
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                onClick={() => setIsOpen(false)}
+                className="w-full text-center py-2.5 bg-[#15877F] text-white rounded-lg font-semibold hover:bg-[#126b64]"
+              >
+                Sign Up
+              </Link>
+            </div>
           ) : (
-            <li>
+            <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase">
+                  {currentUser.name.charAt(0)}
+                </div>
+                <span className="font-medium text-gray-700 text-sm">{currentUser.name}</span>
+              </div>
               <button
                 onClick={handleLogout}
-                className="text-red-500 font-medium"
+                className="flex items-center gap-1 bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition text-sm font-semibold"
               >
+                <LogOut size={16} />
                 Logout
               </button>
-            </li>
+            </div>
           )}
         </ul>
       </div>

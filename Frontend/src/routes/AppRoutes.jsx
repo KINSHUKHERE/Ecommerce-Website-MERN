@@ -1,48 +1,104 @@
-import { Routes, Route } from "react-router-dom";
-import Hero from "../components/Hero";
-import FeaturedProduct from "../components/FeaturedProduct";
-import AdvertisementBanner from "../components/AdvertisementBanner";
-import Footer from "../components/Footer";
-import ProductDetails from "../components/ProductDetails";
-import About from "../components/About";
-import Contact from "../components/Contact";
-import { useEffect } from "react";
-import CreateProduct from "../components/CreateProduct";
-import AddToCart from "../components/AddToCart";
-import AdminDashboard from "../pages/admin/AdminDashboard";
-import ContactDetails from "../pages/admin/ContactDetails";
-import OrderDetails from "../pages/admin/OrderDetails";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import Home from "../pages/Home";
+import Products from "../pages/Products";
+import ProductDetails from "../pages/ProductDetails";
+import About from "../pages/About";
+import Contact from "../pages/Contact";
+import Cart from "../pages/Cart";
 import LogIn from "../pages/Login";
 import SignUp from "../pages/SignUp";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import CreateProduct from "../pages/admin/CreateProduct";
+import ContactDetails from "../pages/admin/ContactDetails";
+import OrderDetails from "../pages/admin/OrderDetails";
+import CategoryManagement from "../pages/admin/CategoryManagement";
+import VariantManagement from "../pages/admin/VariantManagement";
+import EditProduct from "../pages/admin/EditProduct";
 
-const Home = () => {
+// Import Admin Layout & New Pages
+import AdminLayout from "../admin/components/AdminLayout";
+import AdminProducts from "../admin/pages/AdminProducts";
+import ProductView from "../admin/pages/ProductView";
+import ProductEdit from "../admin/pages/ProductEdit";
+
+import Navbar from "../components/Navbar";
+
+// Customer Layout Wrapper
+const UserLayout = () => {
   return (
     <>
-      <Hero />
-      <FeaturedProduct k={4} />
-      <AdvertisementBanner />
-      <Footer />
+      <Navbar />
+      <Outlet />
     </>
   );
+};
+
+// Route Guard for authenticated users
+const ProtectedRoute = ({ children }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// Route Guard for admin users only
+const AdminRoute = ({ children }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
+
+// Route Guard for guests (redirect logged-in users away from login/signup)
+const GuestRoute = ({ children }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user) {
+    return user.role === "admin" ? <Navigate to="/admin" replace /> : <Navigate to="/" replace />;
+  }
+  return children;
 };
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/products" element={<FeaturedProduct />} />
-      <Route path="/create-product" element={<CreateProduct />} />
-      <Route path="/products/:productId" element={<ProductDetails />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/cart" element={<AddToCart />} />
-      <Route path="/contact-details" element={<ContactDetails />} />
-      <Route path="/order-details" element={<OrderDetails />} />
-      <Route path="/login" element={<LogIn />} />
-      <Route path="/register" element={<SignUp />} />
+      {/* Customer / Public / Guest Routes wrapped in UserLayout */}
+      <Route element={<UserLayout />}>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/products/:productId" element={<ProductDetails />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+
+        {/* Guest-only Routes */}
+        <Route path="/login" element={<GuestRoute><LogIn /></GuestRoute>} />
+        <Route path="/register" element={<GuestRoute><SignUp /></GuestRoute>} />
+
+        {/* Protected User Routes */}
+        <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+      </Route>
+
+      {/* Protected Admin-only Routes wrapped in AdminLayout */}
+      <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/products" element={<AdminProducts />} />
+        <Route path="/admin/products/:productId" element={<ProductView />} />
+        <Route path="/admin/products/edit/:productId" element={<ProductEdit />} />
+        <Route path="/create-product" element={<AdminRoute><CreateProduct /></AdminRoute>} />
+        <Route path="/edit-product/:productId" element={<AdminRoute><EditProduct /></AdminRoute>} />
+        <Route path="/contact-details" element={<AdminRoute><ContactDetails /></AdminRoute>} />
+        <Route path="/order-details" element={<AdminRoute><OrderDetails /></AdminRoute>} />
+        <Route path="/categories" element={<AdminRoute><CategoryManagement /></AdminRoute>} />
+        <Route path="/variants" element={<AdminRoute><VariantManagement /></AdminRoute>} />
+      </Route>
     </Routes>
   );
 };
 
 export default AppRoutes;
+

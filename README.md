@@ -1,21 +1,22 @@
 # Shopora - Modern MERN Stack E-Commerce Platform
 
-Shopora is a premium, responsive E-Commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The application showcases an aesthetic design featuring a product catalog, dynamic product detailed views, a database-backed interactive shopping cart, secure user authentication (with hashed passwords), and a fully featured admin management dashboard connected to a backend MongoDB database.
+Shopora is a premium, responsive E-Commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The application showcases an aesthetic design featuring a product catalog with multi-factor filtering, a database-backed interactive shopping cart, secure user onboarding, administrative panels for inventory management (products, categories, variants), and responsive layouts equipped with modern CSS loaders.
 
 ---
 
 ## 🚀 Key Features
 
 *   **Premium UI & UX:** Aesthetic layout featuring modern typography, curated color palettes, interactive hover effects, smooth transitions, and glassmorphism.
-*   **Dynamic Product Catalog:** Fetches and displays products dynamically from a MongoDB database with filtering/slicing on the home page.
-*   **Detailed Product Views:** Dedicated product detail routes enabling users to read descriptions, review prices, and inspect high-quality product images.
+*   **Dynamic Product Catalog & Filters:** An advanced catalog search interface (`Products.jsx`) allowing users to filter items dynamically by name search, category selectors, and variant/brand sidebar filters.
+*   **Cohesive Loading States:** Integrated modern, smooth Tailwind CSS loading spinners across all API-connected pages (catalog, details, cart, categories, variants, contact queries) to prevent the momentary flashing of empty-state placeholders while data is fetched.
+*   **Mobile & Desktop Responsiveness:** Tailored layouts optimized for viewports ranging from mobile screens (320px) to wide laptops. Includes center-aligning flex grids for cards on mobile, responsive form grids, and auto-scrolling tables.
 *   **Database-Backed Shopping Cart:** A fully operational shopping cart synced with MongoDB. Users can add products to their cart (via catalog card buttons or the product detail page), increase or decrease quantities, and remove items. Changes persist directly to the database.
 *   **Real-time Cart Status Badge:** The navigation header displays a real-time badge count of the items currently in the cart. Updates are driven across components using custom event-dispatching listeners (`cartUpdated`).
+*   **Category & Variant Management:** A fully integrated inventory management system enabling admins to create, update, and soft-delete product categories and sub-variants/brands directly from dedicated management portals.
 *   **User Onboarding & Secure Auth:** Integrated signup and login forms on the client connected to backend APIs. User passwords are securely hashed using `bcryptjs` before database persistence. Supports roles: `user`, `vendor`, and `admin`.
 *   **Interactive Contact Queries:** Contact page submissions are captured, saved to MongoDB via a REST API, and displayed in real-time on the Admin dashboard.
 *   **Admin Management Dashboard:** Complete statistics panel containing quick cards for Total Products, Users, Orders, Revenue, and Contact Queries. Includes dynamic navbar toggles to switch layouts between customer views and admin dashboard modules.
 *   **Order Management System:** Structured tables listing customer order details, product summaries, payment status badges (Paid/Pending), and shipment statuses (Delivered, Processing, Pending).
-*   **Responsive Navigation:** Fully optimized for all screen sizes, including custom mobile toggle navigation drawers.
 
 ---
 
@@ -46,10 +47,12 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   │   ├── db/
 │   │   │   └── db.js            # MongoDB database connection logic
 │   │   ├── models/
-│   │   │   ├── productsData.js  # Mongoose Schema for Products
+│   │   │   ├── productsData.js  # Mongoose Schema for Products (referenced Category & Variant)
 │   │   │   ├── authDetails.js   # Mongoose Schema for Users (roles, hashed passwords)
 │   │   │   ├── contactDetails.js # Mongoose Schema for Customer Queries
-│   │   │   └── cartDetails.js   # Mongoose Schema for Shopping Cart items
+│   │   │   ├── cartDetails.js   # Mongoose Schema for Shopping Cart items
+│   │   │   ├── categoryDetails.js # Mongoose Schema for Product Categories
+│   │   │   └── variantDetails.js # Mongoose Schema for Product Variants
 │   │   └── app.js               # Express API routes and application configuration
 │   ├── server.js                # Server entry point (configures Port and starts server)
 │   ├── package.json             # Backend dependencies & scripts
@@ -62,17 +65,18 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   │   │   ├── ProductApi.js    # Product Axios API helper functions
 │   │   │   ├── AuthApi.js       # Signup & Login Axios API helpers
 │   │   │   ├── ContactApi.js    # Contact Queries Axios API helpers
-│   │   │   └── CartApi.js       # Shopping Cart CRUD Axios API helpers
+│   │   │   ├── CartApi.js       # Shopping Cart CRUD Axios API helpers
+│   │   │   └── CategoryAndVarientApi.js # Category & Variant Axios API helpers
 │   │   ├── assets/              # App images & icons
 │   │   ├── components/          # Modular React components
 │   │   │   ├── Navbar.jsx       # Header & Navigation (Admin vs Customer, dynamic cart badge)
 │   │   │   ├── Footer.jsx       # Footer layout
 │   │   │   ├── Hero.jsx         # Landing Hero Section
-│   │   │   ├── FeaturedProduct.jsx  # Products Listing Grid
+│   │   │   ├── FeaturedProduct.jsx  # Products Listing Grid (with responsive styling & loaders)
 │   │   │   ├── EachProduct.jsx      # Product Card component (interactive add-to-cart action)
-│   │   │   ├── ProductDetails.jsx   # Detailed Product Page (add-to-cart trigger)
-│   │   │   ├── CreateProduct.jsx    # Add New Product Form
+│   │   │   ├── ProductDetails.jsx   # Detailed Product Page (integrated with animations & loaders)
 │   │   │   ├── AddToCart.jsx        # Shopping Cart view (DB connection & quantity controls)
+│   │   │   ├── Products.jsx         # Shop search and filter catalog page layout
 │   │   │   └── ScrollToTop.jsx      # Scroll behavior helper
 │   │   ├── pages/               # Top-level Page layouts
 │   │   │   ├── Login.jsx        # User Login Interface (integrated with AuthApi)
@@ -80,7 +84,10 @@ Shopora is a premium, responsive E-Commerce web application built using the MERN
 │   │   │   └── admin/           # Administrative Panels
 │   │   │       ├── AdminDashboard.jsx  # Stats overview cards
 │   │   │       ├── ContactDetails.jsx  # Customer enquiries table (integrated with ContactApi)
-│   │   │       └── OrderDetails.jsx    # Order management and tracking table
+│   │   │       ├── OrderDetails.jsx    # Order management and tracking table
+│   │   │       ├── CreateProduct.jsx   # Add New Product Form (referencing categories & variants)
+│   │   │       ├── CategoryManagement.jsx # Category CRUD interface with loaders
+│   │   │       └── VariantManagement.jsx # Variant/Brand CRUD interface with loaders
 │   │   ├── routes/
 │   │   │   └── AppRoutes.jsx    # React Router definitions (Client & Admin routes)
 │   │   ├── App.jsx              # Main App entry layout
@@ -108,10 +115,11 @@ All API routes communicate with the backend server running by default on `http:/
         {
           "_id": "673f4e3c988a2c...",
           "imgUrl": "https://example.com/nike.jpg",
-          "brandName": "Nike",
           "heading": "Air Zoom Pegasus",
           "price": 8999,
-          "description": "High-performance running shoes."
+          "description": "High-performance running shoes.",
+          "categoryId": { "_id": "...", "name": "Footwear" },
+          "variantId": { "_id": "...", "name": "Nike" }
         }
       ]
     }
@@ -123,7 +131,8 @@ All API routes communicate with the backend server running by default on `http:/
     ```json
     {
       "imgUrl": "https://example.com/nike.jpg",
-      "brandName": "Nike",
+      "categoryId": "675f1a23...",
+      "variantId": "675f1b58...",
       "heading": "Air Zoom Pegasus",
       "price": 8999,
       "description": "High-performance running shoes."
@@ -156,55 +165,24 @@ All API routes communicate with the backend server running by default on `http:/
       "password": "mySecurePassword"
     }
     ```
-*   **Response:**
-    ```json
-    {
-      "msg": "Login successful",
-      "user": {
-        "_id": "673f4a3e811c...",
-        "name": "John Doe",
-        "email": "johndoe@example.com",
-        "role": "user"
-      }
-    }
-    ```
-
-#### 3. Get All Users
-*   **Route:** `GET /all-users`
-*   **Response:** Array of all registered user documents.
 
 ---
 
-### 📞 Contact Endpoints
+### 🏷️ Category & Variant Endpoints
 
-#### 1. Submit Query
-*   **Route:** `POST /post-contactdetails`
-*   **Payload Schema:**
-    ```json
-    {
-      "Name": "Jane Doe",
-      "Email": "janedoe@example.com",
-      "Message": "I have an issue with my shipment."
-    }
-    ```
+#### 1. Category Operations
+*   `POST /add-category` — Payload: `{ "name": "Footwear" }`
+*   `GET /get-categories` — Returns active categories list.
+*   `PUT /update-category/:id` — Payload: `{ "name": "Updated Category" }`
+*   `DELETE /delete-category/:id` — Soft-deletes a category.
+*   `PUT /toggle-category-status/:id` — Toggles active state.
 
-#### 2. Get All Queries
-*   **Route:** `GET /get-contactdetails`
-*   **Response:**
-    ```json
-    {
-      "msg": "Contact Details fetched",
-      "contacts": [
-        {
-          "_id": "674f1b2c...",
-          "Name": "Jane Doe",
-          "Email": "janedoe@example.com",
-          "Message": "I have an issue with my shipment.",
-          "createdAt": "2026-06-17T10:00:00.000Z"
-        }
-      ]
-    }
-    ```
+#### 2. Variant Operations
+*   `POST /add-variant` — Payload: `{ "name": "Nike", "categoryId": "..." }`
+*   `GET /get-variants` — Retrieves all variants.
+*   `GET /get-variants/:categoryId` — Retrieves variants inside a category.
+*   `PUT /update-variant/:id` — Payload: `{ "name": "Adidas" }`
+*   `DELETE /delete-variant/:id` — Soft-deletes a variant.
 
 ---
 
@@ -212,48 +190,15 @@ All API routes communicate with the backend server running by default on `http:/
 
 #### 1. Add / Sync Item to Cart
 *   **Route:** `POST /add-items-cart`
-*   **Payload Schema:**
-    ```json
-    {
-      "userId": "673f4a3e811c...",
-      "productId": "673f4e3c988a2c...",
-      "quantity": 1
-    }
-    ```
+*   **Payload Schema:** `{ "userId": "...", "productId": "...", "quantity": 1 }`
 
 #### 2. Get Cart Items
 *   **Route:** `GET /get-items-cart/:userId`
-*   **Response:**
-    ```json
-    {
-      "msg": "Got data from cart",
-      "cartData": [
-        {
-          "_id": "675d4e1a...",
-          "userId": "673f4a3e811c...",
-          "productId": {
-            "_id": "673f4e3c988a2c...",
-            "heading": "Air Zoom Pegasus",
-            "price": 8999,
-            "imgUrl": "https://example.com/nike.jpg"
-          },
-          "quantity": 2
-        }
-      ]
-    }
-    ```
 
-#### 3. Increment Cart Item Quantity
-*   **Route:** `PUT /increase-cart/:cartId`
-*   **Response:** Confirms item quantity incremented by 1.
-
-#### 4. Decrement Cart Item Quantity
-*   **Route:** `PUT /decrease-cart/:cartId`
-*   **Response:** Confirms item quantity decremented by 1 (minimum value is 1).
-
-#### 5. Delete Cart Item
-*   **Route:** `DELETE /delete-cart/:cartId`
-*   **Response:** Confirms item deleted and returns the removed item details.
+#### 3. Adjust Cart Quantity
+*   `PUT /increase-cart/:cartId` — Increments quantity by 1.
+*   `PUT /decrease-cart/:cartId` — Decrements quantity by 1.
+*   `DELETE /delete-cart/:cartId` — Removes product from cart.
 
 ---
 

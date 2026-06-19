@@ -27,7 +27,12 @@ const ProductDetails = () => {
 
   // Agar productId wrong ho ya product na mile
   if (!product) {
-    return <div className="p-10 text-center text-xl">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 py-20 flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+        <p className="text-gray-500 mt-4 animate-pulse">Loading product details...</p>
+      </div>
+    );
   }
 
   const handleAddToCart = async (product) => {
@@ -72,9 +77,27 @@ const ProductDetails = () => {
           />
         </div>
         <div className="flex flex-col gap-4">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-            {product.brandName}
-          </h2>
+          <div className="flex gap-3 items-center flex-wrap">
+            <span className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700">
+              {product.categoryId?.name}
+            </span>
+
+            <span className="bg-[#15877F]/10 px-3 py-1 rounded-full text-sm text-[#15877F] font-medium">
+              {product.variantId?.name}
+            </span>
+
+            <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+              (product.quantity ?? 10) <= 0 || product.sold
+                ? "bg-red-50 text-red-600"
+                : (product.quantity ?? 10) <= 3
+                  ? "bg-amber-50 text-amber-600 animate-pulse"
+                  : "bg-green-50 text-green-600"
+            }`}>
+              {(product.quantity ?? 10) <= 0 || product.sold 
+                ? "Sold Out" 
+                : `${product.quantity ?? 10} Items Left`}
+            </span>
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
             {product.heading}
           </h1>
@@ -88,10 +111,15 @@ const ProductDetails = () => {
           </div>
 
           <button
-            className="bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition duration-300 mt-4 cursor-pointer"
+            className={`py-3 px-6 rounded-lg font-semibold transition duration-300 mt-4 ${
+              (product.quantity ?? 10) <= 0 || product.sold
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-[#088178] hover:bg-[#06635c] text-white cursor-pointer shadow-md shadow-[#088178]/10"
+            }`}
             onClick={() => handleAddToCart(product)}
+            disabled={(product.quantity ?? 10) <= 0 || product.sold}
           >
-            Add to Cart
+            {(product.quantity ?? 10) <= 0 || product.sold ? "Sold Out" : "Add to Cart"}
           </button>
         </div>
       </div>
