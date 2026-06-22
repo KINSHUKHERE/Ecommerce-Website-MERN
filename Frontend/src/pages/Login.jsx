@@ -7,12 +7,12 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const [isLogin, setIsLogin] = useState(true);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setIsLogin(true);
+    setError("");
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -34,7 +34,7 @@ const Login = () => {
         navigate("/");
       }
     } catch (err) {
-      setIsLogin(false);
+      setError(err.response?.data?.msg || "Unable to Login. Please try again later.");
       console.log("Unable to Login!!");
     }
   };
@@ -45,10 +45,10 @@ const Login = () => {
         <h1 className="text-3xl font-bold text-center text-[#15877F] mb-2">
           Welcome Back
         </h1>
-        {!isLogin && (
+        {error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
             <p className="text-center text-sm font-medium text-red-600">
-              Unable to Login. Please try again later.
+              ❌ {error}
             </p>
           </div>
         )}

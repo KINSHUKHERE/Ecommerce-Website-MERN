@@ -40,8 +40,8 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({
-        msg: "Enter correct login credentials",
+      return res.status(404).json({
+        msg: "Email is not registered. Please sign up first!",
       });
     }
 
@@ -49,7 +49,7 @@ const login = async (req, res) => {
 
     if (!isMatch) {
       return res.status(401).json({
-        msg: "Enter correct login credentials",
+        msg: "Incorrect password. Please try again!",
       });
     }
 
