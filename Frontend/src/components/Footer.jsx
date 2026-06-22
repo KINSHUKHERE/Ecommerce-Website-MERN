@@ -1,5 +1,6 @@
 import React from "react";
 import logo from "../assets/logo.png";
+import paymentGatewaysImg from "../assets/pngegg.png";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -147,7 +148,7 @@ const Footer = () => {
           <div className="mt-1">
             <img
               className="h-8 w-auto object-contain"
-              src="../public/pngegg.png"
+              src={paymentGatewaysImg}
               alt="Payment Gateways"
             />
           </div>
