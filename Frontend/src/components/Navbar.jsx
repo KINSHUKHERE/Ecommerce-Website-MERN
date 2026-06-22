@@ -380,7 +380,7 @@ const Navbar = () => {
               <Link
                 to="/profile"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 hover:opacity-85 transition cursor-pointer"
+                className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
               >
                 <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase">
                   {currentUser.name.charAt(0)}
@@ -389,7 +389,7 @@ const Navbar = () => {
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1 bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition text-sm font-semibold"
+                className="flex items-center gap-1 bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors duration-300 text-sm font-semibold outline-none focus:outline-none"
               >
                 <LogOut size={16} />
                 Logout

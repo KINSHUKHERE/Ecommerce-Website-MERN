@@ -55,7 +55,7 @@ const AdminLayout = ({ children }) => {
             <div className="relative">
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2.5 py-1.5 px-2 hover:bg-gray-50 rounded-lg transition-all cursor-pointer"
+                className="flex items-center gap-2.5 py-1.5 px-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer outline-none focus:outline-none"
               >
                 <div className="w-8 h-8 rounded-full bg-[#088178] text-white flex items-center justify-center font-extrabold text-sm border-2 border-white shadow-sm">
                   {(user?.name?.[0] || "P").toUpperCase()}
@@ -85,7 +85,7 @@ const AdminLayout = ({ children }) => {
                     <Link
                       to="/admin"
                       onClick={() => setProfileMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-650 hover:bg-gray-50 hover:text-gray-950 font-medium transition"
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-650 hover:bg-gray-50 hover:text-gray-950 font-medium transition-colors outline-none focus:outline-none"
                     >
                       <Shield size={16} />
                       Admin Panel
@@ -93,14 +93,14 @@ const AdminLayout = ({ children }) => {
                     <Link
                       to="/admin/profile"
                       onClick={() => setProfileMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-650 hover:bg-gray-50 hover:text-gray-950 font-medium transition"
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-650 hover:bg-gray-50 hover:text-gray-950 font-medium transition-colors outline-none focus:outline-none"
                     >
                       <User size={16} />
                       My Profile
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-medium transition border-t border-gray-100 cursor-pointer"
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-medium transition-colors border-t border-gray-100 cursor-pointer outline-none focus:outline-none"
                     >
                       <LogOut size={16} />
                       Logout
