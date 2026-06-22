@@ -1,7 +1,7 @@
 import React from "react";
 import { Package, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 
-const ProductStats = ({ products = [] }) => {
+const ProductStats = ({ products = [], activeFilter = "", onCardClick }) => {
   const totalProducts = products.length;
   const activeProducts = products.filter((p) => (p.quantity ?? 10) > 0 && !p.sold).length;
   const lowStockProducts = products.filter(
@@ -11,6 +11,7 @@ const ProductStats = ({ products = [] }) => {
 
   const statCards = [
     {
+      id: "",
       title: "Total Products",
       value: totalProducts,
       icon: <Package size={20} />,
@@ -18,6 +19,7 @@ const ProductStats = ({ products = [] }) => {
       accentBg: "bg-blue-500/10"
     },
     {
+      id: "Active",
       title: "Active Products",
       value: activeProducts,
       icon: <CheckCircle size={20} />,
@@ -25,6 +27,7 @@ const ProductStats = ({ products = [] }) => {
       accentBg: "bg-green-500/10"
     },
     {
+      id: "Low Stock",
       title: "Low Stock Products",
       value: lowStockProducts,
       icon: <AlertTriangle size={20} />,
@@ -32,6 +35,7 @@ const ProductStats = ({ products = [] }) => {
       accentBg: "bg-amber-500/10"
     },
     {
+      id: "Sold",
       title: "Out Of Stock Products",
       value: outOfStockProducts,
       icon: <XCircle size={20} />,
@@ -42,24 +46,30 @@ const ProductStats = ({ products = [] }) => {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {statCards.map((card, idx) => (
-        <div
-          key={idx}
-          className={`flex flex-col p-4 bg-white border border-gray-150 rounded-xl shadow-sm hover:shadow-md transition-all duration-300`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-              {card.title}
-            </span>
-            <div className={`p-1.5 rounded-lg ${card.accentBg} ${card.colorClass.split(" ")[1]}`}>
-              {card.icon}
+      {statCards.map((card) => {
+        const isCurrentlyActive = activeFilter === card.id;
+        return (
+          <div
+            key={card.title}
+            onClick={() => onCardClick && onCardClick(card.id)}
+            className={`flex flex-col p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
+              isCurrentlyActive ? "border-[#088178] ring-2 ring-[#088178]/5" : "border-gray-150"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                {card.title}
+              </span>
+              <div className={`p-1.5 rounded-lg ${card.accentBg} ${card.colorClass.split(" ")[1]}`}>
+                {card.icon}
+              </div>
             </div>
+            <span className="text-2xl font-extrabold text-gray-900 mt-2.5 leading-none">
+              {card.value}
+            </span>
           </div>
-          <span className="text-2xl font-extrabold text-gray-900 mt-2.5 leading-none">
-            {card.value}
-          </span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

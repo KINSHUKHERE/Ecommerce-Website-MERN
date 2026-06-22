@@ -191,6 +191,9 @@ const AdminProducts = () => {
     if (selectedStatus) {
       result = result.filter((p) => {
         const status = getProductStatus(p);
+        if (selectedStatus === "Active") {
+          return status !== "Sold";
+        }
         return status === selectedStatus;
       });
     }
@@ -240,8 +243,9 @@ const AdminProducts = () => {
 
   const statusOptions = [
     { label: "All Statuses", value: "" },
-    { label: "In Stock", value: "In Stock" },
-    { label: "Low Stock", value: "Low Stock" },
+    { label: "Active Products", value: "Active" },
+    { label: "In Stock Only", value: "In Stock" },
+    { label: "Low Stock Only", value: "Low Stock" },
     { label: "Out of Stock / Sold", value: "Sold" }
   ];
 
@@ -331,7 +335,11 @@ const AdminProducts = () => {
       </div>
 
       {/* Top Stat Cards Section */}
-      <ProductStats products={products} />
+      <ProductStats
+        products={products}
+        activeFilter={selectedStatus}
+        onCardClick={setSelectedStatus}
+      />
 
       {/* Search & Filters Block */}
       <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-slate-100 p-5 mb-6 shadow-sm shadow-slate-100/30">

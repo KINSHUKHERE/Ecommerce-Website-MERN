@@ -126,7 +126,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                 <div key={idx} className="space-y-1">
                   <button
                     onClick={() => setProductsMenuOpen(!productsMenuOpen)}
-                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                       isActive("/admin/products") || isActive("/create-product")
                         ? "bg-[#088178]/5 text-[#088178]"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -145,7 +145,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                           key={sIdx}
                           to={sub.path}
                           onClick={() => setIsOpen(false)}
-                          className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-semibold transition-all ${
+                          className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium transition-all ${
                             isActive(sub.path)
                               ? "bg-[#088178]/10 text-[#088178]"
                               : "text-gray-500 hover:bg-gray-50 hover:text-gray-950"
@@ -166,7 +166,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                 key={idx}
                 to={item.path}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive(item.path)
                     ? "bg-[#088178]/10 text-[#088178]"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -183,7 +183,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         <div className="p-4 border-t border-gray-100">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
           >
             <LogOut size={18} />
             <span>Logout</span>
