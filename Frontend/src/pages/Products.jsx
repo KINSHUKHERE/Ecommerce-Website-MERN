@@ -75,50 +75,59 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       const res = await getProduct();
-      setProducts(res.data.data);
+      console.log("fetchProducts API raw response:", res);
+      console.log("Fetched Products array:", res.data?.data);
+      setProducts(res.data?.data || []);
     } catch (err) {
-      console.log(err);
+      console.error("fetchProducts error occurred:", err);
     }
   };
 
   const fetchCategories = async () => {
     try {
       const res = await getCategories();
-      setCategories(res.data.categories);
+      console.log("fetchCategories API response:", res.data);
+      setCategories(res.data?.categories || []);
     } catch (err) {
-      console.log(err);
+      console.error("fetchCategories error:", err);
     }
   };
 
   const fetchVariants = async () => {
     try {
       const res = await getVariants();
-      setVariants(res.data.variants);
+      console.log("fetchVariants API response:", res.data);
+      setVariants(res.data?.variants || []);
     } catch (err) {
-      console.log(err);
+      console.error("fetchVariants error:", err);
     }
   };
 
   const filteredProducts = useMemo(() => {
+    console.log("Evaluating filteredProducts. Original list:", products);
     return products.filter((item) => {
-      const matchesSearch =
-        item.heading?.toLowerCase().includes(search.toLowerCase()) ||
-        item.categoryId?.name?.toLowerCase().includes(search.toLowerCase()) ||
-        item.variantId?.name?.toLowerCase().includes(search.toLowerCase());
+      // Safe checks to avoid undefined.toLowerCase() or undefined.includes() exceptions
+      const itemHeading = item.heading || "";
+      const itemCategoryName = item.categoryId?.name || item.category || "";
+      const itemVariantName = item.variantId?.name || item.brand || item.variant || "";
 
+      const matchesSearch =
+        itemHeading.toLowerCase().includes(search.toLowerCase()) ||
+        itemCategoryName.toLowerCase().includes(search.toLowerCase()) ||
+        itemVariantName.toLowerCase().includes(search.toLowerCase());
+
+      const itemCategoryId = item.categoryId?._id || item.categoryId || "";
       const matchesCategory =
         selectedCategory === "" ||
-        item.categoryId?._id === selectedCategory;
+        itemCategoryId.toString() === selectedCategory.toString();
 
+      const itemVariantId = item.variantId?._id || item.variantId || "";
       const matchesVariant =
         selectedVariant === "" ||
-        item.variantId?._id === selectedVariant;
+        itemVariantId.toString() === selectedVariant.toString();
 
-      return (
-        matchesSearch &&
-        matchesCategory &&
-        matchesVariant
-      );
+      const isMatch = matchesSearch && matchesCategory && matchesVariant;
+      return isMatch;
     });
   }, [
     products,
@@ -128,6 +137,7 @@ const Products = () => {
   ]);
 
   const visibleProducts = useMemo(() => {
+    console.log("Filtered products list count:", filteredProducts.length);
     return filteredProducts.slice(0, visibleCount);
   }, [filteredProducts, visibleCount]);
 
