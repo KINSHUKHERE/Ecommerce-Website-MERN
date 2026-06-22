@@ -114,6 +114,7 @@ const SignUp = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
+              autocomplete="email"
               className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#15877F]"
             />
           </div>
@@ -129,6 +130,7 @@ const SignUp = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter password"
+              autocomplete="new-password"
               className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#15877F]"
             />
           </div>
