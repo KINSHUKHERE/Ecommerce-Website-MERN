@@ -10,3 +10,11 @@ export const login = async (data) => {
 export const allUsers = async () => {
   return await axios.get("http://localhost:3000/all-users");
 };
+
+export const getUserProfile = async (id) => {
+  return await axios.get(`http://localhost:3000/user-profile/${id}`);
+};
+
+export const updateProfile = async (id, data) => {
+  return await axios.put(`http://localhost:3000/update-profile/${id}`, data);
+};

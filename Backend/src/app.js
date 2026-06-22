@@ -13,7 +13,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Mount MVC routers
 app.use("/", authRoutes);
 app.use("/", productRoutes);
 app.use("/", categoryRoutes);

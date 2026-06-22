@@ -194,14 +194,14 @@ const Navbar = () => {
               )}
 
               {/* User Profile Avatar details */}
-              <div className="flex items-center gap-2">
+              <Link to="/profile" className="flex items-center gap-2 hover:opacity-85 transition cursor-pointer">
                 <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
                   {currentUser.name.charAt(0)}
                 </div>
                 <span className="font-medium text-gray-700 text-sm hidden lg:block max-w-[120px] truncate">
                   {currentUser.name}
                 </span>
-              </div>
+              </Link>
 
               <button
                 onClick={handleLogout}
@@ -371,12 +371,16 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="flex items-center justify-between pt-1">
-              <div className="flex items-center gap-2">
+              <Link
+                to="/profile"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 hover:opacity-85 transition cursor-pointer"
+              >
                 <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase">
                   {currentUser.name.charAt(0)}
                 </div>
                 <span className="font-medium text-gray-700 text-sm">{currentUser.name}</span>
-              </div>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1 bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition text-sm font-semibold"

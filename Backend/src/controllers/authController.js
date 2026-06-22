@@ -83,8 +83,67 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phoneNumber: user.phoneNumber,
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Unable to fetch user profile",
+      Error: err.message,
+    });
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    const { name, password } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    if (name) {
+      user.name = name;
+    }
+
+    if (password && password.trim() !== "") {
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      msg: "Profile updated successfully",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phoneNumber: user.phoneNumber,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Failed to update profile",
+      Error: err.message,
+    });
+  }
+};
+
 module.exports = {
   signup,
   login,
   getAllUsers,
+  getUserProfile,
+  updateProfile,
 };

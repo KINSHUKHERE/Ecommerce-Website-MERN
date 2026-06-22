@@ -14,6 +14,7 @@ import OrderDetails from "../pages/admin/OrderDetails";
 import CategoryManagement from "../pages/admin/CategoryManagement";
 import VariantManagement from "../pages/admin/VariantManagement";
 import EditProduct from "../pages/admin/EditProduct";
+import Profile from "../pages/Profile";
 
 // Import Admin Layout & New Pages
 import AdminLayout from "../admin/components/AdminLayout";
@@ -81,6 +82,7 @@ const AppRoutes = () => {
 
         {/* Protected User Routes */}
         <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       </Route>
 
       {/* Protected Admin-only Routes wrapped in AdminLayout */}
@@ -95,6 +97,7 @@ const AppRoutes = () => {
         <Route path="/order-details" element={<AdminRoute><OrderDetails /></AdminRoute>} />
         <Route path="/categories" element={<AdminRoute><CategoryManagement /></AdminRoute>} />
         <Route path="/variants" element={<AdminRoute><VariantManagement /></AdminRoute>} />
+        <Route path="/admin/profile" element={<Profile />} />
       </Route>
     </Routes>
   );

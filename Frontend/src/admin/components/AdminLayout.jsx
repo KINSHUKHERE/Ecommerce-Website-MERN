@@ -85,14 +85,22 @@ const AdminLayout = ({ children }) => {
                     <Link
                       to="/admin"
                       onClick={() => setProfileMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-650 hover:bg-gray-50 hover:text-gray-950 font-semibold transition"
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-650 hover:bg-gray-50 hover:text-gray-950 font-medium transition"
                     >
                       <Shield size={16} />
                       Admin Panel
                     </Link>
+                    <Link
+                      to="/admin/profile"
+                      onClick={() => setProfileMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-650 hover:bg-gray-50 hover:text-gray-950 font-medium transition"
+                    >
+                      <User size={16} />
+                      My Profile
+                    </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold transition border-t border-gray-100 cursor-pointer"
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-medium transition border-t border-gray-100 cursor-pointer"
                     >
                       <LogOut size={16} />
                       Logout
