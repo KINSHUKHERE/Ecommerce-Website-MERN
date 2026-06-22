@@ -4,3 +4,15 @@
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
+
+/* Global focus styling resets to prevent default browser outline flash on refresh/hydration */
+a, button {
+  outline: none;
+}
+
+/* Maintain accessibility: show outline only when navigating via keyboard */
+a:focus-visible, button:focus-visible {
+  outline: 2px solid #15877F;
+  outline-offset: 2px;
+}
+

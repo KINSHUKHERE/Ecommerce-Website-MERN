@@ -52,7 +52,7 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const navLink = (path) =>
-    `relative transition-all duration-300 hover:text-[#15877F] py-2 ${
+    `relative transition-colors duration-300 hover:text-[#15877F] py-2 ${
       isActive(path)
         ? "text-[#15877F] font-semibold after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-[#15877F]"
         : "text-gray-700"
@@ -119,7 +119,7 @@ const Navbar = () => {
             </li>
             {/* Admin Management Dropdown */}
             <li className="relative group py-2">
-              <button className="flex items-center gap-1 transition-all duration-300 text-gray-700 hover:text-[#15877F] cursor-pointer font-medium">
+              <button className="flex items-center gap-1 transition-colors duration-300 text-gray-700 hover:text-[#15877F] cursor-pointer font-medium outline-none focus:outline-none">
                 Admin Panel
                 <ChevronDown size={16} className="transition-transform duration-200 group-hover:rotate-180" />
               </button>
@@ -127,31 +127,31 @@ const Navbar = () => {
               <div className="absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden group-hover:block transition-all duration-300 z-50">
                 <Link
                   to="/create-product"
-                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-all"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-colors outline-none focus:outline-none"
                 >
                   Create Product
                 </Link>
                 <Link
                   to="/categories"
-                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-all"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-colors outline-none focus:outline-none"
                 >
                   Categories
                 </Link>
                 <Link
                   to="/variants"
-                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-all"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-colors outline-none focus:outline-none"
                 >
                   Variants
                 </Link>
                 <Link
                   to="/contact-details"
-                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-all"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-colors outline-none focus:outline-none"
                 >
                   Contact Details
                 </Link>
                 <Link
                   to="/order-details"
-                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-all"
+                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-colors outline-none focus:outline-none"
                 >
                   Order Details
                 </Link>
@@ -182,7 +182,7 @@ const Navbar = () => {
               {!isAdmin && (
                 <Link
                   to="/cart"
-                  className="relative transition-all duration-300 hover:text-[#15877F] p-2 hover:scale-105 focus:outline-none"
+                  className="relative transition-[color,transform] duration-300 hover:text-[#15877F] p-2 hover:scale-105 outline-none focus:outline-none"
                 >
                   <ShoppingCart size={22} />
                   {cartCount > 0 && (
@@ -194,7 +194,10 @@ const Navbar = () => {
               )}
 
               {/* User Profile Avatar details */}
-              <Link to="/profile" className="flex items-center gap-2 hover:opacity-85 transition cursor-pointer focus:outline-none">
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
+              >
                 <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
                   {currentUser.name.charAt(0)}
                 </div>
@@ -205,7 +208,7 @@ const Navbar = () => {
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 bg-red-500 text-white px-3.5 py-2 rounded-lg hover:bg-red-600 transition text-sm font-medium cursor-pointer"
+                className="flex items-center gap-1.5 bg-red-500 text-white px-3.5 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 text-sm font-medium cursor-pointer outline-none focus:outline-none"
               >
                 <LogOut size={16} />
                 Logout
@@ -219,7 +222,7 @@ const Navbar = () => {
           {!isAdmin && currentUser && (
             <Link
               to="/cart"
-              className="relative p-2 transition-all duration-300 hover:text-[#15877F] focus:outline-none"
+              className="relative p-2 transition-colors duration-300 hover:text-[#15877F] outline-none focus:outline-none"
             >
               <ShoppingCart size={24} />
               {cartCount > 0 && (
@@ -230,7 +233,10 @@ const Navbar = () => {
             </Link>
           )}
 
-          <button onClick={() => setIsOpen(!isOpen)} className="text-gray-700 hover:text-[#15877F] cursor-pointer">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-gray-700 hover:text-[#15877F] cursor-pointer outline-none focus:outline-none"
+          >
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
@@ -374,7 +380,7 @@ const Navbar = () => {
               <Link
                 to="/profile"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 hover:opacity-85 transition cursor-pointer focus:outline-none"
+                className="flex items-center gap-2 hover:opacity-85 transition cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase">
                   {currentUser.name.charAt(0)}
