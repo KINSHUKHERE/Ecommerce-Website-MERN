@@ -353,46 +353,6 @@ const Checkout = () => {
                   </div>
                 </div>
 
-                {/* Horizontal Line Separator */}
-                <hr className="border-slate-200" />
-
-                {/* 3. Product Summary Block */}
-                <div className="space-y-3.5">
-                  <h3 className="text-sm font-bold text-slate-850 uppercase tracking-wide">
-                    3. Order Summary & Price
-                  </h3>
-
-                  <div className="border border-slate-150 rounded-lg p-3 bg-slate-50/50 space-y-3">
-                    {cartItems.map((item) => (
-                      <div key={item.id} className="flex gap-4 items-center justify-between text-xs font-semibold text-slate-700">
-                        <div className="flex gap-3 items-center min-w-0">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-9 h-9 object-contain bg-white border border-slate-150 rounded p-0.5"
-                          />
-                          <div className="min-w-0 text-left">
-                            <p className="font-bold text-slate-800 truncate max-w-[200px] sm:max-w-[400px]">{item.name}</p>
-                            <p className="text-[10px] text-gray-400 mt-0.5">Quantity: {item.quantity}</p>
-                          </div>
-                        </div>
-                        <span className="font-extrabold text-[#088178]">₹{(item.price * item.quantity).toLocaleString()}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Total payable summary box */}
-                  <div className="flex justify-between items-center bg-[#2874f0]/5 border border-[#2874f0]/10 rounded-lg p-3.5 mt-2">
-                    <div>
-                      <span className="text-[10px] text-gray-400 block uppercase font-bold">Total Amount Payable</span>
-                      <span className="text-base font-extrabold text-slate-900">₹{totalPrice.toLocaleString()}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-150 px-2 py-0.5 rounded-full">
-                      Free Shipping
-                    </span>
-                  </div>
-                </div>
-
                 {/* Action button: NEXT */}
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-end">
                   <button
