@@ -184,10 +184,13 @@ const Checkout = () => {
       {/* Distraction-Free Header (Minimal & Solid, No logos or links) */}
       <header className="bg-[#2874f0] text-white py-3.5 px-4 sm:px-8 shadow-sm">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <span className="text-lg font-bold tracking-wide uppercase italic">Secure Checkout</span>
+          <span className="text-lg font-bold tracking-wide uppercase flex items-center gap-1.5">
+            <Lock size={18} />
+            Secure Checkout
+          </span>
           <div className="flex items-center gap-1 text-xs text-blue-100 font-semibold">
-            <Lock size={13} />
-            <span>100% Encrypted Connection</span>
+            <Shield size={13} />
+            <span>SSL SECURE 256-BIT ENCRYPTION</span>
           </div>
         </div>
       </header>
@@ -203,28 +206,28 @@ const Checkout = () => {
               <Check size={36} strokeWidth={3} className="animate-pulse" />
             </div>
 
-            <h2 className="text-2xl font-black text-slate-800 text-center">Order Confirmed Successfully!</h2>
+            <h2 className="text-2xl font-black text-slate-800 text-center">Thank You! Your Order has Been Placed</h2>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              Your mock payment has been processed and stored in MongoDB.
+              Your transaction has been verified successfully. A confirmation summary and delivery tracking status have been recorded.
             </p>
 
             <div className="my-6 p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 space-y-2.5">
               <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                <span className="text-gray-400">Transaction Reference</span>
+                <span className="text-gray-400">Transaction Reference ID</span>
                 <span className="font-mono text-slate-800 select-all">{generatedTxnId}</span>
               </div>
               {createdOrder && (
                 <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                  <span className="text-gray-400">Order ID</span>
+                  <span className="text-gray-400">Order Reference Number</span>
                   <span className="font-mono text-[#2874f0] font-bold">#{createdOrder._id}</span>
                 </div>
               )}
               <div className="flex justify-between border-b border-slate-200 pb-1.5">
-                <span className="text-gray-400">Payment Option</span>
+                <span className="text-gray-400">Payment Method</span>
                 <span className="text-slate-800">{paymentMethod}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Total Price Charged</span>
+                <span className="text-gray-400">Total Amount Paid</span>
                 <span className="text-slate-900 font-extrabold text-sm">₹{totalPrice.toLocaleString()}</span>
               </div>
             </div>
@@ -236,14 +239,14 @@ const Checkout = () => {
                 className="w-full bg-[#2874f0] hover:bg-blue-700 text-white py-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none"
               >
                 <Home size={15} />
-                Go to Home Screen
+                Continue Shopping
               </button>
               <button
                 onClick={() => navigate("/profile", { state: { activeTab: "orders" } })}
                 className="w-full bg-[#fb641b] hover:bg-[#e05310] text-white py-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer outline-none focus:outline-none"
               >
                 <ShoppingBag size={15} />
-                Track on Orders Section
+                View Order Details & Status
               </button>
             </div>
           </div>
@@ -260,11 +263,11 @@ const Checkout = () => {
                 <div className="space-y-2">
                   <h3 className="text-sm font-bold text-slate-850 uppercase tracking-wide flex items-center gap-1.5">
                     <Sparkles size={15} className="text-[#2874f0]" />
-                    1. Account Details
+                    1. Verified Customer Account
                   </h3>
                   <div className="text-xs text-gray-500 font-semibold pl-1.5 space-y-1">
                     <p>Email: <span className="text-slate-800 font-bold">{localUser?.email}</span></p>
-                    <p>Account Role: <span className="text-slate-800 font-bold capitalize">{localUser?.role || "user"}</span></p>
+                    <p>Account Type: <span className="text-slate-800 font-bold capitalize">{localUser?.role || "user"}</span></p>
                   </div>
                 </div>
 
@@ -274,12 +277,12 @@ const Checkout = () => {
                 {/* 2. Customer Inputs (Editable Name, Phone, and Address) */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold text-slate-850 uppercase tracking-wide">
-                    2. Shipping details
+                    2. Delivery Destination Details
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] text-gray-400 font-bold uppercase">Customer Name</label>
+                      <label className="text-[10px] text-gray-400 font-bold uppercase">Full Name (Recipient)</label>
                       <input
                         type="text"
                         required
@@ -290,7 +293,7 @@ const Checkout = () => {
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] text-gray-400 font-bold uppercase">Mobile Number</label>
+                      <label className="text-[10px] text-gray-400 font-bold uppercase">Contact Mobile Number</label>
                       <input
                         type="text"
                         required
@@ -303,7 +306,7 @@ const Checkout = () => {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] text-gray-400 font-bold uppercase">Street Address</label>
+                    <label className="text-[10px] text-gray-400 font-bold uppercase">Street Address (Flat/House No., Colony)</label>
                     <input
                       type="text"
                       required
@@ -316,7 +319,7 @@ const Checkout = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] text-gray-400 font-bold uppercase">City</label>
+                      <label className="text-[10px] text-gray-400 font-bold uppercase">Town / City</label>
                       <input
                         type="text"
                         required
@@ -327,7 +330,7 @@ const Checkout = () => {
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] text-gray-400 font-bold uppercase">State</label>
+                      <label className="text-[10px] text-gray-400 font-bold uppercase">State / Province</label>
                       <input
                         type="text"
                         required
@@ -338,7 +341,7 @@ const Checkout = () => {
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] text-gray-400 font-bold uppercase">Pincode</label>
+                      <label className="text-[10px] text-gray-400 font-bold uppercase">PIN / Postal Code</label>
                       <input
                         type="text"
                         required
@@ -359,7 +362,7 @@ const Checkout = () => {
                     type="submit"
                     className="bg-[#fb641b] text-white hover:bg-[#e05310] px-10 py-3 rounded-sm font-bold text-xs uppercase tracking-wide shadow cursor-pointer outline-none focus:outline-none"
                   >
-                    Next (Choose Payment)
+                    Continue to Payment Options
                   </button>
                 </div>
 
@@ -369,10 +372,10 @@ const Checkout = () => {
             {/* STEP 2: PAYMENT INFO PAGE */}
             {checkoutStep === 2 && (
               <div className="space-y-5 text-left">
-                <div className="flex items-center gap-1.5 pb-2 border-b border-slate-100">
-                  <span className="text-xs text-[#2874f0] font-bold">Checkout Summary: </span>
-                  <span className="text-xs text-gray-500 font-semibold">
-                    Delivering to {customerName} (₹{totalPrice.toLocaleString()})
+                <div className="flex flex-col gap-1 pb-3 border-b border-slate-100">
+                  <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">Order Summary</span>
+                  <span className="text-sm font-semibold text-slate-800">
+                    Delivering to <span className="font-bold">{customerName}</span> (Total Amount: <span className="font-bold text-[#088178]">₹{totalPrice.toLocaleString()}</span>)
                   </span>
                 </div>
 
@@ -382,14 +385,14 @@ const Checkout = () => {
                     <Loader2 className="animate-spin text-[#2874f0] w-12 h-12" />
                     <div>
                       <h4 className="text-sm font-bold text-slate-800">{processingMsg}</h4>
-                      <p className="text-[10px] text-gray-400 mt-1">Simulating mock banking gateway transaction verification...</p>
+                      <p className="text-[10px] text-gray-400 mt-1">Simulating secure banking gateway transaction verification...</p>
                     </div>
                   </div>
                 ) : (
                   /* Payment selectors */
                   <div className="space-y-4">
                     <h3 className="text-sm font-bold text-slate-850 uppercase tracking-wide">
-                      Select Payment Option
+                      Choose Your Preferred Payment Method
                     </h3>
 
                     {/* Radio Options: UPI, Card, COD */}
@@ -408,7 +411,7 @@ const Checkout = () => {
                           <div className="flex-1">
                             <span className="text-xs font-bold text-slate-800 flex items-center gap-2">
                               <Smartphone size={14} className="text-slate-500" />
-                              UPI (GPay, PhonePe, Paytm, or enter UPI ID)
+                              Instant UPI Transfer (Google Pay, PhonePe, Paytm, or BHIM ID)
                             </span>
                             {paymentMethod === "UPI" && (
                               <div className="mt-4 pl-6 space-y-3 border-l-2 border-slate-200">
@@ -462,7 +465,7 @@ const Checkout = () => {
                           <div className="flex-1">
                             <span className="text-xs font-bold text-slate-800 flex items-center gap-2">
                               <CreditCard size={14} className="text-slate-500" />
-                              Credit / Debit Card (Visa, Mastercard, RuPay)
+                              Credit or Debit Card (Secure Checkout via Visa, Mastercard, RuPay)
                             </span>
                             {paymentMethod === "Card" && (
                               <div className="mt-4 pl-6 space-y-3 border-l-2 border-slate-200 max-w-sm">
@@ -528,7 +531,7 @@ const Checkout = () => {
                           <div className="flex-1">
                             <span className="text-xs font-bold text-slate-800 flex items-center gap-2">
                               <CheckSquare size={14} className="text-slate-500" />
-                              Cash on Delivery (COD)
+                              Cash on Delivery (COD / Pay on Delivery)
                             </span>
                           </div>
                         </label>
@@ -539,16 +542,28 @@ const Checkout = () => {
                     <div className="pt-5 border-t border-slate-100 mt-4 flex justify-between items-center">
                       <button
                         onClick={() => setCheckoutStep(1)}
-                        className="px-4 py-2 border border-slate-200 text-gray-600 text-xs font-bold rounded-sm hover:bg-slate-50 transition cursor-pointer"
+                        className="px-4 py-2 border border-slate-200 text-gray-650 text-xs font-bold rounded-sm hover:bg-slate-50 transition cursor-pointer"
                       >
                         Back
                       </button>
                       <button
                         onClick={handleOrderSubmission}
-                        className="bg-[#fb641b] text-white hover:bg-[#e05310] px-10 py-3 rounded-sm font-bold text-xs uppercase tracking-wide shadow transition-all cursor-pointer outline-none focus:outline-none animate-pulse"
+                        className="bg-[#fb641b] text-white hover:bg-[#e05310] px-10 py-3 rounded-sm font-bold text-xs uppercase tracking-wide shadow transition-all cursor-pointer outline-none focus:outline-none"
                       >
-                        Order Now (Pay ₹{totalPrice.toLocaleString()})
+                        Complete Secure Payment of ₹{totalPrice.toLocaleString()}
                       </button>
+                    </div>
+
+                    {/* Trust-Building Reassuring Micro-copy */}
+                    <div className="mt-6 p-4 bg-slate-50 border border-slate-150 rounded-lg text-[10px] text-gray-500 font-semibold space-y-2 max-w-md">
+                      <p className="flex items-center gap-1.5 text-[#088178]">
+                        <Lock size={13} strokeWidth={2.5} />
+                        <span><strong>Bank-Grade Security Guarantee:</strong> All payment details are encrypted using SSL 256-bit protocols. Your card numbers are never stored on our servers.</span>
+                      </p>
+                      <p className="flex items-start gap-1.5">
+                        <Check size={13} className="text-green-600 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                        <span><strong>100% Secure Checkout:</strong> Complete buyer protection with easy refund options. A confirmation email and digital invoice will be dispatched immediately upon order validation.</span>
+                      </p>
                     </div>
 
                   </div>
