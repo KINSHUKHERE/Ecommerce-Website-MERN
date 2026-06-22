@@ -182,7 +182,7 @@ const Navbar = () => {
               {!isAdmin && (
                 <Link
                   to="/cart"
-                  className="relative transition-all duration-300 hover:text-[#15877F] p-2 hover:scale-105"
+                  className="relative transition-all duration-300 hover:text-[#15877F] p-2 hover:scale-105 focus:outline-none"
                 >
                   <ShoppingCart size={22} />
                   {cartCount > 0 && (
@@ -194,7 +194,7 @@ const Navbar = () => {
               )}
 
               {/* User Profile Avatar details */}
-              <Link to="/profile" className="flex items-center gap-2 hover:opacity-85 transition cursor-pointer">
+              <Link to="/profile" className="flex items-center gap-2 hover:opacity-85 transition cursor-pointer focus:outline-none">
                 <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
                   {currentUser.name.charAt(0)}
                 </div>
@@ -219,7 +219,7 @@ const Navbar = () => {
           {!isAdmin && currentUser && (
             <Link
               to="/cart"
-              className="relative p-2 transition-all duration-300 hover:text-[#15877F]"
+              className="relative p-2 transition-all duration-300 hover:text-[#15877F] focus:outline-none"
             >
               <ShoppingCart size={24} />
               {cartCount > 0 && (
@@ -374,7 +374,7 @@ const Navbar = () => {
               <Link
                 to="/profile"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 hover:opacity-85 transition cursor-pointer"
+                className="flex items-center gap-2 hover:opacity-85 transition cursor-pointer focus:outline-none"
               >
                 <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase">
                   {currentUser.name.charAt(0)}
