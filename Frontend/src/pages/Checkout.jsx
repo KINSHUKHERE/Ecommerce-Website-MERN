@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, Loader2, Lock, Smartphone, CreditCard, CheckSquare, Sparkles, Home, ShoppingBag } from "lucide-react";
+import { Check, Loader2, Lock, Smartphone, CreditCard, CheckSquare, Sparkles, Home, ShoppingBag, Shield } from "lucide-react";
 import { getDataCart } from "../api/CartApi";
 import { createOrder } from "../api/OrderApi";
 
