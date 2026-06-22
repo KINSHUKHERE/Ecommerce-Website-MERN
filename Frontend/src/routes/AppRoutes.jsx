@@ -15,6 +15,7 @@ import CategoryManagement from "../pages/admin/CategoryManagement";
 import VariantManagement from "../pages/admin/VariantManagement";
 import EditProduct from "../pages/admin/EditProduct";
 import Profile from "../pages/Profile";
+import Checkout from "../pages/Checkout";
 
 // Import Admin Layout & New Pages
 import AdminLayout from "../admin/components/AdminLayout";
@@ -83,6 +84,7 @@ const AppRoutes = () => {
         {/* Protected User Routes */}
         <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
       </Route>
 
       {/* Protected Admin-only Routes wrapped in AdminLayout */}
