@@ -103,6 +103,8 @@ const Products = () => {
     }
   };
 
+  console.log("Current products state:", products);
+
   const filteredProducts = useMemo(() => {
     console.log("Evaluating filteredProducts. Original list:", products);
     return products.filter((item) => {
