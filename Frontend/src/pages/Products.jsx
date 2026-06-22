@@ -75,11 +75,15 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       const res = await getProduct();
-      console.log("fetchProducts API raw response:", res);
-      console.log("Fetched Products array:", res.data?.data);
-      setProducts(res.data?.data || []);
+      console.log("Backend se aaya full response:", res.data); // Ye check karein
+      
+      // YAHAN Galti hai! res.data.data use karein:
+      const productsFromApi = res.data?.data || []; 
+      setProducts(productsFromApi); 
+      
+      console.log("Ab state mein set hua:", productsFromApi);
     } catch (err) {
-      console.error("fetchProducts error occurred:", err);
+      console.error("fetchProducts error:", err);
     }
   };
 
