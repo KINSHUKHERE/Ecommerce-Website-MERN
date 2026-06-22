@@ -53,7 +53,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="w-full relative overflow-hidden h-[450px] md:h-[500px] mt-2 group">
+    <div className="w-full relative overflow-hidden h-[260px] sm:h-[350px] md:h-[500px] mt-2 group">
       <div
         className="flex w-full h-full transition-transform duration-500 ease-out"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
