@@ -9,11 +9,14 @@ import {
 } from "lucide-react";
 import { getContact } from "../../api/ContactApi";
 import { allUsers } from "../../api/AuthApi";
+import { getAllOrders } from "../../api/OrderApi";
 
 const AdminDashboard = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalContacts, setTotalContacts] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
 
   const fetchData = async () => {
     try {
@@ -23,6 +26,13 @@ const AdminDashboard = () => {
       setTotalContacts(totalContact.data.contacts.length);
       const totalUser = await allUsers();
       setTotalUsers(totalUser.data.length);
+      
+      const ordersRes = await getAllOrders();
+      const ordersList = ordersRes.data.orders || [];
+      setTotalOrders(ordersList.length);
+      
+      const revenue = ordersList.reduce((acc, order) => acc + (order.totalAmount || 0), 0);
+      setTotalRevenue(revenue);
     } catch (error) {
       console.log(error);
     }
@@ -40,17 +50,17 @@ const AdminDashboard = () => {
     },
     {
       title: "Total Users",
-      value: (totalUsers-1),
+      value: totalUsers > 0 ? totalUsers - 1 : 0,
       icon: <Users size={28} />,
     },
     {
       title: "Total Orders",
-      value: 0,
+      value: totalOrders,
       icon: <ShoppingCart size={28} />,
     },
     {
       title: "Revenue",
-      value: "₹0.00",
+      value: `₹${totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
       icon: <IndianRupee size={28} />,
     },
     {
