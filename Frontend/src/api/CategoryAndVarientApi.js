@@ -1,63 +1,41 @@
-import axios from "axios";
+import api from "./api";
 
 // CATEGORY APIs
 
 export const addCategory = async (data) => {
-  return await axios.post(
-    "http://localhost:3000/add-category",
-    data
-  );
+  return await api.post("/add-category", data);
 };
 
 export const getCategories = async () => {
-  return await axios.get(
-    "http://localhost:3000/get-categories"
-  );
+  return await api.get("/get-categories");
 };
 
 export const updateCategory = async (id, data) => {
-  return await axios.put(
-    `http://localhost:3000/update-category/${id}`,
-    data
-  );
+  return await api.put(`/update-category/${id}`, data);
 };
 
 export const deleteCategory = async (id) => {
-  return await axios.delete(
-    `http://localhost:3000/delete-category/${id}`
-  );
+  return await api.delete(`/delete-category/${id}`);
 };
 
 // VARIANT APIs
 
 export const addVariant = async (data) => {
-  return await axios.post(
-    "http://localhost:3000/add-variant",
-    data
-  );
+  return await api.post("/add-variant", data);
 };
 
 export const getVariants = async () => {
-  return await axios.get(
-    "http://localhost:3000/get-variants"
-  );
+  return await api.get("/get-variants");
 };
 
 export const getVariantsByCategory = async (categoryId) => {
-  return await axios.get(
-    `http://localhost:3000/get-variants/${categoryId}`
-  );
+  return await api.get(`/get-variants/${categoryId}`);
 };
 
 export const updateVariant = async (id, data) => {
-  return await axios.put(
-    `http://localhost:3000/update-variant/${id}`,
-    data
-  );
+  return await api.put(`/update-variant/${id}`, data);
 };
 
 export const deleteVariant = async (id) => {
-  return await axios.delete(
-    `http://localhost:3000/delete-variant/${id}`
-  );
+  return await api.delete(`/delete-variant/${id}`);
 };

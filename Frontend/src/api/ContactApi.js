@@ -1,9 +1,9 @@
-import axios from "axios";
+import api from "./api";
 
 export const getContact = () => {
-  return axios.get("http://localhost:3000/get-contactdetails");
+  return api.get("/get-contactdetails");
 };
 
 export const postContact = (data) => {
-  return axios.post("http://localhost:3000/post-contactdetails", data);
+  return api.post("/post-contactdetails", data);
 };

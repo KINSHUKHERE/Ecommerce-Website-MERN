@@ -1,32 +1,21 @@
-import axios from "axios";
+import api from "./api";
 
 export const sentToCart = async (data) => {
-  return await axios.post(
-    "http://localhost:3000/add-items-cart",
-    data
-  );
+  return await api.post("/add-items-cart", data);
 };
 
 export const getDataCart = async (userId) => {
-  return await axios.get(
-    `http://localhost:3000/get-items-cart/${userId}`
-  );
+  return await api.get(`/get-items-cart/${userId}`);
 };
 
 export const increaseCart = async (cartId) => {
-  return await axios.put(
-    `http://localhost:3000/increase-cart/${cartId}`
-  );
+  return await api.put(`/increase-cart/${cartId}`);
 };
 
 export const decreaseCart = async (cartId) => {
-  return await axios.put(
-    `http://localhost:3000/decrease-cart/${cartId}`
-  );
+  return await api.put(`/decrease-cart/${cartId}`);
 };
 
 export const deleteCart = async (cartId) => {
-  return await axios.delete(
-    `http://localhost:3000/delete-cart/${cartId}`
-  );
+  return await api.delete(`/delete-cart/${cartId}`);
 };
