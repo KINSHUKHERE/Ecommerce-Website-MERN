@@ -13,8 +13,11 @@ const app = express();
 
 const allowedOrigins = [
   "https://ecommerce-website-mern-1-luv9.onrender.com",
+  "https://ecommerce-website-mern-1-luv9.onrender.com/",
   "http://localhost:5173",
-  "http://localhost:3000"
+  "http://localhost:5173/",
+  "http://localhost:3000",
+  "http://localhost:3000/"
 ];
 
 app.use(
