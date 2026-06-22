@@ -7,6 +7,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const variantRoutes = require("./routes/variantRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const contactRoutes = require("./routes/contactRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 const app = express();
 
@@ -19,5 +20,6 @@ app.use("/", categoryRoutes);
 app.use("/", variantRoutes);
 app.use("/", cartRoutes);
 app.use("/", contactRoutes);
+app.use("/", orderRoutes);
 
 module.exports = app;
