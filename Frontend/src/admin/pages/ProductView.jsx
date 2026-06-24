@@ -59,6 +59,12 @@ const ProductView = () => {
     fetchProductDetails();
   }, [productId]);
 
+  useEffect(() => {
+    if (product) {
+      document.title = `VELTIQ | Admin - View ${product.Title || "Product"}`;
+    }
+  }, [product]);
+
   const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);

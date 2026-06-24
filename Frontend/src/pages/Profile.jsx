@@ -143,14 +143,6 @@ const Profile = () => {
       setPassword("");
       setConfirmPassword("");
 
-      setTimeout(() => {
-        if (updatedUser.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
-      }, 1500);
-
     } catch (err) {
       console.error(err);
       showToast(err.response?.data?.msg || "Failed to update profile", "error");

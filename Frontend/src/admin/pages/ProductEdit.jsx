@@ -82,6 +82,12 @@ const ProductEdit = () => {
     loadData();
   }, [productId, navigate]);
 
+  useEffect(() => {
+    if (formData.heading) {
+      document.title = `VELTIQ | Admin - Edit ${formData.heading}`;
+    }
+  }, [formData.heading]);
+
   const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);

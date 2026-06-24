@@ -25,6 +25,12 @@ const ProductDetails = () => {
 
   const { productId } = useParams();
 
+  useEffect(() => {
+    if (product) {
+      document.title = `VELTIQ | ${product.Title || "Product Details"}`;
+    }
+  }, [product]);
+
   // Agar productId wrong ho ya product na mile
   if (!product) {
     return (
