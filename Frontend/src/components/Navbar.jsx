@@ -131,7 +131,7 @@ const Navbar = () => {
               >
                 <ShoppingCart size={22} />
                 {cartCount > 0 && (
-                  <span className="absolute top-0 right-0 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+                  <span className="absolute top-0 right-0 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
                     {cartCount}
                   </span>
                 )}
@@ -145,7 +145,7 @@ const Navbar = () => {
                 <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
                   {currentUser.name.charAt(0)}
                 </div>
-                <span className="font-medium text-gray-700 text-sm hidden lg:block max-w-[120px] truncate">
+                <span className="font-medium text-gray-700 text-sm hidden lg:block max-w-30 truncate">
                   {currentUser.name}
                 </span>
               </Link>
@@ -170,7 +170,7 @@ const Navbar = () => {
             >
               <ShoppingCart size={24} />
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-[18px] h-[18px] rounded-full flex items-center justify-center font-bold">
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold">
                   {cartCount}
                 </span>
               )}
@@ -189,7 +189,7 @@ const Navbar = () => {
       {/* Mobile Menu Drawer */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ${
-          isOpen ? "max-h-[500px] border-t bg-gray-50" : "max-h-0"
+          isOpen ? "max-h-125 border-t bg-gray-50" : "max-h-0"
         }`}
       >
         <ul className="px-6 py-5 flex flex-col gap-4 font-medium text-gray-700">
