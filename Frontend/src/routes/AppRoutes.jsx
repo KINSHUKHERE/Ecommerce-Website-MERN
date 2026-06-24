@@ -27,6 +27,10 @@ import Navbar from "../components/Navbar";
 
 // Customer Layout Wrapper
 const UserLayout = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user && user.role === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
   return (
     <>
       <Navbar />

@@ -75,13 +75,8 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       const res = await getProduct();
-      console.log("Backend se aaya full response:", res.data); // Ye check karein
+      setProducts(res.data.data || []); 
       
-      // YAHAN Galti hai! res.data.data use karein:
-      const productsFromApi = res.data?.data || []; 
-      setProducts(productsFromApi); 
-      
-      console.log("Ab state mein set hua:", productsFromApi);
     } catch (err) {
       console.error("fetchProducts error:", err);
     }
@@ -107,10 +102,7 @@ const Products = () => {
     }
   };
 
-  console.log("Current products state:", products);
-
   const filteredProducts = useMemo(() => {
-    console.log("Evaluating filteredProducts. Original list:", products);
     return products.filter((item) => {
       // Safe checks to avoid undefined.toLowerCase() or undefined.includes() exceptions
       const itemHeading = item.heading || "";

@@ -46,7 +46,6 @@ const Navbar = () => {
     };
   }, [location.pathname]);
 
-  const isAdmin = currentUser?.role === "admin";
   const isAuthPage =
     location.pathname === "/register" || location.pathname === "/login";
   const isActive = (path) => location.pathname === path;
@@ -71,7 +70,7 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md">
       <div className="mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link className="flex items-center gap-3" to={isAdmin ? "/admin" : "/"}>
+        <Link className="flex items-center gap-3" to="/">
           <img src={logo} alt="Shopora" className="h-12 w-12 object-contain" />
           <div className="flex flex-col leading-none">
             <span className="text-xl font-bold text-[#15877F]">Shopora</span>
@@ -82,83 +81,28 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Menu */}
-        {!isAdmin ? (
-          <ul className="hidden md:flex items-center gap-8 font-medium">
-            <li>
-              <Link className={navLink("/")} to="/">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link className={navLink("/products")} to="/products">
-                Products
-              </Link>
-            </li>
-            <li>
-              <Link className={navLink("/about")} to="/about">
-                About
-              </Link>
-            </li>
-            <li>
-              <Link className={navLink("/contact")} to="/contact">
-                Contact
-              </Link>
-            </li>
-          </ul>
-        ) : (
-          <ul className="hidden md:flex items-center gap-8 font-medium">
-            <li>
-              <Link className={navLink("/admin")} to="/admin">
-                Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link className={navLink("/products")} to="/products">
-                Products
-              </Link>
-            </li>
-            {/* Admin Management Dropdown */}
-            <li className="relative group py-2">
-              <button className="flex items-center gap-1 transition-colors duration-300 text-gray-700 hover:text-[#15877F] cursor-pointer font-medium outline-none focus:outline-none">
-                Admin Panel
-                <ChevronDown size={16} className="transition-transform duration-200 group-hover:rotate-180" />
-              </button>
-
-              <div className="absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden group-hover:block transition-all duration-300 z-50">
-                <Link
-                  to="/create-product"
-                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-colors outline-none focus:outline-none"
-                >
-                  Create Product
-                </Link>
-                <Link
-                  to="/categories"
-                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-colors outline-none focus:outline-none"
-                >
-                  Categories
-                </Link>
-                <Link
-                  to="/variants"
-                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-colors outline-none focus:outline-none"
-                >
-                  Variants
-                </Link>
-                <Link
-                  to="/contact-details"
-                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-colors outline-none focus:outline-none"
-                >
-                  Contact Details
-                </Link>
-                <Link
-                  to="/order-details"
-                  className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#15877F] transition-colors outline-none focus:outline-none"
-                >
-                  Order Details
-                </Link>
-              </div>
-            </li>
-          </ul>
-        )}
+        <ul className="hidden md:flex items-center gap-8 font-medium">
+          <li>
+            <Link className={navLink("/")} to="/">
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link className={navLink("/products")} to="/products">
+              Products
+            </Link>
+          </li>
+          <li>
+            <Link className={navLink("/about")} to="/about">
+              About
+            </Link>
+          </li>
+          <li>
+            <Link className={navLink("/contact")} to="/contact">
+              Contact
+            </Link>
+          </li>
+        </ul>
 
         {/* Right Side */}
         <div className="hidden md:flex items-center gap-5">
@@ -179,19 +123,17 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              {!isAdmin && (
-                <Link
-                  to="/cart"
-                  className="relative transition-[color,transform] duration-300 hover:text-[#15877F] p-2 hover:scale-105 outline-none focus:outline-none"
-                >
-                  <ShoppingCart size={22} />
-                  {cartCount > 0 && (
-                    <span className="absolute top-0 right-0 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
-                      {cartCount}
-                    </span>
-                  )}
-                </Link>
-              )}
+              <Link
+                to="/cart"
+                className="relative transition-[color,transform] duration-300 hover:text-[#15877F] p-2 hover:scale-105 outline-none focus:outline-none"
+              >
+                <ShoppingCart size={22} />
+                {cartCount > 0 && (
+                  <span className="absolute top-0 right-0 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
 
               {/* User Profile Avatar details */}
               <Link
@@ -219,7 +161,7 @@ const Navbar = () => {
 
         {/* Mobile Menu Action Row */}
         <div className="flex items-center gap-4 md:hidden">
-          {!isAdmin && currentUser && (
+          {currentUser && (
             <Link
               to="/cart"
               className="relative p-2 transition-colors duration-300 hover:text-[#15877F] outline-none focus:outline-none"
@@ -249,112 +191,42 @@ const Navbar = () => {
         }`}
       >
         <ul className="px-6 py-5 flex flex-col gap-4 font-medium text-gray-700">
-          {!isAdmin ? (
-            <>
-              <li>
-                <Link
-                  to="/"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/products"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/products") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Products
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/about"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/about") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/contact"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/contact") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Contact
-                </Link>
-              </li>
-            </>
-          ) : (
-            <>
-              <li>
-                <Link
-                  to="/admin"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/admin") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/products"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/products") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Products
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/create-product"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/create-product") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Create Product
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/categories"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/categories") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Categories
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/variants"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/variants") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Variants
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/contact-details"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/contact-details") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Contact Details
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/order-details"
-                  className={`block py-1 hover:text-[#15877F] ${isActive("/order-details") ? "text-[#15877F]" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Order Details
-                </Link>
-              </li>
-            </>
-          )}
+          <li>
+            <Link
+              to="/"
+              className={`block py-1 hover:text-[#15877F] ${isActive("/") ? "text-[#15877F]" : ""}`}
+              onClick={() => setIsOpen(false)}
+            >
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/products"
+              className={`block py-1 hover:text-[#15877F] ${isActive("/products") ? "text-[#15877F]" : ""}`}
+              onClick={() => setIsOpen(false)}
+            >
+              Products
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/about"
+              className={`block py-1 hover:text-[#15877F] ${isActive("/about") ? "text-[#15877F]" : ""}`}
+              onClick={() => setIsOpen(false)}
+            >
+              About
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/contact"
+              className={`block py-1 hover:text-[#15877F] ${isActive("/contact") ? "text-[#15877F]" : ""}`}
+              onClick={() => setIsOpen(false)}
+            >
+              Contact
+            </Link>
+          </li>
 
           <hr className="border-gray-200 my-2" />
 
