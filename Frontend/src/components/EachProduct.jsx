@@ -1,13 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { deleteProduct, updateProduct } from "../api/ProductApi";
 import { sentToCart } from "../api/CartApi";
 
-const EachProduct = ({ data, onRefresh }) => {
+const EachProduct = ({ data }) => {
   const navigate = useNavigate();
   
   const user = JSON.parse(localStorage.getItem("user"));
-  const isAdmin = user?.role === "admin";
   const isOutOfStock = (data.quantity ?? 10) <= 0 || data.sold;
 
   const productClicked = () => {
@@ -37,43 +35,6 @@ const EachProduct = ({ data, onRefresh }) => {
     } catch (err) {
       console.log("Unable to add product to cart", err);
     }
-  };
-
-  const handleUpdateStock = async (e, newQty) => {
-    e.stopPropagation();
-    try {
-      await updateProduct(data._id, { quantity: newQty, sold: newQty === 0 });
-      if (onRefresh) onRefresh();
-    } catch (err) {
-      console.log("Error updating stock quantity:", err);
-    }
-  };
-
-  const handleToggleSold = async (e) => {
-    e.stopPropagation();
-    try {
-      await updateProduct(data._id, { sold: !data.sold });
-      if (onRefresh) onRefresh();
-    } catch (err) {
-      console.log("Error toggling sold status:", err);
-    }
-  };
-
-  const handleDelete = async (e) => {
-    e.stopPropagation();
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      try {
-        await deleteProduct(data._id);
-        if (onRefresh) onRefresh();
-      } catch (err) {
-        console.log("Error deleting product:", err);
-      }
-    }
-  };
-
-  const handleEditDetails = (e) => {
-    e.stopPropagation();
-    navigate(`/edit-product/${data._id}`);
   };
 
   return (
@@ -164,60 +125,6 @@ const EachProduct = ({ data, onRefresh }) => {
             </svg>
           </button>
         </div>
-
-        {/* Admin Actions Bar */}
-        {isAdmin && (
-          <div className="border-t border-gray-150 pt-2.5 mt-2.5 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-[10px] font-bold text-gray-500">Edit Qty:</span>
-              <div className="flex items-center border border-gray-300 rounded bg-white">
-                <button
-                  onClick={(e) => handleUpdateStock(e, (data.quantity ?? 10) - 1)}
-                  disabled={(data.quantity ?? 10) <= 0}
-                  className="px-2 py-0.5 text-xs text-gray-600 font-bold hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  -
-                </button>
-                <span className="px-2.5 text-xs font-semibold text-gray-800 border-x border-gray-200 min-w-[20px] text-center">
-                  {data.quantity ?? 10}
-                </span>
-                <button
-                  onClick={(e) => handleUpdateStock(e, (data.quantity ?? 10) + 1)}
-                  className="px-2 py-0.5 text-xs text-gray-600 font-bold hover:bg-gray-100 cursor-pointer"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={handleToggleSold}
-                className={`flex-1 py-1.5 px-2 rounded text-[11px] font-bold transition-all cursor-pointer ${
-                  data.sold
-                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                    : "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                }`}
-              >
-                {data.sold ? "In Stock" : "Mark Sold"}
-              </button>
-              
-              <button
-                onClick={handleEditDetails}
-                className="py-1.5 px-2.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded text-[11px] font-bold flex items-center justify-center cursor-pointer"
-              >
-                Edit
-              </button>
-              
-              <button
-                onClick={handleDelete}
-                className="py-1.5 px-2.5 bg-red-100 text-red-700 hover:bg-red-200 rounded text-[11px] font-bold flex items-center justify-center cursor-pointer"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

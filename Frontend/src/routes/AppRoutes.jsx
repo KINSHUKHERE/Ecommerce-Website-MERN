@@ -13,7 +13,6 @@ import ContactDetails from "../pages/admin/ContactDetails";
 import OrderDetails from "../pages/admin/OrderDetails";
 import CategoryManagement from "../pages/admin/CategoryManagement";
 import VariantManagement from "../pages/admin/VariantManagement";
-import EditProduct from "../pages/admin/EditProduct";
 import Profile from "../pages/Profile";
 import Checkout from "../pages/Checkout";
 
@@ -98,7 +97,6 @@ const AppRoutes = () => {
         <Route path="/admin/products/:productId" element={<ProductView />} />
         <Route path="/admin/products/edit/:productId" element={<ProductEdit />} />
         <Route path="/create-product" element={<AdminRoute><CreateProduct /></AdminRoute>} />
-        <Route path="/edit-product/:productId" element={<AdminRoute><EditProduct /></AdminRoute>} />
         <Route path="/contact-details" element={<AdminRoute><ContactDetails /></AdminRoute>} />
         <Route path="/order-details" element={<AdminRoute><OrderDetails /></AdminRoute>} />
         <Route path="/categories" element={<AdminRoute><CategoryManagement /></AdminRoute>} />
