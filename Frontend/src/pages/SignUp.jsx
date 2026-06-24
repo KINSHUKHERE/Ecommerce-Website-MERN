@@ -15,7 +15,7 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setError("")
+    setError("");
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -47,7 +47,7 @@ const SignUp = () => {
           Create Account
         </h1>
 
-        <p className="text-center text-gray-500 mb-6">Join Shopora today</p>
+        <p className="text-center text-gray-500 mb-6">Join Veltiq today</p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Name */}

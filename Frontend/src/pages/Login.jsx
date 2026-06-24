@@ -34,7 +34,9 @@ const Login = () => {
         navigate("/");
       }
     } catch (err) {
-      setError(err.response?.data?.msg || "Unable to Login. Please try again later.");
+      setError(
+        err.response?.data?.msg || "Unable to Login. Please try again later.",
+      );
       console.log("Unable to Login!!");
     }
   };
@@ -53,7 +55,7 @@ const Login = () => {
           </div>
         )}
         <p className="text-center text-gray-500 mb-6">
-          Login to your Shopora account
+          Login to your Veltiq account
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">

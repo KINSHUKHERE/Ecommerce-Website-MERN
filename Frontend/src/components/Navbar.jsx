@@ -69,16 +69,17 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md">
-      <div className="mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link className="flex items-center gap-3" to="/">
-          <img src={logo} alt="Shopora" className="h-12 w-12 object-contain" />
+      <div className="mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-6">
+        <Link className="flex items-center gap-1" to="/">
+            <img src={logo} alt="Shopora" className="h-20 w-20 object-contain" />
           <div className="flex flex-col leading-none">
-            <span className="text-xl font-bold text-[#15877F]">Shopora</span>
+            <span className="text-xl font-bold text-[#15877F]">VELTIQ</span>
             <span className="text-xs tracking-wider text-gray-500">
-              SHOP SMART
+              POWERING SMART LIFE
             </span>
           </div>
         </Link>
+
 
         {/* Desktop Menu */}
         <ul className="hidden md:flex items-center gap-8 font-medium">
@@ -257,7 +258,9 @@ const Navbar = () => {
                 <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase">
                   {currentUser.name.charAt(0)}
                 </div>
-                <span className="font-medium text-gray-700 text-sm">{currentUser.name}</span>
+                <span className="font-medium text-gray-700 text-sm">
+                  {currentUser.name}
+                </span>
               </Link>
               <button
                 onClick={handleLogout}

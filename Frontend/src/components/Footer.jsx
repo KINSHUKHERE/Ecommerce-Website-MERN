@@ -1,9 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import logo from "../assets/logo.png";
 import paymentGatewaysImg from "../assets/pngegg.png";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Footer = () => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    const userObj = JSON.parse(localStorage.getItem("user"));
+    setCurrentUser(userObj);
+  }, [location.pathname]);
+
   return (
     <footer className="bg-[#f8f9fa] border-t border-gray-200">
       <div className="m-2 mx-auto px-6 md:px-10 py-12 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-4  text-gray-700">
@@ -18,9 +26,7 @@ const Footer = () => {
               />
 
               <div className="flex flex-col leading-none">
-                <span className="text-xl font-bold text-[#15877F]">
-                  Shopora
-                </span>
+                <span className="text-xl font-bold text-[#15877F]">Shopora</span>
                 <span className="text-xs tracking-wider text-gray-500">
                   SHOP SMART
                 </span>
@@ -97,10 +103,10 @@ const Footer = () => {
           <Link to="/" className="hover:underline">
             Delivery Information
           </Link>
-          <Link to="/" className="hover:underline">
+          <Link to="/privacy-policy" className="hover:underline">
             Privacy Policy
           </Link>
-          <Link to="/" className="hover:underline">
+          <Link to="/terms-conditions" className="hover:underline">
             Terms & Conditions
           </Link>
           <Link to="/contact" className="hover:underline">
@@ -111,21 +117,23 @@ const Footer = () => {
         {/* My Account Section */}
         <div className="flex flex-col gap-2 text-sm">
           <h2 className="text-base font-bold text-black mb-1">My Account</h2>
-          <a href="" className="hover:underline">
-            Sign In
-          </a>
-          <a href="" className="hover:underline">
+          {!currentUser && (
+            <Link to="/login" className="hover:underline">
+              Sign In
+            </Link>
+          )}
+          <Link to="/cart" className="hover:underline">
             View Cart
-          </a>
-          <a href="" className="hover:underline">
+          </Link>
+          <Link to="/" className="hover:underline">
             My Wishlist
-          </a>
-          <a href="" className="hover:underline">
+          </Link>
+          <Link to="/profile" className="hover:underline">
             Track My Order
-          </a>
-          <a href="" className="hover:underline">
+          </Link>
+          <Link to="/contact" className="hover:underline">
             Help
-          </a>
+          </Link>
         </div>
 
         {/* Install App Section */}

@@ -9,7 +9,10 @@ const AdminLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const user = JSON.parse(localStorage.getItem("user")) || { name: "Prachi Jain", role: "admin" };
+  const user = JSON.parse(localStorage.getItem("user")) || {
+    name: "Prachi Jain",
+    role: "admin",
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -44,7 +47,7 @@ const AdminLayout = ({ children }) => {
                 S
               </div>
               <span className="font-bold text-gray-900 text-sm leading-none">
-                Shopora
+                Veltiq
               </span>
             </div>
           </div>
@@ -79,8 +82,12 @@ const AdminLayout = ({ children }) => {
                   />
                   <div className="absolute right-0 mt-1.5 w-48 bg-white border border-gray-150 rounded-xl shadow-lg py-1.5 z-20 animate-slideDown">
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-xs text-gray-400 font-bold uppercase">Account</p>
-                      <p className="text-sm font-semibold text-gray-800 mt-0.5 truncate">{user?.email || "admin@shopora.com"}</p>
+                      <p className="text-xs text-gray-400 font-bold uppercase">
+                        Account
+                      </p>
+                      <p className="text-sm font-semibold text-gray-800 mt-0.5 truncate">
+                        {user?.email || "admin@Veltiq.com"}
+                      </p>
                     </div>
                     <Link
                       to="/admin"

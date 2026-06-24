@@ -9,7 +9,7 @@ import {
   DollarSign,
   User,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
 } from "lucide-react";
 
 const OrderDetails = () => {
@@ -48,12 +48,14 @@ const OrderDetails = () => {
     try {
       const res = await updateOrderStatus(orderId, newStatus);
       showToast(`Order status updated to ${newStatus}`, "success");
-      
+
       // Update state dynamically
       setOrders(
         orders.map((order) =>
-          order._id === orderId ? { ...order, orderStatus: res.data.order.orderStatus } : order
-        )
+          order._id === orderId
+            ? { ...order, orderStatus: res.data.order.orderStatus }
+            : order,
+        ),
       );
     } catch (err) {
       console.error("Failed to update status", err);
@@ -101,20 +103,28 @@ const OrderDetails = () => {
               Order Management
             </h1>
             <p className="text-[13px] font-normal text-gray-500 mt-1 leading-relaxed">
-              Track customer checkouts, transaction IDs, payment validations, and update shipping lifecycle.
+              Track customer checkouts, transaction IDs, payment validations,
+              and update shipping lifecycle.
             </p>
           </div>
 
           {/* Stats summary boxes */}
           <div className="flex gap-4">
             <div className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-center">
-              <span className="text-[10px] text-gray-400 font-bold block uppercase">Total Volume</span>
+              <span className="text-[10px] text-gray-400 font-bold block uppercase">
+                Total Volume
+              </span>
               <span className="text-sm font-extrabold text-[#088178]">
-                ₹{orders.reduce((sum, o) => sum + o.totalAmount, 0).toLocaleString()}
+                ₹
+                {orders
+                  .reduce((sum, o) => sum + o.totalAmount, 0)
+                  .toLocaleString()}
               </span>
             </div>
             <div className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-center">
-              <span className="text-[10px] text-gray-400 font-bold block uppercase">Orders Placed</span>
+              <span className="text-[10px] text-gray-400 font-bold block uppercase">
+                Orders Placed
+              </span>
               <span className="text-sm font-extrabold text-slate-700">
                 {orders.length}
               </span>
@@ -124,10 +134,17 @@ const OrderDetails = () => {
 
         {orders.length === 0 ? (
           <div className="text-center py-16">
-            <ShoppingBag size={48} className="text-gray-300 mx-auto mb-4" strokeWidth={1.5} />
-            <h2 className="text-base font-bold text-gray-600">No Orders Found</h2>
+            <ShoppingBag
+              size={48}
+              className="text-gray-300 mx-auto mb-4"
+              strokeWidth={1.5}
+            />
+            <h2 className="text-base font-bold text-gray-600">
+              No Orders Found
+            </h2>
             <p className="text-xs text-gray-400 mt-1">
-              Customer checkouts recorded on the gateway will appear here dynamically.
+              Customer checkouts recorded on the gateway will appear here
+              dynamically.
             </p>
           </div>
         ) : (
@@ -137,7 +154,9 @@ const OrderDetails = () => {
                 <tr className="bg-slate-50 border-b border-slate-150 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                   <th className="p-4 text-left font-bold">Order / Date</th>
                   <th className="p-4 text-left font-bold">Customer Details</th>
-                  <th className="p-4 text-left font-bold">Products Purchased</th>
+                  <th className="p-4 text-left font-bold">
+                    Products Purchased
+                  </th>
                   <th className="p-4 text-left font-bold">Payment Metadata</th>
                   <th className="p-4 text-left font-bold">Order Status</th>
                   <th className="p-4 text-right font-bold">Total Price</th>
@@ -158,11 +177,14 @@ const OrderDetails = () => {
                         </span>
                         <span className="text-[10px] text-gray-400 font-semibold flex items-center gap-1">
                           <Calendar size={11} />
-                          {new Date(order.createdAt).toLocaleDateString("en-IN", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric"
-                          })}
+                          {new Date(order.createdAt).toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )}
                         </span>
                       </div>
                     </td>
@@ -174,7 +196,7 @@ const OrderDetails = () => {
                           {order.userId?.name || "Guest Account"}
                         </span>
                         <span className="text-[11px] text-gray-400 font-semibold truncate">
-                          {order.userId?.email || "no-email@shopora.com"}
+                          {order.userId?.email || "no-email@Veltiq.com"}
                         </span>
                       </div>
                     </td>
@@ -183,7 +205,10 @@ const OrderDetails = () => {
                     <td className="p-4">
                       <div className="space-y-1 max-w-[200px]">
                         {order.items.map((item, idx) => (
-                          <div key={idx} className="flex justify-between items-center text-[11px] text-slate-600">
+                          <div
+                            key={idx}
+                            className="flex justify-between items-center text-[11px] text-slate-600"
+                          >
                             <span className="truncate pr-2">{item.name}</span>
                             <span className="text-[10px] text-gray-400 font-bold bg-slate-100 px-1.5 py-0.2 rounded-md">
                               x{item.quantity}
@@ -215,21 +240,43 @@ const OrderDetails = () => {
                     <td className="p-4">
                       <select
                         value={order.orderStatus}
-                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                        onChange={(e) =>
+                          handleStatusChange(order._id, e.target.value)
+                        }
                         className={`px-3 py-1 rounded-full text-xs font-bold border outline-none cursor-pointer focus:ring-4 focus:ring-[#088178]/5 transition-all ${
                           order.orderStatus === "Delivered"
                             ? "bg-green-50 text-green-700 border-green-150"
                             : order.orderStatus === "Shipped"
-                            ? "bg-blue-50 text-blue-700 border-blue-150"
-                            : order.orderStatus === "Cancelled"
-                            ? "bg-red-50 text-red-700 border-red-150"
-                            : "bg-yellow-50 text-yellow-700 border-yellow-150"
+                              ? "bg-blue-50 text-blue-700 border-blue-150"
+                              : order.orderStatus === "Cancelled"
+                                ? "bg-red-50 text-red-700 border-red-150"
+                                : "bg-yellow-50 text-yellow-700 border-yellow-150"
                         }`}
                       >
-                        <option value="Processing" className="bg-white text-slate-800">Processing</option>
-                        <option value="Shipped" className="bg-white text-slate-800">Shipped</option>
-                        <option value="Delivered" className="bg-white text-slate-800">Delivered</option>
-                        <option value="Cancelled" className="bg-white text-slate-800">Cancelled</option>
+                        <option
+                          value="Processing"
+                          className="bg-white text-slate-800"
+                        >
+                          Processing
+                        </option>
+                        <option
+                          value="Shipped"
+                          className="bg-white text-slate-800"
+                        >
+                          Shipped
+                        </option>
+                        <option
+                          value="Delivered"
+                          className="bg-white text-slate-800"
+                        >
+                          Delivered
+                        </option>
+                        <option
+                          value="Cancelled"
+                          className="bg-white text-slate-800"
+                        >
+                          Cancelled
+                        </option>
                       </select>
                     </td>
 

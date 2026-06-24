@@ -12,14 +12,15 @@ import {
   ChevronRight,
   PlusCircle,
   List,
-  X
+  X,
 } from "lucide-react";
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [productsMenuOpen, setProductsMenuOpen] = useState(
-    location.pathname.startsWith("/admin/products") || location.pathname === "/create-product"
+    location.pathname.startsWith("/admin/products") ||
+      location.pathname === "/create-product",
   );
 
   const handleLogout = () => {
@@ -39,7 +40,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
     {
       title: "Dashboard",
       path: "/admin",
-      icon: <LayoutDashboard size={18} />
+      icon: <LayoutDashboard size={18} />,
     },
     {
       title: "Products",
@@ -48,35 +49,35 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         {
           title: "All Products",
           path: "/admin/products",
-          icon: <List size={16} />
+          icon: <List size={16} />,
         },
         {
           title: "Create Product",
           path: "/create-product",
-          icon: <PlusCircle size={16} />
-        }
-      ]
+          icon: <PlusCircle size={16} />,
+        },
+      ],
     },
     {
       title: "Categories",
       path: "/categories",
-      icon: <Tag size={18} />
+      icon: <Tag size={18} />,
     },
     {
       title: "Variants (Brands)",
       path: "/variants",
-      icon: <Layers size={18} />
+      icon: <Layers size={18} />,
     },
     {
       title: "Orders",
       path: "/order-details",
-      icon: <FileText size={18} />
+      icon: <FileText size={18} />,
     },
     {
       title: "Contact Queries",
       path: "/contact-details",
-      icon: <MessageSquare size={18} />
-    }
+      icon: <MessageSquare size={18} />,
+    },
   ];
 
   return (
@@ -97,13 +98,17 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       >
         {/* Header / Logo */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-          <Link to="/admin" className="flex items-center gap-2.5" onClick={() => setIsOpen(false)}>
+          <Link
+            to="/admin"
+            className="flex items-center gap-2.5"
+            onClick={() => setIsOpen(false)}
+          >
             <div className="w-8 h-8 rounded-lg bg-[#088178] flex items-center justify-center text-white font-extrabold text-lg shadow-sm">
               S
             </div>
             <div className="text-left">
               <span className="block font-bold text-gray-900 text-base leading-none">
-                Shopora
+                Veltiq
               </span>
               <span className="text-[10px] text-gray-400 font-semibold tracking-wider uppercase">
                 Shop Smart
@@ -136,7 +141,11 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                       {item.icon}
                       <span>{item.title}</span>
                     </div>
-                    {productsMenuOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                    {productsMenuOpen ? (
+                      <ChevronDown size={14} />
+                    ) : (
+                      <ChevronRight size={14} />
+                    )}
                   </button>
                   {productsMenuOpen && (
                     <div className="pl-6 pr-2 py-1 space-y-1">

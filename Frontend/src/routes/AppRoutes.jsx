@@ -15,6 +15,8 @@ import CategoryManagement from "../pages/admin/CategoryManagement";
 import VariantManagement from "../pages/admin/VariantManagement";
 import Profile from "../pages/Profile";
 import Checkout from "../pages/Checkout";
+import TermsConditions from "../pages/TermsConditions";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
 
 // Import Admin Layout & New Pages
 import AdminLayout from "../admin/components/AdminLayout";
@@ -79,6 +81,8 @@ const AppRoutes = () => {
         <Route path="/products/:productId" element={<ProductDetails />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/terms-conditions" element={<TermsConditions />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
         {/* Guest-only Routes */}
         <Route path="/login" element={<GuestRoute><LogIn /></GuestRoute>} />
