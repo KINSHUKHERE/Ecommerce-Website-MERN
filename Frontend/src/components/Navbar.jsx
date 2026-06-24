@@ -71,7 +71,7 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md">
       <div className="mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-6">
         <Link className="flex items-center gap-1" to="/">
-            <img src={logo} alt="Shopora" className="h-20 w-20 object-contain" />
+            <img src={logo} alt="Veltiq" className="h-20 w-20 object-contain" />
           <div className="flex flex-col leading-none">
             <span className="text-xl font-bold text-[#15877F]">VELTIQ</span>
             <span className="text-xs tracking-wider text-gray-500">

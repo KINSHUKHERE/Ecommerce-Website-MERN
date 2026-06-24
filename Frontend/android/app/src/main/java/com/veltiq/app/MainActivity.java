@@ -1,4 +1,4 @@
-package com.shopera.app;
+package com.veltiq.app;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -1,6 +1,6 @@
-# Shopora - Modern MERN Stack E-Commerce Platform
+# Veltiq - Modern MERN Stack E-Commerce Platform
 
-Shopora is a premium, fully responsive e-commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The platform is architected with a strict separation between the client-facing store and a dedicated administrative dashboard.
+Veltiq is a premium, fully responsive e-commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The platform is architected with a strict separation between the client-facing store and a dedicated administrative dashboard.
 
 ---
 

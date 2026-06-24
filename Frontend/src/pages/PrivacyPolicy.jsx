@@ -33,7 +33,7 @@ const PrivacyPolicy = () => {
         {/* Policy Content */}
         <div className="space-y-6 text-gray-660 text-sm sm:text-base leading-relaxed text-justify">
           <p>
-            At <strong>Shopora</strong>, we prioritize the privacy and security of our users. This Privacy Policy details how we collect, store, utilize, and protect your personal information when you use our e-commerce platform.
+            At <strong>Veltiq</strong>, we prioritize the privacy and security of our users. This Privacy Policy details how we collect, store, utilize, and protect your personal information when you use our e-commerce platform.
           </p>
 
           <section className="space-y-3">
@@ -90,7 +90,7 @@ const PrivacyPolicy = () => {
           </section>
 
           <div className="pt-8 border-t border-gray-100 mt-8 text-center text-xs text-gray-400">
-            <p>For questions or concerns regarding this policy, contact our compliance team at privacy@shopora.com.</p>
+            <p>For questions or concerns regarding this policy, contact our compliance team at privacy@veltiq.com.</p>
             <p className="mt-1">Poornima University, Jaipur, Rajasthan, India</p>
           </div>
         </div>

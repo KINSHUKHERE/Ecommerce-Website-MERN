@@ -21,12 +21,12 @@ const Footer = () => {
             <Link to="/" className="flex items-center gap-3">
               <img
                 src={logo}
-                alt="Shopora"
+                alt="Veltiq"
                 className="h-12 w-12 object-contain"
               />
 
               <div className="flex flex-col leading-none">
-                <span className="text-xl font-bold text-[#15877F]">Shopora</span>
+                <span className="text-xl font-bold text-[#15877F]">Veltiq</span>
                 <span className="text-xs tracking-wider text-gray-500">
                   SHOP SMART
                 </span>
