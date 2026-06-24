@@ -7,11 +7,12 @@ const {
   decreaseCart,
   deleteCart,
 } = require("../controllers/cartController");
+const verifyUser = require("../middleware/verifyUser");
 
-router.post("/add-items-cart", addItemsToCart);
-router.get("/get-items-cart/:userId", getItemsCart);
-router.put("/increase-cart/:cartId", increaseCart);
-router.put("/decrease-cart/:cartId", decreaseCart);
-router.delete("/delete-cart/:cartId", deleteCart);
+router.post("/add-items-cart", verifyUser, addItemsToCart);
+router.get("/get-items-cart", verifyUser, getItemsCart);
+router.put("/increase-cart/:cartId", verifyUser, increaseCart);
+router.put("/decrease-cart/:cartId", verifyUser, decreaseCart);
+router.delete("/delete-cart/:cartId", verifyUser, deleteCart);
 
 module.exports = router;

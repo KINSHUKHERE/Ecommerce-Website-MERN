@@ -48,7 +48,7 @@ const Checkout = () => {
     }
 
     try {
-      const response = await getDataCart(localUser._id);
+      const response = await getDataCart();
       const formattedData = response.data.cartData.map((item) => ({
         id: item._id,
         productId: item.productId._id,

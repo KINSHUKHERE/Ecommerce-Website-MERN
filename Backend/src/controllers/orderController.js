@@ -4,15 +4,15 @@ const Cart = require("../models/cartDetails");
 const createOrder = async (req, res) => {
   try {
     const {
-      userId,
       items,
       totalAmount,
       shippingAddress,
       paymentMethod,
       transactionId,
     } = req.body;
+    const userId = req.user.userId;
 
-    if (!userId || !items || items.length === 0 || !totalAmount || !shippingAddress || !paymentMethod || !transactionId) {
+    if (!items || items.length === 0 || !totalAmount || !shippingAddress || !paymentMethod || !transactionId) {
       return res.status(400).json({
         msg: "Missing required fields for order creation",
       });
@@ -65,7 +65,7 @@ const getAllOrders = async (req, res) => {
 
 const getUserOrders = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.userId;
 
     const orders = await Order.find({ userId })
       .sort({ createdAt: -1 });

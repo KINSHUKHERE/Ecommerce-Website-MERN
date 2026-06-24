@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
@@ -20,6 +20,7 @@ const allowedOrigins = [
   "http://localhost:3000/"
 ];
 
+app.use(cookieParser());
 app.use(
   cors({
     origin: function (origin, callback) {

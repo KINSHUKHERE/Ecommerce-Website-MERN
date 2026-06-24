@@ -8,8 +8,8 @@ export const getAllOrders = async () => {
   return await api.get("/orders");
 };
 
-export const getUserOrders = async (userId) => {
-  return await api.get(`/orders/user/${userId}`);
+export const getUserOrders = async () => {
+  return await api.get("/orders/user");
 };
 
 export const updateOrderStatus = async (orderId, status) => {

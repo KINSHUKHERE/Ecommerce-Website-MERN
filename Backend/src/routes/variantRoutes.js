@@ -8,12 +8,14 @@ const {
   deleteVariant,
   toggleVariantStatus,
 } = require("../controllers/variantController");
+const verifyUser = require("../middleware/verifyUser");
+const verifyAdmin = require("../middleware/verifyAdmin");
 
-router.post("/add-variant", addVariant);
+router.post("/add-variant", verifyUser, verifyAdmin, addVariant);
 router.get("/get-variants", getVariants);
 router.get("/get-variants/:categoryId", getVariantsByCategory);
-router.put("/update-variant/:id", updateVariant);
-router.delete("/delete-variant/:id", deleteVariant);
-router.put("/toggle-variant-status/:id", toggleVariantStatus);
+router.put("/update-variant/:id", verifyUser, verifyAdmin, updateVariant);
+router.delete("/delete-variant/:id", verifyUser, verifyAdmin, deleteVariant);
+router.put("/toggle-variant-status/:id", verifyUser, verifyAdmin, toggleVariantStatus);
 
 module.exports = router;

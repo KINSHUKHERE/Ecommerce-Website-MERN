@@ -18,7 +18,7 @@ const Navbar = () => {
         return;
       }
 
-      const response = await getDataCart(userObj._id);
+      const response = await getDataCart();
       const totalItems = response.data.cartData.reduce(
         (sum, item) => sum + item.quantity,
         0,
@@ -59,6 +59,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setCurrentUser(null);
     setCartCount(0);
     setIsOpen(false);

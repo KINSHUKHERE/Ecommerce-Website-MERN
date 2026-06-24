@@ -11,10 +11,10 @@ export const allUsers = async () => {
   return await api.get("/all-users");
 };
 
-export const getUserProfile = async (id) => {
-  return await api.get(`/user-profile/${id}`);
+export const getUserProfile = async () => {
+  return await api.get("/user-profile");
 };
 
-export const updateProfile = async (id, data) => {
-  return await api.put(`/update-profile/${id}`, data);
+export const updateProfile = async (data) => {
+  return await api.put("/update-profile", data);
 };

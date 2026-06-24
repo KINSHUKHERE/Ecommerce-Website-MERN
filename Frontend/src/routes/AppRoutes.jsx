@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, Navigate, Outlet, useNavigate, useLocation } from "react-router-dom";
 import Home from "../pages/Home";
 import Products from "../pages/Products";
 import ProductDetails from "../pages/ProductDetails";
@@ -17,6 +18,7 @@ import Profile from "../pages/Profile";
 import Checkout from "../pages/Checkout";
 import TermsConditions from "../pages/TermsConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
+import { getUserProfile } from "../api/AuthApi";
 
 // Import Admin Layout & New Pages
 import AdminLayout from "../admin/components/AdminLayout";
@@ -71,6 +73,30 @@ const GuestRoute = ({ children }) => {
 };
 
 const AppRoutes = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const hasLocalUser = localStorage.getItem("user");
+      if (!hasLocalUser) return;
+
+      try {
+        const res = await getUserProfile();
+        localStorage.setItem("user", JSON.stringify(res.data));
+      } catch (err) {
+        localStorage.removeItem("user");
+        const protectedPaths = ["/cart", "/profile", "/checkout", "/admin", "/create-product", "/contact-details", "/order-details", "/categories", "/variants"];
+        const isProtected = protectedPaths.some(path => location.pathname.startsWith(path));
+        if (isProtected) {
+          navigate("/login", { replace: true });
+        }
+      }
+    };
+
+    checkAuth();
+  }, [navigate, location.pathname]);
+
   return (
     <Routes>
       {/* Customer / Public / Guest Routes wrapped in UserLayout */}

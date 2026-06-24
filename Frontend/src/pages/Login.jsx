@@ -25,8 +25,10 @@ const Login = () => {
     try {
       const response = await login(formData);
       const user = response.data.user;
+      const token = response.data.token;
 
       localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
 
       if (user.role === "admin") {
         navigate("/admin");
@@ -71,7 +73,7 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              autocomplete="email"
+              autoComplete="email"
               className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#15877F]"
             />
           </div>
@@ -86,7 +88,7 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              autocomplete="current-password"
+              autoComplete="current-password"
               className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#15877F]"
             />
           </div>

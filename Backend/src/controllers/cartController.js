@@ -2,7 +2,8 @@ const Cart = require("../models/cartDetails");
 
 const addItemsToCart = async (req, res) => {
   try {
-    const { userId, productId, quantity } = req.body;
+    const { productId, quantity } = req.body;
+    const userId = req.user.userId;
 
     const existingItem = await Cart.findOne({
       userId,
@@ -42,7 +43,7 @@ const addItemsToCart = async (req, res) => {
 
 const getItemsCart = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.userId;
     const cartData = await Cart.find({ userId: userId }).populate("productId");
     res.status(200).json({
       msg: "Got data from cart",
@@ -65,6 +66,12 @@ const increaseCart = async (req, res) => {
     if (!cartItem) {
       return res.status(404).json({
         msg: "Cart item not found",
+      });
+    }
+
+    if (cartItem.userId.toString() !== req.user.userId) {
+      return res.status(403).json({
+        msg: "Forbidden: You do not own this cart item",
       });
     }
 
@@ -96,6 +103,12 @@ const decreaseCart = async (req, res) => {
       });
     }
 
+    if (cartItem.userId.toString() !== req.user.userId) {
+      return res.status(403).json({
+        msg: "Forbidden: You do not own this cart item",
+      });
+    }
+
     if (cartItem.quantity > 1) {
       cartItem.quantity -= 1;
       await cartItem.save();
@@ -116,6 +129,20 @@ const decreaseCart = async (req, res) => {
 const deleteCart = async (req, res) => {
   try {
     const { cartId } = req.params;
+
+    const cartItem = await Cart.findById(cartId);
+
+    if (!cartItem) {
+      return res.status(404).json({
+        msg: "Cart item not found",
+      });
+    }
+
+    if (cartItem.userId.toString() !== req.user.userId) {
+      return res.status(403).json({
+        msg: "Forbidden: You do not own this cart item",
+      });
+    }
 
     const deletedItem = await Cart.findByIdAndDelete(cartId);
 

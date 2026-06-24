@@ -23,7 +23,7 @@ const Cart = () => {
         return;
       }
 
-      const response = await getDataCart(user._id);
+      const response = await getDataCart();
 
       const formattedData = response.data.cartData.map((item) => ({
         id: item._id,

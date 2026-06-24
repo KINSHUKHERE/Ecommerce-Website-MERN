@@ -4,8 +4,8 @@ export const sentToCart = async (data) => {
   return await api.post("/add-items-cart", data);
 };
 
-export const getDataCart = async (userId) => {
-  return await api.get(`/get-items-cart/${userId}`);
+export const getDataCart = async () => {
+  return await api.get("/get-items-cart");
 };
 
 export const increaseCart = async (cartId) => {

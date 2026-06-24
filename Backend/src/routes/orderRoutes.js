@@ -6,10 +6,12 @@ const {
   getUserOrders,
   updateOrderStatus,
 } = require("../controllers/orderController");
+const verifyUser = require("../middleware/verifyUser");
+const verifyAdmin = require("../middleware/verifyAdmin");
 
-router.post("/orders", createOrder);
-router.get("/orders", getAllOrders);
-router.get("/orders/user/:userId", getUserOrders);
-router.put("/orders/:orderId", updateOrderStatus);
+router.post("/orders", verifyUser, createOrder);
+router.get("/orders", verifyUser, verifyAdmin, getAllOrders);
+router.get("/orders/user", verifyUser, getUserOrders);
+router.put("/orders/:orderId", verifyUser, verifyAdmin, updateOrderStatus);
 
 module.exports = router;

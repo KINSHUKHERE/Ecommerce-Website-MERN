@@ -61,7 +61,7 @@ const Profile = () => {
     if (!localUser || !localUser._id) return;
     setLoadingOrders(true);
     try {
-      const res = await getUserOrders(localUser._id);
+      const res = await getUserOrders();
       setOrders(res.data.orders);
     } catch (err) {
       console.error("Failed to load user orders", err);
@@ -79,7 +79,7 @@ const Profile = () => {
 
     const loadProfile = async () => {
       try {
-        const res = await getUserProfile(localUser._id);
+        const res = await getUserProfile();
         const data = res.data;
         setName(data.name || "");
         setEmail(data.email || "");
@@ -124,7 +124,7 @@ const Profile = () => {
 
     setSubmitting(true);
     try {
-      const res = await updateProfile(localUser._id, {
+      const res = await updateProfile({
         name: name.trim(),
         password: password ? password : undefined,
       });

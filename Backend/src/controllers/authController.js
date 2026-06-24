@@ -1,5 +1,6 @@
 const User = require("../models/authDetails");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const signup = async (req, res) => {
   try {
@@ -53,14 +54,27 @@ const login = async (req, res) => {
       });
     }
 
-    res.status(200).json({
-      msg: "Login successful",
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
+    const token = jwt.sign(
+      {
+        userId: user._id,
         role: user.role,
       },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      msg: "Login successful",
+      user,
+      token,
     });
   } catch (err) {
     console.log(err);
@@ -85,21 +99,12 @@ const getAllUsers = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      phoneNumber: user.phoneNumber,
-    });
-  } catch (err) {
+    const user = await User.findById(req.user.userId);
+
+    res.status(200).json(user);
+  } catch (error) {
     res.status(500).json({
-      msg: "Unable to fetch user profile",
-      Error: err.message,
+      msg: "Unable to fetch profile",
     });
   }
 };
@@ -107,7 +112,7 @@ const getUserProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { name, password } = req.body;
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
@@ -140,9 +145,24 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+
+    res.status(200).json({
+      msg: "Logout successful",
+    });
+  } catch (error) {
+    res.status(500).json({
+      msg: "Unable to logout",
+    });
+  }
+};
+
 module.exports = {
   signup,
   login,
+  logout,
   getAllUsers,
   getUserProfile,
   updateProfile,
