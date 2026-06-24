@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { getProduct } from "../../api/ProductApi";
 import {
   Package,
   Users,
@@ -7,9 +6,11 @@ import {
   IndianRupee,
   MessageSquare,
 } from "lucide-react";
-import { getContact } from "../../api/ContactApi";
-import { allUsers } from "../../api/AuthApi";
-import { getAllOrders } from "../../api/OrderApi";
+// import { getProduct } from "../../api/ProductApi";
+// import { getContact } from "../../api/ContactApi";
+// import { allUsers } from "../../api/AuthApi";
+// import { getAllOrders } from "../../api/OrderApi";
+import {getDashboardData} from "../../api/DashboardApi"
 
 const AdminDashboard = () => {
   const [totalProducts, setTotalProducts] = useState(0);
@@ -20,19 +21,12 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const result = await getProduct();
-      setTotalProducts(result.data.data.length);
-      const totalContact = await getContact();
-      setTotalContacts(totalContact.data.contacts.length);
-      const totalUser = await allUsers();
-      setTotalUsers(totalUser.data.length);
-      
-      const ordersRes = await getAllOrders();
-      const ordersList = ordersRes.data.orders || [];
-      setTotalOrders(ordersList.length);
-      
-      const revenue = ordersList.reduce((acc, order) => acc + (order.totalAmount || 0), 0);
-      setTotalRevenue(revenue);
+      const getInfo = await getDashboardData();
+      setTotalProducts(getInfo.totalPro)
+      setTotalOrders(getInfo.totalOrd);
+      setTotalUsers(getInfo.totalUse);
+      setTotalContacts(getInfo.totalCon);
+      setTotalRevenue(getInfo.totalRev);
     } catch (error) {
       console.log(error);
     }
