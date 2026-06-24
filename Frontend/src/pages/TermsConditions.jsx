@@ -86,7 +86,7 @@ const TermsConditions = () => {
           </section>
 
           <div className="pt-8 border-t border-gray-100 mt-8 text-center text-xs text-gray-400">
-            <p>If you have any questions, please contact our support department at support@veltiq.com.</p>
+            <p>If you have any questions, please contact our support department at herekinshuk@gmail.com.</p>
             <p className="mt-1">Poornima University, Jaipur, Rajasthan, India</p>
           </div>
         </div>

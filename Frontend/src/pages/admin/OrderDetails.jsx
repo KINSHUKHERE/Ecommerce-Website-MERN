@@ -196,7 +196,7 @@ const OrderDetails = () => {
                           {order.userId?.name || "Guest Account"}
                         </span>
                         <span className="text-[11px] text-gray-400 font-semibold truncate">
-                          {order.userId?.email || "no-email@Veltiq.com"}
+                          {order.userId?.email || "herekinshuk@gmail.com"}
                         </span>
                       </div>
                     </td>

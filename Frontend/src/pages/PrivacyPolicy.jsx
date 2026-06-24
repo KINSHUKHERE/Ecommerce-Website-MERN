@@ -90,7 +90,7 @@ const PrivacyPolicy = () => {
           </section>
 
           <div className="pt-8 border-t border-gray-100 mt-8 text-center text-xs text-gray-400">
-            <p>For questions or concerns regarding this policy, contact our compliance team at privacy@veltiq.com.</p>
+            <p>For questions or concerns regarding this policy, contact our compliance team at herekinshuk@gmail.com.</p>
             <p className="mt-1">Poornima University, Jaipur, Rajasthan, India</p>
           </div>
         </div>

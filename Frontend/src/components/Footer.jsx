@@ -128,7 +128,7 @@ const Footer = () => {
           <Link to="/" className="hover:underline">
             My Wishlist
           </Link>
-          <Link to="/profile" className="hover:underline">
+          <Link to="/profile" state={{ activeTab: "orders" }} className="hover:underline">
             Track My Order
           </Link>
           <Link to="/contact" className="hover:underline">

@@ -86,7 +86,7 @@ const AdminLayout = ({ children }) => {
                         Account
                       </p>
                       <p className="text-sm font-semibold text-gray-800 mt-0.5 truncate">
-                        {user?.email || "admin@Veltiq.com"}
+                        {user?.email || "herekinshuk@gmail.com"}
                       </p>
                     </div>
                     <Link
