@@ -1,6 +1,6 @@
-# Veltiq - Modern MERN Stack E-Commerce Platform
+# YoCart - Modern MERN Stack E-Commerce Platform
 
-Veltiq is a premium, fully responsive e-commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The platform is architected with a strict separation between the client-facing store and a dedicated administrative dashboard, secured with modern JSON Web Token (JWT) authorization controls.
+YoCart is a premium, fully responsive e-commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The platform is architected with a strict separation between the client-facing store and a dedicated administrative dashboard, secured with modern JSON Web Token (JWT) authorization controls.
 
 ---
 
@@ -132,7 +132,7 @@ Veltiq is a premium, fully responsive e-commerce web application built using the
 
 ## 🔐 Security & Identity Infrastructure
 
-Veltiq implements a strict, enterprise-ready identity architecture protecting user privacy and preventing unauthorized backend changes:
+YoCart implements a strict, enterprise-ready identity architecture protecting user privacy and preventing unauthorized backend changes:
 
 ### 1. Unified Google OAuth & Local Authentication
 - **Google OAuth Integration**: Users can authenticate seamlessly using Google Login on both `/login` and `/register` interfaces (button text customized dynamically for signup/signin context).
@@ -206,8 +206,8 @@ Veltiq implements a strict, enterprise-ready identity architecture protecting us
 
 ### 1. Clone the codebase
 ```bash
-git clone https://github.com/KINSHUKHERE/Ecommerce-Website-MERN.git
-cd Ecommerce-Website-MERN
+git clone https://github.com/KINSHUKHERE/Ecommerce-Website-MERN-.git
+cd Ecommerce-Website-MERN-
 ```
 
 ### 2. Configure the Backend
