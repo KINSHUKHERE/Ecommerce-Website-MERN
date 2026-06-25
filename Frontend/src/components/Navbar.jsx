@@ -69,13 +69,13 @@ const Navbar = () => {
   if (isAuthPage) return null;
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md shadow-md">
-      <div className="mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-6">
-        <Link className="flex items-center gap-1" to="/">
-            <img src={logo} alt="Veltiq" className="h-20 w-20 object-contain" />
+    <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      <div className="mx-auto flex h-16 sm:h-20 items-center justify-between px-4 sm:px-6 lg:px-10 max-w-7xl w-full">
+        <Link className="flex items-center gap-2" to="/">
+          <img src={logo} alt="Veltiq" className="h-12 w-12 sm:h-14 sm:w-14 object-contain" />
           <div className="flex flex-col leading-none">
-            <span className="text-xl font-bold text-[#15877F]">VELTIQ</span>
-            <span className="text-xs tracking-wider text-gray-500">
+            <span className="text-lg sm:text-xl font-bold text-[#15877F] tracking-tight">VELTIQ</span>
+            <span className="text-[9px] sm:text-xs tracking-wider text-gray-500">
               POWERING SMART LIFE
             </span>
           </div>
