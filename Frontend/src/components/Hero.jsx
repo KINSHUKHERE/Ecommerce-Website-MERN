@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import HeroContent from "./HeroContent";
 
 const Hero = () => {
@@ -43,6 +43,14 @@ const Hero = () => {
         "Ultra-low latency mechanical keyboards and RGB mice available.",
     },
   ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev === bannerData.length - 1 ? 0 : prev + 1));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex]);
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev === 0 ? bannerData.length - 1 : prev - 1));
