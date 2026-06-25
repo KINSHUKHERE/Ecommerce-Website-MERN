@@ -11,6 +11,7 @@ const Login = () => {
   });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const navigate = useNavigate();
 
@@ -24,6 +25,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoggingIn(true);
+    setError("");
 
     try {
       const response = await login(formData);
@@ -45,11 +48,14 @@ const Login = () => {
         err.response?.data?.msg || "Unable to Login. Please try again later.",
       );
       console.log("Unable to Login!!");
+      setIsLoggingIn(false);
     }
   };
 
   // Google OAuth integration
   const handleGoogleSuccess = async (credentialResponse) => {
+    setIsLoggingIn(true);
+    setError("");
     try {
       const response = await googleLogin({
         token: credentialResponse.credential,
@@ -71,15 +77,27 @@ const Login = () => {
     } catch (err) {
       console.log(err);
       setError("Google Login Failed");
+      setIsLoggingIn(false);
     }
   };
 
   const handleGoogleError = () => {
     console.log("Google Login Failed");
+    setError("Google Login Failed");
+    setIsLoggingIn(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 relative">
+      {isLoggingIn && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center transition-all duration-300">
+          <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center max-w-xs w-full mx-4 border border-gray-100">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#15877F] mb-4"></div>
+            <p className="text-gray-900 font-bold text-lg text-center">Authenticating</p>
+            <p className="text-gray-500 text-sm text-center mt-1">Please wait while we secure your session...</p>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">
         <h1 className="text-3xl font-bold text-center text-[#15877F] mb-2">
           Welcome Back

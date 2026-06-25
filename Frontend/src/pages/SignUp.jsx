@@ -14,6 +14,7 @@ const SignUp = () => {
   });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -27,18 +28,23 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError("");
 
     try {
       await signUpApi(formData);
+      setIsSubmitting(false);
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.msg || "Unable to create user");
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
+    setIsSubmitting(true);
+    setError("");
     try {
-      setError("");
       const response = await googleLogin({
         token: credentialResponse.credential,
       });
@@ -59,16 +65,27 @@ const SignUp = () => {
     } catch (err) {
       console.log(err);
       setError("Google Sign Up Failed");
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleError = () => {
     console.log("Google Sign Up Failed");
     setError("Google Sign Up Failed");
+    setIsSubmitting(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-8 relative">
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center transition-all duration-300">
+          <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center max-w-xs w-full mx-4 border border-gray-100">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#15877F] mb-4"></div>
+            <p className="text-gray-900 font-bold text-lg text-center">Processing Request</p>
+            <p className="text-gray-500 text-sm text-center mt-1">Please wait while we secure your account details...</p>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">
         {error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
