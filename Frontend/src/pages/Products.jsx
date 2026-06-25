@@ -181,18 +181,7 @@ const Products = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      {/* Back Button */}
-      <div className="px-4 md:px-10 mb-6">
-        <Link
-          to="/"
-          className="group inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full hover:bg-[#088178] hover:text-white hover:border-[#088178] transition-all duration-300 shadow-sm font-semibold text-sm"
-        >
-          <span className="text-lg group-hover:-translate-x-1 transition-transform duration-300">
-            &larr;
-          </span>
-          Back
-        </Link>
-      </div>
+
 
       {/* Heading & Search Box */}
       <div className="text-center mb-6 px-4">

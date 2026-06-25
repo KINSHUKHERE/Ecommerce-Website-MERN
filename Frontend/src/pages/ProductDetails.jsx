@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getProduct } from "../api/ProductApi";
 import { sentToCart } from "../api/CartApi";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState("");
+  const [activeImgIndex, setActiveImgIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,23 +76,72 @@ const ProductDetails = () => {
     }
   };
 
+  const allImages = [product.imgUrl, ...(product.images || [])].filter(Boolean);
+
+  const nextSlide = () => {
+    setActiveImgIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const prevSlide = () => {
+    setActiveImgIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8">
-      <Link
-        to="/products"
-        className="group inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full hover:bg-[#088178] hover:text-white hover:border-[#088178] transition-all duration-300 shadow-sm font-semibold text-sm mb-6"
-      >
-        <span className="text-lg group-hover:-translate-x-1 transition-transform duration-300">
-          &larr;
-        </span>
-        Back
-      </Link>
+
       <div className="grid md:grid-cols-2 gap-8 items-start">
-        <div className="bg-gray-100 rounded-2xl p-4 flex justify-center">
-          <img
-            src={product.imgUrl}
-            className="w-full h-auto max-h-96 object-contain rounded-lg shadow-md"
-          />
+        {/* Interactive Image Slider */}
+        <div className="flex flex-col gap-4 w-full">
+          <div className="bg-gray-100 rounded-2xl p-4 flex justify-center items-center relative aspect-[4/3] max-h-96 w-full group overflow-hidden border border-gray-150 shadow-sm">
+            <img
+              src={allImages[activeImgIndex]}
+              alt={product.heading}
+              className="max-h-full max-w-full object-contain rounded-lg transition-all duration-300 transform scale-100 hover:scale-105"
+            />
+            
+            {allImages.length > 1 && (
+              <>
+                {/* Left Arrow */}
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-[#088178] hover:text-white text-gray-800 p-2 rounded-full shadow-md backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100 cursor-pointer"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                {/* Right Arrow */}
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-[#088178] hover:text-white text-gray-800 p-2 rounded-full shadow-md backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100 cursor-pointer"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+          </div>
+          
+          {/* Thumbnails list */}
+          {allImages.length > 1 && (
+            <div className="flex gap-2.5 overflow-x-auto py-1 scrollbar-none">
+              {allImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onMouseEnter={() => setActiveImgIndex(idx)}
+                  onClick={() => setActiveImgIndex(idx)}
+                  className={`relative w-20 h-20 flex-shrink-0 bg-white border rounded-xl overflow-hidden p-1.5 transition-all duration-200 cursor-pointer ${
+                    activeImgIndex === idx
+                      ? "border-[#088178] ring-2 ring-[#088178]/25 shadow-sm"
+                      : "border-gray-200 hover:border-[#088178]/50"
+                  }`}
+                >
+                  <img
+                    src={img}
+                    alt={`Thumbnail ${idx}`}
+                    className="w-full h-full object-contain rounded-lg"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex gap-3 items-center flex-wrap">

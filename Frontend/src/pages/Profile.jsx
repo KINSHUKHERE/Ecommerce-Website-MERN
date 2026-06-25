@@ -17,7 +17,8 @@ import {
   Calendar,
   Hash,
   MapPin,
-  Info
+  Info,
+  SlidersHorizontal
 } from "lucide-react";
 
 const Profile = () => {
@@ -44,6 +45,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("settings");
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [userOrderStatusFilter, setUserOrderStatusFilter] = useState("All");
 
   // Toast notifications
   const [message, setMessage] = useState("");
@@ -471,7 +473,43 @@ const Profile = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {orders.map((order) => (
+              {/* Status Pills Filter */}
+              <div className="flex gap-2 overflow-x-auto pb-1.5 mb-2.5 scrollbar-none border-b border-slate-100">
+                {["All", "Processing", "Shipped", "Delivered", "Cancelled"].map((status) => {
+                  const isActive = userOrderStatusFilter === status;
+                  const count = status === "All" 
+                    ? orders.length 
+                    : orders.filter(o => o.orderStatus === status).length;
+                  
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => setUserOrderStatusFilter(status)}
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border cursor-pointer ${
+                        isActive
+                          ? "bg-[#088178] text-white border-[#088178] shadow-sm shadow-[#088178]/10"
+                          : "bg-slate-50 text-gray-500 border-slate-200 hover:text-gray-800 hover:bg-slate-100"
+                      }`}
+                    >
+                      {status} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+
+              {orders.filter(o => userOrderStatusFilter === "All" || o.orderStatus === userOrderStatusFilter).length === 0 ? (
+                <div className="py-12 text-center bg-white border border-slate-100 rounded-xl shadow-sm px-6">
+                  <SlidersHorizontal size={36} className="text-gray-300 mx-auto mb-3" />
+                  <h3 className="text-sm font-bold text-gray-600">No Matching Orders</h3>
+                  <p className="text-xs text-gray-400 mt-1">
+                    You have no orders currently in the "{userOrderStatusFilter}" status.
+                  </p>
+                </div>
+              ) : (
+                orders
+                  .filter(o => userOrderStatusFilter === "All" || o.orderStatus === userOrderStatusFilter)
+                  .map((order) => (
                 <div
                   key={order._id}
                   className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm shadow-slate-100/30 space-y-4 text-left relative overflow-hidden"
@@ -571,7 +609,7 @@ const Profile = () => {
 
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
           )}
         </div>

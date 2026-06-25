@@ -8,6 +8,7 @@ const variantRoutes = require("./routes/variantRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 
 const app = express();
 
@@ -17,7 +18,10 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5173/",
   "http://localhost:3000",
-  "http://localhost:3000/"
+  "http://localhost:3000/",
+  "http://localhost",
+  "https://localhost",
+  "capacitor://localhost"
 ];
 
 app.use(cookieParser());
@@ -45,5 +49,6 @@ app.use("/", variantRoutes);
 app.use("/", cartRoutes);
 app.use("/", contactRoutes);
 app.use("/", orderRoutes);
+app.use("/", uploadRoutes);
 
 module.exports = app;

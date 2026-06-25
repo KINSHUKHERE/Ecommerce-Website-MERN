@@ -15,3 +15,13 @@ export const deleteProduct = (id) => {
 export const updateProduct = (id, data) => {
   return api.patch(`/product-update/${id}`, data);
 };
+
+export const uploadProductImage = (file) => {
+  const formData = new FormData();
+  formData.append("image", file);
+  return api.post("/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};

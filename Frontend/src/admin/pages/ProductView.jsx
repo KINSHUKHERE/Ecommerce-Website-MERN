@@ -14,6 +14,8 @@ import {
   IndianRupee,
   Check,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { getProduct, deleteProduct } from "../../api/ProductApi";
 
@@ -26,11 +28,22 @@ const ProductView = () => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [activeImgIndex, setActiveImgIndex] = useState(0);
   const [toast, setToast] = useState({
     show: false,
     message: "",
     type: "success",
   });
+
+  const allImages = product ? [product.imgUrl, ...(product.images || [])].filter(Boolean) : [];
+
+  const nextSlide = () => {
+    setActiveImgIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const prevSlide = () => {
+    setActiveImgIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
+  };
 
   // Check navigation state for redirects (e.g. successful updates)
   useEffect(() => {
@@ -197,17 +210,59 @@ const ProductView = () => {
       <div className="bg-white border border-slate-100 rounded-2xl p-6 sm:p-8 shadow-sm shadow-slate-100/40">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Left Column: Image Area */}
-          <div className="md:col-span-5 flex flex-col items-center">
-            <div className="w-full aspect-square max-w-[280px] bg-slate-50/50 border border-slate-100 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden">
+          <div className="md:col-span-5 flex flex-col items-center w-full">
+            <div className="w-full aspect-square max-w-[280px] bg-white border border-slate-100 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden group shadow-sm">
               <img
-                src={product.imgUrl}
+                src={allImages[activeImgIndex]}
                 alt={product.heading}
-                className={`w-full h-full object-contain rounded-xl transition-all duration-300 ${
+                className={`w-full h-full object-contain rounded-xl transition-all duration-300 transform scale-100 hover:scale-105 ${
                   status === "Sold" ? "grayscale opacity-50" : ""
                 }`}
               />
+              
+              {allImages.length > 1 && (
+                <>
+                  <button
+                    onClick={prevSlide}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#088178] hover:text-white text-gray-800 p-1.5 rounded-full shadow transition-all duration-200 opacity-0 group-hover:opacity-100 cursor-pointer border border-slate-100"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    onClick={nextSlide}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-[#088178] hover:text-white text-gray-800 p-1.5 rounded-full shadow transition-all duration-200 opacity-0 group-hover:opacity-100 cursor-pointer border border-slate-100"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </>
+              )}
             </div>
-            <div className="mt-4.5 w-full bg-slate-50/50 border border-slate-100 rounded-xl p-3.5 flex flex-col gap-2.5">
+
+            {/* Thumbnails (Flipkart style below main) */}
+            {allImages.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto py-1.5 max-w-[280px] scrollbar-none justify-center w-full mt-3">
+                {allImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onMouseEnter={() => setActiveImgIndex(idx)}
+                    onClick={() => setActiveImgIndex(idx)}
+                    className={`relative w-12 h-12 flex-shrink-0 bg-white border rounded-lg overflow-hidden p-1 transition-all duration-200 cursor-pointer ${
+                      activeImgIndex === idx
+                        ? "border-[#088178] ring-2 ring-[#088178]/20"
+                        : "border-gray-200 hover:border-[#088178]/40"
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`Thumbnail ${idx}`}
+                      className="w-full h-full object-contain rounded"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-4.5 w-full bg-slate-50/50 border border-slate-100 rounded-xl p-3.5 flex flex-col gap-2.5 max-w-[280px]">
               <div className="flex items-center justify-between text-[11px] text-gray-500 font-semibold">
                 <span className="flex items-center gap-1">
                   <Calendar size={13} /> Created:

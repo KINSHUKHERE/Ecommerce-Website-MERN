@@ -1,7 +1,17 @@
 import axios from "axios";
+import { Capacitor } from "@capacitor/core";
 
 // Dynamically read the backend base URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+let API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+// If running inside a native mobile app (e.g. on Android emulator), map localhost requests to the emulator loopback address 10.0.2.2
+if (Capacitor.isNativePlatform()) {
+  if (Capacitor.getPlatform() === "android") {
+    if (API_BASE_URL.includes("localhost") || API_BASE_URL.includes("127.0.0.1")) {
+      API_BASE_URL = API_BASE_URL.replace("localhost", "10.0.2.2").replace("127.0.0.1", "10.0.2.2");
+    }
+  }
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { postProduct } from "../../api/ProductApi";
+import { postProduct, uploadProductImage } from "../../api/ProductApi";
 import {
   getCategories,
   getVariantsByCategory,
@@ -14,13 +14,16 @@ import {
   Box,
   AlignLeft,
   Sparkles,
-  ArrowLeft
+  ArrowLeft,
+  Upload,
+  Trash2,
+  Loader2,
+  Image as ImageIcon
 } from "lucide-react";
 
 const CreateProduct = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    imgUrl: "",
     categoryId: "",
     variantId: "",
     heading: "",
@@ -28,9 +31,16 @@ const CreateProduct = () => {
     quantity: "",
     description: "",
   });
+  
+  const [productImages, setProductImages] = useState([]); // Max 6 images
+  const [imageInputMethod, setImageInputMethod] = useState("upload"); // "upload" | "url"
+  const [urlInput, setUrlInput] = useState("");
+
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [categories, setCategories] = useState([]);
   const [variants, setVariants] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -49,13 +59,83 @@ const CreateProduct = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleImagesUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    if (productImages.length + files.length > 6) {
+      alert("You can add up to 6 images only.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const uploadPromises = files.map((file) => uploadProductImage(file));
+      const results = await Promise.all(uploadPromises);
+      const urls = results.map((res) => res.data.url);
+      setProductImages((prev) => [...prev, ...urls]);
+    } catch (err) {
+      console.error("Image upload failed:", err);
+      alert("Failed to upload one or more images");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const addImageUrl = () => {
+    if (!urlInput.trim()) return;
+    if (productImages.length >= 6) {
+      alert("You can add up to 6 images only.");
+      return;
+    }
+    setProductImages((prev) => [...prev, urlInput.trim()]);
+    setUrlInput("");
+  };
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index);
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, index) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const reorderedImages = [...productImages];
+    const [draggedItem] = reorderedImages.splice(draggedIndex, 1);
+    reorderedImages.splice(index, 0, draggedItem);
+
+    setProductImages(reorderedImages);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const removeImage = (indexToRemove) => {
+    setProductImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (productImages.length === 0) {
+      alert("Please upload or add at least one product image.");
+      return;
+    }
+    const finalData = {
+      ...formData,
+      imgUrl: productImages[0],
+      images: productImages.slice(1),
+    };
     try {
-      await postProduct(formData);
+      await postProduct(finalData);
       setIsSubmitted(true);
       setFormData({
-        imgUrl: "",
         categoryId: "",
         variantId: "",
         heading: "",
@@ -63,6 +143,7 @@ const CreateProduct = () => {
         quantity: "",
         description: "",
       });
+      setProductImages([]);
       setTimeout(() => navigate("/admin/products"), 1500);
     } catch (err) {
       console.log("Unable to post data:", err);
@@ -88,13 +169,24 @@ const CreateProduct = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/10 to-slate-100 px-4 py-8">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto text-left">
+        {/* Back Link */}
+        <div className="mb-4">
+          <Link
+            to="/admin/products"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-250 hover:border-gray-300 text-gray-700 hover:text-gray-900 text-xs font-bold rounded-lg transition-all shadow-sm cursor-pointer"
+          >
+            <ArrowLeft size={14} />
+            Back to Registry
+          </Link>
+        </div>
+
         <div className="bg-white rounded-2xl shadow-lg border border-gray-150 p-5 sm:p-7 relative overflow-hidden">
           {/* Decorative Top Accent Bar */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#15877F] to-[#088178]"></div>
 
           {isSubmitted && (
-            <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg font-bold text-center border border-green-200 shadow-sm text-sm">
+            <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg font-bold text-center border border-green-200 shadow-sm text-sm animate-fadeIn">
               ✓ Product Added Successfully! Redirecting...
             </div>
           )}
@@ -108,16 +200,142 @@ const CreateProduct = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Image URL Input */}
-            <InputField
-              label="Image URL"
-              name="imgUrl"
-              value={formData.imgUrl}
-              onChange={dataEntered}
-              placeholder="https://example.com/image.jpg"
-              icon={LinkIcon}
-            />
+          <form onSubmit={handleSubmit} className="space-y-5">
+                       {/* Unified Product Images Manager */}
+            <div className="space-y-4 border-b border-slate-100 pb-5">
+              <div className="flex justify-between items-center flex-wrap gap-2">
+                <div className="space-y-0.5">
+                  <label className="block text-xs font-bold text-gray-655 uppercase tracking-wider">
+                    Product Images ({productImages.length}/6)
+                  </label>
+                  <p className="text-[10px] text-gray-450 font-medium">
+                    The first image will automatically be set as the Primary Cover.
+                  </p>
+                </div>
+                
+                {/* Single Mode Selector pills */}
+                {productImages.length < 6 && (
+                  <div className="flex gap-1.5 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setImageInputMethod("upload")}
+                      className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all cursor-pointer ${
+                        imageInputMethod === "upload"
+                          ? "bg-white text-slate-800 shadow-sm"
+                          : "text-gray-550 hover:text-gray-800"
+                      }`}
+                    >
+                      Upload File
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageInputMethod("url")}
+                      className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all cursor-pointer ${
+                        imageInputMethod === "url"
+                          ? "bg-white text-slate-800 shadow-sm"
+                          : "text-gray-550 hover:text-gray-800"
+                      }`}
+                    >
+                      Image Link URL
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Add Image Inputs (hidden if count is 6) */}
+              {productImages.length < 6 ? (
+                imageInputMethod === "upload" ? (
+                  <label className="w-full h-24 border-2 border-dashed border-gray-305 rounded-xl flex flex-col items-center justify-center p-3 hover:border-[#088178] hover:bg-[#088178]/5 transition-all cursor-pointer">
+                    {uploading ? (
+                      <div className="flex flex-col items-center justify-center text-[#088178]">
+                        <Loader2 className="animate-spin mb-1.5" size={20} />
+                        <span className="text-[10px] font-semibold">Uploading to Cloudinary...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-gray-400 text-center">
+                        <Upload className="mb-1" size={20} />
+                        <span className="text-[11px] font-bold text-gray-500">Upload Product Photos</span>
+                        <span className="text-[9px] text-gray-400 mt-0.5">Select up to {6 - productImages.length} more file(s)</span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImagesUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </label>
+                ) : (
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                        <LinkIcon size={15} />
+                      </span>
+                      <input
+                        type="text"
+                        value={urlInput}
+                        onChange={(e) => setUrlInput(e.target.value)}
+                        placeholder="Paste image link URL here..."
+                        className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-205 focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-800 text-xs bg-white placeholder-gray-400 font-medium h-[36px]"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addImageUrl}
+                      className="px-4 py-1.5 bg-[#088178] hover:bg-[#06635c] text-white text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center h-[36px]"
+                    >
+                      Add URL
+                    </button>
+                  </div>
+                )
+              ) : (
+                <div className="p-3 bg-teal-50/50 border border-teal-100 rounded-xl text-center text-xs font-semibold text-teal-800">
+                  Maximum photo limit of 6 reached. Delete existing ones to add different images.
+                </div>
+              )}
+
+              {/* Photos Preview Grid */}
+              {productImages.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-1">
+                  {productImages.map((url, index) => (
+                    <div
+                      key={index}
+                      draggable={true}
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDrop={(e) => handleDrop(e, index)}
+                      onDragEnd={handleDragEnd}
+                      className={`relative aspect-square border rounded-xl bg-gray-50 flex items-center justify-center p-1.5 overflow-hidden shadow-sm group transition-all cursor-grab active:cursor-grabbing ${
+                        index === 0 ? "border-[#088178]/40 ring-2 ring-[#088178]/5" : "border-gray-200"
+                      } ${draggedIndex === index ? "opacity-40 border-[#088178] border-dashed" : ""}`}
+                    >
+                      <img
+                        src={url}
+                        alt={`Product Photo ${index + 1}`}
+                        className="w-full h-full object-contain rounded-lg"
+                      />
+                      
+                      {/* Primary Cover Badge */}
+                      {index === 0 && (
+                        <div className="absolute top-1 left-1.5 bg-[#088178] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded shadow-sm">
+                          PRIMARY
+                        </div>
+                      )}
+                      
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl cursor-pointer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Grid for Category & Variant dropdowns */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -134,7 +352,7 @@ const CreateProduct = () => {
                     value={formData.categoryId}
                     onChange={handleCategoryChange}
                     required
-                    className="w-full pl-9 pr-10 py-2 rounded-lg border border-gray-200 bg-white focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-800 text-sm font-medium appearance-none cursor-pointer"
+                    className="w-full pl-9 pr-10 py-2 rounded-lg border border-gray-200 bg-white focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-800 text-sm font-medium appearance-none cursor-pointer h-[38px]"
                   >
                     <option value="">Select Category</option>
                     {categories.map((category) => (
@@ -168,7 +386,7 @@ const CreateProduct = () => {
                     }
                     required
                     disabled={!formData.categoryId}
-                    className="w-full pl-9 pr-10 py-2 rounded-lg border border-gray-200 bg-white focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-850 text-sm font-medium appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full pl-9 pr-10 py-2 rounded-lg border border-gray-200 bg-white focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-850 text-sm font-medium appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed h-[38px]"
                   >
                     <option value="">Select Variant</option>
                     {variants.map((variant) => (
@@ -240,7 +458,7 @@ const CreateProduct = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-[#15877F] to-[#088178] text-white font-bold py-2.5 rounded-lg hover:from-[#126b64] hover:to-[#06635c] transition-all duration-300 shadow-sm hover:shadow shadow-[#088178]/10 active:scale-[0.99] flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider mt-2 cursor-pointer"
+              className="w-full bg-gradient-to-r from-[#15877F] to-[#088178] text-white font-bold py-2.5 rounded-lg hover:from-[#126b64] hover:to-[#06635c] transition-all duration-300 shadow-sm hover:shadow shadow-[#088178]/10 active:scale-[0.99] flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider mt-2 cursor-pointer h-[40px]"
             >
               <Sparkles size={16} />
               Submit Product Details
@@ -263,7 +481,7 @@ const InputField = ({
   icon: Icon,
 }) => (
   <div>
-    <label className="block mb-1.5 text-xs font-bold text-gray-650 uppercase tracking-wider text-left">
+    <label className="block mb-1.5 text-xs font-bold text-gray-655 uppercase tracking-wider text-left">
       {label}
     </label>
     <div className="relative">
@@ -281,7 +499,7 @@ const InputField = ({
         placeholder={placeholder}
         className={`w-full ${
           Icon ? "pl-9" : "px-4"
-        } pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-800 text-sm bg-white placeholder-gray-400 font-medium`}
+        } pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-800 text-sm bg-white placeholder-gray-400 font-medium h-[38px]`}
       />
     </div>
   </div>

@@ -1,5 +1,8 @@
 {
   "appId": "com.veltiq.app",
   "appName": "Veltiq",
-  "webDir": "dist"
+  "webDir": "dist",
+  "server": {
+    "cleartext": true
+  }
 }
