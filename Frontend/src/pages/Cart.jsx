@@ -259,7 +259,7 @@ const Cart = () => {
                 onClick={handlePlaceOrderClick}
                 className="hidden lg:block w-full mt-6 bg-[#fb641b] hover:bg-[#e05310] text-white py-3.5 rounded-xl font-semibold transition-all shadow-md cursor-pointer outline-none"
               >
-                PLACE ORDER
+                Place Order
               </button>
             </div>
           </div>
@@ -282,7 +282,7 @@ const Cart = () => {
             onClick={handlePlaceOrderClick}
             className="bg-[#fb641b] hover:bg-[#e05310] text-white px-8 py-3 rounded-xl font-semibold text-sm shadow-md transition-all cursor-pointer outline-none"
           >
-            PLACE ORDER
+            Place Order
           </button>
         </div>
       )}

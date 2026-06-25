@@ -51,10 +51,10 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const navLink = (path) =>
-    `relative transition-colors duration-300 hover:text-[#15877F] h-full flex items-center px-1 border-b-2 ${
+    `relative transition-colors duration-300 hover:text-[#15877F] py-1 ${
       isActive(path)
-        ? "text-[#15877F] font-semibold border-[#15877F]"
-        : "text-gray-700 border-transparent"
+        ? "text-[#15877F] font-semibold after:absolute after:left-0 after:-bottom-1.5 after:h-[2px] after:w-full after:bg-[#15877F]"
+        : "text-gray-700"
     }`;
 
   const handleLogout = () => {
@@ -70,9 +70,9 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
-      <div className="flex h-14 sm:h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
-        <Link className="flex items-center gap-2 h-full" to="/">
-          <img src={logo} alt="Veltiq" className="h-8 w-8 sm:h-9 sm:w-9 object-contain" />
+      <div className="flex h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
+        <Link className="flex items-center gap-1 h-full" to="/">
+          <img src={logo} alt="Veltiq" className="h-9 w-9 sm:h-10 sm:w-10 object-contain translate-y-[2px]" />
           <span className="text-xl sm:text-2xl font-bold text-[#15877F] tracking-tight leading-none">
             VELTIQ
           </span>
@@ -80,23 +80,23 @@ const Navbar = () => {
 
 
         {/* Desktop Menu */}
-        <ul className="hidden md:flex items-stretch gap-8 font-medium h-full">
-          <li className="h-full">
+        <ul className="hidden md:flex items-center gap-8 font-medium">
+          <li>
             <Link className={navLink("/")} to="/">
               Home
             </Link>
           </li>
-          <li className="h-full">
+          <li>
             <Link className={navLink("/products")} to="/products">
               Products
             </Link>
           </li>
-          <li className="h-full">
+          <li>
             <Link className={navLink("/about")} to="/about">
               About
             </Link>
           </li>
-          <li className="h-full">
+          <li>
             <Link className={navLink("/contact")} to="/contact">
               Contact
             </Link>
@@ -111,7 +111,7 @@ const Navbar = () => {
                 to="/login"
                 className="px-4 py-2 border border-[#15877F] text-[#15877F] rounded-lg hover:bg-[#15877F] hover:text-white transition font-medium"
               >
-                Login
+                Log In
               </Link>
               <Link
                 to="/register"
@@ -165,7 +165,7 @@ const Navbar = () => {
               to="/cart"
               className="relative p-2 transition-colors duration-300 hover:text-[#15877F] outline-none focus:outline-none"
             >
-              <ShoppingCart size={24} />
+              <ShoppingCart size={22} />
               {cartCount > 0 && (
                 <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold">
                   {cartCount}
@@ -178,7 +178,7 @@ const Navbar = () => {
             onClick={() => setIsOpen(!isOpen)}
             className="text-gray-700 hover:text-[#15877F] cursor-pointer outline-none focus:outline-none"
           >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
@@ -236,7 +236,7 @@ const Navbar = () => {
                 onClick={() => setIsOpen(false)}
                 className="w-full text-center py-2.5 border border-[#15877F] text-[#15877F] rounded-lg font-semibold hover:bg-gray-100"
               >
-                Login
+                Log In
               </Link>
               <Link
                 to="/register"
