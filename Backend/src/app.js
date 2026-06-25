@@ -13,8 +13,14 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const app = express();
 
 const allowedOrigins = [
-   process.env.FRONTEND_URL, 
-   "http://localhost:5173"
+  "https://yocart.onrender.com", 
+  "https://ecommerce-website-mern-1-luv9.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:3000/",
+  "http://localhost",
+  "https://localhost",
+  "capacitor://localhost"
 ];
 
 app.use(cookieParser());
