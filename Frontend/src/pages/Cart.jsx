@@ -12,6 +12,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null);
 
   const localUser = JSON.parse(localStorage.getItem("user"));
 
@@ -48,31 +49,40 @@ const Cart = () => {
 
   const handleIncrease = async (cartId) => {
     try {
+      setUpdatingId(cartId);
       await increaseCart(cartId);
-      fetchCartData();
+      await fetchCartData();
       window.dispatchEvent(new Event("cartUpdated"));
     } catch (err) {
       console.log("Unable to increase quantity", err);
+    } finally {
+      setUpdatingId(null);
     }
   };
 
   const handleDecrease = async (cartId) => {
     try {
+      setUpdatingId(cartId);
       await decreaseCart(cartId);
-      fetchCartData();
+      await fetchCartData();
       window.dispatchEvent(new Event("cartUpdated"));
     } catch (err) {
       console.log("Unable to decrease quantity", err);
+    } finally {
+      setUpdatingId(null);
     }
   };
 
   const handleDelete = async (cartId) => {
     try {
+      setUpdatingId(cartId);
       await deleteCart(cartId);
-      fetchCartData();
+      await fetchCartData();
       window.dispatchEvent(new Event("cartUpdated"));
     } catch (err) {
       console.log("Unable to delete item", err);
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -139,25 +149,35 @@ const Cart = () => {
                         <div className="flex items-center border border-gray-200 rounded-lg bg-white overflow-hidden shadow-xs">
                           <button
                             onClick={() => handleDecrease(item.id)}
-                            disabled={item.quantity <= 1}
+                            disabled={item.quantity <= 1 || updatingId !== null}
                             className={`px-2 py-0.5 text-gray-500 font-bold hover:bg-gray-100 transition rounded-l ${
-                              item.quantity <= 1 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                              item.quantity <= 1 || updatingId !== null ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
                             }`}
                           >
                             -
                           </button>
-                          <span className="px-2 py-0.5 text-xs font-semibold text-gray-800 border-x border-gray-100 min-w-[16px] text-center">
-                            {item.quantity}
+                          <span className="px-2 py-0.5 text-xs font-semibold text-gray-800 border-x border-gray-100 min-w-[24px] text-center flex items-center justify-center">
+                            {updatingId === item.id ? (
+                              <svg className="animate-spin h-3 w-3 text-[#15877F]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            ) : (
+                              item.quantity
+                            )}
                           </span>
                           <button
                             onClick={() => handleIncrease(item.id)}
-                            className="px-2 py-0.5 text-gray-500 font-bold hover:bg-gray-100 transition rounded-r cursor-pointer"
+                            disabled={updatingId !== null}
+                            className={`px-2 py-0.5 text-gray-500 font-bold hover:bg-gray-100 transition rounded-r ${
+                              updatingId !== null ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                            }`}
                           >
                             +
                           </button>
                         </div>
                       </div>
-
+ 
                       {/* Name & Unit Price */}
                       <div className="flex-1 min-w-0 pr-2">
                         <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
@@ -167,9 +187,9 @@ const Cart = () => {
                           Unit Price: ₹{item.price.toLocaleString()}
                         </p>
                       </div>
-
+ 
                     </div>
-
+ 
                     {/* Middle/Right elements (Subtotal and Actions grouped) */}
                     <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 border-gray-100 pt-3 sm:pt-0">
                       
@@ -180,14 +200,26 @@ const Cart = () => {
                           ₹{(item.price * item.quantity).toLocaleString()}
                         </span>
                       </div>
-
+ 
                       {/* Remove Button */}
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="text-gray-400 hover:text-red-650 transition-colors p-2 rounded-lg hover:bg-red-50 cursor-pointer flex items-center justify-center outline-none focus:outline-none"
+                        disabled={updatingId !== null}
+                        className={`transition-colors p-2 rounded-lg hover:bg-red-50 flex items-center justify-center outline-none focus:outline-none ${
+                          updatingId !== null 
+                            ? "text-gray-300 cursor-not-allowed" 
+                            : "text-gray-400 hover:text-red-650 cursor-pointer"
+                        }`}
                         title="Remove item"
                       >
-                        <Trash2 size={18} />
+                        {updatingId === item.id ? (
+                          <svg className="animate-spin h-[18px] w-[18px] text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <Trash2 size={18} />
+                        )}
                       </button>
 
                     </div>
