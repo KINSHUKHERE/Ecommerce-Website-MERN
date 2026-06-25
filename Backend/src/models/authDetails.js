@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
 
     phoneNumber: {
       type: String,
-      required: true,
+      default: "",
     },
 
     email: {
@@ -29,7 +29,18 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true,
+      default: "",
+    },
+
+    provider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+
+    isProfileComplete: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -37,6 +48,4 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const User = mongoose.model("User", userSchema);
-
-module.exports = User;
+module.exports = mongoose.model("User", userSchema);

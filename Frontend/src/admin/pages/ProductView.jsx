@@ -13,7 +13,7 @@ import {
   Box,
   IndianRupee,
   Check,
-  X
+  X,
 } from "lucide-react";
 import { getProduct, deleteProduct } from "../../api/ProductApi";
 
@@ -26,7 +26,11 @@ const ProductView = () => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   // Check navigation state for redirects (e.g. successful updates)
   useEffect(() => {
@@ -79,7 +83,7 @@ const ProductView = () => {
       await deleteProduct(product._id);
       // Navigate to product list page with success toast state
       navigate("/admin/products", {
-        state: { message: "Product deleted successfully", type: "success" }
+        state: { message: "Product deleted successfully", type: "success" },
       });
     } catch (err) {
       showToast("Failed to delete product", "error");
@@ -96,7 +100,7 @@ const ProductView = () => {
       month: "short",
       year: "numeric",
       hour: "2-digit",
-      minute: "2-digit"
+      minute: "2-digit",
     });
   };
 
@@ -137,7 +141,7 @@ const ProductView = () => {
   const formattedPrice = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   }).format(product.price);
 
   return (
@@ -154,7 +158,9 @@ const ProductView = () => {
           >
             {toast.type === "success" ? <Check size={14} /> : <X size={14} />}
           </div>
-          <span className="text-sm font-bold text-gray-800">{toast.message}</span>
+          <span className="text-sm font-bold text-gray-800">
+            {toast.message}
+          </span>
         </div>
       )}
 
@@ -174,7 +180,7 @@ const ProductView = () => {
             className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-blue-600/10 hover:shadow-lg hover:shadow-blue-600/15 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
           >
             <Pencil size={14} />
-            Edit Product
+            Edit Products
           </Link>
           <button
             onClick={() => setIsDeleteModalOpen(true)}
@@ -203,12 +209,20 @@ const ProductView = () => {
             </div>
             <div className="mt-4.5 w-full bg-slate-50/50 border border-slate-100 rounded-xl p-3.5 flex flex-col gap-2.5">
               <div className="flex items-center justify-between text-[11px] text-gray-500 font-semibold">
-                <span className="flex items-center gap-1"><Calendar size={13} /> Created:</span>
-                <span className="text-gray-800">{formatDate(product.createdAt)}</span>
+                <span className="flex items-center gap-1">
+                  <Calendar size={13} /> Created:
+                </span>
+                <span className="text-gray-800">
+                  {formatDate(product.createdAt)}
+                </span>
               </div>
               <div className="flex items-center justify-between text-[11px] text-gray-500 font-semibold border-t border-slate-100 pt-2.5">
-                <span className="flex items-center gap-1"><Clock size={13} /> Updated:</span>
-                <span className="text-gray-800">{formatDate(product.updatedAt)}</span>
+                <span className="flex items-center gap-1">
+                  <Clock size={13} /> Updated:
+                </span>
+                <span className="text-gray-800">
+                  {formatDate(product.updatedAt)}
+                </span>
               </div>
             </div>
           </div>
@@ -231,8 +245,8 @@ const ProductView = () => {
                     status === "In Stock"
                       ? "bg-green-50 text-green-700 border border-green-100"
                       : status === "Low Stock"
-                      ? "bg-amber-50 text-amber-700 border border-amber-100"
-                      : "bg-zinc-150 text-zinc-650 border border-zinc-200"
+                        ? "bg-amber-50 text-amber-700 border border-amber-100"
+                        : "bg-zinc-150 text-zinc-650 border border-zinc-200"
                   }`}
                 >
                   {status === "Sold" ? "Sold / Out of Stock" : status}
@@ -296,9 +310,12 @@ const ProductView = () => {
                 <AlertTriangle size={20} />
               </div>
               <div>
-                <h3 className="font-extrabold text-gray-900 text-sm">Delete Product</h3>
+                <h3 className="font-extrabold text-gray-900 text-sm">
+                  Delete Product
+                </h3>
                 <p className="text-xs text-gray-500 mt-1.5 leading-relaxed font-semibold">
-                  Are you sure you want to delete this product? This action is permanent and cannot be undone.
+                  Are you sure you want to delete this product? This action is
+                  permanent and cannot be undone.
                 </p>
                 <p className="text-[10px] text-gray-400 font-bold mt-2 truncate bg-gray-50 p-2 rounded-lg border border-gray-100">
                   {product.heading}
@@ -314,7 +331,7 @@ const ProductView = () => {
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="px-4 py-2 bg-red-650 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow-sm hover:shadow transition cursor-pointer"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow-sm hover:shadow transition cursor-pointer"
               >
                 Delete
               </button>

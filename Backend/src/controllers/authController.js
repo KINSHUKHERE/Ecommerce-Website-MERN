@@ -1,6 +1,9 @@
 const User = require("../models/authDetails");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const signup = async (req, res) => {
   try {
@@ -21,6 +24,7 @@ const signup = async (req, res) => {
       phoneNumber,
       email,
       password: hashPassword,
+      isProfileComplete: true,
     });
     res.status(201).json({
       msg: "User Created",
@@ -84,6 +88,65 @@ const login = async (req, res) => {
   }
 };
 
+const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const { name, email } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        phoneNumber: "",
+        password: "",
+        role: "user",
+        provider: "google",
+        isProfileComplete: false,
+      });
+    }
+
+    const jwtToken = jwt.sign(
+      {
+        userId: user._id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      msg: "Google Login Successful",
+      token: jwtToken,
+      user,
+    });
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      msg: "Google Login Failed",
+    });
+  }
+};
+
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find();
@@ -100,8 +163,15 @@ const getAllUsers = async (req, res) => {
 const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
 
-    res.status(200).json(user);
+    const userObj = user.toObject();
+    userObj.hasPassword = !!(user.password && user.password.trim() !== "");
+    delete userObj.password;
+
+    res.status(200).json(userObj);
   } catch (error) {
     res.status(500).json({
       msg: "Unable to fetch profile",
@@ -111,7 +181,7 @@ const getUserProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { name, password } = req.body;
+    const { name, phoneNumber, password } = req.body;
     const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
@@ -119,6 +189,10 @@ const updateProfile = async (req, res) => {
 
     if (name) {
       user.name = name;
+    }
+
+    if (phoneNumber) {
+      user.phoneNumber = phoneNumber;
     }
 
     if (password && password.trim() !== "") {
@@ -159,11 +233,56 @@ const logout = async (req, res) => {
   }
 };
 
+const completeProfile = async (req, res) => {
+  try {
+    const { phoneNumber, password } = req.body;
+
+    if (!phoneNumber) {
+      return res.status(400).json({
+        msg: "Phone number is required",
+      });
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({
+        msg: "User not found",
+      });
+    }
+
+    user.phoneNumber = phoneNumber;
+    user.isProfileComplete = true;
+
+    if (password && password.trim() !== "") {
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+    await user.save();
+
+    const userObj = user.toObject();
+    userObj.hasPassword = !!(user.password && user.password.trim() !== "");
+    delete userObj.password;
+
+    res.status(200).json({
+      msg: "Profile completed successfully",
+      user: userObj,
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Failed to complete profile",
+      Error: err.message,
+    });
+  }
+};
+
 module.exports = {
   signup,
   login,
+  googleLogin,
   logout,
   getAllUsers,
   getUserProfile,
   updateProfile,
+  completeProfile,
 };
+

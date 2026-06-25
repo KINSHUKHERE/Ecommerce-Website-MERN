@@ -33,6 +33,8 @@ const Profile = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("user");
+  const [hasPassword, setHasPassword] = useState(true);
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
 
   // Show/Hide password toggles
   const [showPassword, setShowPassword] = useState(false);
@@ -85,6 +87,7 @@ const Profile = () => {
         setEmail(data.email || "");
         setPhoneNumber(data.phoneNumber || "");
         setRole(data.role || "user");
+        setHasPassword(data.hasPassword !== false);
       } catch (err) {
         console.error("Failed to load user profile:", err);
         showToast("Failed to load profile details", "error");
@@ -126,6 +129,7 @@ const Profile = () => {
     try {
       const res = await updateProfile({
         name: name.trim(),
+        phoneNumber: phoneNumber.trim(),
         password: password ? password : undefined,
       });
 
@@ -134,12 +138,17 @@ const Profile = () => {
       const newLocalStorageUser = {
         ...localUser,
         name: updatedUser.name,
+        phoneNumber: updatedUser.phoneNumber,
       };
       localStorage.setItem("user", JSON.stringify(newLocalStorageUser));
 
       window.dispatchEvent(new Event("storage"));
 
       showToast("Profile updated successfully", "success");
+      if (password) {
+        setHasPassword(true);
+        setShowPasswordFields(false);
+      }
       setPassword("");
       setConfirmPassword("");
 
@@ -297,16 +306,11 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Phone Number field (Read-Only) */}
+            {/* Phone Number field */}
             <div className="flex flex-col gap-1.5 text-left">
-              <div className="flex justify-between items-center">
-                <label className="text-[13px] font-normal text-gray-500">
-                  Phone Number
-                </label>
-                <span className="text-[11px] text-gray-450 font-normal select-none">
-                  Not editable
-                </span>
-              </div>
+              <label className="text-[13px] font-normal text-gray-500">
+                Phone Number
+              </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
                   <Phone size={15} />
@@ -314,68 +318,91 @@ const Profile = () => {
                 <input
                   type="tel"
                   value={phoneNumber}
-                  disabled
-                  className="w-full pl-9 pr-4 py-2 border border-slate-150 rounded-lg bg-slate-50 text-gray-400 text-sm font-normal cursor-not-allowed h-[38px] select-none"
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 border border-slate-150 rounded-lg focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all h-[38px]"
+                  placeholder="Enter your phone number"
+                  required
                 />
-                <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400">
-                  <Lock size={13} />
-                </span>
               </div>
             </div>
 
-            {/* Password field */}
-            <div className="flex flex-col gap-1.5 text-left">
-              <label className="text-[13px] font-normal text-gray-500">
-                New Password
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
-                  <Lock size={15} />
-                </span>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-10 py-2 border border-slate-150 rounded-lg focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all h-[38px]"
-                  placeholder="Leave blank to keep current"
-                />
+            {!hasPassword && !showPasswordFields ? (
+              <div className="bg-slate-50 border border-slate-150 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-left">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                    <Shield size={16} className="text-[#088178]" />
+                    Account Security
+                  </h4>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Password: <span className="font-semibold text-red-500">Not Set</span>. Click below to establish local email & password credentials.
+                  </p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 outline-none focus:outline-none"
+                  onClick={() => setShowPasswordFields(true)}
+                  className="px-4 py-1.5 bg-[#088178]/10 hover:bg-[#088178]/20 text-[#088178] text-xs font-bold rounded-lg transition-all self-start sm:self-center cursor-pointer"
                 >
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  Set Password
                 </button>
               </div>
-            </div>
-
-            {/* Confirm Password field */}
-            {password && (
-              <div className="flex flex-col gap-1.5 text-left animate-fadeIn">
-                <label className="text-[13px] font-normal text-gray-500">
-                  Confirm New Password
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
-                    <Lock size={15} />
-                  </span>
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-9 pr-10 py-2 border border-slate-150 rounded-lg focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all h-[38px]"
-                    placeholder="Re-enter new password"
-                    required={!!password}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 outline-none focus:outline-none"
-                  >
-                    {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
+            ) : (
+              <>
+                {/* Password field */}
+                <div className="flex flex-col gap-1.5 text-left">
+                  <label className="text-[13px] font-normal text-gray-500">
+                    {hasPassword ? "New Password" : "Set Password"}
+                  </label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                      <Lock size={15} />
+                    </span>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-9 pr-10 py-2 border border-slate-150 rounded-lg focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all h-[38px]"
+                      placeholder={hasPassword ? "Leave blank to keep current" : "Enter a password"}
+                      required={!hasPassword}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 outline-none focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
                 </div>
-              </div>
+
+                {/* Confirm Password field */}
+                {password && (
+                  <div className="flex flex-col gap-1.5 text-left animate-fadeIn">
+                    <label className="text-[13px] font-normal text-gray-500">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                        <Lock size={15} />
+                      </span>
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full pl-9 pr-10 py-2 border border-slate-150 rounded-lg focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all h-[38px]"
+                        placeholder="Re-enter password"
+                        required={!!password}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 outline-none focus:outline-none"
+                      >
+                        {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Action Row */}

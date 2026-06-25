@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Check, Loader2, Lock, Smartphone, CreditCard, CheckSquare, Sparkles, Home, ShoppingBag, Shield } from "lucide-react";
 import { getDataCart } from "../api/CartApi";
 import { createOrder } from "../api/OrderApi";
+import { getUserProfile } from "../api/AuthApi";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -41,42 +42,65 @@ const Checkout = () => {
 
   const localUser = JSON.parse(localStorage.getItem("user"));
 
-  const fetchCartData = async () => {
+  useEffect(() => {
     if (!localUser) {
       navigate("/login");
       return;
     }
 
-    try {
-      const response = await getDataCart();
-      const formattedData = response.data.cartData.map((item) => ({
-        id: item._id,
-        productId: item.productId._id,
-        name: item.productId.heading,
-        price: item.productId.price,
-        quantity: item.quantity,
-        image: item.productId.imgUrl,
-      }));
-      setCartItems(formattedData);
+    const verifyAndLoad = async () => {
+      try {
+        // 1. Verify user profile has phone number and password
+        const profileRes = await getUserProfile();
+        const userObj = profileRes.data;
+        localStorage.setItem("user", JSON.stringify(userObj));
 
-      // Pre-fill user information
-      setCustomerName(localUser.name || "");
-      setCustomerPhone(localUser.phoneNumber || "");
+        const hasPhone = userObj.phoneNumber && userObj.phoneNumber.trim() !== "";
+        const hasPwd = userObj.hasPassword === true;
 
-      // If cart is empty, redirect back (unless completed)
-      if (formattedData.length === 0 && checkoutStep !== 3) {
-        navigate("/cart");
+        if (!hasPhone || !hasPwd) {
+          let msg = "";
+          if (!hasPhone && !hasPwd) {
+            msg = "Please set up your Phone Number and Password in your Profile before placing an order.";
+          } else if (!hasPhone) {
+            msg = "Please set up your Phone Number in your Profile before placing an order.";
+          } else {
+            msg = "Please set up a Password in your Profile before placing an order.";
+          }
+          alert(msg);
+          navigate("/profile", { replace: true });
+          return;
+        }
+
+        // 2. Load Cart Data
+        const response = await getDataCart();
+        const formattedData = response.data.cartData.map((item) => ({
+          id: item._id,
+          productId: item.productId._id,
+          name: item.productId.heading,
+          price: item.productId.price,
+          quantity: item.quantity,
+          image: item.productId.imgUrl,
+        }));
+        setCartItems(formattedData);
+
+        // Pre-fill user information
+        setCustomerName(userObj.name || "");
+        setCustomerPhone(userObj.phoneNumber || "");
+
+        // If cart is empty, redirect back (unless completed)
+        if (formattedData.length === 0 && checkoutStep !== 3) {
+          navigate("/cart");
+        }
+      } catch (err) {
+        console.error("Error during checkout initialization", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Error fetching cart for checkout", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  useEffect(() => {
-    fetchCartData();
-  }, []);
+    verifyAndLoad();
+  }, [navigate, checkoutStep]);
 
   const totalPrice = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,

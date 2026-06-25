@@ -18,3 +18,11 @@ export const getUserProfile = async () => {
 export const updateProfile = async (data) => {
   return await api.put("/update-profile", data);
 };
+
+export const googleLogin = async (data) => {
+  return await api.post("/google", data);
+};
+
+export const completeProfile = async (data) => {
+  return await api.put("/complete-profile", data);
+};

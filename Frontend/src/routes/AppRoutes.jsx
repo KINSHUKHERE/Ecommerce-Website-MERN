@@ -18,6 +18,7 @@ import Profile from "../pages/Profile";
 import Checkout from "../pages/Checkout";
 import TermsConditions from "../pages/TermsConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
+import CompleteProfile from "../pages/CompleteProfile";
 import { getUserProfile } from "../api/AuthApi";
 
 // Import Admin Layout & New Pages
@@ -78,15 +79,32 @@ const AppRoutes = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const hasLocalUser = localStorage.getItem("user");
-      if (!hasLocalUser) return;
+      const localUserStr = localStorage.getItem("user");
+      if (!localUserStr) return;
+
+      const isDeferred = sessionStorage.getItem("profileSetupDeferred") === "true";
+
+      try {
+        const localUser = JSON.parse(localUserStr);
+        if (localUser && localUser.role !== "admin" && localUser.isProfileComplete === false && !isDeferred && location.pathname !== "/complete-profile") {
+          navigate("/complete-profile", { replace: true });
+          return;
+        }
+      } catch (e) {
+        // Ignore json parse error
+      }
 
       try {
         const res = await getUserProfile();
-        localStorage.setItem("user", JSON.stringify(res.data));
+        const updatedUser = res.data;
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        
+        if (updatedUser && updatedUser.role !== "admin" && updatedUser.isProfileComplete === false && !isDeferred && location.pathname !== "/complete-profile") {
+          navigate("/complete-profile", { replace: true });
+        }
       } catch (err) {
         localStorage.removeItem("user");
-        const protectedPaths = ["/cart", "/profile", "/checkout", "/admin", "/create-product", "/contact-details", "/order-details", "/categories", "/variants"];
+        const protectedPaths = ["/cart", "/profile", "/checkout", "/admin", "/create-product", "/contact-details", "/order-details", "/categories", "/variants", "/complete-profile"];
         const isProtected = protectedPaths.some(path => location.pathname.startsWith(path));
         if (isProtected) {
           navigate("/login", { replace: true });
@@ -119,6 +137,9 @@ const AppRoutes = () => {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
       </Route>
+
+      {/* Complete Profile (no navbar) */}
+      <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
 
       {/* Protected Admin-only Routes wrapped in AdminLayout */}
       <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>

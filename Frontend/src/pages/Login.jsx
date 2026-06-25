@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../api/AuthApi";
+import { login, googleLogin } from "../api/AuthApi";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -32,6 +33,8 @@ const Login = () => {
 
       if (user.role === "admin") {
         navigate("/admin");
+      } else if (user.isProfileComplete === false) {
+        navigate("/complete-profile");
       } else {
         navigate("/");
       }
@@ -41,6 +44,36 @@ const Login = () => {
       );
       console.log("Unable to Login!!");
     }
+  };
+
+  // Google OAuth integration
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const response = await googleLogin({
+        token: credentialResponse.credential,
+      });
+
+      const user = response.data.user;
+      const token = response.data.token;
+
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else if (user.isProfileComplete === false) {
+        navigate("/complete-profile");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      console.log(err);
+      setError("Google Login Failed");
+    }
+  };
+
+  const handleGoogleError = () => {
+    console.log("Google Login Failed");
   };
 
   return (
@@ -108,6 +141,20 @@ const Login = () => {
           >
             Login
           </button>
+
+          <div className="my-5 flex items-center">
+            <div className="flex-1 border-t"></div>
+            <span className="px-3 text-sm text-gray-500">OR</span>
+            <div className="flex-1 border-t"></div>
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap={false}
+            />
+          </div>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">

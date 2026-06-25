@@ -1,6 +1,7 @@
 import React, { useDeferredValue, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { signUpApi } from "../api/AuthApi";
+import { signUpApi, googleLogin } from "../api/AuthApi";
+import { GoogleLogin } from "@react-oauth/google";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -31,6 +32,37 @@ const SignUp = () => {
     } catch (err) {
       setError(err.response?.data?.msg || "Unable to create user");
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setError("");
+      const response = await googleLogin({
+        token: credentialResponse.credential,
+      });
+
+      const user = response.data.user;
+      const token = response.data.token;
+
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else if (user.isProfileComplete === false) {
+        navigate("/complete-profile");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      console.log(err);
+      setError("Google Sign Up Failed");
+    }
+  };
+
+  const handleGoogleError = () => {
+    console.log("Google Sign Up Failed");
+    setError("Google Sign Up Failed");
   };
 
   return (
@@ -141,6 +173,21 @@ const SignUp = () => {
           >
             Sign Up
           </button>
+
+          <div className="my-5 flex items-center">
+            <div className="flex-1 border-t border-gray-200"></div>
+            <span className="px-3 text-sm text-gray-500">OR</span>
+            <div className="flex-1 border-t border-gray-200"></div>
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap={false}
+              text="signup_with"
+            />
+          </div>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
