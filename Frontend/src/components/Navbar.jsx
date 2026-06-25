@@ -51,10 +51,10 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const navLink = (path) =>
-    `relative transition-colors duration-300 hover:text-[#15877F] py-2 ${
+    `relative transition-colors duration-300 hover:text-[#15877F] h-full flex items-center px-1 border-b-2 ${
       isActive(path)
-        ? "text-[#15877F] font-semibold after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-[#15877F]"
-        : "text-gray-700"
+        ? "text-[#15877F] font-semibold border-[#15877F]"
+        : "text-gray-700 border-transparent"
     }`;
 
   const handleLogout = () => {
@@ -70,36 +70,33 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
-      <div className="mx-auto flex h-16 sm:h-20 items-center justify-between px-4 sm:px-6 lg:px-10 max-w-7xl w-full">
-        <Link className="flex items-center gap-2" to="/">
-          <img src={logo} alt="Veltiq" className="h-12 w-12 sm:h-14 sm:w-14 object-contain" />
-          <div className="flex flex-col leading-none">
-            <span className="text-lg sm:text-xl font-bold text-[#15877F] tracking-tight">VELTIQ</span>
-            <span className="text-[9px] sm:text-xs tracking-wider text-gray-500">
-              POWERING SMART LIFE
-            </span>
-          </div>
+      <div className="flex h-14 sm:h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
+        <Link className="flex items-center gap-2 h-full" to="/">
+          <img src={logo} alt="Veltiq" className="h-8 w-8 sm:h-9 sm:w-9 object-contain" />
+          <span className="text-xl sm:text-2xl font-bold text-[#15877F] tracking-tight leading-none">
+            VELTIQ
+          </span>
         </Link>
 
 
         {/* Desktop Menu */}
-        <ul className="hidden md:flex items-center gap-8 font-medium">
-          <li>
+        <ul className="hidden md:flex items-stretch gap-8 font-medium h-full">
+          <li className="h-full">
             <Link className={navLink("/")} to="/">
               Home
             </Link>
           </li>
-          <li>
+          <li className="h-full">
             <Link className={navLink("/products")} to="/products">
               Products
             </Link>
           </li>
-          <li>
+          <li className="h-full">
             <Link className={navLink("/about")} to="/about">
               About
             </Link>
           </li>
-          <li>
+          <li className="h-full">
             <Link className={navLink("/contact")} to="/contact">
               Contact
             </Link>

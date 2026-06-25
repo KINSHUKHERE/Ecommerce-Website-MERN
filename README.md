@@ -218,7 +218,7 @@ npm install
 ```
 Create a `.env` file in the root of the `Backend/` folder:
 ```env
-MONGO_URI=mongodb+srv://admin:ShoperaAdmin@cluster0.v9dftns.mongodb.net/Ecommerce
+MONGO_URI=your_mongodb_atlas_connection_string_here
 JWT_SECRET=your_jwt_private_key_here
 GOOGLE_CLIENT_ID=your_google_client_id_here
 PORT=3000
