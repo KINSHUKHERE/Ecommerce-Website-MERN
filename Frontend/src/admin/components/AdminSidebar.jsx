@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.png";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -101,20 +102,10 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <Link
             to="/admin"
-            className="flex items-center gap-2.5"
+            className="flex items-center"
             onClick={() => setIsOpen(false)}
           >
-            <div className="w-8 h-8 rounded-lg bg-[#088178] flex items-center justify-center text-white font-extrabold text-lg shadow-sm">
-              S
-            </div>
-            <div className="text-left">
-              <span className="block font-bold text-gray-900 text-base leading-none">
-                Veltiq
-              </span>
-              <span className="text-[10px] text-gray-400 font-semibold tracking-wider uppercase">
-                Shop Smart
-              </span>
-            </div>
+            <img src={logo} alt="YoCart" className="h-8 w-auto object-contain" />
           </Link>
           <button
             onClick={() => setIsOpen(false)}

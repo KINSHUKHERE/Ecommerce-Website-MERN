@@ -72,10 +72,7 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div className="flex h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
         <Link className="flex items-center gap-1 h-full" to="/">
-          <img src={logo} alt="Veltiq" className="h-9 w-9 sm:h-10 sm:w-10 object-contain translate-y-[2px]" />
-          <span className="text-xl sm:text-2xl font-bold text-[#15877F] tracking-tight leading-none">
-            VELTIQ
-          </span>
+          <img src={logo} alt="YoCart" className="h-9 sm:h-10 w-auto object-contain" />
         </Link>
 
 

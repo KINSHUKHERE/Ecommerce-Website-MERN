@@ -110,7 +110,7 @@ const Login = () => {
           </div>
         )}
         <p className="text-center text-gray-500 mb-6">
-          Login to your Veltiq account
+          Login to your YoCart account
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">

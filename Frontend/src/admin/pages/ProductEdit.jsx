@@ -97,7 +97,7 @@ const ProductEdit = () => {
 
   useEffect(() => {
     if (formData.heading) {
-      document.title = `VELTIQ | Admin - Edit ${formData.heading}`;
+      document.title = `YoCart | Admin - Edit ${formData.heading}`;
     }
   }, [formData.heading]);
 

@@ -2,38 +2,38 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const getTitleFromPathname = (pathname) => {
-  if (pathname === "/") return "VELTIQ | Shop Smart";
-  if (pathname === "/products") return "VELTIQ | Products";
-  if (pathname === "/about") return "VELTIQ | About Us";
-  if (pathname === "/contact") return "VELTIQ | Contact Us";
-  if (pathname === "/terms-conditions") return "VELTIQ | Terms & Conditions";
-  if (pathname === "/privacy-policy") return "VELTIQ | Privacy Policy";
-  if (pathname === "/login") return "VELTIQ | Sign In";
-  if (pathname === "/register") return "VELTIQ | Sign Up";
-  if (pathname === "/cart") return "VELTIQ | Cart";
-  if (pathname === "/profile") return "VELTIQ | Profile";
-  if (pathname === "/checkout") return "VELTIQ | Checkout";
-  if (pathname === "/admin") return "VELTIQ | Admin Dashboard";
-  if (pathname === "/admin/products") return "VELTIQ | Admin - Products";
-  if (pathname === "/create-product") return "VELTIQ | Admin - Create Product";
-  if (pathname === "/contact-details") return "VELTIQ | Admin - Contact Queries";
-  if (pathname === "/order-details") return "VELTIQ | Admin - Order Details";
-  if (pathname === "/categories") return "VELTIQ | Admin - Categories";
-  if (pathname === "/variants") return "VELTIQ | Admin - Variants";
-  if (pathname === "/admin/profile") return "VELTIQ | Admin - Profile";
+  if (pathname === "/") return "YoCart | Shop Smart";
+  if (pathname === "/products") return "YoCart | Products";
+  if (pathname === "/about") return "YoCart | About Us";
+  if (pathname === "/contact") return "YoCart | Contact Us";
+  if (pathname === "/terms-conditions") return "YoCart | Terms & Conditions";
+  if (pathname === "/privacy-policy") return "YoCart | Privacy Policy";
+  if (pathname === "/login") return "YoCart | Sign In";
+  if (pathname === "/register") return "YoCart | Sign Up";
+  if (pathname === "/cart") return "YoCart | Cart";
+  if (pathname === "/profile") return "YoCart | Profile";
+  if (pathname === "/checkout") return "YoCart | Checkout";
+  if (pathname === "/admin") return "YoCart | Admin Dashboard";
+  if (pathname === "/admin/products") return "YoCart | Admin - Products";
+  if (pathname === "/create-product") return "YoCart | Admin - Create Product";
+  if (pathname === "/contact-details") return "YoCart | Admin - Contact Queries";
+  if (pathname === "/order-details") return "YoCart | Admin - Order Details";
+  if (pathname === "/categories") return "YoCart | Admin - Categories";
+  if (pathname === "/variants") return "YoCart | Admin - Variants";
+  if (pathname === "/admin/profile") return "YoCart | Admin - Profile";
 
   // Dynamic routes fallback title
   if (pathname.startsWith("/admin/products/edit/")) {
-    return "VELTIQ | Admin - Edit Product";
+    return "YoCart | Admin - Edit Product";
   }
   if (pathname.startsWith("/admin/products/")) {
-    return "VELTIQ | Admin - View Product";
+    return "YoCart | Admin - View Product";
   }
   if (pathname.startsWith("/products/")) {
-    return "VELTIQ | Product Details";
+    return "YoCart | Product Details";
   }
 
-  return "VELTIQ";
+  return "YoCart";
 };
 
 const DynamicTitle = () => {

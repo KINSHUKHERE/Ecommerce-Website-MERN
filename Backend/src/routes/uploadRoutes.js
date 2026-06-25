@@ -19,7 +19,7 @@ router.post(
 
       // Upload file to Cloudinary
       const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "veltiq_products",
+        folder: "yocart_products",
       });
 
       // Delete the temporary local file from the disk

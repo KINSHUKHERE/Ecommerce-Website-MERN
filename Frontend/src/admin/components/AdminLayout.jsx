@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
 import { Menu, LogOut, ChevronDown, User, Shield } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
+import logo from "../../assets/logo.png";
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -43,13 +44,8 @@ const AdminLayout = ({ children }) => {
             >
               <Menu size={20} />
             </button>
-            <div className="flex items-center gap-2 lg:hidden">
-              <div className="w-7 h-7 rounded bg-[#088178] flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
-                S
-              </div>
-              <span className="font-bold text-gray-900 text-sm leading-none">
-                Veltiq
-              </span>
+            <div className="flex items-center lg:hidden">
+              <img src={logo} alt="YoCart" className="h-7 w-auto object-contain" />
             </div>
           </div>
 

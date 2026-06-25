@@ -98,7 +98,7 @@ const SignUp = () => {
           Create Account
         </h1>
 
-        <p className="text-center text-gray-500 mb-6">Join Veltiq today</p>
+        <p className="text-center text-gray-500 mb-6">Join YoCart today</p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Name */}

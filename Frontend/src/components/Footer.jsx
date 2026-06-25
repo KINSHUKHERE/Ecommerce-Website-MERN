@@ -18,19 +18,12 @@ const Footer = () => {
         {/* Brand & Contact Section */}
         <div className="flex flex-col items-start max-w-sm">
           <div className="flex gap-2 mb-5 items-center">
-            <Link to="/" className="flex items-center gap-3">
+            <Link to="/" className="flex items-center">
               <img
                 src={logo}
-                alt="Veltiq"
-                className="h-12 w-12 object-contain"
+                alt="YoCart"
+                className="h-12 w-auto object-contain"
               />
-
-              <div className="flex flex-col leading-none">
-                <span className="text-xl font-bold text-[#15877F]">Veltiq</span>
-                <span className="text-xs tracking-wider text-gray-500">
-                  SHOP SMART
-                </span>
-              </div>
             </Link>
           </div>
           <div className="flex flex-col gap-2 text-sm mb-4">

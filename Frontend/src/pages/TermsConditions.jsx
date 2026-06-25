@@ -33,13 +33,13 @@ const TermsConditions = () => {
         {/* Terms Content */}
         <div className="space-y-6 text-gray-660 text-sm sm:text-base leading-relaxed text-justify">
           <p>
-            Welcome to <strong>Veltiq</strong>. These Terms & Conditions govern your use of our website, services, and transactions. By accessing or shopping on our platform, you agree to comply with and be bound by these terms. If you do not agree, please do not use our services.
+            Welcome to <strong>YoCart</strong>. These Terms & Conditions govern your use of our website, services, and transactions. By accessing or shopping on our platform, you agree to comply with and be bound by these terms. If you do not agree, please do not use our services.
           </p>
 
           <section className="space-y-3">
             <h2 className="text-lg font-bold text-gray-900">1. Account Security</h2>
             <p>
-              When you create an account on Veltiq, you are responsible for maintaining the security and confidentiality of your credentials (email and password). You agree to accept responsibility for all activities that occur under your account. If you suspect unauthorized access, notify us immediately.
+              When you create an account on YoCart, you are responsible for maintaining the security and confidentiality of your credentials (email and password). You agree to accept responsibility for all activities that occur under your account. If you suspect unauthorized access, notify us immediately.
             </p>
           </section>
 
@@ -60,7 +60,7 @@ const TermsConditions = () => {
           <section className="space-y-3">
             <h2 className="text-lg font-bold text-gray-900">4. Shipping & Delivery</h2>
             <p>
-              Delivery timeframes are estimated and not guaranteed. Veltiq partners with standard courier services to deliver products across valid postal locations. Any delays caused by courier service issues, weather, or natural disruptions are outside our immediate liability.
+              Delivery timeframes are estimated and not guaranteed. YoCart partners with standard courier services to deliver products across valid postal locations. Any delays caused by courier service issues, weather, or natural disruptions are outside our immediate liability.
             </p>
           </section>
 
@@ -74,7 +74,7 @@ const TermsConditions = () => {
           <section className="space-y-3">
             <h2 className="text-lg font-bold text-gray-900">6. Intellectual Property</h2>
             <p>
-              All assets, including the brand name Veltiq, design frameworks, stylesheets, icons, product images, graphics, and codebase, are intellectual property of Veltiq and Poornima University. Reproducing or using these assets without written permission is strictly prohibited.
+              All assets, including the brand name YoCart, design frameworks, stylesheets, icons, product images, graphics, and codebase, are intellectual property of YoCart and Poornima University. Reproducing or using these assets without written permission is strictly prohibited.
             </p>
           </section>
 

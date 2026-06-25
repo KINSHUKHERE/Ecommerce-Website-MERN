@@ -78,7 +78,7 @@ const ProductView = () => {
 
   useEffect(() => {
     if (product) {
-      document.title = `VELTIQ | Admin - View ${product.Title || "Product"}`;
+      document.title = `YoCart | Admin - View ${product.Title || "Product"}`;
     }
   }, [product]);
 

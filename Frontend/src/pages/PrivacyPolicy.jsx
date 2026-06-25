@@ -33,7 +33,7 @@ const PrivacyPolicy = () => {
         {/* Policy Content */}
         <div className="space-y-6 text-gray-660 text-sm sm:text-base leading-relaxed text-justify">
           <p>
-            At <strong>Veltiq</strong>, we prioritize the privacy and security of our users. This Privacy Policy details how we collect, store, utilize, and protect your personal information when you use our e-commerce platform.
+            At <strong>YoCart</strong>, we prioritize the privacy and security of our users. This Privacy Policy details how we collect, store, utilize, and protect your personal information when you use our e-commerce platform.
           </p>
 
           <section className="space-y-3">
