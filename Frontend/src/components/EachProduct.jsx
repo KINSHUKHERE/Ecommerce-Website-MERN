@@ -14,6 +14,9 @@ const EachProduct = ({ data }) => {
 
   if (!data) return null;
 
+  const [adding, setAdding] = React.useState(false);
+  const [toast, setToast] = React.useState("");
+
   const handleAddToCart = async (e) => {
     e.stopPropagation();
 
@@ -24,6 +27,7 @@ const EachProduct = ({ data }) => {
         return;
       }
 
+      setAdding(true);
       const cartData = {
         userId: user._id,
         productId: data._id,
@@ -32,8 +36,15 @@ const EachProduct = ({ data }) => {
 
       await sentToCart(cartData);
       window.dispatchEvent(new Event("cartUpdated"));
+      
+      setToast(`"${data.heading}" added to cart!`);
+      setTimeout(() => {
+        setToast("");
+      }, 2500);
     } catch (err) {
       console.log("Unable to add product to cart", err);
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -105,27 +116,40 @@ const EachProduct = ({ data }) => {
                 : "bg-[#e8f6ea] text-[#088178] hover:bg-[#088178] hover:text-white active:scale-90 cursor-pointer"
             }`}
             onClick={handleAddToCart}
-            disabled={isOutOfStock}
+            disabled={isOutOfStock || adding}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="sm:w-[18px] sm:h-[18px]"
-            >
-              <circle cx="8" cy="21" r="1" />
-              <circle cx="19" cy="21" r="1" />
-              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-            </svg>
+            {adding ? (
+              <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="sm:w-[18px] sm:h-[18px]"
+              >
+                <circle cx="8" cy="21" r="1" />
+                <circle cx="19" cy="21" r="1" />
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 bg-gray-900/95 border border-gray-800 text-white px-4 py-2.5 rounded-lg shadow-lg text-xs font-semibold flex items-center gap-2 animate-fadeIn">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          {toast}
+        </div>
+      )}
     </div>
   );
 };

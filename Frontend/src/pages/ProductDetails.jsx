@@ -5,6 +5,8 @@ import { sentToCart } from "../api/CartApi";
 
 const ProductDetails = () => {
   const [product, setProduct] = useState(null);
+  const [adding, setAdding] = useState(false);
+  const [toast, setToast] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,6 +53,7 @@ const ProductDetails = () => {
         return;
       }
 
+      setAdding(true);
       const cartData = {
         userId: user._id,
         productId: product._id,
@@ -59,8 +62,15 @@ const ProductDetails = () => {
 
       const response = await sentToCart(cartData);
       window.dispatchEvent(new Event("cartUpdated"));
+      
+      setToast(`"${product.heading}" added to cart!`);
+      setTimeout(() => {
+        setToast("");
+      }, 2500);
     } catch (err) {
       console.log("Unable to add product to cart", err);
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -117,18 +127,34 @@ const ProductDetails = () => {
           </div>
 
           <button
-            className={`py-3 px-6 rounded-lg font-semibold transition duration-300 mt-4 ${
+            className={`py-3 px-6 rounded-lg font-semibold transition duration-300 mt-4 flex items-center justify-center gap-2 ${
               (product.quantity ?? 10) <= 0 || product.sold
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                 : "bg-[#088178] hover:bg-[#06635c] text-white cursor-pointer shadow-md shadow-[#088178]/10"
             }`}
             onClick={() => handleAddToCart(product)}
-            disabled={(product.quantity ?? 10) <= 0 || product.sold}
+            disabled={(product.quantity ?? 10) <= 0 || product.sold || adding}
           >
-            {(product.quantity ?? 10) <= 0 || product.sold ? "Sold Out" : "Add to Cart"}
+            {adding ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Adding...
+              </>
+            ) : (
+              (product.quantity ?? 10) <= 0 || product.sold ? "Sold Out" : "Add to Cart"
+            )}
           </button>
         </div>
       </div>
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 bg-gray-900/95 border border-gray-800 text-white px-4 py-2.5 rounded-lg shadow-lg text-xs font-semibold flex items-center gap-2 animate-fadeIn">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          {toast}
+        </div>
+      )}
     </div>
   );
 };

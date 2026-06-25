@@ -1,5 +1,6 @@
 const Order = require("../models/orderDetails");
 const Cart = require("../models/cartDetails");
+const Product = require("../models/productsData");
 
 const createOrder = async (req, res) => {
   try {
@@ -29,6 +30,18 @@ const createOrder = async (req, res) => {
       paymentStatus: "Paid",
       orderStatus: "Processing",
     });
+
+    // Update product quantities
+    for (const item of items) {
+      const product = await Product.findById(item.productId);
+      if (product) {
+        product.quantity = Math.max(0, (product.quantity ?? 10) - item.quantity);
+        if (product.quantity <= 0) {
+          product.sold = true;
+        }
+        await product.save();
+      }
+    }
 
     // Clear user's cart
     await Cart.deleteMany({ userId });

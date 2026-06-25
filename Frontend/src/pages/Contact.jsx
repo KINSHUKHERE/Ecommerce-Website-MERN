@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { postContact } from "../api/ContactApi";
 
@@ -9,23 +9,53 @@ const Contact = () => {
     Message: "",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setIsAuthenticated(true);
+      setFormData((prev) => ({
+        ...prev,
+        Name: user.name || "",
+        Email: user.email || "",
+      }));
+    }
+  }, []);
 
   const formDetails = (e) => {
+    setError("");
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleForm = async (e) => {
     e.preventDefault();
+    setError("");
+    setIsSubmitted(false);
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      setError("Please login or sign up first to submit this form.");
+      return;
+    }
+
+    if (!formData.Name.trim() || !formData.Email.trim() || !formData.Message.trim()) {
+      setError("All fields are required.");
+      return;
+    }
+
     try {
       await postContact(formData);
       setIsSubmitted(true);
       setFormData({
-        Name: "",
-        Email: "",
+        Name: user.name || "",
+        Email: user.email || "",
         Message: "",
       });
     } catch (err) {
       console.log("Error in sending data in contact details api : ", err);
+      setError("Failed to send message. Please try again later.");
     }
   };
 
@@ -75,6 +105,20 @@ const Contact = () => {
           </div>
 
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+            {!isAuthenticated && (
+              <div className="mb-6 p-4 bg-amber-50 text-amber-800 rounded-xl font-semibold text-center border border-amber-200 text-sm">
+                ⚠️ You must be logged in to submit this form.{" "}
+                <Link to="/login" className="underline font-bold text-[#088178] hover:text-[#06635c]">Log In</Link> or{" "}
+                <Link to="/register" className="underline font-bold text-[#088178] hover:text-[#06635c]">Sign Up</Link>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-xl font-semibold text-center border border-red-200">
+                ❌ {error}
+              </div>
+            )}
+
             {isSubmitted && (
               <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-xl font-semibold text-center border border-green-200">
                 ✓ We will assist you soon...

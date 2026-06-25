@@ -108,11 +108,13 @@ Veltiq is a premium, fully responsive e-commerce web application built using the
 *   **Product Details Viewer:** Dedicated page to inspect product descriptions, stock levels, pricing details, and add items to the cart.
 *   **Space-Efficient Responsive Cart:** Clean, mobile-friendly cart layout (`Cart.jsx`) that aligns items horizontally on desktop to utilize full width, stacks cleanly on mobile, updates quantities in real-time, and integrates a mobile sticky bottom checkout bar.
 *   **Dynamic Cart Count Badge:** Updates cart counts instantly across the header using custom event-driven listeners (`cartUpdated`).
+*   **Interactive Add-to-Cart Feedback:** Renders a loader spinner inside the cart button during adding requests, coupled with a smooth-fadeIn bottom-right toast confirmation containing the specific product name.
 *   **Apple/Stripe-Style 2-Page Checkout Wizard:** A distraction-free checkout flow (`Checkout.jsx`) featuring:
     *   *Page 1 (Delivery destination)*: Verified user credentials check and editable shipping recipient forms (Name, Mobile, Street, City, State, PIN).
     *   *Page 2 (Secure Payment Options)*: Interactive method choices (Instant UPI app list or custom VPA, Credit/Debit card validation fields, and Cash on Delivery) with bank-grade security guarantees and secure transaction simulators.
     *   *Success screen*: Check animations, generated transaction ID (`TXN_...`), order reference hashes, and direct navigation routes.
 *   **Tabbed Customer Profile Tracking:** A clean settings layout (`Profile.jsx`) refactored into tabs (Account Settings / My Orders) to dynamically list detailed purchase cards with receipt details, tracking references, and active shipping milestones.
+*   **Autofilled & Secured Contact Support:** The user contact page automatically pre-fills Name and Email fields for logged-in sessions (allowing custom manipulation), while blocking guest form submissions and warning them to login or register first.
 
 ### 📊 Admin Panel Dashboard
 *   **Layout Isolation (`AdminLayout`):** Strictly separated from the store interface. Hides the customer navigation header, rendering a glassmorphic top header and a fixed vertical navigation sidebar (Dashboard, Products, Categories, Variants, Orders, Contact Queries, Logout).
@@ -145,6 +147,7 @@ Veltiq implements a strict, enterprise-ready identity architecture protecting us
 - **Role-Based Access Control**: An additional `verifyAdmin` middleware acts as an administrative route guard, authorizing product modifications, orders updates, and category/variant settings only to users with the `"admin"` role.
 - **Profile Security Panel**: The user's settings profile (`Profile.jsx`) hides password configuration behind an **Account Security** card showing `Password: Not Set` for OAuth users. Clicking `[ Set Password ]` opens input fields to set local credentials. User phone numbers can also be updated directly in the profile settings.
 - **Secure Checkout Enforcements**: Customers are blocked from completing orders unless a phone number and local password are set. Missing details prompt the user and redirect them directly to `/profile` for setup.
+- **Automatic Stock Inventory Management**: On successful checkout, the backend database controller automatically decrements the quantities of the ordered products by the matching items quantity and sets the product's `sold` status to `true` if stock drops to 0.
 - **Dynamic Password Toggle Toggles**: Integrated `Eye` and `EyeOff` show/hide toggles on every password field in the application (Login, SignUp, Complete Profile, and Profile Settings).
 - **Real-Time Password Confirmation Feedback**: Form inputs render real-time verification status helper texts ("✓ Passwords match" or "❌ Passwords do not match") dynamically as the user types.
 
