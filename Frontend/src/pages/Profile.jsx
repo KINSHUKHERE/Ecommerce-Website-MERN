@@ -400,6 +400,12 @@ const Profile = () => {
                         {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                       </button>
                     </div>
+                    {confirmPassword && password !== confirmPassword && (
+                      <p className="text-xs text-red-550 text-red-500 mt-1 text-left">❌ Passwords do not match</p>
+                    )}
+                    {confirmPassword && password === confirmPassword && (
+                      <p className="text-xs text-green-600 mt-1 text-left">✓ Passwords match</p>
+                    )}
                   </div>
                 )}
               </>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { completeProfile } from "../api/AuthApi";
+import { Eye, EyeOff } from "lucide-react";
 
 const CompleteProfile = () => {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ const CompleteProfile = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -156,14 +159,23 @@ const CompleteProfile = () => {
             {/* Password */}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">New Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter password (optional)"
-                className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#15877F]"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter password (optional)"
+                  className="w-full border rounded-lg pl-4 pr-10 py-3 focus:outline-none focus:ring-2 focus:ring-[#15877F]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-650 cursor-pointer outline-none focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             {/* Confirm Password */}
@@ -172,15 +184,30 @@ const CompleteProfile = () => {
                 <label className="block text-sm font-medium mb-2">
                   Confirm Password <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  required={!!formData.password}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm your password"
-                  className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#15877F]"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    required={!!formData.password}
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm your password"
+                    className="w-full border rounded-lg pl-4 pr-10 py-3 focus:outline-none focus:ring-2 focus:ring-[#15877F]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-650 cursor-pointer outline-none focus:outline-none"
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                  <p className="text-xs text-red-500 mt-1.5 text-left">❌ Passwords do not match</p>
+                )}
+                {formData.confirmPassword && formData.password === formData.confirmPassword && (
+                  <p className="text-xs text-green-650 text-green-600 mt-1.5 text-left">✓ Passwords match</p>
+                )}
               </div>
             )}
           </div>
