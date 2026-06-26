@@ -52,7 +52,11 @@ const ProductDetails = () => {
       setActiveImgIndex(0);
     }
   }, [product]);
-  
+  // Find variant matching current selection
+  const activeVariant = product?.variants?.find((v) => {
+    return v.attributes.every((attr) => selectedOptions[attr.name] === attr.value);
+  });
+
   // Reset active image index when active variant changes
   useEffect(() => {
     setActiveImgIndex(0);
@@ -67,11 +71,6 @@ const ProductDetails = () => {
       </div>
     );
   }
-
-  // Find variant matching current selection
-  const activeVariant = product.variants?.find((v) => {
-    return v.attributes.every((attr) => selectedOptions[attr.name] === attr.value);
-  });
 
   const getProductTotalStock = (p) => {
     if (p.variants && p.variants.length > 0) {
