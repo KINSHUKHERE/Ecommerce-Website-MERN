@@ -1003,7 +1003,7 @@ const CreateProduct = () => {
 
       {/* Toast Alert Widget */}
       {message && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
+        <div className="fixed top-4 right-4 z-[9999] flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
           <div
             className={`w-6 h-6 rounded-full flex items-center justify-center ${
               toastType === "success"

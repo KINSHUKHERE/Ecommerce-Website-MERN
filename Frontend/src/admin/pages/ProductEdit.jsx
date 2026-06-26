@@ -631,7 +631,7 @@ const ProductEdit = () => {
     <div className="max-w-4xl mx-auto">
       {/* Toast Alert Widget */}
       {toast.show && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2.5 px-4.5 py-3 rounded-xl bg-white border border-gray-150 shadow-xl animate-slideIn">
+        <div className="fixed top-4 right-4 z-[9999] flex items-center gap-2.5 px-4.5 py-3 rounded-xl bg-white border border-gray-150 shadow-xl animate-slideIn">
           <div
             className={`w-6 h-6 rounded-full flex items-center justify-center ${
               toast.type === "success"
