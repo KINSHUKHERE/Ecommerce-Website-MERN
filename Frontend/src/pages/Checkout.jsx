@@ -317,7 +317,7 @@ const Checkout = () => {
 
   return (
     <div className="flex-grow w-full bg-slate-50 font-sans antialiased text-slate-800 leading-relaxed">
-      <div className="max-w-2xl mx-auto px-4 py-8 pb-24">
+      <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
         
   
         {checkoutStep === 3 ? (

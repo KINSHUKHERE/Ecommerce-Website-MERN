@@ -139,7 +139,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="flex-grow w-full bg-neutral-50 px-2 sm:px-6 py-6 pb-24 lg:pb-8 font-sans antialiased relative">
+    <div className="flex-grow w-full bg-neutral-50 px-2 sm:px-6 py-6 pb-8 font-sans antialiased relative">
       {/* Toast Alert Widget */}
       {message && (
         <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
