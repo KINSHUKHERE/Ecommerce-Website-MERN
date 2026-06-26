@@ -331,7 +331,7 @@ const ProductView = () => {
 
           {/* Right Column: Attribute Details */}
           <div className="md:col-span-7 flex flex-col justify-between">
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               {/* Category, Brand, Status Row */}
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#088178]/5 border border-[#088178]/10 text-[#088178] rounded-md text-[10px] font-bold">
@@ -385,7 +385,7 @@ const ProductView = () => {
               </div>
 
               {/* Description Body */}
-              <div>
+              <div className="order-2 md:order-none">
                 <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
                   Product Description
                 </h4>
@@ -396,7 +396,7 @@ const ProductView = () => {
 
               {/* Variants Details Table */}
               {product.variants && product.variants.length > 0 && (
-                <div className="mt-6 border-t pt-6 text-left">
+                <div className="mt-4 md:mt-6 border-t pt-4 md:pt-6 text-left order-1 md:order-none">
                   <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
                     Configured Product Variants ({product.variants.length})
                   </h4>

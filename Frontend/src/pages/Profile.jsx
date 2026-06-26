@@ -654,18 +654,18 @@ const Profile = () => {
                   .map((order) => (
                 <div
                   key={order._id}
-                  className="bg-white border border-slate-100 rounded-xl p-5 shadow-sm shadow-slate-100/30 space-y-4 text-left relative overflow-hidden"
+                  className="bg-white border border-slate-100 rounded-xl p-3 sm:p-5 shadow-sm shadow-slate-100/30 space-y-4 text-left relative overflow-hidden"
                 >
                   <div className="absolute top-0 left-0 right-0 h-[3px] bg-slate-100"></div>
 
                   {/* Order Card Header details */}
                   <div className="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-3">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5">
                         <span className="text-[10px] text-gray-400 block font-bold uppercase tracking-wider">
                           Order Reference
                         </span>
-                        <span className="text-xs font-bold text-slate-800">
+                        <span className="text-xs font-bold text-slate-800 truncate max-w-[120px] sm:max-w-none inline-block">
                           #{order._id}
                         </span>
                       </div>
@@ -715,7 +715,7 @@ const Profile = () => {
                   </div>
 
                   {/* Order Details Footer */}
-                  <div className="pt-3.5 border-t border-slate-100 grid md:grid-cols-2 gap-4 text-xs font-medium text-slate-600 bg-slate-50/50 -mx-5 -mb-5 px-5 py-4">
+                  <div className="pt-3.5 border-t border-slate-100 grid md:grid-cols-2 gap-4 text-xs font-medium text-slate-600 bg-slate-50/50 -mx-5 -mb-5 px-3 sm:px-5 py-3 sm:py-4">
                     
                     {/* Shipping Address Summary */}
                     <div className="space-y-1.5">
@@ -737,7 +737,7 @@ const Profile = () => {
                         <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                           Transaction ID
                         </span>
-                        <span className="font-mono text-[11px] text-slate-700 block select-all">
+                        <span className="font-mono text-[11px] text-slate-700 block select-all truncate max-w-[140px] sm:max-w-none">
                           {order.transactionId}
                         </span>
                       </div>

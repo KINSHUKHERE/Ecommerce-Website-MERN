@@ -128,7 +128,7 @@ const ContactDetails = () => {
       </div>
 
       {/* Analytics Stats Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
         <div
           onClick={() => setDateFilter("all")}
           className={`flex flex-col p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
@@ -136,22 +136,22 @@ const ContactDetails = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Total Queries</span>
+            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Total Queries</span>
             <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
               <MessageSquare size={16} />
             </div>
           </div>
-          <span className="text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.total}</span>
+          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.total}</span>
         </div>
 
         <div className="flex flex-col p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Unique Senders</span>
+            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Unique Senders</span>
             <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
               <User size={16} />
             </div>
           </div>
-          <span className="text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.uniqueEmails}</span>
+          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.uniqueEmails}</span>
         </div>
       </div>
 

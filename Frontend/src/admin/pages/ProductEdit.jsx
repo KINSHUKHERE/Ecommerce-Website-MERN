@@ -190,6 +190,7 @@ const ProductEdit = () => {
 
     if (productImages.length + files.length > 6) {
       showToast("You can add up to 6 images only.", "error");
+      e.target.value = "";
       return;
     }
 
@@ -207,6 +208,7 @@ const ProductEdit = () => {
       showToast("Failed to upload one or more images", "error");
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   };
 

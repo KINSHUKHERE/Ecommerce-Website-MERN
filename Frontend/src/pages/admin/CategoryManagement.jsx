@@ -207,7 +207,7 @@ const CategoryManagement = () => {
       </div>
 
       {/* Analytics Stats Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
         <div
           onClick={() => {
             setStatusFilter("");
@@ -217,12 +217,12 @@ const CategoryManagement = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Total Categories</span>
+            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Total Categories</span>
             <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
               <Tag size={15} />
             </div>
           </div>
-          <span className="text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.total}</span>
+          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.total}</span>
         </div>
 
         <div
@@ -232,12 +232,12 @@ const CategoryManagement = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Active Categories</span>
+            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Active Categories</span>
             <div className="p-1.5 rounded-lg bg-green-50 text-green-600">
               <CheckCircle size={15} />
             </div>
           </div>
-          <span className="text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.active}</span>
+          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.active}</span>
         </div>
 
         <div
@@ -247,12 +247,12 @@ const CategoryManagement = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Inactive Categories</span>
+            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Inactive Categories</span>
             <div className="p-1.5 rounded-lg bg-red-50 text-red-650">
               <XCircle size={15} />
             </div>
           </div>
-          <span className="text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.inactive}</span>
+          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.inactive}</span>
         </div>
       </div>
 

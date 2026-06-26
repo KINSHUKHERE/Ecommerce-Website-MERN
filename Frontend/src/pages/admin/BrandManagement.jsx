@@ -312,7 +312,7 @@ const BrandManagement = () => {
       </div>
 
       {/* Analytics Stats Section */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <div
           onClick={() => {
             setSelectedStatusFilter("");
@@ -323,12 +323,12 @@ const BrandManagement = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Total Brands</span>
+            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Total Brands</span>
             <div className="p-1.5 rounded-lg bg-blue-50 text-blue-650">
               <Layers size={16} />
             </div>
           </div>
-          <span className="text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.total}</span>
+          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.total}</span>
         </div>
 
         <div
@@ -338,12 +338,12 @@ const BrandManagement = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Active Brands</span>
+            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Active Brands</span>
             <div className="p-1.5 rounded-lg bg-green-50 text-green-600">
               <CheckCircle size={16} />
             </div>
           </div>
-          <span className="text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.active}</span>
+          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.active}</span>
         </div>
 
         <div
@@ -353,22 +353,22 @@ const BrandManagement = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Inactive Brands</span>
+            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Inactive Brands</span>
             <div className="p-1.5 rounded-lg bg-red-50 text-red-600">
               <XCircle size={16} />
             </div>
           </div>
-          <span className="text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.inactive}</span>
+          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.inactive}</span>
         </div>
 
         <div className="flex flex-col p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Categories</span>
+            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Categories</span>
             <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
               <TrendingUp size={16} />
             </div>
           </div>
-          <span className="text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.uniqueCats}</span>
+          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.uniqueCats}</span>
         </div>
       </div>
 
