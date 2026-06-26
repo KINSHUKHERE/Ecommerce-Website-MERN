@@ -60,6 +60,39 @@ async function seedProducts() {
 
     const productsToSeed = [
       {
+        heading: "iPhone 17 Pro Max",
+        description: "The next generation of iPhone featuring a stunning titanium design, the revolutionary A19 Pro chip, and advanced camera systems.",
+        categoryName: "Smartphones",
+        brandName: "Apple",
+        imgUrl: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800",
+        images: [
+          "https://images.unsplash.com/photo-1678652197286-f152d50e1ef3?w=800",
+          "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800",
+          "https://images.unsplash.com/photo-1616348436168-de43ad0db179?w=800"
+        ],
+        options: [
+          { name: "Color", values: ["Desert Titanium", "Titanium Gray", "Deep Aurora"] },
+          { name: "Storage", values: ["256GB", "512GB", "1TB"] }
+        ],
+        basePrice: 139900,
+        priceDelta: { "512GB": 20000, "1TB": 40000 },
+        baseQuantity: 10,
+        variantImages: {
+          "Desert Titanium": [
+            "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800",
+            "https://images.unsplash.com/photo-1678652197286-f152d50e1ef3?w=800"
+          ],
+          "Titanium Gray": [
+            "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800",
+            "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800"
+          ],
+          "Deep Aurora": [
+            "https://images.unsplash.com/photo-1616348436168-de43ad0db179?w=800",
+            "https://images.unsplash.com/photo-1573148195900-7845dcb9b127?w=800"
+          ]
+        }
+      },
+      {
         heading: "iPhone 15 Pro Titanium",
         description: "Featuring the groundbreaking A17 Pro chip, a customizable Action button, and a powerful titanium build.",
         categoryName: "Smartphones",
@@ -182,12 +215,20 @@ async function seedProducts() {
           }
         });
 
+        let variantImages = [item.imgUrl];
+        if (item.variantImages) {
+          const matchingKey = combo.map(c => c.value).find(val => item.variantImages[val]);
+          if (matchingKey) {
+            variantImages = item.variantImages[matchingKey];
+          }
+        }
+
         return {
           productId: product._id,
           sku,
           price,
           quantity: item.baseQuantity,
-          images: [item.imgUrl],
+          images: variantImages,
           attributes: combo
         };
       });

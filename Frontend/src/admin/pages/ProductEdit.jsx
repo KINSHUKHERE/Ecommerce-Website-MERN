@@ -55,6 +55,7 @@ const ProductEdit = () => {
   const [variantUrlInput, setVariantUrlInput] = useState("");
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [draggedVariantImgIndex, setDraggedVariantImgIndex] = useState(null);
+  const [imageSyncAttribute, setImageSyncAttribute] = useState("");
 
   // Variant States
   const [hasVariants, setHasVariants] = useState(false);
@@ -140,6 +141,39 @@ const ProductEdit = () => {
       document.title = `YoCart | Admin - Edit ${formData.heading}`;
     }
   }, [formData.heading]);
+
+  // Auto-detect Color option as default image sync link
+  useEffect(() => {
+    const colorOpt = options.find(o => o.name && (o.name.toLowerCase().includes("color") || o.name.toLowerCase().includes("colour")));
+    if (colorOpt) {
+      setImageSyncAttribute(colorOpt.name);
+    } else {
+      setImageSyncAttribute("");
+    }
+  }, [options]);
+
+  const triggerImageSyncAll = (syncAttrName) => {
+    if (!syncAttrName) return;
+    setVariants((prev) => {
+      const imageMap = {};
+      prev.forEach((v) => {
+        const attr = v.attributes.find(a => a.name === syncAttrName);
+        if (attr && v.images && v.images.length > 0) {
+          if (!imageMap[attr.value]) {
+            imageMap[attr.value] = v.images;
+          }
+        }
+      });
+
+      return prev.map((v) => {
+        const attr = v.attributes.find(a => a.name === syncAttrName);
+        if (attr && imageMap[attr.value]) {
+          return { ...v, images: [...imageMap[attr.value]] };
+        }
+        return v;
+      });
+    });
+  };
 
   const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
@@ -372,20 +406,20 @@ const ProductEdit = () => {
   };
 
   const syncSharedVariantImages = (variantsList, changedVariantIdx) => {
+    if (!imageSyncAttribute) return variantsList;
+
     const changedVariant = variantsList[changedVariantIdx];
     if (!changedVariant || !changedVariant.attributes || changedVariant.attributes.length === 0) return variantsList;
 
-    let syncAttr = changedVariant.attributes.find(a => a.name.toLowerCase().includes("color") || a.name.toLowerCase().includes("colour"));
-    if (!syncAttr) {
-      syncAttr = changedVariant.attributes[0];
-    }
+    const syncAttr = changedVariant.attributes.find(a => a.name === imageSyncAttribute);
+    if (!syncAttr) return variantsList;
 
     const syncValue = syncAttr.value;
 
     return variantsList.map((v, idx) => {
       if (idx === changedVariantIdx) return v;
 
-      const matchingAttr = v.attributes.find(a => a.name === syncAttr.name);
+      const matchingAttr = v.attributes.find(a => a.name === imageSyncAttribute);
       if (matchingAttr && matchingAttr.value === syncValue) {
         return { ...v, images: [...(changedVariant.images || [])] };
       }
@@ -979,8 +1013,26 @@ const ProductEdit = () => {
                       </div>
                     </div>
                     
-                    {/* Bulk editing bar */}
+                     {/* Bulk editing bar */}
                     <div className="flex flex-wrap items-center gap-2">
+                      {/* Image Sync Dropdown */}
+                      <div className="flex items-center gap-1.5 mr-2">
+                        <label className="text-[11px] font-bold text-slate-650 whitespace-nowrap">Link Images By:</label>
+                        <select
+                          value={imageSyncAttribute}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setImageSyncAttribute(val);
+                            triggerImageSyncAll(val);
+                          }}
+                          className="px-2.5 py-1 text-xs border border-slate-200 rounded-lg bg-white font-semibold cursor-pointer outline-none focus:border-slate-400"
+                        >
+                          <option value="">Individual Images</option>
+                          {options.filter(o => o.name).map((o, idx) => (
+                            <option key={idx} value={o.name}>{o.name}</option>
+                          ))}
+                        </select>
+                      </div>
                       <input
                         type="number"
                         placeholder="Price (₹)"
