@@ -1075,7 +1075,7 @@ const ProductEdit = () => {
                         setActiveImagePickerVariant(null);
                       } catch (err) {
                         console.error(err);
-                        showToast("Variant image upload failed");
+                        showToast("Variant image upload failed", "error");
                       } finally {
                         setUploadingVariantIndex(null);
                       }

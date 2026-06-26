@@ -52,6 +52,11 @@ const ProductDetails = () => {
       setActiveImgIndex(0);
     }
   }, [product]);
+  
+  // Reset active image index when active variant changes
+  useEffect(() => {
+    setActiveImgIndex(0);
+  }, [activeVariant?._id]);
 
   // If wrong productId or product not found
   if (!product) {
