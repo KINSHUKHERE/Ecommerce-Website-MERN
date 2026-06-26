@@ -10,10 +10,8 @@ const variantSchema = new mongoose.Schema(
     },
     sku: {
       type: String,
-      required: true,
-      unique: true,
+      required: false,
       trim: true,
-      index: true,
     },
     price: {
       type: Number,
@@ -36,19 +34,6 @@ const variantSchema = new mongoose.Schema(
         value: { type: String, required: true },
       },
     ],
-    barcode: {
-      type: String,
-      sparse: true,
-    },
-    weight: {
-      type: Number,
-      default: 0,
-    },
-    dimensions: {
-      length: { type: Number, default: 0 },
-      width: { type: Number, default: 0 },
-      height: { type: Number, default: 0 },
-    },
     isActive: {
       type: Boolean,
       default: true,

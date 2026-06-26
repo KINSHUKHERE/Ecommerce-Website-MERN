@@ -8,11 +8,22 @@ const addProduct = async (req, res) => {
     const product = await Product.create(productData);
 
     if (Array.isArray(variants) && variants.length > 0) {
-      // Add productId to each variant
-      const variantsWithProductId = variants.map(v => ({
-        ...v,
-        productId: product._id
-      }));
+      // Add productId and auto-generated unique SKU to each variant
+      const variantsWithProductId = variants.map((v, idx) => {
+        const shortName = product.heading
+          .slice(0, 4)
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, "");
+        const attrVals = v.attributes.map(a => a.value.slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, "")).join("-");
+        const uniqueSuffix = `${idx}-${Math.floor(100 + Math.random() * 900)}`;
+        const generatedSku = `SKU-${shortName}-${attrVals}-${uniqueSuffix}`;
+        
+        return {
+          ...v,
+          productId: product._id,
+          sku: v.sku || generatedSku
+        };
+      });
       await Variant.insertMany(variantsWithProductId);
     } else {
       // Create a default Variant for flat products
@@ -151,16 +162,22 @@ const updateProduct = async (req, res) => {
             quantity: variant.quantity,
             images: variant.images,
             attributes: variant.attributes,
-            barcode: variant.barcode,
-            weight: variant.weight,
-            dimensions: variant.dimensions,
             isActive: variant.isActive
           });
         } else {
           // Create new variant
+          const shortName = updatedProduct.heading
+            .slice(0, 4)
+            .toUpperCase()
+            .replace(/[^A-Z0-9]/g, "");
+          const attrVals = variant.attributes.map(a => a.value.slice(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, "")).join("-");
+          const uniqueSuffix = `${Math.floor(1000 + Math.random() * 9000)}`;
+          const generatedSku = `SKU-${shortName}-${attrVals}-${uniqueSuffix}`;
+
           await Variant.create({
             ...variant,
-            productId: id
+            productId: id,
+            sku: variant.sku || generatedSku
           });
         }
       }

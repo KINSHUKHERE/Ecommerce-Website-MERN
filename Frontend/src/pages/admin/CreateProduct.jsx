@@ -218,8 +218,6 @@ const CreateProduct = () => {
         quantity: formData.quantity || "",
         images: [],
         attributes: combo,
-        barcode: "",
-        weight: "",
       };
     });
     
@@ -325,27 +323,23 @@ const CreateProduct = () => {
       }
 
       for (const v of variants) {
-        if (!v.sku || !v.sku.trim()) {
-          showToast("All variants must have a valid SKU.");
-          return;
-        }
+        const name = v.attributes.map(a => a.value).join(" • ");
         if (v.price === "" || isNaN(v.price) || Number(v.price) < 0) {
-          showToast(`Invalid price rate for variant with SKU ${v.sku}.`);
+          showToast(`Invalid price rate for variant ${name}.`);
           return;
         }
         if (v.quantity === "" || isNaN(v.quantity) || Number(v.quantity) < 0) {
-          showToast(`Invalid stock quantity for variant with SKU ${v.sku}.`);
+          showToast(`Invalid stock quantity for variant ${name}.`);
           return;
         }
       }
 
-      // Format weights & numbers
+      // Format numbers
       const formattedVariants = variants.map(v => ({
-        ...v,
         price: Number(v.price),
         quantity: Number(v.quantity),
-        weight: v.weight ? Number(v.weight) : undefined,
-        images: v.images.length > 0 ? v.images : [productImages[0]],
+        attributes: v.attributes,
+        images: v.images && v.images.length > 0 ? v.images : [productImages[0]],
       }));
 
       finalData.variants = formattedVariants;
@@ -763,11 +757,8 @@ const CreateProduct = () => {
                           <tr className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-gray-500 border-b border-slate-100">
                             <th className="py-2.5 px-4 w-12 text-center">Image</th>
                             <th className="py-2.5 px-4">Variant Attributes</th>
-                            <th className="py-2.5 px-4">SKU Code</th>
                             <th className="py-2.5 px-4">Price (₹)</th>
                             <th className="py-2.5 px-4">Stock</th>
-                            <th className="py-2.5 px-4">Weight (g)</th>
-                            <th className="py-2.5 px-4">Barcode</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
@@ -779,7 +770,7 @@ const CreateProduct = () => {
                                   <label className="relative w-8 h-8 rounded border bg-slate-100 border-dashed hover:border-[#088178] hover:bg-[#088178]/5 transition-all flex items-center justify-center overflow-hidden cursor-pointer">
                                     {uploadingVariantIndex === vIdx ? (
                                       <Loader2 className="animate-spin text-[#088178] w-4 h-4" />
-                                    ) : v.images.length > 0 ? (
+                                    ) : v.images && v.images.length > 0 ? (
                                       <img
                                         src={v.images[0]}
                                         alt="Variant"
@@ -800,14 +791,6 @@ const CreateProduct = () => {
                                 <td className="py-2.5 px-4 text-slate-800 font-bold">{name}</td>
                                 <td className="py-2.5 px-4">
                                   <input
-                                    type="text"
-                                    value={v.sku}
-                                    onChange={(e) => handleVariantChange(vIdx, "sku", e.target.value)}
-                                    className="px-2 py-1 text-xs border rounded w-full font-mono bg-white"
-                                  />
-                                </td>
-                                <td className="py-2.5 px-4">
-                                  <input
                                     type="number"
                                     value={v.price}
                                     onChange={(e) => handleVariantChange(vIdx, "price", e.target.value)}
@@ -822,24 +805,6 @@ const CreateProduct = () => {
                                     onChange={(e) => handleVariantChange(vIdx, "quantity", e.target.value)}
                                     placeholder="Stock"
                                     className="px-2 py-1 text-xs border rounded w-[65px] bg-white font-medium"
-                                  />
-                                </td>
-                                <td className="py-2.5 px-4">
-                                  <input
-                                    type="number"
-                                    value={v.weight}
-                                    onChange={(e) => handleVariantChange(vIdx, "weight", e.target.value)}
-                                    placeholder="200"
-                                    className="px-2 py-1 text-xs border rounded w-[65px] bg-white font-medium"
-                                  />
-                                </td>
-                                <td className="py-2.5 px-4">
-                                  <input
-                                    type="text"
-                                    value={v.barcode}
-                                    onChange={(e) => handleVariantChange(vIdx, "barcode", e.target.value)}
-                                    placeholder="Barcode"
-                                    className="px-2 py-1 text-xs border rounded w-[100px] bg-white font-medium"
                                   />
                                 </td>
                               </tr>

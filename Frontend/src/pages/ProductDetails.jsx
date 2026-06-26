@@ -216,11 +216,6 @@ const ProductDetails = () => {
             {product.heading}
           </h1>
           
-          {activeVariant && (
-            <span className="text-xs font-mono text-gray-400">
-              SKU: {activeVariant.sku}
-            </span>
-          )}
 
           <p className="text-2xl font-bold text-indigo-650">
             ₹{(activeVariant ? activeVariant.price : (product.price || 0)).toLocaleString()}

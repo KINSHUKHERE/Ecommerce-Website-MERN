@@ -188,8 +188,7 @@ async function seedProducts() {
           price,
           quantity: item.baseQuantity,
           images: [item.imgUrl],
-          attributes: combo,
-          barcode: `EAN-${brandCode}-${prodCode}-${idx + 10000}`
+          attributes: combo
         };
       });
 

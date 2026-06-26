@@ -389,11 +389,8 @@ const ProductView = () => {
                         <tr className="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-gray-500 border-b border-slate-100">
                           <th className="py-2.5 px-4 w-12 text-center">Image</th>
                           <th className="py-2.5 px-4">Variant Attributes</th>
-                          <th className="py-2.5 px-4 font-mono">SKU</th>
                           <th className="py-2.5 px-4 text-right">Price</th>
                           <th className="py-2.5 px-4 text-center">Stock</th>
-                          <th className="py-2.5 px-4 text-center">Weight</th>
-                          <th className="py-2.5 px-4">Barcode</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
@@ -408,18 +405,15 @@ const ProductView = () => {
                                   {v.images && v.images.length > 0 ? (
                                     <img src={v.images[0]} alt="Variant" className="w-full h-full object-contain" />
                                   ) : (
-                                    <ImageIcon size={14} className="text-gray-400" />
+                                    <Box size={14} className="text-gray-400" />
                                   )}
                                 </div>
                               </td>
                               <td className="py-2.5 px-4 font-bold text-slate-800">{name}</td>
-                              <td className="py-2.5 px-4 font-mono text-gray-500">{v.sku}</td>
                               <td className="py-2.5 px-4 text-right text-[#088178]">
                                 ₹{v.price.toLocaleString()}
                               </td>
                               <td className="py-2.5 px-4 text-center">{v.quantity}</td>
-                              <td className="py-2.5 px-4 text-center">{v.weight ? `${v.weight}g` : "N/A"}</td>
-                              <td className="py-2.5 px-4 text-gray-500">{v.barcode || "N/A"}</td>
                             </tr>
                           );
                         })}
