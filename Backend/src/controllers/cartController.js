@@ -1,9 +1,18 @@
 const Cart = require("../models/cartDetails");
+const Product = require("../models/productsData");
 
 const addItemsToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
     const userId = req.user.userId;
+    const qtyToAdd = quantity || 1;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        msg: "Product not found",
+      });
+    }
 
     const existingItem = await Cart.findOne({
       userId,
@@ -12,7 +21,13 @@ const addItemsToCart = async (req, res) => {
 
     // Product already exists in cart
     if (existingItem) {
-      existingItem.quantity += quantity || 1;
+      const newQty = existingItem.quantity + qtyToAdd;
+      if (newQty > product.quantity) {
+        return res.status(400).json({
+          msg: `Cannot add more. Only ${product.quantity} items available in stock.`,
+        });
+      }
+      existingItem.quantity = newQty;
 
       await existingItem.save();
 
@@ -23,10 +38,16 @@ const addItemsToCart = async (req, res) => {
     }
 
     // Product not in cart yet
+    if (qtyToAdd > product.quantity) {
+      return res.status(400).json({
+        msg: `Cannot add. Only ${product.quantity} items available in stock.`,
+      });
+    }
+
     const cartItem = await Cart.create({
       userId,
       productId,
-      quantity: quantity || 1,
+      quantity: qtyToAdd,
     });
 
     res.status(201).json({
@@ -72,6 +93,19 @@ const increaseCart = async (req, res) => {
     if (cartItem.userId.toString() !== req.user.userId) {
       return res.status(403).json({
         msg: "Forbidden: You do not own this cart item",
+      });
+    }
+
+    const product = await Product.findById(cartItem.productId);
+    if (!product) {
+      return res.status(404).json({
+        msg: "Product not found",
+      });
+    }
+
+    if (cartItem.quantity + 1 > product.quantity) {
+      return res.status(400).json({
+        msg: `Cannot increase. Only ${product.quantity} items available in stock.`,
       });
     }
 

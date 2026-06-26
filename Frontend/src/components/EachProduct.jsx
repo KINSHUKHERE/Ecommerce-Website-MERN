@@ -41,6 +41,11 @@ const EachProduct = ({ data }) => {
         setToast("");
       }, 2500);
     } catch (err) {
+      const errMsg = err.response?.data?.msg || "Unable to add product to cart";
+      setToast(errMsg);
+      setTimeout(() => {
+        setToast("");
+      }, 3000);
       console.log("Unable to add product to cart", err);
     } finally {
       setAdding(false);

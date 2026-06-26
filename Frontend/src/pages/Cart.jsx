@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2 } from "lucide-react";
+import { Trash2, Check, X } from "lucide-react";
 import {
   getDataCart,
   increaseCart,
@@ -13,6 +13,16 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+
+  const showToast = (msg, type = "success") => {
+    setMessage(msg);
+    setToastType(type);
+    setTimeout(() => {
+      setMessage("");
+    }, 3000);
+  };
 
   const localUser = JSON.parse(localStorage.getItem("user"));
 
@@ -54,6 +64,8 @@ const Cart = () => {
       await fetchCartData();
       window.dispatchEvent(new Event("cartUpdated"));
     } catch (err) {
+      const errMsg = err.response?.data?.msg || "Unable to increase quantity";
+      showToast(errMsg, "error");
       console.log("Unable to increase quantity", err);
     } finally {
       setUpdatingId(null);
@@ -67,6 +79,8 @@ const Cart = () => {
       await fetchCartData();
       window.dispatchEvent(new Event("cartUpdated"));
     } catch (err) {
+      const errMsg = err.response?.data?.msg || "Unable to decrease quantity";
+      showToast(errMsg, "error");
       console.log("Unable to decrease quantity", err);
     } finally {
       setUpdatingId(null);
@@ -109,7 +123,22 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 px-2 sm:px-6 py-6 pb-24 lg:pb-8 font-sans antialiased">
+    <div className="min-h-screen bg-neutral-50 px-2 sm:px-6 py-6 pb-24 lg:pb-8 font-sans antialiased relative">
+      {/* Toast Alert Widget */}
+      {message && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
+          <div
+            className={`w-6 h-6 rounded-full flex items-center justify-center ${
+              toastType === "success"
+                ? "bg-green-50 text-green-600 border border-green-100"
+                : "bg-red-50 text-red-655 border border-red-100"
+            }`}
+          >
+            {toastType === "success" ? <Check size={14} /> : <X size={14} />}
+          </div>
+          <span className="text-sm font-medium text-gray-800">{message}</span>
+        </div>
+      )}
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-left border-b border-gray-100 pb-3 tracking-tight">
           Shopping Cart ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items)
