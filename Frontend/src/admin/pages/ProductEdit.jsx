@@ -51,6 +51,8 @@ const ProductEdit = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadingVariantIndex, setUploadingVariantIndex] = useState(null);
   const [activeImagePickerVariant, setActiveImagePickerVariant] = useState(null);
+  const [variantImageInputMethod, setVariantImageInputMethod] = useState("upload");
+  const [variantUrlInput, setVariantUrlInput] = useState("");
   const [draggedIndex, setDraggedIndex] = useState(null);
 
   // Variant States
@@ -335,27 +337,74 @@ const ProductEdit = () => {
     setVariants(prev => prev.map((v, idx) => idx === vIdx ? { ...v, [field]: val } : v));
   };
 
-  const handleVariantImageUpload = async (e, vIdx) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleVariantImagesUpload = async (e, vIdx) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const currentImages = variants[vIdx]?.images || [];
+    if (currentImages.length + files.length > 6) {
+      showToast("You can add up to 6 images per variant.", "error");
+      return;
+    }
 
     setUploadingVariantIndex(vIdx);
     try {
-      const res = await uploadProductImage(file);
-      const url = res.data.url;
-      setVariants(prev => prev.map((v, idx) => {
-        if (idx === vIdx) {
-          return { ...v, images: [url] };
-        }
-        return v;
-      }));
-      showToast("Variant image uploaded successfully", "success");
+      const uploadPromises = files.map((file) => uploadProductImage(file));
+      const responses = await Promise.all(uploadPromises);
+      const urls = responses.map((res) => res.data.url);
+
+      setVariants((prev) =>
+        prev.map((v, idx) => {
+          if (idx === vIdx) {
+            return { ...v, images: [...(v.images || []), ...urls] };
+          }
+          return v;
+        })
+      );
+      showToast("Variant images uploaded successfully", "success");
     } catch (err) {
       console.error(err);
-      showToast("Variant image upload failed", "error");
+      showToast("Failed to upload one or more variant images", "error");
     } finally {
       setUploadingVariantIndex(null);
     }
+  };
+
+  const addVariantImageUrl = (vIdx) => {
+    const url = variantUrlInput.trim();
+    if (!url) return;
+
+    const currentImages = variants[vIdx]?.images || [];
+    if (currentImages.length >= 6) {
+      showToast("You can add up to 6 images per variant.", "error");
+      return;
+    }
+
+    setVariants((prev) =>
+      prev.map((v, idx) => {
+        if (idx === vIdx) {
+          return { ...v, images: [...(v.images || []), url] };
+        }
+        return v;
+      })
+    );
+    setVariantUrlInput("");
+    showToast("Variant image URL added", "success");
+  };
+
+  const removeVariantImage = (vIdx, imgIdx) => {
+    setVariants((prev) =>
+      prev.map((v, idx) => {
+        if (idx === vIdx) {
+          return {
+            ...v,
+            images: (v.images || []).filter((_, i) => i !== imgIdx),
+          };
+        }
+        return v;
+      })
+    );
+    showToast("Variant image removed", "success");
   };
 
   const handleApplyBulk = () => {
@@ -373,16 +422,10 @@ const ProductEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (productImages.length === 0) {
-      showToast("Please upload or add at least one product image.", "error");
-      return;
-    }
     setSaving(true);
 
     let finalData = {
       ...formData,
-      imgUrl: productImages[0],
-      images: productImages.slice(1),
       options: hasVariants ? options.filter(o => o.name.trim() !== "" && o.values.length > 0) : [],
     };
 
@@ -390,6 +433,14 @@ const ProductEdit = () => {
       // Validate variants
       if (variants.length === 0) {
         showToast("Please configure at least one variant option value.", "error");
+        setSaving(false);
+        return;
+      }
+
+      // Check if at least one variant has an image
+      const firstVariantWithImage = variants.find(v => v.images && v.images.length > 0);
+      if (!firstVariantWithImage) {
+        showToast("Please upload or add at least one image to at least one variant.", "error");
         setSaving(false);
         return;
       }
@@ -408,16 +459,18 @@ const ProductEdit = () => {
         }
       }
 
-      // Format numbers
+      // Format numbers and handle fallback images
       const formattedVariants = variants.map(v => ({
         _id: v._id || undefined,
         sku: v.sku || undefined,
         price: Number(v.price),
         quantity: Number(v.quantity),
         attributes: v.attributes,
-        images: v.images && v.images.length > 0 ? v.images : [productImages[0]],
+        images: v.images && v.images.length > 0 ? v.images : [firstVariantWithImage.images[0]],
       }));
 
+      finalData.imgUrl = firstVariantWithImage.images[0];
+      finalData.images = firstVariantWithImage.images.slice(1);
       finalData.variants = formattedVariants;
       
       // Clean top level price/qty since they are variant-specific
@@ -425,6 +478,11 @@ const ProductEdit = () => {
       finalData.quantity = 0;
     } else {
       // Flat product pricing/quantity validation
+      if (productImages.length === 0) {
+        showToast("Please upload or add at least one product image.", "error");
+        setSaving(false);
+        return;
+      }
       if (formData.price === "" || isNaN(formData.price) || Number(formData.price) < 0) {
         showToast("Please enter a valid product price.", "error");
         setSaving(false);
@@ -436,6 +494,8 @@ const ProductEdit = () => {
         return;
       }
       
+      finalData.imgUrl = productImages[0];
+      finalData.images = productImages.slice(1);
       finalData.price = Number(formData.price);
       finalData.quantity = Number(formData.quantity);
       
@@ -520,136 +580,137 @@ const ProductEdit = () => {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Form Fields: 8 columns */}
             <div className="md:col-span-8 space-y-4">
-              
-              {/* Unified Product Images Manager */}
-              <div className="space-y-4 border-b border-slate-100 pb-5">
-                <div className="flex justify-between items-center flex-wrap gap-2">
-                  <div className="space-y-0.5 text-left">
-                    <label className="block text-xs font-bold text-gray-655 uppercase tracking-wider">
-                      Product Images ({productImages.length}/6)
-                    </label>
-                    <p className="text-[10px] text-gray-450 font-medium">
-                      The first image will automatically be set as the Primary Cover.
-                    </p>
+                           {/* Unified Product Images Manager */}
+              {!hasVariants && (
+                <div className="space-y-4 border-b border-slate-100 pb-5">
+                  <div className="flex justify-between items-center flex-wrap gap-2">
+                    <div className="space-y-0.5 text-left">
+                      <label className="block text-xs font-bold text-gray-655 uppercase tracking-wider">
+                        Product Images ({productImages.length}/6)
+                      </label>
+                      <p className="text-[10px] text-gray-450 font-medium">
+                        The first image will automatically be set as the Primary Cover.
+                      </p>
+                    </div>
+                    
+                    {productImages.length < 6 && (
+                      <div className="flex gap-1.5 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                        <button
+                          type="button"
+                          onClick={() => setImageInputMethod("upload")}
+                          className={`px-2 py-0.5 text-[9px] font-bold rounded transition-all cursor-pointer ${
+                            imageInputMethod === "upload"
+                              ? "bg-white text-slate-800 shadow-sm"
+                              : "text-gray-500 hover:text-gray-800"
+                          }`}
+                        >
+                          Upload File
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setImageInputMethod("url")}
+                          className={`px-2 py-0.5 text-[9px] font-bold rounded transition-all cursor-pointer ${
+                            imageInputMethod === "url"
+                              ? "bg-white text-slate-800 shadow-sm"
+                              : "text-gray-555 hover:text-gray-800"
+                          }`}
+                        >
+                          Image Link URL
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  
-                  {productImages.length < 6 && (
-                    <div className="flex gap-1.5 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-                      <button
-                        type="button"
-                        onClick={() => setImageInputMethod("upload")}
-                        className={`px-2 py-0.5 text-[9px] font-bold rounded transition-all cursor-pointer ${
-                          imageInputMethod === "upload"
-                            ? "bg-white text-slate-800 shadow-sm"
-                            : "text-gray-500 hover:text-gray-800"
-                        }`}
-                      >
-                        Upload File
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setImageInputMethod("url")}
-                        className={`px-2 py-0.5 text-[9px] font-bold rounded transition-all cursor-pointer ${
-                          imageInputMethod === "url"
-                            ? "bg-white text-slate-800 shadow-sm"
-                            : "text-gray-555 hover:text-gray-800"
-                        }`}
-                      >
-                        Image Link URL
-                      </button>
+
+                  {productImages.length < 6 ? (
+                    imageInputMethod === "upload" ? (
+                      <label className="w-full h-24 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-3 hover:border-[#088178] hover:bg-[#088178]/5 transition-all cursor-pointer">
+                        {uploading ? (
+                          <div className="flex flex-col items-center justify-center text-[#088178]">
+                            <Loader2 className="animate-spin mb-1.5" size={20} />
+                            <span className="text-[10px] font-semibold">Uploading to Cloudinary...</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center text-gray-400 text-center">
+                            <Upload className="mb-1" size={20} />
+                            <span className="text-[11px] font-bold text-gray-500">Upload Product Photos</span>
+                            <span className="text-[9px] text-gray-400 mt-0.5">Select up to {6 - productImages.length} more file(s)</span>
+                          </div>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleImagesUpload}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                      </label>
+                    ) : (
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                            <LinkIcon size={14} />
+                          </span>
+                          <input
+                            type="text"
+                            value={urlInput}
+                            onChange={(e) => setUrlInput(e.target.value)}
+                            placeholder="Paste image link URL here..."
+                            className="w-full pl-8.5 pr-3 py-1.5 rounded-lg border border-slate-100 bg-slate-50/70 focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none transition-all text-xs font-semibold text-gray-755 placeholder-gray-400 h-[32px]"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={addImageUrl}
+                          className="px-4 py-1 bg-[#088178] hover:bg-[#06635c] text-white text-[11px] font-bold rounded-lg transition-all cursor-pointer flex items-center h-[32px]"
+                        >
+                          Add URL
+                        </button>
+                      </div>
+                    )
+                  ) : (
+                    <div className="p-3 bg-teal-50/50 border border-teal-100 rounded-xl text-center text-xs font-semibold text-teal-800">
+                      Maximum photo limit of 6 reached. Delete existing ones to add different images.
+                    </div>
+                  )}
+
+                  {productImages.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 items-start pt-1">
+                      {productImages.map((url, index) => (
+                        <div
+                          key={index}
+                          draggable={true}
+                          onDragStart={(e) => handleDragStart(e, index)}
+                          onDragOver={(e) => handleDragOver(e, index)}
+                          onDrop={(e) => handleDrop(e, index)}
+                          onDragEnd={handleDragEnd}
+                          className={`relative aspect-square border rounded-xl bg-gray-50 flex items-center justify-center p-1.5 overflow-hidden shadow-sm group transition-all cursor-grab active:cursor-grabbing ${
+                            index === 0 ? "border-[#088178]/40 ring-2 ring-[#088178]/5" : "border-slate-150"
+                          } ${draggedIndex === index ? "opacity-40 border-[#088178] border-dashed" : ""}`}
+                        >
+                          <img
+                            src={url}
+                            alt={`Product Photo ${index + 1}`}
+                            className="w-full h-full object-contain rounded-lg"
+                          />
+                          {index === 0 && (
+                            <div className="absolute top-1 left-1.5 bg-[#088178] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded shadow-sm">
+                              PRIMARY
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl cursor-pointer"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
-
-                {productImages.length < 6 ? (
-                  imageInputMethod === "upload" ? (
-                    <label className="w-full h-24 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-3 hover:border-[#088178] hover:bg-[#088178]/5 transition-all cursor-pointer">
-                      {uploading ? (
-                        <div className="flex flex-col items-center justify-center text-[#088178]">
-                          <Loader2 className="animate-spin mb-1.5" size={20} />
-                          <span className="text-[10px] font-semibold">Uploading to Cloudinary...</span>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center text-gray-400 text-center">
-                          <Upload className="mb-1" size={20} />
-                          <span className="text-[11px] font-bold text-gray-500">Upload Product Photos</span>
-                          <span className="text-[9px] text-gray-400 mt-0.5">Select up to {6 - productImages.length} more file(s)</span>
-                        </div>
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleImagesUpload}
-                        disabled={uploading}
-                        className="hidden"
-                      />
-                    </label>
-                  ) : (
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
-                          <LinkIcon size={14} />
-                        </span>
-                        <input
-                          type="text"
-                          value={urlInput}
-                          onChange={(e) => setUrlInput(e.target.value)}
-                          placeholder="Paste image link URL here..."
-                          className="w-full pl-8.5 pr-3 py-1.5 rounded-lg border border-slate-100 bg-slate-50/70 focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none transition-all text-xs font-semibold text-gray-755 placeholder-gray-400 h-[32px]"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={addImageUrl}
-                        className="px-4 py-1 bg-[#088178] hover:bg-[#06635c] text-white text-[11px] font-bold rounded-lg transition-all cursor-pointer flex items-center h-[32px]"
-                      >
-                        Add URL
-                      </button>
-                    </div>
-                  )
-                ) : (
-                  <div className="p-3 bg-teal-50/50 border border-teal-100 rounded-xl text-center text-xs font-semibold text-teal-800">
-                    Maximum photo limit of 6 reached. Delete existing ones to add different images.
-                  </div>
-                )}
-
-                {productImages.length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 items-start pt-1">
-                    {productImages.map((url, index) => (
-                      <div
-                        key={index}
-                        draggable={true}
-                        onDragStart={(e) => handleDragStart(e, index)}
-                        onDragOver={(e) => handleDragOver(e, index)}
-                        onDrop={(e) => handleDrop(e, index)}
-                        onDragEnd={handleDragEnd}
-                        className={`relative aspect-square border rounded-xl bg-gray-50 flex items-center justify-center p-1.5 overflow-hidden shadow-sm group transition-all cursor-grab active:cursor-grabbing ${
-                          index === 0 ? "border-[#088178]/40 ring-2 ring-[#088178]/5" : "border-slate-150"
-                        } ${draggedIndex === index ? "opacity-40 border-[#088178] border-dashed" : ""}`}
-                      >
-                        <img
-                          src={url}
-                          alt={`Product Photo ${index + 1}`}
-                          className="w-full h-full object-contain rounded-lg"
-                        />
-                        {index === 0 && (
-                          <div className="absolute top-1 left-1.5 bg-[#088178] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded shadow-sm">
-                            PRIMARY
-                          </div>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl cursor-pointer"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              )}
 
               {/* Grid for Category & Brand */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -984,12 +1045,12 @@ const ProductEdit = () => {
             className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
             onClick={() => setActiveImagePickerVariant(null)}
           />
-          <div className="bg-white border border-gray-150 rounded-2xl max-w-sm w-full p-5 shadow-2xl z-10 relative overflow-hidden animate-slideUp text-left">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[#088178]"></div>
+          <div className="bg-white border border-gray-150 rounded-2xl max-w-md w-full p-6 shadow-2xl z-10 relative overflow-hidden animate-slideUp text-left">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#088178]"></div>
             
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-extrabold text-gray-900 text-sm">
-                Select Variant Image
+                Manage Variant Media Images
               </h3>
               <button
                 type="button"
@@ -1000,104 +1061,143 @@ const ProductEdit = () => {
               </button>
             </div>
 
-            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-3.5 bg-gray-50 border border-gray-100 px-2.5 py-1.5 rounded-lg truncate">
+            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-4 bg-gray-50 border border-gray-100 px-2.5 py-1.5 rounded-lg truncate">
               Variant: {variants[activeImagePickerVariant]?.attributes.map(a => a.value).join(" • ")}
             </p>
 
-            {/* Product Images Selector */}
-            <div className="space-y-2 mb-4.5">
+            {/* Current Variant Images Grid */}
+            <div className="space-y-2.5 mb-4">
               <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                Choose from Product Media Images
+                Variant Photo Gallery ({(variants[activeImagePickerVariant]?.images || []).length}/6)
               </label>
-              {productImages.length === 0 ? (
-                <p className="text-[10px] text-gray-400 font-semibold italic bg-slate-50 p-3 rounded-xl text-center border border-slate-100">
-                  No product media images uploaded yet. Upload images above first, or upload a custom file below.
+              
+              {(!variants[activeImagePickerVariant]?.images || variants[activeImagePickerVariant].images.length === 0) ? (
+                <p className="text-[10px] text-gray-400 font-semibold italic bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+                  No variant-specific photos uploaded yet. Upload or add link URLs below.
                 </p>
               ) : (
-                <div className="grid grid-cols-4 gap-2">
-                  {productImages.map((url, idx) => {
-                    const isSelected = variants[activeImagePickerVariant]?.images?.[0] === url;
-                    return (
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                  {(variants[activeImagePickerVariant].images).map((url, idx) => (
+                    <div
+                      key={idx}
+                      className="relative aspect-square border border-slate-200 rounded-lg bg-slate-50 p-1 flex items-center justify-center overflow-hidden group"
+                    >
+                      <img src={url} alt="Variant media" className="w-full h-full object-contain rounded-md" />
+                      {idx === 0 && (
+                        <div className="absolute top-0.5 left-1 bg-[#088178] text-white text-[6px] font-extrabold px-1 rounded-sm">
+                          COVER
+                        </div>
+                      )}
                       <button
-                        key={idx}
                         type="button"
-                        onClick={() => {
-                          setVariants(prev => prev.map((v, i) => i === activeImagePickerVariant ? { ...v, images: [url] } : v));
-                          setActiveImagePickerVariant(null);
-                          showToast("Variant image assigned", "success");
-                        }}
-                        className={`relative aspect-square rounded-lg border bg-slate-50 p-1 flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
-                          isSelected ? "border-[#088178] ring-2 ring-[#088178]/25 shadow-sm" : "border-slate-200 hover:border-slate-355"
-                        }`}
+                        onClick={() => removeVariantImage(activeImagePickerVariant, idx)}
+                        className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg cursor-pointer"
                       >
-                        <img src={url} alt="Product Media" className="w-full h-full object-contain rounded-md" />
+                        <Trash2 size={13} />
                       </button>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
 
-            <div className="border-t border-slate-100 my-3.5"></div>
+            <div className="border-t border-slate-100 my-4"></div>
 
-            {/* Custom File Upload Area */}
-            <div className="space-y-2.5">
-              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                Or Upload a Custom Image
-              </label>
-              
-              <div className="flex gap-2">
-                <label className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold rounded-lg transition text-center cursor-pointer border border-slate-200 flex items-center justify-center gap-1.5 min-h-[34px]">
-                  {uploadingVariantIndex === activeImagePickerVariant ? (
-                    <>
-                      <Loader2 className="animate-spin text-[#088178] w-3.5 h-3.5" />
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <Upload size={13} />
-                      Upload File
-                    </>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    disabled={uploadingVariantIndex !== null}
-                    onChange={async (e) => {
-                      const file = e.target.files[0];
-                      if (!file) return;
-                      setUploadingVariantIndex(activeImagePickerVariant);
-                      try {
-                        const res = await uploadProductImage(file);
-                        const url = res.data.url;
-                        setVariants(prev => prev.map((v, i) => i === activeImagePickerVariant ? { ...v, images: [url] } : v));
-                        showToast("Variant image uploaded successfully", "success");
-                        setActiveImagePickerVariant(null);
-                      } catch (err) {
-                        console.error(err);
-                        showToast("Variant image upload failed", "error");
-                      } finally {
-                        setUploadingVariantIndex(null);
-                      }
-                    }}
-                    className="hidden"
-                  />
-                </label>
+            {/* Upload / Link Inputs */}
+            {(variants[activeImagePickerVariant]?.images || []).length < 6 ? (
+              <div className="space-y-3.5">
+                <div className="flex justify-between items-center">
+                  <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                    Add Photos
+                  </span>
+                  
+                  <div className="flex gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setVariantImageInputMethod("upload")}
+                      className={`px-2 py-0.5 text-[9px] font-bold rounded-md transition-all cursor-pointer ${
+                        variantImageInputMethod === "upload"
+                          ? "bg-white text-slate-800 shadow-sm"
+                          : "text-gray-555 hover:text-gray-800"
+                      }`}
+                    >
+                      Upload
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVariantImageInputMethod("url")}
+                      className={`px-2 py-0.5 text-[9px] font-bold rounded-md transition-all cursor-pointer ${
+                        variantImageInputMethod === "url"
+                          ? "bg-white text-slate-800 shadow-sm"
+                          : "text-gray-555 hover:text-gray-800"
+                      }`}
+                    >
+                      Link URL
+                    </button>
+                  </div>
+                </div>
 
-                {variants[activeImagePickerVariant]?.images?.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setVariants(prev => prev.map((v, i) => i === activeImagePickerVariant ? { ...v, images: [] } : v));
-                      setActiveImagePickerVariant(null);
-                      showToast("Variant image cleared", "success");
-                    }}
-                    className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-655 text-[11px] font-bold rounded-lg border border-red-200 transition cursor-pointer"
-                  >
-                    Clear Image
-                  </button>
+                {variantImageInputMethod === "upload" ? (
+                  <label className="w-full h-20 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-2.5 hover:border-[#088178] hover:bg-[#088178]/5 transition-all cursor-pointer">
+                    {uploadingVariantIndex === activeImagePickerVariant ? (
+                      <div className="flex flex-col items-center justify-center text-[#088178]">
+                        <Loader2 className="animate-spin mb-1" size={16} />
+                        <span className="text-[9px] font-semibold">Uploading to Cloudinary...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-gray-400 text-center">
+                        <Upload className="mb-0.5" size={16} />
+                        <span className="text-[10px] font-bold text-gray-500">Upload Variant Photos</span>
+                        <span className="text-[8px] text-gray-400 mt-0.5">Select up to {6 - (variants[activeImagePickerVariant]?.images || []).length} file(s)</span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      disabled={uploadingVariantIndex !== null}
+                      onChange={(e) => handleVariantImagesUpload(e, activeImagePickerVariant)}
+                      className="hidden"
+                    />
+                  </label>
+                ) : (
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                        <LinkIcon size={13} />
+                      </span>
+                      <input
+                        type="text"
+                        value={variantUrlInput}
+                        onChange={(e) => setVariantUrlInput(e.target.value)}
+                        placeholder="Paste photo link URL..."
+                        className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-200 focus:border-[#088178] outline-none text-xs bg-white placeholder-gray-400 font-medium h-[32px]"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => addVariantImageUrl(activeImagePickerVariant)}
+                      className="px-3 py-1 bg-[#088178] hover:bg-[#06635c] text-white text-xs font-bold rounded-lg transition h-[32px] cursor-pointer"
+                    >
+                      Add
+                    </button>
+                  </div>
                 )}
               </div>
+            ) : (
+              <div className="p-2.5 bg-teal-50/50 border border-teal-100 rounded-xl text-center text-[10px] font-semibold text-teal-800">
+                Variant maximum photos limit of 6 reached.
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2.5 mt-5">
+              <button
+                type="button"
+                onClick={() => setActiveImagePickerVariant(null)}
+                className="px-4 py-2 bg-slate-800 hover:bg-black text-white text-xs font-bold rounded-lg transition-all cursor-pointer shadow-sm"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>
