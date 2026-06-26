@@ -58,6 +58,7 @@ const CreateProduct = () => {
   const [brands, setBrands] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadingVariantIndex, setUploadingVariantIndex] = useState(null);
+  const [activeImagePickerVariant, setActiveImagePickerVariant] = useState(null);
   const [draggedIndex, setDraggedIndex] = useState(null);
 
   const showToast = (msg, type = "error") => {
@@ -384,7 +385,7 @@ const CreateProduct = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-teal-50/10 to-slate-100 px-4 py-8 rounded-2xl">
+    <div className="bg-gradient-to-br from-slate-50 via-teal-50/10 to-slate-100 p-2 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl">
       <div className="max-w-4xl mx-auto text-left">
         {/* Back Link */}
         <div className="mb-4">
@@ -397,7 +398,7 @@ const CreateProduct = () => {
           </Link>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-150 p-5 sm:p-7 relative overflow-hidden">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-150 p-4 sm:p-7 relative overflow-hidden">
           {/* Decorative Top Accent Bar */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#15877F] to-[#088178]"></div>
 
@@ -767,7 +768,12 @@ const CreateProduct = () => {
                             return (
                               <tr key={vIdx} className="hover:bg-slate-50/20">
                                 <td className="py-2.5 px-4 text-center">
-                                  <label className="relative w-8 h-8 rounded border bg-slate-100 border-dashed hover:border-[#088178] hover:bg-[#088178]/5 transition-all flex items-center justify-center overflow-hidden cursor-pointer">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveImagePickerVariant(vIdx)}
+                                    title="Choose or upload variant image"
+                                    className="relative w-8 h-8 rounded border bg-slate-50 border-dashed hover:border-[#088178] hover:bg-[#088178]/5 transition-all flex items-center justify-center overflow-hidden cursor-pointer mx-auto"
+                                  >
                                     {uploadingVariantIndex === vIdx ? (
                                       <Loader2 className="animate-spin text-[#088178] w-4 h-4" />
                                     ) : v.images && v.images.length > 0 ? (
@@ -779,14 +785,7 @@ const CreateProduct = () => {
                                     ) : (
                                       <ImageIcon size={14} className="text-gray-400" />
                                     )}
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      onChange={(e) => handleVariantImageUpload(e, vIdx)}
-                                      disabled={uploadingVariantIndex !== null}
-                                      className="hidden"
-                                    />
-                                  </label>
+                                  </button>
                                 </td>
                                 <td className="py-2.5 px-4 text-slate-800 font-bold">{name}</td>
                                 <td className="py-2.5 px-4">
@@ -843,6 +842,132 @@ const CreateProduct = () => {
             {toastType === "success" ? <Check size={14} /> : <X size={14} />}
           </div>
           <span className="text-sm font-medium text-gray-800">{message}</span>
+        </div>
+      )}
+
+      {/* Variant Image Selector Modal */}
+      {activeImagePickerVariant !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setActiveImagePickerVariant(null)}
+          />
+          <div className="bg-white border border-gray-150 rounded-2xl max-w-sm w-full p-5 shadow-2xl z-10 relative overflow-hidden animate-slideUp text-left">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[#088178]"></div>
+            
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-extrabold text-gray-900 text-sm">
+                Select Variant Image
+              </h3>
+              <button
+                type="button"
+                onClick={() => setActiveImagePickerVariant(null)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer p-1"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-3.5 bg-gray-50 border border-gray-100 px-2.5 py-1.5 rounded-lg truncate">
+              Variant: {variants[activeImagePickerVariant]?.attributes.map(a => a.value).join(" • ")}
+            </p>
+
+            {/* Product Images Selector */}
+            <div className="space-y-2 mb-4.5">
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                Choose from Product Media Images
+              </label>
+              {productImages.length === 0 ? (
+                <p className="text-[10px] text-gray-400 font-semibold italic bg-slate-50 p-3 rounded-xl text-center border border-slate-100">
+                  No product media images uploaded yet. Upload images above first, or upload a custom file below.
+                </p>
+              ) : (
+                <div className="grid grid-cols-4 gap-2">
+                  {productImages.map((url, idx) => {
+                    const isSelected = variants[activeImagePickerVariant]?.images?.[0] === url;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setVariants(prev => prev.map((v, i) => i === activeImagePickerVariant ? { ...v, images: [url] } : v));
+                          setActiveImagePickerVariant(null);
+                          showToast("Variant image assigned", "success");
+                        }}
+                        className={`relative aspect-square rounded-lg border bg-slate-50 p-1 flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                          isSelected ? "border-[#088178] ring-2 ring-[#088178]/25 shadow-sm" : "border-slate-200 hover:border-slate-355"
+                        }`}
+                      >
+                        <img src={url} alt="Product Media" className="w-full h-full object-contain rounded-md" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-slate-100 my-3.5"></div>
+
+            {/* Custom File Upload Area */}
+            <div className="space-y-2.5">
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                Or Upload a Custom Image
+              </label>
+              
+              <div className="flex gap-2">
+                <label className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold rounded-lg transition text-center cursor-pointer border border-slate-200 flex items-center justify-center gap-1.5 min-h-[34px]">
+                  {uploadingVariantIndex === activeImagePickerVariant ? (
+                    <>
+                      <Loader2 className="animate-spin text-[#088178] w-3.5 h-3.5" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={13} />
+                      Upload File
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={uploadingVariantIndex !== null}
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      setUploadingVariantIndex(activeImagePickerVariant);
+                      try {
+                        const res = await uploadProductImage(file);
+                        const url = res.data.url;
+                        setVariants(prev => prev.map((v, i) => i === activeImagePickerVariant ? { ...v, images: [url] } : v));
+                        showToast("Variant image uploaded successfully", "success");
+                        setActiveImagePickerVariant(null);
+                      } catch (err) {
+                        console.error(err);
+                        showToast("Variant image upload failed");
+                      } finally {
+                        setUploadingVariantIndex(null);
+                      }
+                    }}
+                    className="hidden"
+                  />
+                </label>
+
+                {variants[activeImagePickerVariant]?.images?.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVariants(prev => prev.map((v, i) => i === activeImagePickerVariant ? { ...v, images: [] } : v));
+                      setActiveImagePickerVariant(null);
+                      showToast("Variant image cleared", "success");
+                    }}
+                    className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-655 text-[11px] font-bold rounded-lg border border-red-200 transition cursor-pointer"
+                  >
+                    Clear Image
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
