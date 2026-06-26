@@ -5,6 +5,7 @@ import { sentToCart } from "../api/CartApi";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const ProductDetails = () => {
+  const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState("");
@@ -28,8 +29,6 @@ const ProductDetails = () => {
       console.log("Unable to fetch products: ", err);
     }
   };
-
-  const { productId } = useParams();
 
   useEffect(() => {
     if (product) {
