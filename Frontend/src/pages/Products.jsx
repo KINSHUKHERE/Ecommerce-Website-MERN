@@ -180,7 +180,7 @@ const Products = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-gray-50 py-8">
+    <div className="flex-grow w-full bg-gray-50 py-8">
 
 
       {/* Heading & Search Box */}

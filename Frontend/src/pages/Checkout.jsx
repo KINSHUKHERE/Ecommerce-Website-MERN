@@ -308,7 +308,7 @@ const Checkout = () => {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-80px)] bg-slate-50 flex flex-col items-center justify-center">
+      <div className="flex-grow w-full bg-slate-50 flex flex-col items-center justify-center">
         <Loader2 className="animate-spin text-[#088178] w-10 h-10 mb-4" />
         <p className="text-sm text-gray-500 font-medium animate-pulse">Securing Connection...</p>
       </div>
@@ -316,12 +316,10 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-slate-50 font-sans antialiased text-slate-800 leading-relaxed">
+    <div className="flex-grow w-full bg-slate-50 font-sans antialiased text-slate-800 leading-relaxed">
       <div className="max-w-2xl mx-auto px-4 py-8 pb-24">
         
-        {/* ========================================================================= */}
-        {/* STEP 3: PAYMENT SUCCESS CONFIRMATION PAGE */}
-        {/* ========================================================================= */}
+  
         {checkoutStep === 3 ? (
           <div className="max-w-2xl mx-auto p-8 bg-white border border-gray-100 rounded-2xl shadow-sm text-center relative overflow-hidden animate-fadeIn text-left">
             

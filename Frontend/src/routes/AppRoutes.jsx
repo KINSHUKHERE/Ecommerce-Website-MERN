@@ -36,10 +36,12 @@ const UserLayout = () => {
     return <Navigate to="/admin" replace />;
   }
   return (
-    <>
+    <div className="flex flex-col min-h-screen w-full">
       <Navbar />
-      <Outlet />
-    </>
+      <main className="flex-grow flex flex-col w-full">
+        <Outlet />
+      </main>
+    </div>
   );
 };
 

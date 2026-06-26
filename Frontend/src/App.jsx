@@ -4,7 +4,7 @@ import DynamicTitle from "./components/DynamicTitle";
 
 function App() {
   return (
-    <div className="w-full h-screen">
+    <div className="w-full min-h-screen">
       <ScrollToTop />
       <DynamicTitle />
       <AppRoutes />
