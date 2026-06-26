@@ -316,7 +316,7 @@ const Profile = () => {
   };
 
   return (
-    <div className={`max-w-2xl mx-auto ${isAdmin ? "mt-4" : "my-12 px-4 md:px-0"}`}>
+    <div className={`w-full max-w-2xl mx-auto ${isAdmin ? "mt-4" : "my-12 px-4 md:px-0"}`}>
       {/* Toast Alert Widget */}
       {message && (
         <div className="fixed top-4 right-4 z-[9999] flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
@@ -665,11 +665,11 @@ const Profile = () => {
                         <span className="text-[10px] text-gray-400 block font-bold uppercase tracking-wider flex-shrink-0">
                           Order Reference
                         </span>
-                        <span className="text-[11px] sm:text-xs font-bold text-slate-800 break-all sm:break-normal inline-block">
+                        <span className="text-[11px] sm:text-xs font-bold text-slate-800">
                           #{order._id}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 text-[11px] text-gray-400">
+                      <div className="flex items-center gap-1 text-[11px] text-gray-400 mt-0.5">
                         <Calendar size={12} />
                         <span>{new Date(order.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -715,7 +715,7 @@ const Profile = () => {
                   </div>
 
                   {/* Order Details Footer */}
-                  <div className="pt-3.5 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium text-slate-600 bg-slate-50/50 px-3 sm:px-5 py-3 sm:py-4 rounded-b-xl">
+                  <div className="pt-3.5 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium text-slate-600 bg-slate-50/50 -mx-4 sm:-mx-5 -mb-4 sm:-mb-5 px-4 sm:px-5 py-3.5 sm:py-4 rounded-b-xl">
                     
                     {/* Shipping Address Summary */}
                     <div className="space-y-1.5">
@@ -734,10 +734,10 @@ const Profile = () => {
                     {/* Cost & Transaction Metadata */}
                     <div className="space-y-1.5 md:text-right flex flex-col md:items-end justify-between min-w-0">
                       <div className="w-full flex justify-between md:justify-end gap-3 items-center min-w-0">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex-shrink-0">
                           Transaction ID
                         </span>
-                        <span className="font-mono text-[11px] text-slate-700 block select-all break-all text-right max-w-[160px] sm:max-w-none">
+                        <span className="font-mono text-[11px] text-slate-700 block select-all truncate text-right max-w-[170px] sm:max-w-none">
                           {order.transactionId}
                         </span>
                       </div>
