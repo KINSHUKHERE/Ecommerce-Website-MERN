@@ -36,6 +36,12 @@ const CategoryManagement = () => {
   // Search & Filter states
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
 
   const fetchCategories = async () => {
     try {
@@ -165,6 +171,12 @@ const CategoryManagement = () => {
 
     return result;
   }, [categories, search, statusFilter]);
+
+  const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+  const paginatedCategories = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredCategories.slice(start, start + itemsPerPage);
+  }, [filteredCategories, currentPage, itemsPerPage]);
 
   return (
     <div className="relative leading-normal">
@@ -371,7 +383,7 @@ const CategoryManagement = () => {
               </thead>
 
               <tbody className="divide-y divide-gray-100 text-[14px] font-normal text-slate-800">
-                {filteredCategories.map((category) => {
+                {paginatedCategories.map((category) => {
                   const isEditing = editingId === category._id;
 
                   if (isEditing) {
@@ -480,6 +492,73 @@ const CategoryManagement = () => {
                 })}
               </tbody>
             </table>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4">
+                <div className="flex flex-1 justify-between sm:hidden">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="relative ml-3 inline-flex items-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[13px] font-normal text-gray-500">
+                      Showing <span className="font-semibold text-slate-800">{Math.min(filteredCategories.length, (currentPage - 1) * itemsPerPage + 1)}</span> to{" "}
+                      <span className="font-semibold text-slate-800">{Math.min(filteredCategories.length, currentPage * itemsPerPage)}</span> of{" "}
+                      <span className="font-semibold text-slate-800">{filteredCategories.length}</span> categories
+                    </p>
+                  </div>
+                  <div>
+                    <nav className="isolate inline-flex -space-x-px rounded-lg shadow-sm border border-slate-200" aria-label="Pagination">
+                      <button
+                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="relative inline-flex items-center rounded-l-lg px-2.5 py-2 text-gray-400 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 border-r border-slate-200"
+                      >
+                        <span className="sr-only">Previous</span>
+                        &lsaquo;
+                      </button>
+                      {Array.from({ length: totalPages }).map((_, idx) => {
+                        const pageNum = idx + 1;
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`relative inline-flex items-center px-4 py-2 text-sm font-medium transition-all duration-300 ${
+                              currentPage === pageNum
+                                ? "z-10 bg-[#088178] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#088178]"
+                                : "text-slate-700 hover:bg-slate-50"
+                            } ${pageNum !== totalPages ? "border-r border-slate-200" : ""}`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                      <button
+                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="relative inline-flex items-center rounded-r-lg px-2.5 py-2 text-gray-400 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 border-l border-slate-200"
+                      >
+                        <span className="sr-only">Next</span>
+                        &rsaquo;
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
