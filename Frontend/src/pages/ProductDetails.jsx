@@ -11,6 +11,9 @@ const ProductDetails = () => {
   const [toast, setToast] = useState("");
   const [activeImgIndex, setActiveImgIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState({});
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const minSwipeDistance = 50;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -127,10 +130,6 @@ const ProductDetails = () => {
     ? activeVariant.images
     : [product.imgUrl, ...(product.images || [])].filter(Boolean);
 
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
-
-  const minSwipeDistance = 50;
 
   const onTouchStart = (e) => {
     setTouchEnd(null);
