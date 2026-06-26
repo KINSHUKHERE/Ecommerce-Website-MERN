@@ -69,7 +69,7 @@ const Navbar = () => {
   if (isAuthPage) return null;
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <nav className="relative md:sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div className="flex h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
         <Link className="flex items-center gap-1 h-full" to="/">
           <img src={logo} alt="YoCart" className="h-9 sm:h-10 w-auto object-contain" />
@@ -182,8 +182,8 @@ const Navbar = () => {
 
       {/* Mobile Menu Drawer */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ${
-          isOpen ? "max-h-125 border-t bg-gray-50" : "max-h-0"
+        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-all duration-300 border-b border-gray-250 bg-gray-50 shadow-lg ${
+          isOpen ? "max-h-125 border-t" : "max-h-0"
         }`}
       >
         <ul className="px-6 py-5 flex flex-col gap-4 font-medium text-gray-700">

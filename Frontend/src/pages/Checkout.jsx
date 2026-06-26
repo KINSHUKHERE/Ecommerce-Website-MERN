@@ -377,7 +377,7 @@ const Checkout = () => {
           /* ========================================================================= */
           /* FORM DETAILS (STEP 1 & STEP 2 PAGES) */
           /* ========================================================================= */
-          <div className="max-w-2xl mx-auto p-8 bg-white border border-gray-100 rounded-2xl shadow-sm relative overflow-hidden">
+          <div className="max-w-2xl mx-auto p-8 bg-white border border-gray-100 rounded-2xl shadow-sm relative overflow-visible">
 
             {/* STEP 1: FORM DETAILS PAGE */}
             {checkoutStep === 1 && (
