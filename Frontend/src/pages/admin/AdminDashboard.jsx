@@ -54,7 +54,7 @@ const AdminDashboard = () => {
     },
     {
       title: "Revenue",
-      value: `₹${totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
+      value: `₹${totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
       icon: <IndianRupee size={28} />,
     },
     {
@@ -77,7 +77,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
         {cards.map((card, index) => (
           <div
             key={index}
@@ -94,7 +94,7 @@ const AdminDashboard = () => {
               {card.title}
             </h3>
 
-            <p className="mt-2 text-lg sm:text-2xl xl:text-3xl font-bold text-gray-800 break-words">
+            <p className="mt-2 text-lg sm:text-2xl font-bold text-gray-800 break-words">
               {card.value}
             </p>
           </div>
