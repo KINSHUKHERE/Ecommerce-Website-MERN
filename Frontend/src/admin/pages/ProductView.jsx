@@ -29,13 +29,17 @@ const ProductView = () => {
   const [deleting, setDeleting] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [activeImgIndex, setActiveImgIndex] = useState(0);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(null);
   const [toast, setToast] = useState({
     show: false,
     message: "",
     type: "success",
   });
 
-  const allImages = product ? [product.imgUrl, ...(product.images || [])].filter(Boolean) : [];
+  const selectedVariant = (selectedVariantIndex !== null && product?.variants?.[selectedVariantIndex]) || null;
+  const allImages = selectedVariant && selectedVariant.images && selectedVariant.images.length > 0
+    ? selectedVariant.images
+    : (product ? [product.imgUrl, ...(product.images || [])].filter(Boolean) : []);
 
   const nextSlide = () => {
     setActiveImgIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
@@ -292,6 +296,19 @@ const ProductView = () => {
               </div>
             )}
 
+            {selectedVariantIndex !== null && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedVariantIndex(null);
+                  setActiveImgIndex(0);
+                }}
+                className="mt-2.5 text-[10px] font-extrabold text-[#088178] hover:underline cursor-pointer flex items-center gap-1 bg-[#088178]/5 px-2.5 py-1.5 rounded-lg border border-[#088178]/10 w-full justify-center max-w-[280px]"
+              >
+                ← Reset to All Product Images
+              </button>
+            )}
+
             <div className="mt-4.5 w-full bg-slate-50/50 border border-slate-100 rounded-xl p-3.5 flex flex-col gap-2.5 max-w-[280px]">
               <div className="flex items-center justify-between text-[11px] text-gray-500 font-semibold">
                 <span className="flex items-center gap-1">
@@ -399,7 +416,18 @@ const ProductView = () => {
                             ? v.attributes.map(a => a.value).join(" • ")
                             : "Default Base Variant";
                           return (
-                            <tr key={vIdx} className="hover:bg-slate-50/20">
+                            <tr
+                              key={vIdx}
+                              onClick={() => {
+                                setSelectedVariantIndex(prev => prev === vIdx ? null : vIdx);
+                                setActiveImgIndex(0);
+                              }}
+                              className={`cursor-pointer transition-all ${
+                                selectedVariantIndex === vIdx
+                                  ? "bg-[#088178]/5 font-bold text-[#088178] border-l-2 border-[#088178]"
+                                  : "hover:bg-slate-50/20"
+                              }`}
+                            >
                               <td className="py-2.5 px-4 text-center">
                                 <div className="w-8 h-8 rounded border bg-slate-50 flex items-center justify-center overflow-hidden">
                                   {v.images && v.images.length > 0 ? (

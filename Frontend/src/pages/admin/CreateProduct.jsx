@@ -160,8 +160,8 @@ const CreateProduct = () => {
     e.preventDefault();
     if (draggedVariantImgIndex === null || draggedVariantImgIndex === targetIdx) return;
 
-    setVariants((prev) =>
-      prev.map((v, idx) => {
+    setVariants((prev) => {
+      const updated = prev.map((v, idx) => {
         if (idx === vIdx) {
           const reorderedImages = [...(v.images || [])];
           const [draggedItem] = reorderedImages.splice(draggedVariantImgIndex, 1);
@@ -169,8 +169,9 @@ const CreateProduct = () => {
           return { ...v, images: reorderedImages };
         }
         return v;
-      })
-    );
+      });
+      return syncSharedVariantImages(updated, vIdx);
+    });
   };
 
   const handleVariantImgDragEnd = () => {
@@ -301,6 +302,28 @@ const CreateProduct = () => {
     setVariants(prev => prev.map((v, idx) => idx === vIdx ? { ...v, [field]: val } : v));
   };
 
+  const syncSharedVariantImages = (variantsList, changedVariantIdx) => {
+    const changedVariant = variantsList[changedVariantIdx];
+    if (!changedVariant || !changedVariant.attributes || changedVariant.attributes.length === 0) return variantsList;
+
+    let syncAttr = changedVariant.attributes.find(a => a.name.toLowerCase().includes("color") || a.name.toLowerCase().includes("colour"));
+    if (!syncAttr) {
+      syncAttr = changedVariant.attributes[0];
+    }
+
+    const syncValue = syncAttr.value;
+
+    return variantsList.map((v, idx) => {
+      if (idx === changedVariantIdx) return v;
+
+      const matchingAttr = v.attributes.find(a => a.name === syncAttr.name);
+      if (matchingAttr && matchingAttr.value === syncValue) {
+        return { ...v, images: [...(changedVariant.images || [])] };
+      }
+      return v;
+    });
+  };
+
   const handleVariantImagesUpload = async (e, vIdx) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -319,14 +342,15 @@ const CreateProduct = () => {
         urls.push(res.data.url);
       }
 
-      setVariants((prev) =>
-        prev.map((v, idx) => {
+      setVariants((prev) => {
+        const updated = prev.map((v, idx) => {
           if (idx === vIdx) {
             return { ...v, images: [...(v.images || []), ...urls] };
           }
           return v;
-        })
-      );
+        });
+        return syncSharedVariantImages(updated, vIdx);
+      });
       showToast("Variant images uploaded successfully", "success");
     } catch (err) {
       console.error(err);
@@ -346,21 +370,22 @@ const CreateProduct = () => {
       return;
     }
 
-    setVariants((prev) =>
-      prev.map((v, idx) => {
+    setVariants((prev) => {
+      const updated = prev.map((v, idx) => {
         if (idx === vIdx) {
           return { ...v, images: [...(v.images || []), url] };
         }
         return v;
-      })
-    );
+      });
+      return syncSharedVariantImages(updated, vIdx);
+    });
     setVariantUrlInput("");
     showToast("Variant image URL added", "success");
   };
 
   const removeVariantImage = (vIdx, imgIdx) => {
-    setVariants((prev) =>
-      prev.map((v, idx) => {
+    setVariants((prev) => {
+      const updated = prev.map((v, idx) => {
         if (idx === vIdx) {
           return {
             ...v,
@@ -368,8 +393,9 @@ const CreateProduct = () => {
           };
         }
         return v;
-      })
-    );
+      });
+      return syncSharedVariantImages(updated, vIdx);
+    });
     showToast("Variant image removed", "success");
   };
 
