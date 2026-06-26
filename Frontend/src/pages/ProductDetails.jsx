@@ -128,6 +128,33 @@ const ProductDetails = () => {
     ? activeVariant.images
     : [product.imgUrl, ...(product.images || [])].filter(Boolean);
 
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe) {
+      nextSlide();
+    }
+    if (isRightSwipe) {
+      prevSlide();
+    }
+  };
+
   const nextSlide = () => {
     setActiveImgIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
   };
@@ -142,7 +169,12 @@ const ProductDetails = () => {
       <div className="grid md:grid-cols-2 gap-8 items-start">
         {/* Interactive Image Slider */}
         <div className="flex flex-col gap-4 w-full">
-          <div className="bg-gray-100 rounded-2xl p-4 flex justify-center items-center relative aspect-[4/3] max-h-96 w-full group overflow-hidden border border-gray-150 shadow-sm">
+          <div 
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            className="bg-gray-100 rounded-2xl p-4 flex justify-center items-center relative aspect-[4/3] max-h-96 w-full group overflow-hidden border border-gray-150 shadow-sm touch-pan-y"
+          >
             <img
               src={allImages[activeImgIndex]}
               alt={product.heading}
