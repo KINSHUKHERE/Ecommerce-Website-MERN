@@ -22,7 +22,9 @@ import {
   RotateCcw,
   CheckCircle,
   XCircle,
-  TrendingUp
+  TrendingUp,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 
 const BrandManagement = () => {
@@ -46,10 +48,28 @@ const BrandManagement = () => {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+  const [expandedCategories, setExpandedCategories] = useState({});
 
   useEffect(() => {
     setCurrentPage(1);
   }, [search, selectedCategoryFilter, selectedStatusFilter]);
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      const initial = {};
+      categories.forEach((c) => {
+        initial[c._id] = true;
+      });
+      setExpandedCategories(initial);
+    }
+  }, [categories]);
+
+  const toggleCategoryExpand = (catId) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [catId]: !prev[catId],
+    }));
+  };
 
   // Memoized stats calculation for analyzing
   const stats = useMemo(() => {
@@ -97,6 +117,45 @@ const BrandManagement = () => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredBrands.slice(start, start + itemsPerPage);
   }, [filteredBrands, currentPage, itemsPerPage]);
+
+  // Group brands by category
+  const groupedBrands = useMemo(() => {
+    const groups = {};
+    categories.forEach((cat) => {
+      groups[cat._id] = {
+        categoryId: cat._id,
+        categoryName: cat.name,
+        brands: [],
+      };
+    });
+    groups["uncategorized"] = {
+      categoryId: "uncategorized",
+      categoryName: "Uncategorized",
+      brands: [],
+    };
+    filteredBrands.forEach((brand) => {
+      const catId = brand.categoryId?._id || brand.categoryId || "uncategorized";
+      if (!groups[catId]) {
+        groups[catId] = {
+          categoryId: catId,
+          categoryName: brand.categoryId?.name || "Uncategorized",
+          brands: [],
+        };
+      }
+      groups[catId].brands.push(brand);
+    });
+    let result = Object.values(groups);
+    if (groups["uncategorized"].brands.length === 0) {
+      result = result.filter((g) => g.categoryId !== "uncategorized");
+    }
+    if (selectedCategoryFilter) {
+      result = result.filter((g) => g.categoryId === selectedCategoryFilter);
+    }
+    if (search.trim() || selectedStatusFilter) {
+      result = result.filter((g) => g.brands.length > 0);
+    }
+    return result;
+  }, [brands, categories, filteredBrands, selectedCategoryFilter, search, selectedStatusFilter]);
 
   const handleResetFilters = () => {
     setSearch("");
@@ -470,239 +529,191 @@ const BrandManagement = () => {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/65 text-gray-500 border-b border-slate-100 text-[13px] font-normal">
-                  <th className="py-3 px-6">Brand Name</th>
-                  <th className="py-3 px-6">Category Type</th>
-                  <th className="py-3 px-6 text-center">Status</th>
-                  <th className="py-3 px-6 text-center w-[180px]">Actions</th>
-                </tr>
-              </thead>
+          <div className="space-y-4">
+            {groupedBrands.map((group) => {
+              const catId = group.categoryId;
+              const isExpanded = expandedCategories[catId] !== false;
+              
+              return (
+                <div key={catId} className="border border-slate-100 bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300">
+                  {/* Accordion Group Header */}
+                  <div
+                    onClick={() => toggleCategoryExpand(catId)}
+                    className="flex items-center justify-between px-6 py-4 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors duration-200 border-b border-slate-100 select-none"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-slate-800 text-[14px]">
+                        {group.categoryName}
+                      </span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#088178]/10 text-[#088178] border border-[#088178]/20">
+                        {group.brands.length} {group.brands.length === 1 ? "Brand" : "Brands"}
+                      </span>
+                    </div>
+                    <div className="text-gray-400 hover:text-slate-600 transition-colors duration-200">
+                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </div>
+                  </div>
 
-              <tbody className="divide-y divide-gray-100 text-[14px] font-normal text-slate-800">
-                {paginatedBrands.map((brand) => {
-                  const isEditing = editingId === brand._id;
-
-                  if (isEditing) {
-                    return (
-                      <tr
-                        key={brand._id}
-                        className="bg-slate-50/80 border-y border-slate-100 transition-all duration-300 animate-fadeIn"
-                      >
-                        <td colSpan={4} className="py-5 px-6">
-                          <div className="flex flex-col gap-4">
-                            {/* Title indicator */}
-                            <div className="flex items-center gap-1.5 text-sm font-semibold text-[#088178]">
-                              <Edit3 size={14} />
-                              <span>Editing Brand: <span className="text-slate-800 underline decoration-slate-300">{brand.name}</span></span>
-                            </div>
-
-                            {/* Grid/Flex Layout for Inputs */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {/* Brand Name Input */}
-                              <div className="flex flex-col gap-1.5">
-                                <label className="text-[13px] font-normal text-gray-500">
-                                  Brand Name
-                                </label>
-                                <div className="relative">
-                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
-                                    <Layers size={14} />
-                                  </span>
-                                  <input
-                                    type="text"
-                                    value={editBrandName}
-                                    onChange={(e) => setEditBrandName(e.target.value)}
-                                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all duration-300 shadow-sm"
-                                    placeholder="Enter Brand Name"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Category Dropdown */}
-                              <div className="flex flex-col gap-1.5">
-                                <label className="text-[13px] font-normal text-gray-500">
-                                  Category Type
-                                </label>
-                                <div className="relative">
-                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
-                                    <Tag size={14} />
-                                  </span>
-                                  <select
-                                    value={editCategoryId}
-                                    onChange={(e) => setEditCategoryId(e.target.value)}
-                                    className="w-full pl-9 pr-8 py-2 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 appearance-none cursor-pointer shadow-sm"
-                                  >
-                                    <option value="">Select Category</option>
-                                    {categories.map((category) => (
-                                      <option key={category._id} value={category._id}>
-                                        {category.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Actions Buttons */}
-                            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100/70 mt-1">
-                              <button
-                                onClick={() => {
-                                  setEditingId(null);
-                                  setEditBrandName("");
-                                  setEditCategoryId("");
-                                }}
-                                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-all duration-300 cursor-pointer flex items-center gap-1.5"
-                              >
-                                <X size={14} />
-                                Cancel
-                              </button>
-                              <button
-                                onClick={() => handleUpdateInline(brand._id)}
-                                className="px-4 py-2 bg-[#088178] hover:bg-[#088178]/90 text-white text-sm font-medium rounded-lg transition-all duration-300 cursor-pointer flex items-center gap-1.5"
-                              >
-                                <Check size={14} />
-                                Save Changes
-                              </button>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  }
-
-                  return (
-                    <tr key={brand._id} className="hover:bg-slate-50/50 transition-all duration-200">
-                      
-                      {/* Brand Name Column */}
-                      <td className="py-3.5 px-6">
-                        <span className="font-medium text-slate-800 text-sm">{brand.name}</span>
-                      </td>
-
-                      {/* Category Column */}
-                      <td className="py-3.5 px-6 text-gray-500 text-[13px] font-normal">
-                        {brand.categoryId?.name || "N/A"}
-                      </td>
-
-                      {/* Status Column */}
-                      <td className="py-3.5 px-6 text-center">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-normal ${
-                            brand.isActive ?? true
-                              ? "bg-green-50 text-green-700 border border-green-100"
-                              : "bg-red-50 text-red-700 border border-red-100"
-                          }`}
-                        >
-                          {(brand.isActive ?? true) ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-
-                      {/* Actions Column */}
-                      <td className="py-3.5 px-6">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={() => handleToggleStatus(brand._id)}
-                            className={`p-1.5 rounded-lg transition-all duration-300 cursor-pointer ${
-                              (brand.isActive ?? true)
-                                ? "text-gray-500 hover:text-amber-600 hover:bg-amber-50"
-                                : "text-gray-500 hover:text-green-600 hover:bg-green-50"
-                            }`}
-                            title={(brand.isActive ?? true) ? "Deactivate Brand" : "Activate Brand"}
-                          >
-                            {(brand.isActive ?? true) ? <XCircle size={15} /> : <CheckCircle size={15} />}
-                          </button>
-                          <button
-                            onClick={() => handleEdit(brand)}
-                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 cursor-pointer"
-                            title="Edit Brand"
-                          >
-                            <Edit3 size={15} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(brand._id)}
-                            className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
-                            title="Delete Brand"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                  {/* Group Brands Table */}
+                  {isExpanded && (
+                    <div className="overflow-x-auto">
+                      {group.brands.length === 0 ? (
+                        <div className="py-6 text-center text-gray-400 text-[13px] font-normal">
+                          No brands in this category.
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      ) : (
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="bg-slate-50/20 text-gray-500 border-b border-slate-100 text-[12px] font-medium uppercase tracking-wider">
+                              <th className="py-3 px-6">Brand Name</th>
+                              <th className="py-3 px-6 text-center w-[120px]">Status</th>
+                              <th className="py-3 px-6 text-center w-[180px]">Actions</th>
+                            </tr>
+                          </thead>
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4">
-                <div className="flex flex-1 justify-between sm:hidden">
-                  <button
-                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="relative ml-3 inline-flex items-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                  >
-                    Next
-                  </button>
+                          <tbody className="divide-y divide-gray-100 text-[14px] font-normal text-slate-800">
+                            {group.brands.map((brand) => {
+                              const isEditing = editingId === brand._id;
+
+                              if (isEditing) {
+                                return (
+                                  <tr
+                                    key={brand._id}
+                                    className="bg-slate-50/80 border-y border-slate-100 transition-all duration-300 animate-fadeIn"
+                                  >
+                                    <td colSpan={3} className="py-5 px-6">
+                                      <div className="flex flex-col gap-4">
+                                        <div className="flex items-center gap-1.5 text-sm font-semibold text-[#088178]">
+                                          <Edit3 size={14} />
+                                          <span>Editing Brand: <span className="text-slate-800 underline decoration-slate-300">{brand.name}</span></span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                          <div className="flex flex-col gap-1.5">
+                                            <label className="text-[13px] font-normal text-gray-500">Brand Name</label>
+                                            <div className="relative">
+                                              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                                                <Layers size={14} />
+                                              </span>
+                                              <input
+                                                type="text"
+                                                value={editBrandName}
+                                                onChange={(e) => setEditBrandName(e.target.value)}
+                                                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all duration-300 shadow-sm"
+                                                placeholder="Enter Brand Name"
+                                              />
+                                            </div>
+                                          </div>
+
+                                          <div className="flex flex-col gap-1.5">
+                                            <label className="text-[13px] font-normal text-gray-500">Category Type</label>
+                                            <div className="relative">
+                                              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                                                <Tag size={14} />
+                                              </span>
+                                              <select
+                                                value={editCategoryId}
+                                                onChange={(e) => setEditCategoryId(e.target.value)}
+                                                className="w-full pl-9 pr-8 py-2 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 appearance-none cursor-pointer shadow-sm"
+                                              >
+                                                <option value="">Select Category</option>
+                                                {categories.map((category) => (
+                                                  <option key={category._id} value={category._id}>
+                                                    {category.name}
+                                                  </option>
+                                                ))}
+                                              </select>
+                                              <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 pointer-events-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100/70 mt-1">
+                                          <button
+                                            onClick={() => {
+                                              setEditingId(null);
+                                              setEditBrandName("");
+                                              setEditCategoryId("");
+                                            }}
+                                            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-all duration-300 cursor-pointer flex items-center gap-1.5"
+                                          >
+                                            <X size={14} />
+                                            Cancel
+                                          </button>
+                                          <button
+                                            onClick={() => handleUpdateInline(brand._id)}
+                                            className="px-4 py-2 bg-[#088178] hover:bg-[#088178]/90 text-white text-sm font-medium rounded-lg transition-all duration-300 cursor-pointer flex items-center gap-1.5"
+                                          >
+                                            <Check size={14} />
+                                            Save Changes
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              }
+
+                              return (
+                                <tr key={brand._id} className="hover:bg-slate-50/50 transition-all duration-200">
+                                  <td className="py-3.5 px-6">
+                                    <span className="font-medium text-slate-800 text-sm">{brand.name}</span>
+                                  </td>
+
+                                  <td className="py-3.5 px-6 text-center">
+                                    <span
+                                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-normal ${
+                                        brand.isActive ?? true
+                                          ? "bg-green-50 text-green-700 border border-green-100"
+                                          : "bg-red-50 text-red-700 border border-red-100"
+                                      }`}
+                                    >
+                                      {(brand.isActive ?? true) ? "Active" : "Inactive"}
+                                    </span>
+                                  </td>
+
+                                  <td className="py-3.5 px-6">
+                                    <div className="flex justify-center gap-2">
+                                      <button
+                                        onClick={() => handleToggleStatus(brand._id)}
+                                        className={`p-1.5 rounded-lg transition-all duration-300 cursor-pointer ${
+                                          (brand.isActive ?? true)
+                                            ? "text-gray-500 hover:text-amber-600 hover:bg-amber-50"
+                                            : "text-gray-500 hover:text-green-600 hover:bg-green-50"
+                                        }`}
+                                        title={(brand.isActive ?? true) ? "Deactivate Brand" : "Activate Brand"}
+                                      >
+                                        {(brand.isActive ?? true) ? <XCircle size={15} /> : <CheckCircle size={15} />}
+                                      </button>
+                                      <button
+                                        onClick={() => handleEdit(brand)}
+                                        className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 cursor-pointer"
+                                        title="Edit Brand"
+                                      >
+                                        <Edit3 size={15} />
+                                      </button>
+                                      <button
+                                        onClick={() => handleDelete(brand._id)}
+                                        className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
+                                        title="Delete Brand"
+                                      >
+                                        <Trash2 size={15} />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-[13px] font-normal text-gray-500">
-                      Showing <span className="font-semibold text-slate-800">{Math.min(filteredBrands.length, (currentPage - 1) * itemsPerPage + 1)}</span> to{" "}
-                      <span className="font-semibold text-slate-800">{Math.min(filteredBrands.length, currentPage * itemsPerPage)}</span> of{" "}
-                      <span className="font-semibold text-slate-800">{filteredBrands.length}</span> brands
-                    </p>
-                  </div>
-                  <div>
-                    <nav className="isolate inline-flex -space-x-px rounded-lg shadow-sm border border-slate-200" aria-label="Pagination">
-                      <button
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                        className="relative inline-flex items-center rounded-l-lg px-2.5 py-2 text-gray-400 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 border-r border-slate-200"
-                      >
-                        <span className="sr-only">Previous</span>
-                        &lsaquo;
-                      </button>
-                      {Array.from({ length: totalPages }).map((_, idx) => {
-                        const pageNum = idx + 1;
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => setCurrentPage(pageNum)}
-                            className={`relative inline-flex items-center px-4 py-2 text-sm font-medium transition-all duration-300 ${
-                              currentPage === pageNum
-                                ? "z-10 bg-[#088178] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#088178]"
-                                : "text-slate-700 hover:bg-slate-50"
-                            } ${pageNum !== totalPages ? "border-r border-slate-200" : ""}`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-                      <button
-                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        className="relative inline-flex items-center rounded-r-lg px-2.5 py-2 text-gray-400 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 border-l border-slate-200"
-                      >
-                        <span className="sr-only">Next</span>
-                        &rsaquo;
-                      </button>
-                    </nav>
-                  </div>
-                </div>
-              </div>
-            )}
+              );
+            })}
           </div>
         )}
       </div>
