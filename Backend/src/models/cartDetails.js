@@ -14,6 +14,12 @@ const cartSchema = new mongoose.Schema(
       required: true,
     },
 
+    variantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Variant",
+      required: true,
+    },
+
     quantity: {
       type: Number,
       required: true,

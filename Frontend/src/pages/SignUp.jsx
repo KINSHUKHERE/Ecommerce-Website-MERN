@@ -76,7 +76,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-8 relative">
+    <div className="min-h-[calc(100vh-80px)] bg-gray-100 flex items-center justify-center px-4 py-8 relative">
       {isSubmitting && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center transition-all duration-300">
           <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col items-center max-w-xs w-full mx-4 border border-gray-100">

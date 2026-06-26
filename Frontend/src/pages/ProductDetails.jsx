@@ -9,11 +9,13 @@ const ProductDetails = () => {
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState("");
   const [activeImgIndex, setActiveImgIndex] = useState(0);
+  const [selectedOptions, setSelectedOptions] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
   const fetchProducts = async () => {
     try {
       const res = await getProduct();
@@ -31,21 +33,52 @@ const ProductDetails = () => {
 
   useEffect(() => {
     if (product) {
-      document.title = `VELTIQ | ${product.Title || "Product Details"}`;
+      document.title = `VELTIQ | ${product.heading || "Product Details"}`;
+      
+      // Initialize selected options with first variant's attributes
+      const initialOptions = {};
+      if (product.options && product.options.length > 0) {
+        if (product.variants && product.variants.length > 0) {
+          product.variants[0].attributes.forEach((attr) => {
+            initialOptions[attr.name] = attr.value;
+          });
+        } else {
+          product.options.forEach((opt) => {
+            initialOptions[opt.name] = opt.values[0] || "";
+          });
+        }
+      }
+      setSelectedOptions(initialOptions);
+      setActiveImgIndex(0);
     }
   }, [product]);
 
-  // Agar productId wrong ho ya product na mile
+  // If wrong productId or product not found
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50 py-20 flex flex-col items-center justify-center">
+      <div className="min-h-[calc(100vh-80px)] bg-gray-50 py-20 flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
         <p className="text-gray-500 mt-4 animate-pulse">Loading product details...</p>
       </div>
     );
   }
 
-  const handleAddToCart = async (product) => {
+  // Find variant matching current selection
+  const activeVariant = product.variants?.find((v) => {
+    return v.attributes.every((attr) => selectedOptions[attr.name] === attr.value);
+  });
+
+  const getProductTotalStock = (p) => {
+    if (p.variants && p.variants.length > 0) {
+      return p.variants.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
+    }
+    return p.quantity ?? 0;
+  };
+
+  const stockCount = activeVariant ? activeVariant.quantity : getProductTotalStock(product);
+  const isOutOfStock = stockCount <= 0 || product.sold;
+
+  const handleAddToCart = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
 
@@ -54,10 +87,17 @@ const ProductDetails = () => {
         return;
       }
 
+      if (product.options && product.options.length > 0 && !activeVariant) {
+        setToast("Please select all options first");
+        setTimeout(() => setToast(""), 3000);
+        return;
+      }
+
       setAdding(true);
       const cartData = {
         userId: user._id,
         productId: product._id,
+        variantId: activeVariant ? activeVariant._id : undefined,
         quantity: 1,
       };
 
@@ -80,7 +120,9 @@ const ProductDetails = () => {
     }
   };
 
-  const allImages = [product.imgUrl, ...(product.images || [])].filter(Boolean);
+  const allImages = (activeVariant && activeVariant.images && activeVariant.images.length > 0)
+    ? activeVariant.images
+    : [product.imgUrl, ...(product.images || [])].filter(Boolean);
 
   const nextSlide = () => {
     setActiveImgIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
@@ -147,7 +189,7 @@ const ProductDetails = () => {
             </div>
           )}
         </div>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 text-left">
           <div className="flex gap-3 items-center flex-wrap">
             <span className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700">
               {product.categoryId?.name}
@@ -158,23 +200,70 @@ const ProductDetails = () => {
             </span>
 
             <span className={`px-3 py-1 rounded-full text-sm font-bold ${
-              (product.quantity ?? 10) <= 0 || product.sold
+              isOutOfStock
                 ? "bg-red-50 text-red-600"
-                : (product.quantity ?? 10) <= 3
+                : stockCount <= 3
                   ? "bg-amber-50 text-amber-600 animate-pulse"
                   : "bg-green-50 text-green-600"
             }`}>
-              {(product.quantity ?? 10) <= 0 || product.sold 
+              {isOutOfStock 
                 ? "Sold Out" 
-                : `${product.quantity ?? 10} Items Left`}
+                : `${stockCount} Items Left`}
             </span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+          
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
             {product.heading}
           </h1>
-          <p className="text-2xl font-bold text-indigo-600">₹{product.price}</p>
+          
+          {activeVariant && (
+            <span className="text-xs font-mono text-gray-400">
+              SKU: {activeVariant.sku}
+            </span>
+          )}
 
-          <div className="border-t pt-6 mt-4">
+          <p className="text-2xl font-bold text-indigo-650">
+            ₹{(activeVariant ? activeVariant.price : (product.price || 0)).toLocaleString()}
+          </p>
+
+          {/* Option Selectors Swatches */}
+          {product.options && product.options.length > 0 && (
+            <div className="flex flex-col gap-4 border-y py-4 my-2">
+              {product.options.map((opt) => (
+                <div key={opt.name} className="flex flex-col gap-2">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    Select {opt.name}
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {opt.values.map((val) => {
+                      const isSelected = selectedOptions[opt.name] === val;
+                      return (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() =>
+                            setSelectedOptions((prev) => ({
+                              ...prev,
+                              [opt.name]: val,
+                            }))
+                          }
+                          className={`px-4 py-2 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-[#088178] border-[#088178] text-white shadow-sm shadow-[#088178]/20"
+                              : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                          }`}
+                        >
+                          {val}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="border-t pt-4">
             <h3 className="text-lg font-semibold mb-2">Product Description</h3>
             <p className="text-gray-600 leading-relaxed text-justify">
               {product.description}
@@ -183,12 +272,12 @@ const ProductDetails = () => {
 
           <button
             className={`py-3 px-6 rounded-lg font-semibold transition duration-300 mt-4 flex items-center justify-center gap-2 ${
-              (product.quantity ?? 10) <= 0 || product.sold
+              isOutOfStock
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                 : "bg-[#088178] hover:bg-[#06635c] text-white cursor-pointer shadow-md shadow-[#088178]/10"
             }`}
-            onClick={() => handleAddToCart(product)}
-            disabled={(product.quantity ?? 10) <= 0 || product.sold || adding}
+            onClick={handleAddToCart}
+            disabled={isOutOfStock || adding}
           >
             {adding ? (
               <>
@@ -199,7 +288,7 @@ const ProductDetails = () => {
                 Adding...
               </>
             ) : (
-              (product.quantity ?? 10) <= 0 || product.sold ? "Sold Out" : "Add to Cart"
+              isOutOfStock ? "Sold Out" : "Add to Cart"
             )}
           </button>
         </div>

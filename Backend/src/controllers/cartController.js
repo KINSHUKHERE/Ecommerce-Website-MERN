@@ -1,30 +1,46 @@
 const Cart = require("../models/cartDetails");
 const Product = require("../models/productsData");
+const Variant = require("../models/variantDetails");
 
 const addItemsToCart = async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId, variantId, quantity } = req.body;
     const userId = req.user.userId;
     const qtyToAdd = quantity || 1;
 
-    const product = await Product.findById(productId);
-    if (!product) {
+    let targetVariantId = variantId;
+
+    // Fallback: If variantId is not provided, fetch the default variant for this product
+    if (!targetVariantId) {
+      const defaultVariant = await Variant.findOne({ productId, attributes: { $size: 0 }, isDeleted: false });
+      if (!defaultVariant) {
+        return res.status(404).json({
+          msg: "Product has no variants available",
+        });
+      }
+      targetVariantId = defaultVariant._id;
+    }
+
+    // Fetch variant to check stock
+    const variant = await Variant.findById(targetVariantId);
+    if (!variant || variant.isDeleted) {
       return res.status(404).json({
-        msg: "Product not found",
+        msg: "Selected variant not found",
       });
     }
 
     const existingItem = await Cart.findOne({
       userId,
       productId,
+      variantId: targetVariantId,
     });
 
     // Product already exists in cart
     if (existingItem) {
       const newQty = existingItem.quantity + qtyToAdd;
-      if (newQty > product.quantity) {
+      if (newQty > variant.quantity) {
         return res.status(400).json({
-          msg: `Cannot add more. Only ${product.quantity} items available in stock.`,
+          msg: `Cannot add more. Only ${variant.quantity} items available in stock.`,
         });
       }
       existingItem.quantity = newQty;
@@ -38,15 +54,16 @@ const addItemsToCart = async (req, res) => {
     }
 
     // Product not in cart yet
-    if (qtyToAdd > product.quantity) {
+    if (qtyToAdd > variant.quantity) {
       return res.status(400).json({
-        msg: `Cannot add. Only ${product.quantity} items available in stock.`,
+        msg: `Cannot add. Only ${variant.quantity} items available in stock.`,
       });
     }
 
     const cartItem = await Cart.create({
       userId,
       productId,
+      variantId: targetVariantId,
       quantity: qtyToAdd,
     });
 
@@ -65,7 +82,9 @@ const addItemsToCart = async (req, res) => {
 const getItemsCart = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const cartData = await Cart.find({ userId: userId }).populate("productId");
+    const cartData = await Cart.find({ userId: userId })
+      .populate("productId")
+      .populate("variantId");
     res.status(200).json({
       msg: "Got data from cart",
       cartData,
@@ -96,16 +115,16 @@ const increaseCart = async (req, res) => {
       });
     }
 
-    const product = await Product.findById(cartItem.productId);
-    if (!product) {
+    const variant = await Variant.findById(cartItem.variantId);
+    if (!variant || variant.isDeleted) {
       return res.status(404).json({
-        msg: "Product not found",
+        msg: "Product variant not found",
       });
     }
 
-    if (cartItem.quantity + 1 > product.quantity) {
+    if (cartItem.quantity + 1 > variant.quantity) {
       return res.status(400).json({
-        msg: `Cannot increase. Only ${product.quantity} items available in stock.`,
+        msg: `Cannot increase. Only ${variant.quantity} items available in stock.`,
       });
     }
 

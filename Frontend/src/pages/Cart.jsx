@@ -36,14 +36,30 @@ const Cart = () => {
 
       const response = await getDataCart();
 
-      const formattedData = response.data.cartData.map((item) => ({
-        id: item._id,
-        productId: item.productId._id,
-        name: item.productId.heading,
-        price: item.productId.price,
-        quantity: item.quantity,
-        image: item.productId.imgUrl,
-      }));
+      const formattedData = response.data.cartData.map((item) => {
+        const variant = item.variantId;
+        const product = item.productId;
+        
+        const price = variant ? variant.price : (product.price || 0);
+        const image = (variant && variant.images && variant.images.length > 0)
+          ? variant.images[0]
+          : product.imgUrl;
+          
+        const attributeString = (variant && variant.attributes && variant.attributes.length > 0)
+          ? variant.attributes.map(attr => `${attr.name}: ${attr.value}`).join(", ")
+          : "";
+
+        return {
+          id: item._id,
+          productId: product._id,
+          variantId: variant ? variant._id : "",
+          name: product.heading,
+          price,
+          quantity: item.quantity,
+          image,
+          attributes: attributeString,
+        };
+      });
 
       setCartItems(formattedData);
     } catch (err) {
@@ -115,7 +131,7 @@ const Cart = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f1f3f6] p-6 flex flex-col items-center justify-center">
+      <div className="min-h-[calc(100vh-80px)] bg-[#f1f3f6] p-6 flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#15877F]"></div>
         <p className="text-gray-500 mt-4 animate-pulse">Loading your cart...</p>
       </div>
@@ -123,7 +139,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 px-2 sm:px-6 py-6 pb-24 lg:pb-8 font-sans antialiased relative">
+    <div className="min-h-[calc(100vh-80px)] bg-neutral-50 px-2 sm:px-6 py-6 pb-24 lg:pb-8 font-sans antialiased relative">
       {/* Toast Alert Widget */}
       {message && (
         <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
@@ -212,6 +228,11 @@ const Cart = () => {
                         <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
                           {item.name}
                         </h3>
+                        {item.attributes && (
+                          <p className="text-xs text-[#088178] font-medium mt-0.5">
+                            {item.attributes}
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500 mt-1">
                           Unit Price: ₹{item.price.toLocaleString()}
                         </p>

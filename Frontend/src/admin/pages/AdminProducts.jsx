@@ -151,8 +151,42 @@ const AdminProducts = () => {
   }, [search, selectedCategory, selectedBrand, selectedStatus, sortBy]);
 
   // Status helper
+  const getProductTotalStock = (product) => {
+    if (product.variants && product.variants.length > 0) {
+      return product.variants.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
+    }
+    return product.quantity ?? 0;
+  };
+
+  const getProductPriceDisplay = (product) => {
+    if (!product.variants || product.variants.length === 0) {
+      return product.price ? `₹${product.price.toLocaleString()}` : "N/A";
+    }
+    const prices = product.variants.map(v => v.price);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    if (minPrice === maxPrice) {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0
+      }).format(minPrice);
+    }
+    const minFmt = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0
+    }).format(minPrice);
+    const maxFmt = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0
+    }).format(maxPrice);
+    return `${minFmt} - ${maxFmt}`;
+  };
+
   const getProductStatus = (item) => {
-    const qty = item.quantity ?? 10;
+    const qty = getProductTotalStock(item);
     if (qty <= 0 || item.sold) return "Sold";
     if (qty <= 3) return "Low Stock";
     return "In Stock";
@@ -204,13 +238,21 @@ const AdminProducts = () => {
     } else if (sortBy === "oldest") {
       result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     } else if (sortBy === "price-low") {
-      result.sort((a, b) => a.price - b.price);
+      result.sort((a, b) => {
+        const pA = a.variants && a.variants.length > 0 ? Math.min(...a.variants.map(v => v.price)) : (a.price || 0);
+        const pB = b.variants && b.variants.length > 0 ? Math.min(...b.variants.map(v => v.price)) : (b.price || 0);
+        return pA - pB;
+      });
     } else if (sortBy === "price-high") {
-      result.sort((a, b) => b.price - a.price);
+      result.sort((a, b) => {
+        const pA = a.variants && a.variants.length > 0 ? Math.min(...a.variants.map(v => v.price)) : (a.price || 0);
+        const pB = b.variants && b.variants.length > 0 ? Math.min(...b.variants.map(v => v.price)) : (b.price || 0);
+        return pB - pA;
+      });
     } else if (sortBy === "stock-low") {
-      result.sort((a, b) => (a.quantity ?? 10) - (b.quantity ?? 10));
+      result.sort((a, b) => getProductTotalStock(a) - getProductTotalStock(b));
     } else if (sortBy === "stock-high") {
-      result.sort((a, b) => (b.quantity ?? 10) - (a.quantity ?? 10));
+      result.sort((a, b) => getProductTotalStock(b) - getProductTotalStock(a));
     }
 
     return result;
@@ -451,11 +493,7 @@ const AdminProducts = () => {
                   {visibleProducts.map((p) => {
                     const status = getProductStatus(p);
                     const isSold = status === "Sold";
-                    const formattedPrice = new Intl.NumberFormat("en-IN", {
-                      style: "currency",
-                      currency: "INR",
-                      maximumFractionDigits: 0
-                    }).format(p.price);
+                    const priceDisplay = getProductPriceDisplay(p);
 
                     return (
                       <tr key={p._id} className="hover:bg-slate-50/30 transition">
@@ -483,10 +521,10 @@ const AdminProducts = () => {
                           {p.brandId?.name || "N/A"}
                         </td>
                         <td className="py-3 px-6 text-right font-medium text-slate-800">
-                          {formattedPrice}
+                          {priceDisplay}
                         </td>
                         <td className="py-3 px-6 text-center text-gray-700">
-                          {p.quantity ?? 10}
+                          {getProductTotalStock(p)}
                         </td>
                         <td className="py-3 px-6">
                           <span
@@ -540,11 +578,7 @@ const AdminProducts = () => {
             {visibleProducts.map((p) => {
               const status = getProductStatus(p);
               const isSold = status === "Sold";
-              const formattedPrice = new Intl.NumberFormat("en-IN", {
-                style: "currency",
-                currency: "INR",
-                maximumFractionDigits: 0
-              }).format(p.price);
+              const priceDisplay = getProductPriceDisplay(p);
 
               return (
                 <div
@@ -586,10 +620,10 @@ const AdminProducts = () => {
                       </h3>
                       <div className="flex items-baseline gap-2 mt-1.5">
                         <span className="text-sm font-bold text-[#088178]">
-                          {formattedPrice}
+                          {priceDisplay}
                         </span>
                         <span className="text-[13px] font-normal text-gray-500">
-                          Stock: {p.quantity ?? 10}
+                          Stock: {getProductTotalStock(p)}
                         </span>
                       </div>
                       <p className="text-[13px] text-gray-500 font-normal mt-1 leading-normal line-clamp-1">

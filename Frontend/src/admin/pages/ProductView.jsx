@@ -117,8 +117,42 @@ const ProductView = () => {
     });
   };
 
+  const getProductTotalStock = (p) => {
+    if (p.variants && p.variants.length > 0) {
+      return p.variants.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
+    }
+    return p.quantity ?? 0;
+  };
+
+  const getProductPriceDisplay = (p) => {
+    if (!p.variants || p.variants.length === 0) {
+      return p.price ? `₹${p.price.toLocaleString()}` : "N/A";
+    }
+    const prices = p.variants.map(v => v.price);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    if (minPrice === maxPrice) {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0
+      }).format(minPrice);
+    }
+    const minFmt = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0
+    }).format(minPrice);
+    const maxFmt = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0
+    }).format(maxPrice);
+    return `${minFmt} - ${maxFmt}`;
+  };
+
   const getProductStatus = (item) => {
-    const qty = item.quantity ?? 10;
+    const qty = getProductTotalStock(item);
     if (qty <= 0 || item.sold) return "Sold";
     if (qty <= 3) return "Low Stock";
     return "In Stock";
@@ -151,11 +185,7 @@ const ProductView = () => {
   }
 
   const status = getProductStatus(product);
-  const formattedPrice = new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(product.price);
+  const priceDisplay = getProductPriceDisplay(product);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -321,18 +351,18 @@ const ProductView = () => {
               <div className="grid grid-cols-2 gap-4 border-y border-gray-100 py-4 my-2.5 bg-slate-50/50 rounded-xl px-4">
                 <div>
                   <span className="block text-[10px] text-gray-450 uppercase font-bold tracking-wider">
-                    Price Value
+                    Price Range / Price
                   </span>
                   <span className="text-xl font-extrabold text-[#088178] mt-1 block leading-none">
-                    {formattedPrice}
+                    {priceDisplay}
                   </span>
                 </div>
                 <div>
                   <span className="block text-[10px] text-gray-455 uppercase font-bold tracking-wider">
-                    Quantity In Stock
+                    Total Quantity In Stock
                   </span>
                   <span className="text-xl font-extrabold text-gray-900 mt-1 block leading-none">
-                    {product.quantity ?? 10} units
+                    {getProductTotalStock(product)} units
                   </span>
                 </div>
               </div>
@@ -342,10 +372,62 @@ const ProductView = () => {
                 <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
                   Product Description
                 </h4>
-                <p className="text-xs text-gray-650 leading-relaxed font-medium bg-gray-50 border border-gray-100 p-3.5 rounded-xl whitespace-pre-line">
+                <p className="text-xs text-gray-655 leading-relaxed font-medium bg-gray-50 border border-gray-100 p-3.5 rounded-xl whitespace-pre-line">
                   {product.description || "No description provided."}
                 </p>
               </div>
+
+              {/* Variants Details Table */}
+              {product.variants && product.variants.length > 0 && (
+                <div className="mt-6 border-t pt-6 text-left">
+                  <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
+                    Configured Product Variants ({product.variants.length})
+                  </h4>
+                  <div className="overflow-x-auto border border-slate-100 rounded-xl bg-white shadow-sm">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-gray-500 border-b border-slate-100">
+                          <th className="py-2.5 px-4 w-12 text-center">Image</th>
+                          <th className="py-2.5 px-4">Variant Attributes</th>
+                          <th className="py-2.5 px-4 font-mono">SKU</th>
+                          <th className="py-2.5 px-4 text-right">Price</th>
+                          <th className="py-2.5 px-4 text-center">Stock</th>
+                          <th className="py-2.5 px-4 text-center">Weight</th>
+                          <th className="py-2.5 px-4">Barcode</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                        {product.variants.map((v, vIdx) => {
+                          const name = v.attributes.length > 0
+                            ? v.attributes.map(a => a.value).join(" • ")
+                            : "Default Base Variant";
+                          return (
+                            <tr key={vIdx} className="hover:bg-slate-50/20">
+                              <td className="py-2.5 px-4 text-center">
+                                <div className="w-8 h-8 rounded border bg-slate-50 flex items-center justify-center overflow-hidden">
+                                  {v.images && v.images.length > 0 ? (
+                                    <img src={v.images[0]} alt="Variant" className="w-full h-full object-contain" />
+                                  ) : (
+                                    <ImageIcon size={14} className="text-gray-400" />
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-2.5 px-4 font-bold text-slate-800">{name}</td>
+                              <td className="py-2.5 px-4 font-mono text-gray-500">{v.sku}</td>
+                              <td className="py-2.5 px-4 text-right text-[#088178]">
+                                ₹{v.price.toLocaleString()}
+                              </td>
+                              <td className="py-2.5 px-4 text-center">{v.quantity}</td>
+                              <td className="py-2.5 px-4 text-center">{v.weight ? `${v.weight}g` : "N/A"}</td>
+                              <td className="py-2.5 px-4 text-gray-500">{v.barcode || "N/A"}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

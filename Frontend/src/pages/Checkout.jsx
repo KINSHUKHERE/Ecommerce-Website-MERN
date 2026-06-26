@@ -81,14 +81,25 @@ const Checkout = () => {
 
         // 2. Load Cart Data
         const response = await getDataCart();
-        const formattedData = response.data.cartData.map((item) => ({
-          id: item._id,
-          productId: item.productId._id,
-          name: item.productId.heading,
-          price: item.productId.price,
-          quantity: item.quantity,
-          image: item.productId.imgUrl,
-        }));
+        const formattedData = response.data.cartData.map((item) => {
+          const variant = item.variantId;
+          const product = item.productId;
+          
+          const price = variant ? variant.price : (product.price || 0);
+          const image = (variant && variant.images && variant.images.length > 0)
+            ? variant.images[0]
+            : product.imgUrl;
+
+          return {
+            id: item._id,
+            productId: product._id,
+            variantId: variant ? variant._id : "",
+            name: product.heading,
+            price,
+            quantity: item.quantity,
+            image,
+          };
+        });
         setCartItems(formattedData);
 
         // Pre-fill user information
@@ -172,6 +183,7 @@ const Checkout = () => {
           userId: localUser._id,
           items: cartItems.map((item) => ({
             productId: item.productId,
+            variantId: item.variantId || null,
             name: item.name,
             price: item.price,
             quantity: item.quantity,
@@ -203,7 +215,7 @@ const Checkout = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+      <div className="min-h-[calc(100vh-80px)] bg-slate-50 flex flex-col items-center justify-center">
         <Loader2 className="animate-spin text-[#088178] w-10 h-10 mb-4" />
         <p className="text-sm text-gray-500 font-medium animate-pulse">Securing Connection...</p>
       </div>
@@ -211,7 +223,7 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans antialiased text-slate-800 leading-relaxed">
+    <div className="min-h-[calc(100vh-80px)] bg-slate-50 font-sans antialiased text-slate-800 leading-relaxed">
       <div className="max-w-2xl mx-auto px-4 py-8 pb-24">
         
         {/* ========================================================================= */}

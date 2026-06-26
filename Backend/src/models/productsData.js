@@ -19,7 +19,7 @@ const productSchema = new mongoose.Schema(
 
     price: {
       type: Number,
-      required: true,
+      required: false,
     },
 
     description: {
@@ -41,8 +41,16 @@ const productSchema = new mongoose.Schema(
 
     quantity: {
       type: Number,
-      default: 10,
+      required: false,
+      default: 0,
     },
+
+    options: [
+      {
+        name: { type: String, required: true },
+        values: { type: [String], default: [] },
+      }
+    ],
 
     sold: {
       type: Boolean,

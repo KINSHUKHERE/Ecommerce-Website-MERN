@@ -4,7 +4,7 @@ import { ArrowLeft, Lock } from "lucide-react";
 
 const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-[calc(100vh-80px)] bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-white rounded-3xl border border-gray-150 shadow-md p-6 sm:p-10">
         {/* Back Button */}
         <div className="mb-6">

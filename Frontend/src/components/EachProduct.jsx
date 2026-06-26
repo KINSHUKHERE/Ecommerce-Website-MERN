@@ -6,7 +6,31 @@ const EachProduct = ({ data }) => {
   const navigate = useNavigate();
   
   const user = JSON.parse(localStorage.getItem("user"));
-  const isOutOfStock = (data.quantity ?? 10) <= 0 || data.sold;
+
+  const getStockCount = (product) => {
+    if (product.variants && product.variants.length > 0) {
+      return product.variants.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
+    }
+    return product.quantity ?? 0;
+  };
+
+  const getMinPrice = (product) => {
+    if (product.variants && product.variants.length > 0) {
+      return Math.min(...product.variants.map(v => v.price));
+    }
+    return product.price || 0;
+  };
+
+  const hasPriceRange = (product) => {
+    if (product.variants && product.variants.length > 1) {
+      const prices = product.variants.map(v => v.price);
+      return Math.min(...prices) !== Math.max(...prices);
+    }
+    return false;
+  };
+
+  const stockCount = getStockCount(data);
+  const isOutOfStock = stockCount <= 0 || data.sold;
 
   const productClicked = () => {
     navigate(`/products/${data._id}`);
@@ -20,6 +44,12 @@ const EachProduct = ({ data }) => {
   const handleAddToCart = async (e) => {
     e.stopPropagation();
 
+    // Redirect to details if product has variants/options
+    if (data.options && data.options.length > 0) {
+      navigate(`/products/${data._id}`);
+      return;
+    }
+
     try {
       if (!user) {
         navigate("/login");
@@ -27,6 +57,8 @@ const EachProduct = ({ data }) => {
       }
 
       setAdding(true);
+      
+      // For flat products, the backend expects productId. It will resolve the default base variant itself.
       const cartData = {
         userId: user._id,
         productId: data._id,
@@ -81,11 +113,11 @@ const EachProduct = ({ data }) => {
             <span className={`text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded ${
               isOutOfStock 
                 ? "bg-red-50 text-red-600" 
-                : (data.quantity ?? 10) <= 3 
+                : stockCount <= 3 
                   ? "bg-amber-50 text-amber-600 animate-pulse" 
                   : "bg-green-50 text-green-600"
             }`}>
-              {isOutOfStock ? "Sold Out" : `${data.quantity ?? 10} Left`}
+              {isOutOfStock ? "Sold Out" : `${stockCount} Left`}
             </span>
           </div>
 
@@ -110,7 +142,7 @@ const EachProduct = ({ data }) => {
       <div>
         <div className="flex justify-between items-center mt-2.5 sm:mt-4 pt-2 border-t border-gray-50 px-1">
           <span className="font-extrabold text-[14px] sm:text-[16px] text-[#088178]">
-            ₹{data.price}
+            ₹{getMinPrice(data).toLocaleString()}{hasPriceRange(data) ? "+" : ""}
           </span>
 
           <button

@@ -120,7 +120,7 @@ const OrderDetails = () => {
     });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 text-left">
+    <div className="p-4 sm:p-6 text-left">
       {/* Toast Alert Widget */}
       {message && (
         <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">

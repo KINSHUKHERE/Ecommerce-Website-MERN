@@ -1,6 +1,7 @@
 const Order = require("../models/orderDetails");
 const Cart = require("../models/cartDetails");
 const Product = require("../models/productsData");
+const Variant = require("../models/variantDetails");
 
 const createOrder = async (req, res) => {
   try {
@@ -31,15 +32,24 @@ const createOrder = async (req, res) => {
       orderStatus: "Processing",
     });
 
-    // Update product quantities
+    // Update variant and product quantities
     for (const item of items) {
-      const product = await Product.findById(item.productId);
-      if (product) {
-        product.quantity = Math.max(0, (product.quantity ?? 10) - item.quantity);
-        if (product.quantity <= 0) {
-          product.sold = true;
+      if (item.variantId) {
+        const variant = await Variant.findById(item.variantId);
+        if (variant) {
+          variant.quantity = Math.max(0, variant.quantity - item.quantity);
+          await variant.save();
         }
-        await product.save();
+      } else {
+        // Fallback for older flat products
+        const product = await Product.findById(item.productId);
+        if (product) {
+          product.quantity = Math.max(0, (product.quantity ?? 10) - item.quantity);
+          if (product.quantity <= 0) {
+            product.sold = true;
+          }
+          await product.save();
+        }
       }
     }
 
