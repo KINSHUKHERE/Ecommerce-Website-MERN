@@ -292,7 +292,7 @@ const ProductDetails = () => {
             </div>
           )}
 
-          <div className="border-t pt-4">
+          <div className=" pt-4">
             <h3 className="text-lg font-semibold mb-2">Product Description</h3>
             <p className="text-gray-600 leading-relaxed text-justify">
               {product.description}
