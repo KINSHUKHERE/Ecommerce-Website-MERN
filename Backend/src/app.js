@@ -13,14 +13,14 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const app = express();
 
 const allowedOrigins = [
-  "https://yocart.onrender.com", 
+  "https://yocart.onrender.com",
   "https://ecommerce-website-mern-1-luv9.onrender.com",
   "http://localhost:5173",
   "http://localhost:3000",
-  "http://localhost:3000/",
+  "http://localhost:5174/",
   "http://localhost",
   "https://localhost",
-  "capacitor://localhost"
+  "capacitor://localhost",
 ];
 
 app.use(cookieParser());
@@ -28,25 +28,27 @@ app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
-      
+
       // Check if origin is localhost (e.g., http://localhost:5174, capacitor://localhost, etc.)
-      const isLocalhost = origin.startsWith("http://localhost:") || 
-                          origin.startsWith("https://localhost:") || 
-                          origin === "http://localhost" || 
-                          origin === "https://localhost" || 
-                          origin.startsWith("capacitor://localhost");
-      
+      const isLocalhost =
+        origin.startsWith("http://localhost:") ||
+        origin.startsWith("https://localhost:") ||
+        origin === "http://localhost" ||
+        origin === "https://localhost" ||
+        origin.startsWith("capacitor://localhost");
+
       if (isLocalhost || allowedOrigins.indexOf(origin) !== -1) {
         return callback(null, true);
       }
-      
-      const msg = "The CORS policy for this site does not allow access from the specified Origin.";
+
+      const msg =
+        "The CORS policy for this site does not allow access from the specified Origin.";
       return callback(new Error(msg), false);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-  })
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
 );
 app.use(express.json());
 

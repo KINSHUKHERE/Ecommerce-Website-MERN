@@ -54,6 +54,7 @@ const ProductEdit = () => {
   const [variantImageInputMethod, setVariantImageInputMethod] = useState("upload");
   const [variantUrlInput, setVariantUrlInput] = useState("");
   const [draggedIndex, setDraggedIndex] = useState(null);
+  const [draggedVariantImgIndex, setDraggedVariantImgIndex] = useState(null);
 
   // Variant States
   const [hasVariants, setHasVariants] = useState(false);
@@ -210,6 +211,36 @@ const ProductEdit = () => {
 
   const handleDragEnd = () => {
     setDraggedIndex(null);
+  };
+
+  const handleVariantImgDragStart = (e, imgIdx) => {
+    setDraggedVariantImgIndex(imgIdx);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleVariantImgDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleVariantImgDrop = (e, targetIdx, vIdx) => {
+    e.preventDefault();
+    if (draggedVariantImgIndex === null || draggedVariantImgIndex === targetIdx) return;
+
+    setVariants((prev) =>
+      prev.map((v, idx) => {
+        if (idx === vIdx) {
+          const reorderedImages = [...(v.images || [])];
+          const [draggedItem] = reorderedImages.splice(draggedVariantImgIndex, 1);
+          reorderedImages.splice(targetIdx, 0, draggedItem);
+          return { ...v, images: reorderedImages };
+        }
+        return v;
+      })
+    );
+  };
+
+  const handleVariantImgDragEnd = () => {
+    setDraggedVariantImgIndex(null);
   };
 
   const removeImage = (indexToRemove) => {
@@ -866,12 +897,13 @@ const ProductEdit = () => {
                         </div>
                       )}
                       <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl cursor-pointer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-1.5 right-1.5 w-5.5 h-5.5 bg-white border border-gray-150 hover:border-red-500 text-gray-500 hover:text-white hover:bg-red-500 rounded-full flex items-center justify-center shadow-sm transition-all cursor-pointer z-10"
+                          title="Delete image"
+                        >
+                          <X size={12} strokeWidth={3} />
+                        </button>
                     </div>
                   ))}
                 </div>
@@ -1084,7 +1116,14 @@ const ProductEdit = () => {
                   {(variants[activeImagePickerVariant].images).map((url, idx) => (
                     <div
                       key={idx}
-                      className="relative aspect-square border border-slate-200 rounded-lg bg-slate-50 p-1 flex items-center justify-center overflow-hidden group"
+                      draggable={true}
+                      onDragStart={(e) => handleVariantImgDragStart(e, idx)}
+                      onDragOver={handleVariantImgDragOver}
+                      onDrop={(e) => handleVariantImgDrop(e, idx, activeImagePickerVariant)}
+                      onDragEnd={handleVariantImgDragEnd}
+                      className={`relative aspect-square border rounded-lg bg-slate-50 p-1 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing ${
+                        idx === 0 ? "border-[#088178]/40 ring-1 ring-[#088178]/5" : "border-slate-200"
+                      } ${draggedVariantImgIndex === idx ? "opacity-40 border-[#088178] border-dashed" : ""}`}
                     >
                       <img src={url} alt="Variant media" className="w-full h-full object-contain rounded-md" />
                       {idx === 0 && (
@@ -1095,9 +1134,10 @@ const ProductEdit = () => {
                       <button
                         type="button"
                         onClick={() => removeVariantImage(activeImagePickerVariant, idx)}
-                        className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg cursor-pointer"
+                        className="absolute top-1 right-1 w-4.5 h-4.5 bg-white border border-gray-150 hover:border-red-500 text-gray-500 hover:text-white hover:bg-red-500 rounded-full flex items-center justify-center shadow-sm transition-all cursor-pointer z-10"
+                        title="Delete image"
                       >
-                        <Trash2 size={13} />
+                        <X size={10} strokeWidth={3} />
                       </button>
                     </div>
                   ))}
