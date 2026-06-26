@@ -584,138 +584,6 @@ const ProductEdit = () => {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Form Fields: 8 columns */}
             <div className="md:col-span-8 space-y-4">
-                           {/* Unified Product Images Manager */}
-              {!hasVariants && (
-                <div className="space-y-4 border-b border-slate-100 pb-5">
-                  <div className="flex justify-between items-center flex-wrap gap-2">
-                    <div className="space-y-0.5 text-left">
-                      <label className="block text-xs font-bold text-gray-655 uppercase tracking-wider">
-                        Product Images ({productImages.length}/6)
-                      </label>
-                      <p className="text-[10px] text-gray-450 font-medium">
-                        The first image will automatically be set as the Primary Cover.
-                      </p>
-                    </div>
-                    
-                    {productImages.length < 6 && (
-                      <div className="flex gap-1.5 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-                        <button
-                          type="button"
-                          onClick={() => setImageInputMethod("upload")}
-                          className={`px-2 py-0.5 text-[9px] font-bold rounded transition-all cursor-pointer ${
-                            imageInputMethod === "upload"
-                              ? "bg-white text-slate-800 shadow-sm"
-                              : "text-gray-500 hover:text-gray-800"
-                          }`}
-                        >
-                          Upload File
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setImageInputMethod("url")}
-                          className={`px-2 py-0.5 text-[9px] font-bold rounded transition-all cursor-pointer ${
-                            imageInputMethod === "url"
-                              ? "bg-white text-slate-800 shadow-sm"
-                              : "text-gray-555 hover:text-gray-800"
-                          }`}
-                        >
-                          Image Link URL
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {productImages.length < 6 ? (
-                    imageInputMethod === "upload" ? (
-                      <label className="w-full h-24 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-3 hover:border-[#088178] hover:bg-[#088178]/5 transition-all cursor-pointer">
-                        {uploading ? (
-                          <div className="flex flex-col items-center justify-center text-[#088178]">
-                            <Loader2 className="animate-spin mb-1.5" size={20} />
-                            <span className="text-[10px] font-semibold">Uploading to Cloudinary...</span>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center text-gray-400 text-center">
-                            <Upload className="mb-1" size={20} />
-                            <span className="text-[11px] font-bold text-gray-500">Upload Product Photos</span>
-                            <span className="text-[9px] text-gray-400 mt-0.5">Select up to {6 - productImages.length} more file(s)</span>
-                          </div>
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={handleImagesUpload}
-                          disabled={uploading}
-                          className="hidden"
-                        />
-                      </label>
-                    ) : (
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
-                            <LinkIcon size={14} />
-                          </span>
-                          <input
-                            type="text"
-                            value={urlInput}
-                            onChange={(e) => setUrlInput(e.target.value)}
-                            placeholder="Paste image link URL here..."
-                            className="w-full pl-8.5 pr-3 py-1.5 rounded-lg border border-slate-100 bg-slate-50/70 focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none transition-all text-xs font-semibold text-gray-755 placeholder-gray-400 h-[32px]"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={addImageUrl}
-                          className="px-4 py-1 bg-[#088178] hover:bg-[#06635c] text-white text-[11px] font-bold rounded-lg transition-all cursor-pointer flex items-center h-[32px]"
-                        >
-                          Add URL
-                        </button>
-                      </div>
-                    )
-                  ) : (
-                    <div className="p-3 bg-teal-50/50 border border-teal-100 rounded-xl text-center text-xs font-semibold text-teal-800">
-                      Maximum photo limit of 6 reached. Delete existing ones to add different images.
-                    </div>
-                  )}
-
-                  {productImages.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 items-start pt-1">
-                      {productImages.map((url, index) => (
-                        <div
-                          key={index}
-                          draggable={true}
-                          onDragStart={(e) => handleDragStart(e, index)}
-                          onDragOver={(e) => handleDragOver(e, index)}
-                          onDrop={(e) => handleDrop(e, index)}
-                          onDragEnd={handleDragEnd}
-                          className={`relative aspect-square border rounded-xl bg-gray-50 flex items-center justify-center p-1.5 overflow-hidden shadow-sm group transition-all cursor-grab active:cursor-grabbing ${
-                            index === 0 ? "border-[#088178]/40 ring-2 ring-[#088178]/5" : "border-slate-150"
-                          } ${draggedIndex === index ? "opacity-40 border-[#088178] border-dashed" : ""}`}
-                        >
-                          <img
-                            src={url}
-                            alt={`Product Photo ${index + 1}`}
-                            className="w-full h-full object-contain rounded-lg"
-                          />
-                          {index === 0 && (
-                            <div className="absolute top-1 left-1.5 bg-[#088178] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded shadow-sm">
-                              PRIMARY
-                            </div>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl cursor-pointer"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
               {/* Grid for Category & Brand */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -876,6 +744,138 @@ const ProductEdit = () => {
                 placeholder="10"
                 icon={Box}
               />
+            </div>
+          )}
+
+          {/* Unified Product Images Manager */}
+          {!hasVariants && (
+            <div className="space-y-4 border-t border-slate-100 pt-5 mt-4 animate-fadeIn">
+              <div className="flex justify-between items-center flex-wrap gap-2">
+                <div className="space-y-0.5 text-left">
+                  <label className="block text-xs font-bold text-gray-655 uppercase tracking-wider">
+                    Product Images ({productImages.length}/6)
+                  </label>
+                  <p className="text-[10px] text-gray-450 font-medium">
+                    The first image will automatically be set as the Primary Cover.
+                  </p>
+                </div>
+                
+                {productImages.length < 6 && (
+                  <div className="flex gap-1.5 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => setImageInputMethod("upload")}
+                      className={`px-2 py-0.5 text-[9px] font-bold rounded transition-all cursor-pointer ${
+                        imageInputMethod === "upload"
+                          ? "bg-white text-slate-800 shadow-sm"
+                          : "text-gray-550 hover:text-gray-800"
+                      }`}
+                    >
+                      Upload File
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageInputMethod("url")}
+                      className={`px-2 py-0.5 text-[9px] font-bold rounded transition-all cursor-pointer ${
+                        imageInputMethod === "url"
+                          ? "bg-white text-slate-800 shadow-sm"
+                          : "text-gray-555 hover:text-gray-800"
+                      }`}
+                    >
+                      Image Link URL
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {productImages.length < 6 ? (
+                imageInputMethod === "upload" ? (
+                  <label className="w-full h-24 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-3 hover:border-[#088178] hover:bg-[#088178]/5 transition-all cursor-pointer">
+                    {uploading ? (
+                      <div className="flex flex-col items-center justify-center text-[#088178]">
+                        <Loader2 className="animate-spin mb-1.5" size={20} />
+                        <span className="text-[10px] font-semibold">Uploading to Cloudinary...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-gray-400 text-center">
+                        <Upload className="mb-1" size={20} />
+                        <span className="text-[11px] font-bold text-gray-500">Upload Product Photos</span>
+                        <span className="text-[9px] text-gray-400 mt-0.5">Select up to {6 - productImages.length} more file(s)</span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImagesUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </label>
+                ) : (
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                        <LinkIcon size={14} />
+                      </span>
+                      <input
+                        type="text"
+                        value={urlInput}
+                        onChange={(e) => setUrlInput(e.target.value)}
+                        placeholder="Paste image link URL here..."
+                        className="w-full pl-8.5 pr-3 py-1.5 rounded-lg border border-slate-100 bg-slate-50/70 focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none transition-all text-xs font-semibold text-gray-755 placeholder-gray-400 h-[32px]"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addImageUrl}
+                      className="px-4 py-1 bg-[#088178] hover:bg-[#06635c] text-white text-[11px] font-bold rounded-lg transition-all cursor-pointer flex items-center h-[32px]"
+                    >
+                      Add URL
+                    </button>
+                  </div>
+                )
+              ) : (
+                <div className="p-3 bg-teal-50/50 border border-teal-100 rounded-xl text-center text-xs font-semibold text-teal-800">
+                  Maximum photo limit of 6 reached. Delete existing ones to add different images.
+                </div>
+              )}
+
+              {productImages.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 items-start pt-1">
+                  {productImages.map((url, index) => (
+                    <div
+                      key={index}
+                      draggable={true}
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDrop={(e) => handleDrop(e, index)}
+                      onDragEnd={handleDragEnd}
+                      className={`relative aspect-square border rounded-xl bg-gray-50 flex items-center justify-center p-1.5 overflow-hidden shadow-sm group transition-all cursor-grab active:cursor-grabbing ${
+                        index === 0 ? "border-[#088178]/40 ring-2 ring-[#088178]/5" : "border-slate-150"
+                      } ${draggedIndex === index ? "opacity-40 border-[#088178] border-dashed" : ""}`}
+                    >
+                      <img
+                        src={url}
+                        alt={`Product Photo ${index + 1}`}
+                        className="w-full h-full object-contain rounded-lg"
+                      />
+                      {index === 0 && (
+                        <div className="absolute top-1 left-1.5 bg-[#088178] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded shadow-sm">
+                          PRIMARY
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl cursor-pointer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
