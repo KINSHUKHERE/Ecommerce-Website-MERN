@@ -30,6 +30,7 @@ const ProductView = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [activeImgIndex, setActiveImgIndex] = useState(0);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(null);
+const [touchStartX, setTouchStartX] = useState(null);
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -47,6 +48,25 @@ const ProductView = () => {
 
   const prevSlide = () => {
     setActiveImgIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    const threshold = 50; // minimum swipe distance
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
+    }
+    setTouchStartX(null);
   };
 
   // Check navigation state for redirects (e.g. successful updates)
@@ -245,7 +265,7 @@ const ProductView = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Left Column: Image Area */}
           <div className="md:col-span-5 flex flex-col items-center w-full">
-            <div className="w-full aspect-square max-w-[280px] bg-white border border-slate-100 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden group shadow-sm">
+            <div className="w-full aspect-square max-w-[280px] bg-white border border-slate-100 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden group shadow-sm" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
               <img
                 src={allImages[activeImgIndex]}
                 alt={product.heading}
