@@ -3,8 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { getProduct, updateProduct, uploadProductImage } from "../../api/ProductApi";
 import {
   getCategories,
-  getVariantsByCategory,
-} from "../../api/CategoryAndVarientApi";
+  getBrandsByCategory,
+} from "../../api/CategoryAndBrandApi";
 import {
   Link as LinkIcon,
   Tag,
@@ -29,7 +29,7 @@ const ProductEdit = () => {
 
   const [formData, setFormData] = useState({
     categoryId: "",
-    variantId: "",
+    brandId: "",
     heading: "",
     price: "",
     quantity: "",
@@ -43,7 +43,7 @@ const ProductEdit = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [variants, setVariants] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [imgLoadError, setImgLoadError] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
   const [uploading, setUploading] = useState(false);
@@ -62,7 +62,7 @@ const ProductEdit = () => {
           const categoryId = product.categoryId?._id || product.categoryId;
           setFormData({
             categoryId: categoryId || "",
-            variantId: product.variantId?._id || product.variantId || "",
+            brandId: product.brandId?._id || product.brandId || "",
             heading: product.heading || "",
             price: product.price || "",
             quantity: product.quantity ?? 10,
@@ -77,8 +77,8 @@ const ProductEdit = () => {
           setProductImages(combined);
 
           if (categoryId) {
-            const variantRes = await getVariantsByCategory(categoryId);
-            setVariants(variantRes.data.variants || []);
+            const brandRes = await getBrandsByCategory(categoryId);
+            setBrands(brandRes.data.brands || []);
           }
         } else {
           showToast("Product not found", "error");
@@ -180,16 +180,16 @@ const ProductEdit = () => {
     setFormData((prev) => ({
       ...prev,
       categoryId,
-      variantId: "",
+      brandId: "",
     }));
-    setVariants([]);
+    setBrands([]);
 
     if (categoryId) {
       try {
-        const response = await getVariantsByCategory(categoryId);
-        setVariants(response.data.variants || []);
+        const response = await getBrandsByCategory(categoryId);
+        setBrands(response.data.brands || []);
       } catch (err) {
-        showToast("Error loading variants", "error");
+        showToast("Error loading brands", "error");
         console.error(err);
       }
     }
@@ -416,7 +416,7 @@ const ProductEdit = () => {
                 )}
               </div>
 
-              {/* Grid for Category & Variant dropdowns */}
+              {/* Grid for Category & Brand dropdowns */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Category Select */}
                 <div>
@@ -447,25 +447,25 @@ const ProductEdit = () => {
                   </div>
                 </div>
 
-                {/* Variant Select */}
+                {/* Brand Select */}
                 <div>
                   <label className="block mb-1.5 text-xs font-bold text-gray-655 uppercase tracking-wider text-left">
-                    Brand / Variant
+                    Brand / Brand
                   </label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
                       <Layers size={15} />
                     </span>
                     <select
-                      name="variantId"
-                      value={formData.variantId}
+                      name="brandId"
+                      value={formData.brandId}
                       onChange={handleInputChange}
                       required
                       disabled={!formData.categoryId}
                       className="w-full pl-9.5 pr-8 py-2.5 rounded-xl border border-slate-100 bg-slate-50/70 focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none transition-all text-xs font-semibold text-gray-700 appearance-none cursor-pointer disabled:opacity-50"
                     >
-                      <option value="">Select Variant</option>
-                      {variants.map((v) => (
+                      <option value="">Select Brand</option>
+                      {brands.map((v) => (
                         <option key={v._id} value={v._id}>
                           {v.name}
                         </option>

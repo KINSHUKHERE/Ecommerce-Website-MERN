@@ -76,6 +76,13 @@ const Profile = () => {
   };
 
   useEffect(() => {
+    if (location.state?.alertMsg) {
+      showToast(location.state.alertMsg, "error");
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
     if (!localUser || !localUser._id) {
       navigate("/login");
       return;

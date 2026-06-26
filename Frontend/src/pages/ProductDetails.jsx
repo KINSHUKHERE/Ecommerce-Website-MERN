@@ -50,7 +50,6 @@ const ProductDetails = () => {
       const user = JSON.parse(localStorage.getItem("user"));
 
       if (!user) {
-        alert("Please login first");
         navigate("/login");
         return;
       }
@@ -150,7 +149,7 @@ const ProductDetails = () => {
             </span>
 
             <span className="bg-[#15877F]/10 px-3 py-1 rounded-full text-sm text-[#15877F] font-medium">
-              {product.variantId?.name}
+              {product.brandId?.name}
             </span>
 
             <span className={`px-3 py-1 rounded-full text-sm font-bold ${

@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { postProduct, uploadProductImage } from "../../api/ProductApi";
 import {
   getCategories,
-  getVariantsByCategory,
-} from "../../api/CategoryAndVarientApi";
+  getBrandsByCategory,
+} from "../../api/CategoryAndBrandApi";
 import {
   Link as LinkIcon,
   Tag,
@@ -18,6 +18,8 @@ import {
   Upload,
   Trash2,
   Loader2,
+  Check,
+  X,
   Image as ImageIcon
 } from "lucide-react";
 
@@ -25,7 +27,7 @@ const CreateProduct = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     categoryId: "",
-    variantId: "",
+    brandId: "",
     heading: "",
     price: "",
     quantity: "",
@@ -37,8 +39,16 @@ const CreateProduct = () => {
   const [urlInput, setUrlInput] = useState("");
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [message, setMessage] = useState("");
+  const [toastType, setToastType] = useState("error");
+
+  const showToast = (msg, type = "error") => {
+    setMessage(msg);
+    setToastType(type);
+    setTimeout(() => setMessage(""), 4000);
+  };
   const [categories, setCategories] = useState([]);
-  const [variants, setVariants] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
 
@@ -64,7 +74,7 @@ const CreateProduct = () => {
     if (files.length === 0) return;
 
     if (productImages.length + files.length > 6) {
-      alert("You can add up to 6 images only.");
+      showToast("You can add up to 6 images only.");
       return;
     }
 
@@ -76,7 +86,7 @@ const CreateProduct = () => {
       setProductImages((prev) => [...prev, ...urls]);
     } catch (err) {
       console.error("Image upload failed:", err);
-      alert("Failed to upload one or more images");
+      showToast("Failed to upload one or more images");
     } finally {
       setUploading(false);
     }
@@ -85,7 +95,7 @@ const CreateProduct = () => {
   const addImageUrl = () => {
     if (!urlInput.trim()) return;
     if (productImages.length >= 6) {
-      alert("You can add up to 6 images only.");
+      showToast("You can add up to 6 images only.");
       return;
     }
     setProductImages((prev) => [...prev, urlInput.trim()]);
@@ -124,7 +134,7 @@ const CreateProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (productImages.length === 0) {
-      alert("Please upload or add at least one product image.");
+      showToast("Please upload or add at least one product image.");
       return;
     }
     const finalData = {
@@ -137,7 +147,7 @@ const CreateProduct = () => {
       setIsSubmitted(true);
       setFormData({
         categoryId: "",
-        variantId: "",
+        brandId: "",
         heading: "",
         price: "",
         quantity: "",
@@ -156,14 +166,14 @@ const CreateProduct = () => {
     setFormData((prev) => ({
       ...prev,
       categoryId,
-      variantId: "",
+      brandId: "",
     }));
 
     try {
-      const response = await getVariantsByCategory(categoryId);
-      setVariants(response.data.variants);
+      const response = await getBrandsByCategory(categoryId);
+      setBrands(response.data.brands);
     } catch (err) {
-      console.log("Unable to fetch variants", err);
+      console.log("Unable to fetch brands", err);
     }
   };
 
@@ -337,7 +347,7 @@ const CreateProduct = () => {
               )}
             </div>
 
-            {/* Grid for Category & Variant dropdowns */}
+            {/* Grid for Category & Brand dropdowns */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Category Select */}
               <div>
@@ -367,31 +377,31 @@ const CreateProduct = () => {
                 </div>
               </div>
 
-              {/* Variant Select */}
+              {/* Brand Select */}
               <div>
                 <label className="block mb-1.5 text-xs font-bold text-gray-650 uppercase tracking-wider text-left">
-                  Variant
+                  Brand
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
                     <Layers size={16} />
                   </span>
                   <select
-                    value={formData.variantId}
+                    value={formData.brandId}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        variantId: e.target.value,
+                        brandId: e.target.value,
                       })
                     }
                     required
                     disabled={!formData.categoryId}
                     className="w-full pl-9 pr-10 py-2 rounded-lg border border-gray-200 bg-white focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-850 text-sm font-medium appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed h-[38px]"
                   >
-                    <option value="">Select Variant</option>
-                    {variants.map((variant) => (
-                      <option key={variant._id} value={variant._id}>
-                        {variant.name}
+                    <option value="">Select Brand</option>
+                    {brands.map((brand) => (
+                      <option key={brand._id} value={brand._id}>
+                        {brand.name}
                       </option>
                     ))}
                   </select>
@@ -466,6 +476,21 @@ const CreateProduct = () => {
           </form>
         </div>
       </div>
+      {/* Toast Alert Widget */}
+      {message && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
+          <div
+            className={`w-6 h-6 rounded-full flex items-center justify-center ${
+              toastType === "success"
+                ? "bg-green-50 text-green-600 border border-green-100"
+                : "bg-red-50 text-red-655 border border-red-100"
+            }`}
+          >
+            {toastType === "success" ? <Check size={14} /> : <X size={14} />}
+          </div>
+          <span className="text-sm font-medium text-gray-800">{message}</span>
+        </div>
+      )}
     </div>
   );
 };

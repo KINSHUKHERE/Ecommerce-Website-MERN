@@ -293,7 +293,7 @@ const ProductView = () => {
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 border border-blue-100 text-blue-750 rounded-md text-[10px] font-bold">
                   <Layers size={11} />
-                  {product.variantId?.name || "No Brand"}
+                  {product.brandId?.name || "No Brand"}
                 </span>
                 <span
                   className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold ${

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, Loader2, Lock, Smartphone, CreditCard, CheckSquare, Sparkles, Home, ShoppingBag, Shield } from "lucide-react";
+import { Check, X, Loader2, Lock, Smartphone, CreditCard, CheckSquare, Sparkles, Home, ShoppingBag, Shield } from "lucide-react";
 import { getDataCart } from "../api/CartApi";
 import { createOrder } from "../api/OrderApi";
 import { getUserProfile } from "../api/AuthApi";
@@ -39,6 +39,14 @@ const Checkout = () => {
   const [processingMsg, setProcessingMsg] = useState("Connecting to secure gateway...");
   const [generatedTxnId, setGeneratedTxnId] = useState("");
   const [createdOrder, setCreatedOrder] = useState(null);
+  const [message, setMessage] = useState("");
+  const [toastType, setToastType] = useState("error");
+
+  const showToast = (msg, type = "error") => {
+    setMessage(msg);
+    setToastType(type);
+    setTimeout(() => setMessage(""), 4000);
+  };
 
   const localUser = JSON.parse(localStorage.getItem("user"));
 
@@ -67,8 +75,7 @@ const Checkout = () => {
           } else {
             msg = "Please set up a Password in your Profile before placing an order.";
           }
-          alert(msg);
-          navigate("/profile", { replace: true });
+          navigate("/profile", { replace: true, state: { alertMsg: msg } });
           return;
         }
 
@@ -111,15 +118,15 @@ const Checkout = () => {
   const handleProceedToPayment = (e) => {
     e.preventDefault();
     if (!customerName.trim()) {
-      alert("Please enter a recipient name");
+      showToast("Please enter a recipient name");
       return;
     }
     if (!customerPhone.trim()) {
-      alert("Please enter a contact phone number");
+      showToast("Please enter a contact phone number");
       return;
     }
     if (!shippingAddress.address.trim()) {
-      alert("Please enter your street shipping address");
+      showToast("Please enter your street shipping address");
       return;
     }
     setCheckoutStep(2); // Go to Page 2 (Payment options)
@@ -188,7 +195,7 @@ const Checkout = () => {
         window.dispatchEvent(new Event("cartUpdated"));
       } catch (err) {
         console.error("Failed to place checkout order", err);
-        alert("Mock payment succeeded, but database order creation failed. Please try again.");
+        showToast("Mock payment succeeded, but database order creation failed. Please try again.");
         setProcessing(false);
       }
     }, 2500);
@@ -601,6 +608,21 @@ const Checkout = () => {
         )}
 
       </div>
+      {/* Toast Alert Widget */}
+      {message && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
+          <div
+            className={`w-6 h-6 rounded-full flex items-center justify-center ${
+              toastType === "success"
+                ? "bg-green-50 text-green-600 border border-green-100"
+                : "bg-red-50 text-red-655 border border-red-100"
+            }`}
+          >
+            {toastType === "success" ? <Check size={14} /> : <X size={14} />}
+          </div>
+          <span className="text-sm font-medium text-gray-800">{message}</span>
+        </div>
+      )}
     </div>
   );
 };

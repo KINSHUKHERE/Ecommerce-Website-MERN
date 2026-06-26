@@ -66,8 +66,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       icon: <Tag size={18} />,
     },
     {
-      title: "Variants (Brands)",
-      path: "/variants",
+      title: "Brands",
+      path: "/brands",
       icon: <Layers size={18} />,
     },
     {

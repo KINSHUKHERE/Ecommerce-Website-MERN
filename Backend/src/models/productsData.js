@@ -33,9 +33,9 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
 
-    variantId: {
+    brandId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Variant",
+      ref: "Brand",
       required: true,
     },
 

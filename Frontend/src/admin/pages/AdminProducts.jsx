@@ -20,7 +20,7 @@ import {
   Package
 } from "lucide-react";
 import { getProduct, deleteProduct } from "../../api/ProductApi";
-import { getCategories, getVariants } from "../../api/CategoryAndVarientApi";
+import { getCategories, getBrands } from "../../api/CategoryAndBrandApi";
 import ProductStats from "../components/ProductStats";
 
 // Custom Soft UI Dropdown Select Component
@@ -85,7 +85,7 @@ const AdminProducts = () => {
   const location = useLocation();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [variants, setVariants] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
 
@@ -95,7 +95,7 @@ const AdminProducts = () => {
   // Filters & Search states
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedVariant, setSelectedVariant] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [sortBy, setSortBy] = useState("latest");
 
@@ -117,14 +117,14 @@ const AdminProducts = () => {
   // Fetch initial data
   const loadAllData = async () => {
     try {
-      const [productRes, categoryRes, variantRes] = await Promise.all([
+      const [productRes, categoryRes, brandRes] = await Promise.all([
         getProduct(),
         getCategories(),
-        getVariants(),
+        getBrands(),
       ]);
       setProducts(productRes.data.data || []);
       setCategories(categoryRes.data.categories || []);
-      setVariants(variantRes.data.variants || []);
+      setBrands(brandRes.data.brands || []);
     } catch (err) {
       showToast("Failed to load store data", "error");
       console.error(err);
@@ -148,7 +148,7 @@ const AdminProducts = () => {
   // Reset pagination when search/filters change
   useEffect(() => {
     setVisibleCount(20);
-  }, [search, selectedCategory, selectedVariant, selectedStatus, sortBy]);
+  }, [search, selectedCategory, selectedBrand, selectedStatus, sortBy]);
 
   // Status helper
   const getProductStatus = (item) => {
@@ -169,7 +169,7 @@ const AdminProducts = () => {
         (p) =>
           p.heading?.toLowerCase().includes(query) ||
           p.categoryId?.name?.toLowerCase().includes(query) ||
-          p.variantId?.name?.toLowerCase().includes(query)
+          p.brandId?.name?.toLowerCase().includes(query)
       );
     }
 
@@ -180,10 +180,10 @@ const AdminProducts = () => {
       );
     }
 
-    // Variant filter
-    if (selectedVariant) {
+    // Brand filter
+    if (selectedBrand) {
       result = result.filter(
-        (p) => (p.variantId?._id || p.variantId) === selectedVariant
+        (p) => (p.brandId?._id || p.brandId) === selectedBrand
       );
     }
 
@@ -214,7 +214,7 @@ const AdminProducts = () => {
     }
 
     return result;
-  }, [products, search, selectedCategory, selectedVariant, selectedStatus, sortBy]);
+  }, [products, search, selectedCategory, selectedBrand, selectedStatus, sortBy]);
 
   // Paginated slice
   const visibleProducts = useMemo(() => {
@@ -230,7 +230,7 @@ const AdminProducts = () => {
   }, [categories]);
 
   const brandOptions = useMemo(() => {
-    const filtered = variants.filter(
+    const filtered = brands.filter(
       (v) =>
         !selectedCategory ||
         (v.categoryId?._id || v.categoryId) === selectedCategory
@@ -239,7 +239,7 @@ const AdminProducts = () => {
       { label: "All Brands", value: "" },
       ...filtered.map((v) => ({ label: v.name, value: v._id }))
     ];
-  }, [variants, selectedCategory]);
+  }, [brands, selectedCategory]);
 
   const statusOptions = [
     { label: "All Statuses", value: "" },
@@ -280,7 +280,7 @@ const AdminProducts = () => {
   const handleResetFilters = () => {
     setSearch("");
     setSelectedCategory("");
-    setSelectedVariant("");
+    setSelectedBrand("");
     setSelectedStatus("");
     setSortBy("latest");
     showToast("Filters reset successfully", "success");
@@ -378,8 +378,8 @@ const AdminProducts = () => {
 
             {/* Brand Filter */}
             <SoftDropdown
-              value={selectedVariant}
-              onChange={setSelectedVariant}
+              value={selectedBrand}
+              onChange={setSelectedBrand}
               options={brandOptions}
               placeholder="Brand"
             />
@@ -401,7 +401,7 @@ const AdminProducts = () => {
             />
 
             {/* Reset Button */}
-            {(search || selectedCategory || selectedVariant || selectedStatus || sortBy !== "latest") && (
+            {(search || selectedCategory || selectedBrand || selectedStatus || sortBy !== "latest") && (
               <button
                 onClick={handleResetFilters}
                 className="inline-flex items-center justify-center gap-1.5 border border-red-100 text-red-500 hover:bg-red-50/50 py-2 px-3 rounded-lg text-xs font-bold transition-all duration-300 cursor-pointer h-[38px]"
@@ -480,7 +480,7 @@ const AdminProducts = () => {
                           {p.categoryId?.name || "N/A"}
                         </td>
                         <td className="py-3 px-6 text-gray-500 text-[13px]">
-                          {p.variantId?.name || "N/A"}
+                          {p.brandId?.name || "N/A"}
                         </td>
                         <td className="py-3 px-6 text-right font-medium text-slate-800">
                           {formattedPrice}
@@ -579,7 +579,7 @@ const AdminProducts = () => {
                     {/* Right: Product Basic Details */}
                     <div className="flex-1 min-w-0">
                       <span className="block text-[13px] font-normal text-gray-500 leading-none">
-                        {p.variantId?.name || "No Brand"}
+                        {p.brandId?.name || "No Brand"}
                       </span>
                       <h3 className="font-semibold text-sm text-slate-800 mt-1 leading-snug truncate">
                         {p.heading}

@@ -4,7 +4,8 @@ import {
   getCategories,
   updateCategory,
   deleteCategory,
-} from "../../api/CategoryAndVarientApi";
+  toggleCategoryStatus,
+} from "../../api/CategoryAndBrandApi";
 import {
   Tag,
   PlusCircle,
@@ -103,6 +104,17 @@ const CategoryManagement = () => {
       fetchCategories();
     } catch (err) {
       showToast("Failed to update category", "error");
+      console.log(err);
+    }
+  };
+
+  const handleToggleStatus = async (id) => {
+    try {
+      await toggleCategoryStatus(id);
+      showToast("Category status updated successfully", "success");
+      fetchCategories();
+    } catch (err) {
+      showToast("Failed to update category status", "error");
       console.log(err);
     }
   };
@@ -436,6 +448,17 @@ const CategoryManagement = () => {
 
                       <td className="py-3.5 px-6">
                         <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() => handleToggleStatus(category._id)}
+                            className={`p-1.5 rounded-lg transition-all duration-300 cursor-pointer ${
+                              (category.isActive ?? true)
+                                ? "text-gray-500 hover:text-amber-600 hover:bg-amber-50"
+                                : "text-gray-500 hover:text-green-600 hover:bg-green-50"
+                            }`}
+                            title={(category.isActive ?? true) ? "Deactivate Category" : "Activate Category"}
+                          >
+                            {(category.isActive ?? true) ? <XCircle size={15} /> : <CheckCircle size={15} />}
+                          </button>
                           <button
                             onClick={() => handleEdit(category)}
                             className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 cursor-pointer"

@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
 import {
-  addVariant,
-  getVariants,
-  updateVariant,
-  deleteVariant,
+  addBrand,
+  getBrands,
+  updateBrand,
+  deleteBrand,
   getCategories,
-} from "../../api/CategoryAndVarientApi";
+  toggleBrandStatus,
+} from "../../api/CategoryAndBrandApi";
 import { 
   Tag, 
   Layers, 
@@ -24,15 +25,15 @@ import {
   TrendingUp
 } from "lucide-react";
 
-const VariantManagement = () => {
-  const [variantName, setVariantName] = useState("");
+const BrandManagement = () => {
+  const [brandName, setBrandName] = useState("");
   const [categoryId, setCategoryId] = useState("");
 
-  const [variants, setVariants] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
 
   const [editingId, setEditingId] = useState(null);
-  const [editVariantName, setEditVariantName] = useState("");
+  const [editBrandName, setEditBrandName] = useState("");
   const [editCategoryId, setEditCategoryId] = useState("");
 
   const [message, setMessage] = useState("");
@@ -46,21 +47,21 @@ const VariantManagement = () => {
 
   // Memoized stats calculation for analyzing
   const stats = useMemo(() => {
-    const total = variants.length;
-    const active = variants.filter((v) => v.isActive ?? true).length;
+    const total = brands.length;
+    const active = brands.filter((v) => v.isActive ?? true).length;
     const inactive = total - active;
     const uniqueCats = new Set(
-      variants
+      brands
         .map((v) => v.categoryId?._id || v.categoryId)
         .filter(Boolean)
     ).size;
 
     return { total, active, inactive, uniqueCats };
-  }, [variants]);
+  }, [brands]);
 
-  // Memoized filtered variants
-  const filteredVariants = useMemo(() => {
-    let result = [...variants];
+  // Memoized filtered brands
+  const filteredBrands = useMemo(() => {
+    let result = [...brands];
 
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -83,7 +84,7 @@ const VariantManagement = () => {
     }
 
     return result;
-  }, [variants, search, selectedCategoryFilter, selectedStatusFilter]);
+  }, [brands, search, selectedCategoryFilter, selectedStatusFilter]);
 
   const handleResetFilters = () => {
     setSearch("");
@@ -100,10 +101,10 @@ const VariantManagement = () => {
     }
   };
 
-  const fetchVariants = async () => {
+  const fetchBrands = async () => {
     try {
-      const response = await getVariants();
-      setVariants(response.data.variants || []);
+      const response = await getBrands();
+      setBrands(response.data.brands || []);
     } catch (err) {
       console.log(err);
     }
@@ -112,7 +113,7 @@ const VariantManagement = () => {
   useEffect(() => {
     const loadAll = async () => {
       try {
-        await Promise.all([fetchCategories(), fetchVariants()]);
+        await Promise.all([fetchCategories(), fetchBrands()]);
       } catch (err) {
         console.log(err);
       } finally {
@@ -133,69 +134,80 @@ const VariantManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!variantName || !categoryId) {
+    if (!brandName || !categoryId) {
       showToast("Please fill in all fields", "error");
       return;
     }
 
     try {
-      await addVariant({
-        name: variantName,
+      await addBrand({
+        name: brandName,
         categoryId,
       });
 
-      showToast("Variant added successfully", "success");
-      setVariantName("");
+      showToast("Brand added successfully", "success");
+      setBrandName("");
       setCategoryId("");
-      fetchVariants();
+      fetchBrands();
     } catch (err) {
-      showToast("Failed to add variant", "error");
+      showToast(err.response?.data?.msg || "Failed to add brand", "error");
       console.log(err);
     }
   };
 
-  const handleEdit = (variant) => {
-    setEditingId(variant._id);
-    setEditVariantName(variant.name);
-    setEditCategoryId(variant.categoryId?._id || variant.categoryId);
+  const handleEdit = (brand) => {
+    setEditingId(brand._id);
+    setEditBrandName(brand.name);
+    setEditCategoryId(brand.categoryId?._id || brand.categoryId);
   };
 
   const handleUpdateInline = async (id) => {
-    if (!editVariantName || !editCategoryId) {
+    if (!editBrandName || !editCategoryId) {
       showToast("Please fill in all fields", "error");
       return;
     }
 
     try {
-      await updateVariant(id, {
-        name: editVariantName,
+      await updateBrand(id, {
+        name: editBrandName,
         categoryId: editCategoryId,
       });
 
-      showToast("Variant updated successfully", "success");
+      showToast("Brand updated successfully", "success");
       setEditingId(null);
-      setEditVariantName("");
+      setEditBrandName("");
       setEditCategoryId("");
-      fetchVariants();
+      fetchBrands();
     } catch (err) {
-      showToast("Failed to update variant", "error");
+      showToast(err.response?.data?.msg || "Failed to update brand", "error");
+      console.log(err);
+    }
+  };
+
+  const handleToggleStatus = async (id) => {
+    try {
+      await toggleBrandStatus(id);
+      showToast("Brand status updated successfully", "success");
+      fetchBrands();
+    } catch (err) {
+      showToast("Failed to update brand status", "error");
       console.log(err);
     }
   };
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this variant?",
+      "Are you sure you want to delete this brand?",
     );
 
     if (!confirmDelete) return;
 
     try {
-      await deleteVariant(id);
-      showToast("Variant deleted successfully", "success");
-      fetchVariants();
+      await deleteBrand(id);
+      showToast("Brand deleted successfully", "success");
+      fetchBrands();
     } catch (err) {
-      showToast("Failed to delete variant", "error");
+      showToast("Failed to delete brand", "error");
       console.log(err);
     }
   };
@@ -221,10 +233,10 @@ const VariantManagement = () => {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800 leading-normal">
-          Variant Management
+          Brand Management
         </h1>
         <p className="text-[13px] font-normal text-gray-500 mt-1 leading-relaxed">
-          Manage product variants and brands.
+          Manage product brands and brands.
         </p>
       </div>
 
@@ -240,7 +252,7 @@ const VariantManagement = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Total Variants</span>
+            <span className="text-[13px] font-normal text-gray-500">Total Brands</span>
             <div className="p-1.5 rounded-lg bg-blue-50 text-blue-650">
               <Layers size={16} />
             </div>
@@ -255,7 +267,7 @@ const VariantManagement = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Active Variants</span>
+            <span className="text-[13px] font-normal text-gray-500">Active Brands</span>
             <div className="p-1.5 rounded-lg bg-green-50 text-green-600">
               <CheckCircle size={16} />
             </div>
@@ -270,7 +282,7 @@ const VariantManagement = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-gray-500">Inactive Variants</span>
+            <span className="text-[13px] font-normal text-gray-500">Inactive Brands</span>
             <div className="p-1.5 rounded-lg bg-red-50 text-red-600">
               <XCircle size={16} />
             </div>
@@ -289,13 +301,13 @@ const VariantManagement = () => {
         </div>
       </div>
 
-      {/* Add Variant Form Card */}
+      {/* Add Brand Form Card */}
       <div className="bg-white border border-slate-100 rounded-xl p-5 mb-6 shadow-sm shadow-slate-100/30 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 bg-[#088178]"></div>
         
         <h2 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
           <PlusCircle size={16} className="text-[#088178]" />
-          Add Variant / Brand
+          Add Brand / Brand
         </h2>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -321,16 +333,16 @@ const VariantManagement = () => {
             </span>
           </div>
 
-          {/* Variant Input */}
+          {/* Brand Input */}
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
               <Layers size={15} />
             </span>
             <input
               type="text"
-              placeholder="Enter Variant Name (e.g. Apple, Sony)"
-              value={variantName}
-              onChange={(e) => setVariantName(e.target.value)}
+              placeholder="Enter Brand Name (e.g. Apple, Sony)"
+              value={brandName}
+              onChange={(e) => setBrandName(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-slate-50/70 border border-slate-100 rounded-lg focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all h-[38px]"
             />
           </div>
@@ -341,7 +353,7 @@ const VariantManagement = () => {
             className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#088178] hover:bg-[#088178]/90 text-white text-sm font-medium rounded-lg shadow-sm transition-all cursor-pointer h-[38px]"
           >
             <Plus size={15} />
-            Add Variant
+            Add Brand
           </button>
         </form>
       </div>
@@ -356,7 +368,7 @@ const VariantManagement = () => {
             </span>
             <input
               type="text"
-              placeholder="Search variants by name or category..."
+              placeholder="Search brands by name or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-8 pr-8 py-2 bg-slate-50/70 border border-slate-100 rounded-lg focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all"
@@ -417,24 +429,24 @@ const VariantManagement = () => {
         </div>
       </div>
 
-      {/* Variants Registry Table */}
+      {/* Brands Registry Table */}
       <div className="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm shadow-slate-100/30">
         <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/20">
-          <h2 className="text-base font-semibold text-slate-800">All Variants</h2>
+          <h2 className="text-base font-semibold text-slate-800">All Brands</h2>
           <span className="text-[13px] font-normal text-gray-500">
-            Showing {filteredVariants.length} of {variants.length}
+            Showing {filteredBrands.length} of {brands.length}
           </span>
         </div>
 
         {loading ? (
           <div className="p-12 flex flex-col items-center justify-center">
             <Loader2 className="animate-spin text-[#088178] w-8 h-8 mb-4" />
-            <p className="text-xs font-normal text-gray-500 animate-pulse">Fetching variants...</p>
+            <p className="text-xs font-normal text-gray-500 animate-pulse">Fetching brands...</p>
           </div>
-        ) : filteredVariants.length === 0 ? (
+        ) : filteredBrands.length === 0 ? (
           <div className="p-12 text-center shadow-sm">
             <Inbox className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-800">No Variants Found</h3>
+            <h3 className="text-base font-semibold text-slate-800">No Brands Found</h3>
             <p className="text-[13px] font-normal text-gray-500 mt-1">Try resetting filters or adjusting search keys.</p>
             {(search || selectedCategoryFilter || selectedStatusFilter) && (
               <button
@@ -450,7 +462,7 @@ const VariantManagement = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/65 text-gray-500 border-b border-slate-100 text-[13px] font-normal">
-                  <th className="py-3 px-6">Variant Name</th>
+                  <th className="py-3 px-6">Brand Name</th>
                   <th className="py-3 px-6">Category Type</th>
                   <th className="py-3 px-6 text-center">Status</th>
                   <th className="py-3 px-6 text-center w-[180px]">Actions</th>
@@ -458,13 +470,13 @@ const VariantManagement = () => {
               </thead>
 
               <tbody className="divide-y divide-gray-100 text-[14px] font-normal text-slate-800">
-                {filteredVariants.map((variant) => {
-                  const isEditing = editingId === variant._id;
+                {filteredBrands.map((brand) => {
+                  const isEditing = editingId === brand._id;
 
                   if (isEditing) {
                     return (
                       <tr
-                        key={variant._id}
+                        key={brand._id}
                         className="bg-slate-50/80 border-y border-slate-100 transition-all duration-300 animate-fadeIn"
                       >
                         <td colSpan={4} className="py-5 px-6">
@@ -472,15 +484,15 @@ const VariantManagement = () => {
                             {/* Title indicator */}
                             <div className="flex items-center gap-1.5 text-sm font-semibold text-[#088178]">
                               <Edit3 size={14} />
-                              <span>Editing Variant: <span className="text-slate-800 underline decoration-slate-300">{variant.name}</span></span>
+                              <span>Editing Brand: <span className="text-slate-800 underline decoration-slate-300">{brand.name}</span></span>
                             </div>
 
                             {/* Grid/Flex Layout for Inputs */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {/* Variant Name Input */}
+                              {/* Brand Name Input */}
                               <div className="flex flex-col gap-1.5">
                                 <label className="text-[13px] font-normal text-gray-500">
-                                  Variant Name
+                                  Brand Name
                                 </label>
                                 <div className="relative">
                                   <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
@@ -488,10 +500,10 @@ const VariantManagement = () => {
                                   </span>
                                   <input
                                     type="text"
-                                    value={editVariantName}
-                                    onChange={(e) => setEditVariantName(e.target.value)}
+                                    value={editBrandName}
+                                    onChange={(e) => setEditBrandName(e.target.value)}
                                     className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all duration-300 shadow-sm"
-                                    placeholder="Enter Variant Name"
+                                    placeholder="Enter Brand Name"
                                   />
                                 </div>
                               </div>
@@ -529,7 +541,7 @@ const VariantManagement = () => {
                               <button
                                 onClick={() => {
                                   setEditingId(null);
-                                  setEditVariantName("");
+                                  setEditBrandName("");
                                   setEditCategoryId("");
                                 }}
                                 className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-all duration-300 cursor-pointer flex items-center gap-1.5"
@@ -538,7 +550,7 @@ const VariantManagement = () => {
                                 Cancel
                               </button>
                               <button
-                                onClick={() => handleUpdateInline(variant._id)}
+                                onClick={() => handleUpdateInline(brand._id)}
                                 className="px-4 py-2 bg-[#088178] hover:bg-[#088178]/90 text-white text-sm font-medium rounded-lg transition-all duration-300 cursor-pointer flex items-center gap-1.5"
                               >
                                 <Check size={14} />
@@ -552,28 +564,28 @@ const VariantManagement = () => {
                   }
 
                   return (
-                    <tr key={variant._id} className="hover:bg-slate-50/50 transition-all duration-200">
+                    <tr key={brand._id} className="hover:bg-slate-50/50 transition-all duration-200">
                       
-                      {/* Variant Name Column */}
+                      {/* Brand Name Column */}
                       <td className="py-3.5 px-6">
-                        <span className="font-medium text-slate-800 text-sm">{variant.name}</span>
+                        <span className="font-medium text-slate-800 text-sm">{brand.name}</span>
                       </td>
 
                       {/* Category Column */}
                       <td className="py-3.5 px-6 text-gray-500 text-[13px] font-normal">
-                        {variant.categoryId?.name || "N/A"}
+                        {brand.categoryId?.name || "N/A"}
                       </td>
 
                       {/* Status Column */}
                       <td className="py-3.5 px-6 text-center">
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-normal ${
-                            variant.isActive ?? true
+                            brand.isActive ?? true
                               ? "bg-green-50 text-green-700 border border-green-100"
                               : "bg-red-50 text-red-700 border border-red-100"
                           }`}
                         >
-                          {(variant.isActive ?? true) ? "Active" : "Inactive"}
+                          {(brand.isActive ?? true) ? "Active" : "Inactive"}
                         </span>
                       </td>
 
@@ -581,16 +593,27 @@ const VariantManagement = () => {
                       <td className="py-3.5 px-6">
                         <div className="flex justify-center gap-2">
                           <button
-                            onClick={() => handleEdit(variant)}
+                            onClick={() => handleToggleStatus(brand._id)}
+                            className={`p-1.5 rounded-lg transition-all duration-300 cursor-pointer ${
+                              (brand.isActive ?? true)
+                                ? "text-gray-500 hover:text-amber-600 hover:bg-amber-50"
+                                : "text-gray-500 hover:text-green-600 hover:bg-green-50"
+                            }`}
+                            title={(brand.isActive ?? true) ? "Deactivate Brand" : "Activate Brand"}
+                          >
+                            {(brand.isActive ?? true) ? <XCircle size={15} /> : <CheckCircle size={15} />}
+                          </button>
+                          <button
+                            onClick={() => handleEdit(brand)}
                             className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 cursor-pointer"
-                            title="Edit Variant"
+                            title="Edit Brand"
                           >
                             <Edit3 size={15} />
                           </button>
                           <button
-                            onClick={() => handleDelete(variant._id)}
+                            onClick={() => handleDelete(brand._id)}
                             className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
-                            title="Delete Variant"
+                            title="Delete Brand"
                           >
                             <Trash2 size={15} />
                           </button>
@@ -608,4 +631,4 @@ const VariantManagement = () => {
   );
 };
 
-export default VariantManagement;
+export default BrandManagement;

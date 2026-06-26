@@ -21,7 +21,7 @@ const getProducts = async (req, res) => {
   try {
     const data = await Product.find()
       .populate("categoryId")
-      .populate("variantId");
+      .populate("brandId");
     console.log("data fetched");
     res.status(200).json({
       msg: "Data fetched",

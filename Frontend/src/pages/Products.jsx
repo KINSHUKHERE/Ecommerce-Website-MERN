@@ -5,8 +5,8 @@ import EachProduct from "../components/EachProduct";
 import { getProduct } from "../api/ProductApi";
 import {
   getCategories,
-  getVariants,
-} from "../api/CategoryAndVarientApi";
+  getBrands,
+} from "../api/CategoryAndBrandApi";
 
 // Premium Skeleton Card Loader Component
 const ProductSkeleton = () => (
@@ -37,7 +37,7 @@ const ProductSkeleton = () => (
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [variants, setVariants] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -48,7 +48,7 @@ const Products = () => {
 
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedVariant, setSelectedVariant] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState("");
 
   useEffect(() => {
     const loadAllData = async () => {
@@ -56,7 +56,7 @@ const Products = () => {
         await Promise.all([
           fetchProducts(),
           fetchCategories(),
-          fetchVariants(),
+          fetchBrands(),
         ]);
       } catch (err) {
         console.log("Error loading data", err);
@@ -70,7 +70,7 @@ const Products = () => {
   // Reset visibleCount when any filter/search changes
   useEffect(() => {
     setVisibleCount(10);
-  }, [search, selectedCategory, selectedVariant]);
+  }, [search, selectedCategory, selectedBrand]);
 
   const fetchProducts = async () => {
     try {
@@ -92,13 +92,13 @@ const Products = () => {
     }
   };
 
-  const fetchVariants = async () => {
+  const fetchBrands = async () => {
     try {
-      const res = await getVariants();
-      console.log("fetchVariants API response:", res.data);
-      setVariants(res.data?.variants || []);
+      const res = await getBrands();
+      console.log("fetchBrands API response:", res.data);
+      setBrands(res.data?.brands || []);
     } catch (err) {
-      console.error("fetchVariants error:", err);
+      console.error("fetchBrands error:", err);
     }
   };
 
@@ -107,31 +107,31 @@ const Products = () => {
       // Safe checks to avoid undefined.toLowerCase() or undefined.includes() exceptions
       const itemHeading = item.heading || "";
       const itemCategoryName = item.categoryId?.name || item.category || "";
-      const itemVariantName = item.variantId?.name || item.brand || item.variant || "";
+      const itemBrandName = item.brandId?.name || item.brand || item.brand || "";
 
       const matchesSearch =
         itemHeading.toLowerCase().includes(search.toLowerCase()) ||
         itemCategoryName.toLowerCase().includes(search.toLowerCase()) ||
-        itemVariantName.toLowerCase().includes(search.toLowerCase());
+        itemBrandName.toLowerCase().includes(search.toLowerCase());
 
       const itemCategoryId = item.categoryId?._id || item.categoryId || "";
       const matchesCategory =
         selectedCategory === "" ||
         itemCategoryId.toString() === selectedCategory.toString();
 
-      const itemVariantId = item.variantId?._id || item.variantId || "";
-      const matchesVariant =
-        selectedVariant === "" ||
-        itemVariantId.toString() === selectedVariant.toString();
+      const itemBrandId = item.brandId?._id || item.brandId || "";
+      const matchesBrand =
+        selectedBrand === "" ||
+        itemBrandId.toString() === selectedBrand.toString();
 
-      const isMatch = matchesSearch && matchesCategory && matchesVariant;
+      const isMatch = matchesSearch && matchesCategory && matchesBrand;
       return isMatch;
     });
   }, [
     products,
     search,
     selectedCategory,
-    selectedVariant,
+    selectedBrand,
   ]);
 
   const visibleProducts = useMemo(() => {
@@ -176,7 +176,7 @@ const Products = () => {
   const clearFilters = () => {
     setSearch("");
     setSelectedCategory("");
-    setSelectedVariant("");
+    setSelectedBrand("");
   };
 
   return (
@@ -233,9 +233,9 @@ const Products = () => {
               }`}
             >
               <SlidersHorizontal size={14} />
-              Filters {selectedCategory || selectedVariant ? "•" : ""}
+              Filters {selectedCategory || selectedBrand ? "•" : ""}
             </button>
-            {(selectedCategory || selectedVariant || search) && (
+            {(selectedCategory || selectedBrand || search) && (
               <button
                 onClick={clearFilters}
                 className="flex items-center gap-1 text-red-500 font-bold text-xs hover:text-red-600 transition cursor-pointer"
@@ -271,7 +271,7 @@ const Products = () => {
                     <button
                       onClick={() => {
                         setSelectedCategory("");
-                        setSelectedVariant("");
+                        setSelectedBrand("");
                       }}
                       className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                         selectedCategory === ""
@@ -286,7 +286,7 @@ const Products = () => {
                         key={category._id}
                         onClick={() => {
                           setSelectedCategory(category._id);
-                          setSelectedVariant("");
+                          setSelectedBrand("");
                         }}
                         className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                           selectedCategory === category._id
@@ -315,32 +315,32 @@ const Products = () => {
                 ) : (
                   <>
                     <button
-                      onClick={() => setSelectedVariant("")}
+                      onClick={() => setSelectedBrand("")}
                       className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                        selectedVariant === ""
+                        selectedBrand === ""
                           ? "bg-[#15877F] text-white border-[#15877F] shadow-sm"
                           : "bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100"
                       }`}
                     >
                       All Brands
                     </button>
-                    {variants
+                    {brands
                       .filter(
-                        (variant) =>
+                        (brand) =>
                           selectedCategory === "" ||
-                          (variant.categoryId?._id || variant.categoryId) === selectedCategory
+                          (brand.categoryId?._id || brand.categoryId) === selectedCategory
                       )
-                      .map((variant) => (
+                      .map((brand) => (
                         <button
-                          key={variant._id}
-                          onClick={() => setSelectedVariant(variant._id)}
+                          key={brand._id}
+                          onClick={() => setSelectedBrand(brand._id)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                            selectedVariant === variant._id
+                            selectedBrand === brand._id
                               ? "bg-[#15877F] text-white border-[#15877F] shadow-sm"
                               : "bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100"
                           }`}
                         >
-                          {variant.name}
+                          {brand.name}
                         </button>
                       ))}
                   </>
@@ -365,7 +365,7 @@ const Products = () => {
                   <SlidersHorizontal size={18} className="text-[#15877F]" />
                   Filters
                 </h2>
-                {(selectedCategory || selectedVariant || search) && (
+                {(selectedCategory || selectedBrand || search) && (
                   <button
                     onClick={clearFilters}
                     className="text-red-500 text-xs font-bold hover:text-red-600 transition flex items-center gap-1 cursor-pointer"
@@ -391,7 +391,7 @@ const Products = () => {
                       <button
                         onClick={() => {
                           setSelectedCategory("");
-                          setSelectedVariant("");
+                          setSelectedBrand("");
                         }}
                         className={`px-4 py-2.5 rounded-xl text-left text-sm font-semibold transition-all border-l-2 cursor-pointer ${
                           selectedCategory === ""
@@ -406,7 +406,7 @@ const Products = () => {
                           key={category._id}
                           onClick={() => {
                             setSelectedCategory(category._id);
-                            setSelectedVariant("");
+                            setSelectedBrand("");
                           }}
                           className={`px-4 py-2.5 rounded-xl text-left text-sm font-semibold transition-all border-l-2 cursor-pointer ${
                             selectedCategory === category._id
@@ -435,32 +435,32 @@ const Products = () => {
                   ) : (
                     <>
                       <button
-                        onClick={() => setSelectedVariant("")}
+                        onClick={() => setSelectedBrand("")}
                         className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                          selectedVariant === ""
+                          selectedBrand === ""
                             ? "bg-[#15877F] text-white border-[#15877F] shadow-sm shadow-[#15877F]/20"
                             : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
                         }`}
                       >
                         All Brands
                       </button>
-                      {variants
+                      {brands
                         .filter(
-                          (variant) =>
+                          (brand) =>
                             selectedCategory === "" ||
-                            (variant.categoryId?._id || variant.categoryId) === selectedCategory
+                            (brand.categoryId?._id || brand.categoryId) === selectedCategory
                         )
-                        .map((variant) => (
+                        .map((brand) => (
                           <button
-                            key={variant._id}
-                            onClick={() => setSelectedVariant(variant._id)}
+                            key={brand._id}
+                            onClick={() => setSelectedBrand(brand._id)}
                             className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                              selectedVariant === variant._id
+                              selectedBrand === brand._id
                                 ? "bg-[#15877F] text-white border-[#15877F] shadow-sm shadow-[#15877F]/20"
                                 : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
                             }`}
                           >
-                            {variant.name}
+                            {brand.name}
                           </button>
                         ))}
                     </>

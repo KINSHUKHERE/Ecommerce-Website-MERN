@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const variantSchema = new mongoose.Schema(
+const brandSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -29,6 +29,6 @@ const variantSchema = new mongoose.Schema(
   },
 );
 
-const Variant = mongoose.model("Variant", variantSchema);
+const Brand = mongoose.model("Brand", brandSchema);
 
-module.exports = Variant;
+module.exports = Brand;

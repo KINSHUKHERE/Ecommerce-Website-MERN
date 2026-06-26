@@ -19,7 +19,7 @@ const getTitleFromPathname = (pathname) => {
   if (pathname === "/contact-details") return "YoCart | Admin - Contact Queries";
   if (pathname === "/order-details") return "YoCart | Admin - Order Details";
   if (pathname === "/categories") return "YoCart | Admin - Categories";
-  if (pathname === "/variants") return "YoCart | Admin - Variants";
+  if (pathname === "/brands") return "YoCart | Admin - Brands";
   if (pathname === "/admin/profile") return "YoCart | Admin - Profile";
 
   // Dynamic routes fallback title

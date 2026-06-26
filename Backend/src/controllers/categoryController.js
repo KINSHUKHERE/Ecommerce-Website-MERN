@@ -5,7 +5,7 @@ const addCategoryObj = async (req, res) => {
     const { name } = req.body;
 
     const existingCategory = await Category.findOne({
-      name: name.trim(),
+      name: { $regex: new RegExp("^" + name.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "$", "i") },
       isDeleted: false,
     });
 
@@ -16,7 +16,7 @@ const addCategoryObj = async (req, res) => {
     }
 
     const category = await Category.create({
-      name,
+      name: name.trim(),
     });
 
     res.status(201).json({
@@ -52,11 +52,24 @@ const getCategoriesList = async (req, res) => {
 const updateCategoryObj = async (req, res) => {
   try {
     const { id } = req.params;
+    const { name } = req.body;
+
+    const existingCategory = await Category.findOne({
+      name: { $regex: new RegExp("^" + name.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "$", "i") },
+      isDeleted: false,
+      _id: { $ne: id }
+    });
+
+    if (existingCategory) {
+      return res.status(409).json({
+        msg: "Category already exists",
+      });
+    }
 
     const updatedCategory = await Category.findByIdAndUpdate(
       id,
       {
-        name: req.body.name,
+        name: name.trim(),
       },
       {
         new: true,

@@ -22,7 +22,6 @@ const EachProduct = ({ data }) => {
 
     try {
       if (!user) {
-        alert("Please login first");
         navigate("/login");
         return;
       }
@@ -87,7 +86,7 @@ const EachProduct = ({ data }) => {
 
           <div className="flex flex-col">
             <span className="text-xs sm:text-sm font-semibold text-[#465B52] mt-0.5">
-              {data.variantId?.name}
+              {data.brandId?.name}
             </span>
           </div>
 
