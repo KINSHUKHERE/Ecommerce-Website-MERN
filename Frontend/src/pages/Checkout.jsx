@@ -527,67 +527,59 @@ const Checkout = () => {
                     </div>
                   )}
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-medium text-gray-700 mb-1">Street Address (Flat/House No., Colony)</label>
-                    <input
-                      type="text"
-                      required
-                      disabled={selectedAddressId !== "manual"}
-                      placeholder="Flat/House No., Colony, Street, Apartment"
-                      value={shippingAddress.address}
-                      onChange={(e) => setShippingAddress({ ...shippingAddress, address: e.target.value })}
-                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-905 ${
-                        selectedAddressId !== "manual" ? "bg-slate-50 text-gray-550 border-gray-150 cursor-not-allowed select-none" : "bg-white border-gray-205"
-                      }`}
-                    />
-                  </div>
+                  {selectedAddressId === "manual" && (
+                    <div className="space-y-5 animate-fadeIn">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-gray-700 mb-1">Street Address (Flat/House No., Colony)</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Flat/House No., Colony, Street, Apartment"
+                          value={shippingAddress.address}
+                          onChange={(e) => setShippingAddress({ ...shippingAddress, address: e.target.value })}
+                          className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-900 bg-white"
+                        />
+                      </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-sm font-medium text-gray-700 mb-1">Town / City</label>
-                      <input
-                        type="text"
-                        required
-                        disabled={selectedAddressId !== "manual"}
-                        placeholder="New Delhi"
-                        value={shippingAddress.city}
-                        onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
-                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-905 ${
-                          selectedAddressId !== "manual" ? "bg-slate-50 text-gray-550 border-gray-150 cursor-not-allowed select-none" : "bg-white border-gray-205"
-                        }`}
-                      />
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm font-medium text-gray-700 mb-1">Town / City</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="New Delhi"
+                            value={shippingAddress.city}
+                            onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-900 bg-white"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm font-medium text-gray-700 mb-1">State / Province</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="Delhi"
+                            value={shippingAddress.state}
+                            onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-900 bg-white"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm font-medium text-gray-700 mb-1">PIN / Postal Code</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="110001"
+                            maxLength="6"
+                            pattern="\d{6}"
+                            value={shippingAddress.postalCode}
+                            onChange={(e) => setShippingAddress({ ...shippingAddress, postalCode: e.target.value.replace(/\D/g, "") })}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-900 bg-white"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-sm font-medium text-gray-700 mb-1">State / Province</label>
-                      <input
-                        type="text"
-                        required
-                        disabled={selectedAddressId !== "manual"}
-                        placeholder="Delhi"
-                        value={shippingAddress.state}
-                        onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
-                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-905 ${
-                          selectedAddressId !== "manual" ? "bg-slate-50 text-gray-550 border-gray-150 cursor-not-allowed select-none" : "bg-white border-gray-205"
-                        }`}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-sm font-medium text-gray-700 mb-1">PIN / Postal Code</label>
-                      <input
-                        type="text"
-                        required
-                        disabled={selectedAddressId !== "manual"}
-                        placeholder="110001"
-                        maxLength="6"
-                        pattern="\d{6}"
-                        value={shippingAddress.postalCode}
-                        onChange={(e) => setShippingAddress({ ...shippingAddress, postalCode: e.target.value.replace(/\D/g, "") })}
-                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-905 ${
-                          selectedAddressId !== "manual" ? "bg-slate-50 text-gray-550 border-gray-150 cursor-not-allowed select-none" : "bg-white border-gray-205"
-                        }`}
-                      />
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Action button: NEXT */}
