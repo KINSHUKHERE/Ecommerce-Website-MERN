@@ -58,7 +58,7 @@ const BrandManagement = () => {
     if (categories.length > 0) {
       const initial = {};
       categories.forEach((c) => {
-        initial[c._id] = true;
+        initial[c._id] = false;
       });
       setExpandedCategories(initial);
     }
@@ -532,7 +532,7 @@ const BrandManagement = () => {
           <div className="space-y-4">
             {groupedBrands.map((group) => {
               const catId = group.categoryId;
-              const isExpanded = expandedCategories[catId] !== false;
+              const isExpanded = !!expandedCategories[catId];
               
               return (
                 <div key={catId} className="border border-slate-100 bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300">
