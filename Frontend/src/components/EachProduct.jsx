@@ -4,7 +4,11 @@ import { sentToCart } from "../api/CartApi";
 
 const EachProduct = ({ data }) => {
   const navigate = useNavigate();
-  
+  const [adding, setAdding] = React.useState(false);
+  const [toast, setToast] = React.useState("");
+
+  if (!data) return null;
+
   const user = JSON.parse(localStorage.getItem("user"));
 
   const getStockCount = (product) => {
@@ -35,11 +39,6 @@ const EachProduct = ({ data }) => {
   const productClicked = () => {
     navigate(`/products/${data._id}`);
   };
-
-  if (!data) return null;
-
-  const [adding, setAdding] = React.useState(false);
-  const [toast, setToast] = React.useState("");
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
