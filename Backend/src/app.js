@@ -9,6 +9,7 @@ const cartRoutes = require("./routes/cartRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const addressRoutes = require("./routes/addressRoutes");
 
 const app = express();
 
@@ -60,5 +61,6 @@ app.use("/", cartRoutes);
 app.use("/", contactRoutes);
 app.use("/", orderRoutes);
 app.use("/", uploadRoutes);
+app.use("/", addressRoutes);
 
 module.exports = app;

@@ -214,19 +214,20 @@ const CompleteProfile = () => {
 
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
-              type="button"
-              onClick={handleSetupLater}
-              className="flex-1 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-semibold transition text-center cursor-pointer outline-none focus:outline-none"
-            >
-              Setup Later
-            </button>
-            <button
               type="submit"
               disabled={loading || !isInputSufficient()}
               className="flex-1 bg-[#15877F] text-white py-3 rounded-lg font-semibold hover:bg-[#126b64] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer outline-none focus:outline-none"
             >
               {loading ? "Saving..." : "Complete Setup"}
             </button>
+            <button
+              type="button"
+              onClick={handleSetupLater}
+              className="flex-1 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-semibold transition text-center cursor-pointer outline-none focus:outline-none"
+            >
+              Setup Later
+            </button>
+            
           </div>
         </form>
       </div>

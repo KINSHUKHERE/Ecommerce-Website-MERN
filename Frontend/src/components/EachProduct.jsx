@@ -43,7 +43,6 @@ const EachProduct = ({ data }) => {
   const handleAddToCart = async (e) => {
     e.stopPropagation();
 
-    // Redirect to details if product has variants/options
     if (data.options && data.options.length > 0) {
       navigate(`/products/${data._id}`);
       return;
@@ -57,7 +56,6 @@ const EachProduct = ({ data }) => {
 
       setAdding(true);
       
-      // For flat products, the backend expects productId. It will resolve the default base variant itself.
       const cartData = {
         userId: user._id,
         productId: data._id,

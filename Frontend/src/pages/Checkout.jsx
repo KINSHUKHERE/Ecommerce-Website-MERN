@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, X, Loader2, Lock, Smartphone, CreditCard, CheckSquare, Sparkles, Home, ShoppingBag, Shield } from "lucide-react";
+import { Check, X, Loader2, Lock, Smartphone, CreditCard, CheckSquare, Sparkles, Home, ShoppingBag, Shield, MapPin, ChevronDown } from "lucide-react";
 import { getDataCart } from "../api/CartApi";
 import { createOrder } from "../api/OrderApi";
 import { getUserProfile } from "../api/AuthApi";
+import { getAddresses, addAddress } from "../api/AddressApi";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -22,6 +23,12 @@ const Checkout = () => {
     state: "Delhi",
     postalCode: "110001",
   });
+
+  // Saved Addresses State
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState("manual");
+  const [showSaveAddressPrompt, setShowSaveAddressPrompt] = useState(false);
+  const [showAddressDropdown, setShowAddressDropdown] = useState(false);
 
   // Page 2 Payment Options state
   const [paymentMethod, setPaymentMethod] = useState("UPI");
@@ -106,6 +113,26 @@ const Checkout = () => {
         setCustomerName(userObj.name || "");
         setCustomerPhone(userObj.phoneNumber || "");
 
+        // 3. Load Saved Addresses
+        try {
+          const addrRes = await getAddresses();
+          const addrs = addrRes.data.addresses || [];
+          setSavedAddresses(addrs);
+          if (addrs.length > 0) {
+            setSelectedAddressId(addrs[0]._id);
+            setShippingAddress({
+              address: addrs[0].streetAddress,
+              city: addrs[0].city,
+              state: addrs[0].state,
+              postalCode: addrs[0].pinCode,
+            });
+          } else {
+            setSelectedAddressId("manual");
+          }
+        } catch (addrErr) {
+          console.error("Failed to load saved addresses during checkout:", addrErr);
+        }
+
         // If cart is empty, redirect back (unless completed)
         if (formattedData.length === 0 && checkoutStep !== 3) {
           navigate("/cart");
@@ -125,6 +152,51 @@ const Checkout = () => {
     0,
   );
 
+  const handleAddressSelect = (id) => {
+    setSelectedAddressId(id);
+    if (id === "manual") {
+      setShippingAddress({
+        address: "",
+        city: "",
+        state: "",
+        postalCode: "",
+      });
+    } else {
+      const selected = savedAddresses.find((a) => a._id === id);
+      if (selected) {
+        setShippingAddress({
+          address: selected.streetAddress,
+          city: selected.city,
+          state: selected.state,
+          postalCode: selected.pinCode,
+        });
+      }
+    }
+  };
+
+  const handleSkipSaveAddress = () => {
+    setShowSaveAddressPrompt(false);
+    setCheckoutStep(2);
+  };
+
+  const handleSaveAndContinueAddress = async () => {
+    try {
+      await addAddress({
+        streetAddress: shippingAddress.address.trim(),
+        city: shippingAddress.city.trim(),
+        state: shippingAddress.state.trim(),
+        pinCode: shippingAddress.postalCode.trim(),
+        country: "India"
+      });
+      showToast("Address saved to your address book", "success");
+    } catch (err) {
+      console.error("Failed to save manual address to book:", err);
+      showToast(err.response?.data?.msg || "Could not save address, proceeding to payment", "error");
+    }
+    setShowSaveAddressPrompt(false);
+    setCheckoutStep(2);
+  };
+
   // Form input validation for Page 1
   const handleProceedToPayment = (e) => {
     e.preventDefault();
@@ -140,7 +212,28 @@ const Checkout = () => {
       showToast("Please enter your street shipping address");
       return;
     }
-    setCheckoutStep(2); // Go to Page 2 (Payment options)
+    if (!shippingAddress.city.trim()) {
+      showToast("Please enter your city");
+      return;
+    }
+    if (!shippingAddress.state.trim()) {
+      showToast("Please enter your state");
+      return;
+    }
+    if (!shippingAddress.postalCode.trim()) {
+      showToast("Please enter your postal code");
+      return;
+    }
+    if (shippingAddress.postalCode.trim().length !== 6 || !/^\d+$/.test(shippingAddress.postalCode.trim())) {
+      showToast("PIN / Postal Code must be a 6-digit number");
+      return;
+    }
+
+    if (selectedAddressId === "manual") {
+      setShowSaveAddressPrompt(true);
+    } else {
+      setCheckoutStep(2); // Go to Page 2 (Payment options)
+    }
   };
 
   // Card input formatting helpers
@@ -335,15 +428,117 @@ const Checkout = () => {
                     </div>
                   </div>
 
+                  {savedAddresses.length > 0 && (
+                    <div className="space-y-3 mb-5 relative">
+                      <label className="text-sm font-semibold text-gray-700 block">Select Delivery Address</label>
+                      <div className="relative">
+                        {/* Trigger Button */}
+                        <button
+                          type="button"
+                          onClick={() => setShowAddressDropdown(!showAddressDropdown)}
+                          className="w-full p-3.5 border border-gray-200 hover:border-gray-300 rounded-xl bg-white flex items-center justify-between text-left transition-all focus:ring-2 focus:ring-indigo-500 outline-none"
+                        >
+                          <div className="flex items-start gap-3">
+                            <MapPin className="text-indigo-600 mt-1 shrink-0" size={16} />
+                            <div className="text-xs font-normal text-slate-700">
+                              {selectedAddressId === "manual" ? (
+                                <>
+                                  <span className="font-bold text-slate-800 block">Type Address Manually</span>
+                                  <span className="text-gray-500 block mt-0.5">Enter a new shipping address for this order.</span>
+                                </>
+                              ) : (
+                                (() => {
+                                  const addr = savedAddresses.find((a) => a._id === selectedAddressId);
+                                  if (addr) {
+                                    return (
+                                      <>
+                                        <span className="font-bold text-slate-800 block">{addr.streetAddress}</span>
+                                        <span className="text-gray-500 block mt-0.5">
+                                          {addr.city}, {addr.state} - {addr.pinCode} ({addr.country})
+                                        </span>
+                                      </>
+                                    );
+                                  }
+                                  return <span className="font-bold text-slate-800">Select an address</span>;
+                                })()
+                              )}
+                            </div>
+                          </div>
+                          <ChevronDown className={`text-gray-400 transition-transform duration-200 shrink-0 ${showAddressDropdown ? 'rotate-180' : ''}`} size={18} />
+                        </button>
+
+                        {/* Backdrop for closing when clicking outside */}
+                        {showAddressDropdown && (
+                          <div 
+                            className="fixed inset-0 z-10 cursor-default" 
+                            onClick={() => setShowAddressDropdown(false)}
+                          />
+                        )}
+
+                        {/* Dropdown Options List (Overlaying on elements below it) */}
+                        {showAddressDropdown && (
+                          <div className="absolute z-20 w-full mt-1.5 bg-white border border-gray-250 rounded-xl shadow-xl max-h-60 overflow-y-auto divide-y divide-gray-100 animate-fadeIn">
+                            {savedAddresses.map((addr) => (
+                              <button
+                                key={addr._id}
+                                type="button"
+                                onClick={() => {
+                                  handleAddressSelect(addr._id);
+                                  setShowAddressDropdown(false);
+                                }}
+                                className={`w-full p-3.5 flex items-start gap-3 text-left transition-all hover:bg-slate-50 ${
+                                  selectedAddressId === addr._id ? "bg-indigo-50/20" : ""
+                                }`}
+                              >
+                                <div className="mt-1 flex items-center justify-center w-4 h-4 rounded-full border border-gray-300 shrink-0">
+                                  {selectedAddressId === addr._id && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                                </div>
+                                <div className="text-xs font-normal text-slate-700">
+                                  <span className="font-bold text-slate-800 block">{addr.streetAddress}</span>
+                                  <span className="text-gray-500 block mt-0.5">
+                                    {addr.city}, {addr.state} - {addr.pinCode} ({addr.country})
+                                  </span>
+                                </div>
+                              </button>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleAddressSelect("manual");
+                                setShowAddressDropdown(false);
+                              }}
+                              className={`w-full p-3.5 flex items-start gap-3 text-left transition-all hover:bg-slate-50 ${
+                                selectedAddressId === "manual" ? "bg-indigo-50/20" : ""
+                              }`}
+                            >
+                              <div className="mt-1 flex items-center justify-center w-4 h-4 rounded-full border border-gray-300 shrink-0">
+                                {selectedAddressId === "manual" && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
+                              </div>
+                              <div className="text-xs font-normal text-slate-700">
+                                <span className="font-bold text-slate-800 block">Type Address Manually</span>
+                                <span className="text-gray-500 block mt-0.5">
+                                  Enter a new shipping address for this order.
+                                </span>
+                              </div>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700 mb-1">Street Address (Flat/House No., Colony)</label>
                     <input
                       type="text"
                       required
+                      disabled={selectedAddressId !== "manual"}
                       placeholder="Flat/House No., Colony, Street, Apartment"
                       value={shippingAddress.address}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, address: e.target.value })}
-                      className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-900 bg-white"
+                      className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-905 ${
+                        selectedAddressId !== "manual" ? "bg-slate-50 text-gray-550 border-gray-150 cursor-not-allowed select-none" : "bg-white border-gray-205"
+                      }`}
                     />
                   </div>
 
@@ -353,10 +548,13 @@ const Checkout = () => {
                       <input
                         type="text"
                         required
+                        disabled={selectedAddressId !== "manual"}
                         placeholder="New Delhi"
                         value={shippingAddress.city}
                         onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
-                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-900 bg-white"
+                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-905 ${
+                          selectedAddressId !== "manual" ? "bg-slate-50 text-gray-550 border-gray-150 cursor-not-allowed select-none" : "bg-white border-gray-205"
+                        }`}
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -364,10 +562,13 @@ const Checkout = () => {
                       <input
                         type="text"
                         required
+                        disabled={selectedAddressId !== "manual"}
                         placeholder="Delhi"
                         value={shippingAddress.state}
                         onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
-                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-900 bg-white"
+                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-905 ${
+                          selectedAddressId !== "manual" ? "bg-slate-50 text-gray-550 border-gray-150 cursor-not-allowed select-none" : "bg-white border-gray-205"
+                        }`}
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -375,12 +576,15 @@ const Checkout = () => {
                       <input
                         type="text"
                         required
+                        disabled={selectedAddressId !== "manual"}
                         placeholder="110001"
                         maxLength="6"
                         pattern="\d{6}"
                         value={shippingAddress.postalCode}
                         onChange={(e) => setShippingAddress({ ...shippingAddress, postalCode: e.target.value.replace(/\D/g, "") })}
-                        className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-900 bg-white"
+                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-normal text-gray-905 ${
+                          selectedAddressId !== "manual" ? "bg-slate-50 text-gray-550 border-gray-150 cursor-not-allowed select-none" : "bg-white border-gray-205"
+                        }`}
                       />
                     </div>
                   </div>
@@ -620,6 +824,39 @@ const Checkout = () => {
         )}
 
       </div>
+      {/* MANUAL ADDRESS SAVE PROMPT MODAL */}
+      {showSaveAddressPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white border border-gray-150 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl space-y-4 animate-scaleUp text-left">
+            <div className="w-12 h-12 rounded-full bg-[#e8f6ea] border border-green-150 text-[#088178] flex items-center justify-center">
+              <MapPin size={22} className="animate-bounce" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-gray-950">Save this address?</h3>
+              <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
+                Would you like to save this new address to your address book for future orders? You can save up to 10 addresses.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleSkipSaveAddress}
+                className="flex-1 py-2.5 border border-gray-250 text-gray-700 hover:bg-gray-50 font-bold text-xs rounded-xl transition cursor-pointer text-center"
+              >
+                Skip
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAndContinueAddress}
+                className="flex-1 py-2.5 bg-gray-900 hover:bg-black text-white font-bold text-xs rounded-xl transition cursor-pointer text-center"
+              >
+                Save & Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toast Alert Widget */}
       {message && (
         <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
