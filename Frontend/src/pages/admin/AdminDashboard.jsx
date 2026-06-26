@@ -65,32 +65,36 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-        <p className="text-gray-500 mt-1">
+      <div className="mb-4 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight">
+          Admin Dashboard
+        </h1>
+        <p className="text-sm sm:text-base text-gray-500 mt-1 max-w-2xl">
           Welcome back! Here's an overview of your store.
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
         {cards.map((card, index) => (
           <div
             key={index}
-            className="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition duration-300"
+            className="bg-white rounded-2xl shadow-md p-4 sm:p-6 hover:shadow-xl transition duration-300"
           >
             <div className="flex items-center justify-between">
-              <div className="text-[#15877F]">{card.icon}</div>
-              <span className="text-xs bg-[#15877F]/10 text-[#15877F] px-2 py-1 rounded-full">
+              <div className="text-[#15877F] scale-90 sm:scale-100 origin-left">{card.icon}</div>
+              <span className="text-[10px] sm:text-xs bg-[#15877F]/10 text-[#15877F] px-2 py-1 rounded-full whitespace-nowrap">
                 Store
               </span>
             </div>
 
-            <h3 className="mt-4 text-gray-500 text-sm">{card.title}</h3>
+            <h3 className="mt-3 sm:mt-4 text-gray-500 text-[11px] sm:text-sm leading-snug">
+              {card.title}
+            </h3>
 
-            <p className="mt-2 text-3xl font-bold text-gray-800">
+            <p className="mt-2 text-lg sm:text-2xl xl:text-3xl font-bold text-gray-800 break-words">
               {card.value}
             </p>
           </div>

@@ -346,10 +346,10 @@ const Profile = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-200 mb-6">
+      <div className="flex items-center gap-2 border-b border-slate-200 mb-6 overflow-x-auto pb-1 scrollbar-none">
         <button
           onClick={() => setActiveTab("settings")}
-          className={`px-4 py-2.5 text-sm font-bold transition-all relative border-b-2 -mb-px outline-none focus:outline-none cursor-pointer ${
+          className={`px-4 py-2.5 text-sm font-bold transition-all relative border-b-2 -mb-px outline-none focus:outline-none cursor-pointer whitespace-nowrap flex-shrink-0 ${
             activeTab === "settings"
               ? "text-[#088178] border-[#088178]"
               : "text-gray-500 border-transparent hover:text-gray-800"
@@ -363,7 +363,7 @@ const Profile = () => {
               setActiveTab("orders");
               fetchUserOrdersData();
             }}
-            className={`px-4 py-2.5 text-sm font-bold transition-all relative border-b-2 -mb-px outline-none focus:outline-none cursor-pointer ${
+            className={`px-4 py-2.5 text-sm font-bold transition-all relative border-b-2 -mb-px outline-none focus:outline-none cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === "orders"
                 ? "text-[#088178] border-[#088178]"
                 : "text-gray-500 border-transparent hover:text-gray-800"
@@ -378,7 +378,7 @@ const Profile = () => {
               setActiveTab("addresses");
               fetchUserAddresses();
             }}
-            className={`px-4 py-2.5 text-sm font-bold transition-all relative border-b-2 -mb-px outline-none focus:outline-none cursor-pointer ${
+            className={`px-4 py-2.5 text-sm font-bold transition-all relative border-b-2 -mb-px outline-none focus:outline-none cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === "addresses"
                 ? "text-[#088178] border-[#088178]"
                 : "text-gray-500 border-transparent hover:text-gray-800"
@@ -654,18 +654,18 @@ const Profile = () => {
                   .map((order) => (
                 <div
                   key={order._id}
-                  className="bg-white border border-slate-100 rounded-xl p-3 sm:p-5 shadow-sm shadow-slate-100/30 space-y-4 text-left relative overflow-hidden"
+                  className="bg-white border border-slate-100 rounded-xl p-4 sm:p-5 shadow-sm shadow-slate-100/30 space-y-4 text-left relative overflow-hidden w-full min-w-0"
                 >
                   <div className="absolute top-0 left-0 right-0 h-[3px] bg-slate-100"></div>
 
                   {/* Order Card Header details */}
-                  <div className="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-3">
-                    <div className="space-y-1">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5">
-                        <span className="text-[10px] text-gray-400 block font-bold uppercase tracking-wider">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-b border-slate-100 pb-3">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5 min-w-0">
+                        <span className="text-[10px] text-gray-400 block font-bold uppercase tracking-wider flex-shrink-0">
                           Order Reference
                         </span>
-                        <span className="text-xs font-bold text-slate-800 truncate max-w-[120px] sm:max-w-none inline-block">
+                        <span className="text-[11px] sm:text-xs font-bold text-slate-800 break-all sm:break-normal inline-block">
                           #{order._id}
                         </span>
                       </div>
@@ -682,7 +682,7 @@ const Profile = () => {
                     </div>
 
                     <span
-                      className={`px-3 py-1 text-xs font-bold rounded-full border ${getOrderStatusClass(
+                      className={`px-3 py-1 text-xs font-bold rounded-full border self-start sm:self-auto ${getOrderStatusClass(
                         order.orderStatus
                       )}`}
                     >
@@ -715,7 +715,7 @@ const Profile = () => {
                   </div>
 
                   {/* Order Details Footer */}
-                  <div className="pt-3.5 border-t border-slate-100 grid md:grid-cols-2 gap-4 text-xs font-medium text-slate-600 bg-slate-50/50 -mx-5 -mb-5 px-3 sm:px-5 py-3 sm:py-4">
+                  <div className="pt-3.5 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium text-slate-600 bg-slate-50/50 px-3 sm:px-5 py-3 sm:py-4 rounded-b-xl">
                     
                     {/* Shipping Address Summary */}
                     <div className="space-y-1.5">
@@ -732,12 +732,12 @@ const Profile = () => {
                     </div>
 
                     {/* Cost & Transaction Metadata */}
-                    <div className="space-y-1.5 md:text-right flex flex-col md:items-end justify-between">
-                      <div className="w-full flex justify-between md:justify-end gap-3 items-center">
+                    <div className="space-y-1.5 md:text-right flex flex-col md:items-end justify-between min-w-0">
+                      <div className="w-full flex justify-between md:justify-end gap-3 items-center min-w-0">
                         <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                           Transaction ID
                         </span>
-                        <span className="font-mono text-[11px] text-slate-700 block select-all truncate max-w-[140px] sm:max-w-none">
+                        <span className="font-mono text-[11px] text-slate-700 block select-all break-all text-right max-w-[160px] sm:max-w-none">
                           {order.transactionId}
                         </span>
                       </div>
