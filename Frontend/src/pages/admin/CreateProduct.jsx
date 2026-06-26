@@ -97,9 +97,11 @@ const CreateProduct = () => {
 
     setUploading(true);
     try {
-      const uploadPromises = files.map((file) => uploadProductImage(file));
-      const results = await Promise.all(uploadPromises);
-      const urls = results.map((res) => res.data.url);
+      const urls = [];
+      for (const file of files) {
+        const res = await uploadProductImage(file);
+        urls.push(res.data.url);
+      }
       setProductImages((prev) => [...prev, ...urls]);
     } catch (err) {
       console.error("Image upload failed:", err);
@@ -280,9 +282,11 @@ const CreateProduct = () => {
 
     setUploadingVariantIndex(vIdx);
     try {
-      const uploadPromises = files.map((file) => uploadProductImage(file));
-      const responses = await Promise.all(uploadPromises);
-      const urls = responses.map((res) => res.data.url);
+      const urls = [];
+      for (const file of files) {
+        const res = await uploadProductImage(file);
+        urls.push(res.data.url);
+      }
 
       setVariants((prev) =>
         prev.map((v, idx) => {
