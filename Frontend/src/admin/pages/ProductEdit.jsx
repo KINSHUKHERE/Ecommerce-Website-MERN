@@ -13,7 +13,6 @@ import {
   IndianRupee,
   Box,
   AlignLeft,
-  Sparkles,
   ArrowLeft,
   Loader2,
   X,
@@ -1143,7 +1142,6 @@ const ProductEdit = () => {
                 </>
               ) : (
                 <>
-                  <Sparkles size={14} />
                   Save Product Changes
                 </>
               )}

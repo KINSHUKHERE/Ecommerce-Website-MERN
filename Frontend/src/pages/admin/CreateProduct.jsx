@@ -13,7 +13,6 @@ import {
   IndianRupee,
   Box,
   AlignLeft,
-  Sparkles,
   ArrowLeft,
   Upload,
   Trash2,
@@ -996,7 +995,6 @@ const CreateProduct = () => {
               type="submit"
               className="w-full bg-gradient-to-r from-[#15877F] to-[#088178] text-white font-bold py-2.5 rounded-lg hover:from-[#126b64] hover:to-[#06635c] transition-all duration-300 shadow-sm hover:shadow shadow-[#088178]/10 active:scale-[0.99] flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider mt-2 cursor-pointer h-[40px]"
             >
-              <Sparkles size={16} />
               Submit Product details
             </button>
           </form>

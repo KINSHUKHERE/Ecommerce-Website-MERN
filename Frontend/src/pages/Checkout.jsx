@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, X, Loader2, Lock, Smartphone, CreditCard, CheckSquare, Sparkles, Home, ShoppingBag, Shield, MapPin, ChevronDown } from "lucide-react";
+import { Check, X, Loader2, Lock, Smartphone, CreditCard, CheckSquare, Home, ShoppingBag, Shield, MapPin, ChevronDown } from "lucide-react";
 import { getDataCart } from "../api/CartApi";
 import { createOrder } from "../api/OrderApi";
 import { getUserProfile } from "../api/AuthApi";
@@ -383,7 +383,6 @@ const Checkout = () => {
                 {/* 1. Account Details Section */}
                 <div className="space-y-3">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 tracking-tight flex items-center gap-2">
-                    <Sparkles size={18} className="text-gray-400" />
                     Verified Customer Account
                   </h2>
                   <div className="text-sm text-gray-600 font-normal pl-1.5 space-y-1.5 leading-relaxed">
