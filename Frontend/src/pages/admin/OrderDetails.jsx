@@ -162,7 +162,10 @@ const OrderDetails = () => {
               <span className="text-sm font-extrabold text-[#088178]">
                 ₹
                 {orders
-                  .reduce((sum, o) => sum + o.totalAmount, 0)
+                  .reduce((sum, o) => {
+                    if (o.orderStatus === "Cancelled") return sum;
+                    return sum + o.totalAmount;
+                  }, 0)
                   .toLocaleString()}
               </span>
             </div>

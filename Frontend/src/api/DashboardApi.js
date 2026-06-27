@@ -19,7 +19,12 @@ export const getDashboardData = async () => {
     totalUse: users.data.length,
     totalOrd: ordersList.length,
     totalRev: ordersList.reduce(
-      (acc, order) => acc + (order.totalAmount || 0),
+      (acc, order) => {
+        if (order.orderStatus === "Cancelled") {
+          return acc;
+        }
+        return acc + (order.totalAmount || 0);
+      },
       0,
     ),
   };
