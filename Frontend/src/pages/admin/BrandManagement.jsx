@@ -374,7 +374,6 @@ const BrandManagement = () => {
 
       {/* Add Brand Form Card */}
       <div className="bg-white border border-slate-100 rounded-xl p-5 mb-6 shadow-sm shadow-slate-100/30 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-[#088178]"></div>
         
         <h2 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
           <PlusCircle size={16} className="text-[#088178]" />
