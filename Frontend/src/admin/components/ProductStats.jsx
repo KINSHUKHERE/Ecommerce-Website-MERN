@@ -2,12 +2,24 @@ import React from "react";
 import { Package, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 
 const ProductStats = ({ products = [], activeFilter = "", onCardClick }) => {
+  const getProductTotalStock = (product) => {
+    if (product.variants && product.variants.length > 0) {
+      return product.variants.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
+    }
+    return product.quantity ?? 0;
+  };
+
+  const getProductStatus = (item) => {
+    const qty = getProductTotalStock(item);
+    if (qty <= 0 || item.sold) return "Sold";
+    if (qty <= 3) return "Low Stock";
+    return "In Stock";
+  };
+
   const totalProducts = products.length;
-  const activeProducts = products.filter((p) => (p.quantity ?? 10) > 0 && !p.sold).length;
-  const lowStockProducts = products.filter(
-    (p) => (p.quantity ?? 10) > 0 && (p.quantity ?? 10) <= 3 && !p.sold
-  ).length;
-  const outOfStockProducts = products.filter((p) => (p.quantity ?? 10) <= 0 || p.sold).length;
+  const activeProducts = products.filter((p) => getProductStatus(p) !== "Sold").length;
+  const lowStockProducts = products.filter((p) => getProductStatus(p) === "Low Stock").length;
+  const outOfStockProducts = products.filter((p) => getProductStatus(p) === "Sold").length;
 
   const statCards = [
     {
