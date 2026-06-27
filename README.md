@@ -105,7 +105,7 @@ YoCart is a premium, fully responsive e-commerce web application built using the
 ### 🛍️ Client / Customer Panel
 *   **Home Landing Hub:** Welcoming landing page featuring visual Hero sections, promotional advertisement banners, featured products grid, and standard links.
 *   **Searchable Product Catalog:** Advanced product list (`Products.jsx`) with text search (matches title, category, brand) and category/brand filters. Incorporates clean skeleton loaders and infinite scrolling via `IntersectionObserver`.
-*   **Product Details Viewer:** Dedicated page to inspect product descriptions, stock levels, pricing details, and add items to the cart.
+*   **Product Details Viewer:** Dedicated page to inspect product descriptions, stock levels, pricing details, and add items to the cart. Features native **image swiping gestures** on mobile views (`onTouchStart`/`onTouchEnd`) for seamless media navigation.
 *   **Space-Efficient Responsive Cart:** Clean, mobile-friendly cart layout (`Cart.jsx`) that aligns items horizontally on desktop to utilize full width, stacks cleanly on mobile, updates quantities in real-time, and integrates a mobile sticky bottom checkout bar.
 *   **Dynamic Cart Count Badge:** Updates cart counts instantly across the header using custom event-driven listeners (`cartUpdated`).
 *   **Interactive Add-to-Cart Feedback:** Renders a loader spinner inside the cart button during adding requests, coupled with a smooth-fadeIn bottom-right toast confirmation containing the specific product name.
@@ -113,17 +113,21 @@ YoCart is a premium, fully responsive e-commerce web application built using the
     *   *Page 1 (Delivery destination)*: Verified user credentials check and editable shipping recipient forms (Name, Mobile, Street, City, State, PIN).
     *   *Page 2 (Secure Payment Options)*: Interactive method choices (Instant UPI app list or custom VPA, Credit/Debit card validation fields, and Cash on Delivery) with bank-grade security guarantees and secure transaction simulators.
     *   *Success screen*: Check animations, generated transaction ID (`TXN_...`), order reference hashes, and direct navigation routes.
-*   **Tabbed Customer Profile Tracking:** A clean settings layout (`Profile.jsx`) refactored into tabs (Account Settings / My Orders) to dynamically list detailed purchase cards with receipt details, tracking references, and active shipping milestones.
+*   **Tabbed Customer Profile Tracking:** A clean settings layout (`Profile.jsx`) refactored into tabs (Account Settings / My Orders / Address Book). Outer wrappers enforce a consistent, uniform width (`w-full max-w-2xl`) across tabs, while the My Orders cards dynamically stack information and bleed footer shaded boxes to the boundaries on mobile.
 *   **Autofilled & Secured Contact Support:** The user contact page automatically pre-fills Name and Email fields for logged-in sessions (allowing custom manipulation), while blocking guest form submissions and warning them to login or register first.
+*   **Mobile Navbar Enhancements:** Fixed viewport visibility with the bottom outline removed and replaced by a subtle, premium dark shadow.
 
 ### 📊 Admin Panel Dashboard
 *   **Layout Isolation (`AdminLayout`):** Strictly separated from the store interface. Hides the customer navigation header, rendering a glassmorphic top header and a fixed vertical navigation sidebar (Dashboard, Products, Categories, Variants, Orders, Contact Queries, Logout).
+*   **Dashboard Stats Grid:** Stats are displayed in a clean 2x2 grid on mobile view, and optimized as a 3-column layout on desktop view to provide maximum width and readability. Values like Revenue are formatted as rounded integers (e.g. `₹21,30,858` without `.00` decimals) to prevent line breaks.
 *   **Products Catalog Control (`/admin/products`):** Soft UI tabular grid displaying product summaries, categories, variants, pricing, stock levels, status tags, and action buttons. Renders as a spacious 1-column list on mobile screens.
 *   **Custom Select Dropdowns:** Custom React-based selectors (`SoftDropdown`) providing clean overlays, hover animations, and height alignment.
 *   **Dynamic Stats Counters:** Live stats computing Total Products, Active Products, Low Stock Products, and Out of Stock (Sold) Products from the database.
 *   **Load More Pagination:** Interactive scroll footer paging replacing native page numbers.
-*   **Timestamps & Description Viewer:** Detailed product view route (`/admin/products/:productId`) rendering creation/update timestamps.
-*   **Image URL Validation Editor:** Form-editor route (`/admin/products/edit/:productId`) containing live image preview boxes to inspect URLs for broken links.
+*   **Timestamps & Description Viewer:** Detailed product view route (`/admin/products/:productId`) rendering creation/update timestamps. Includes **mobile touch gestures** to swipe between product photos.
+*   **Configurable Product Variants (Mobile Reordering):** The variants table in `/admin/products/:productId` dynamically reorders on mobile using flex ordering rules (`order-1` for variants table, `order-2` for description) to display variants above description.
+*   **Compact Stats Rows:** Categories, Brands, and Contact Query pages present dashboard stats in a single row on mobile views, with responsive font sizing (`text-[11px] sm:text-[13px]`) to maximize screen usage.
+*   **Image URL Validation Editor:** Form-editor route (`/admin/products/edit/:productId`) containing live image preview boxes to inspect URLs for broken links. Instantly clears file input cache values after upload to allow selecting duplicate or new photos cleanly.
 *   **Safe Deletion Dialog:** Confirmation overlay modal preventing accidental deletions.
 *   **Category & Variant CRUD Ports:** Dedicated interfaces to manage, update, and soft-delete store categories and variant brands.
 *   **Orders Lifecycle Audits (`OrderDetails.jsx`):** Database-backed audit panel listing all customer transactions, items, amounts, and dates, with inline status selectors (Processing, Shipped, Delivered, Cancelled) that update MongoDB.
@@ -245,3 +249,17 @@ Start the Vite development server:
 npm run dev
 ```
 The application will start running on `http://localhost:5173`.
+
+### 4. Database Seeding & Local Fallback (Optional)
+If your network environment restricts access to the remote MongoDB Atlas instance (e.g. dynamic IP addresses blocked by Atlas firewall), you can configure the backend to use a local MongoDB instance:
+
+1. Ensure a local MongoDB instance is running on your machine (default port `27017`).
+2. Update the `MONGO_URI` variable in the `Backend/.env` file:
+   ```env
+   MONGO_URI=mongodb://localhost:27017/Ecommerce
+   ```
+3. Run the database migration and seeding script from the `Backend` directory to populate the collections:
+   ```bash
+   node seed.js
+   ```
+   *(Note: This script migrates collections, cleans existing items, and seeds a beautiful 12-item catalog with fully-resolved category and brand relationships).*
