@@ -1,5 +1,40 @@
 const Product = require("../models/productsData");
 const Variant = require("../models/variantDetails");
+const cloudinary = require("../config/cloudinary");
+
+const getPublicIdFromUrl = (url) => {
+  if (!url || !url.includes("cloudinary.com")) return null;
+  try {
+    const parts = url.split("/upload/");
+    if (parts.length < 2) return null;
+    const afterUpload = parts[1];
+    const pathSegments = afterUpload.split("/");
+    if (pathSegments[0].match(/^v\d+$/)) {
+      pathSegments.shift();
+    }
+    const fullPath = pathSegments.join("/");
+    const lastDotIndex = fullPath.lastIndexOf(".");
+    return lastDotIndex !== -1 ? fullPath.substring(0, lastDotIndex) : fullPath;
+  } catch (err) {
+    console.error("Error parsing Cloudinary URL:", err);
+    return null;
+  }
+};
+
+const isImageInUse = async (url, excludeProductId) => {
+  const otherProductCount = await Product.countDocuments({
+    _id: { $ne: excludeProductId },
+    $or: [{ imgUrl: url }, { images: url }]
+  });
+  if (otherProductCount > 0) return true;
+
+  const otherVariantCount = await Variant.countDocuments({
+    productId: { $ne: excludeProductId },
+    images: url
+  });
+  return otherVariantCount > 0;
+};
+
 
 const addProduct = async (req, res) => {
   try {
@@ -107,6 +142,43 @@ const deleteProduct = async (req, res) => {
 
     if (!deletedProduct) {
       return res.status(404).json({ msg: "Product not found" });
+    }
+
+    // Collect all image URLs from the product and its variants
+    const imageUrls = new Set();
+    if (deletedProduct.imgUrl) imageUrls.add(deletedProduct.imgUrl);
+    if (Array.isArray(deletedProduct.images)) {
+      deletedProduct.images.forEach(img => {
+        if (img) imageUrls.add(img);
+      });
+    }
+
+    // Fetch all variants associated with this product (active and soft-deleted)
+    const productVariants = await Variant.find({ productId: id });
+    productVariants.forEach(variant => {
+      if (Array.isArray(variant.images)) {
+        variant.images.forEach(img => {
+          if (img) imageUrls.add(img);
+        });
+      }
+    });
+
+    // Delete unique images from Cloudinary if they are not in use by other products/variants
+    for (const url of imageUrls) {
+      const publicId = getPublicIdFromUrl(url);
+      if (publicId) {
+        const inUse = await isImageInUse(url, id);
+        if (!inUse) {
+          try {
+            console.log(`Deleting image from Cloudinary: ${publicId}`);
+            await cloudinary.uploader.destroy(publicId);
+          } catch (destroyErr) {
+            console.error(`Failed to destroy image ${publicId} on Cloudinary:`, destroyErr.message);
+          }
+        } else {
+          console.log(`Image ${url} is in use by another product or variant. Skipping deletion.`);
+        }
+      }
     }
 
     // Soft delete all variants of this product
