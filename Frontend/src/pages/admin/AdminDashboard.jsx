@@ -64,15 +64,21 @@ const AdminDashboard = () => {
     },
   ];
 
+  const user = JSON.parse(localStorage.getItem("user")) || {
+    name: "Admin",
+    role: "admin",
+  };
+  const firstName = user?.name ? user.name.split(" ")[0] : "Admin";
+
   return (
     <div className="space-y-5 sm:space-y-6">
       {/* Header */}
       <div className="mb-4 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight">
-          Admin Dashboard
+          Welcome back, {firstName}! 👋
         </h1>
-        <p className="text-sm sm:text-base text-gray-500 mt-1 max-w-2xl">
-          Welcome back! Here's an overview of your store.
+        <p className="text-sm sm:text-base text-gray-500 mt-1">
+          Here's a comprehensive snapshot of your YoCart store's performance, catalog overview, and customer inquiries.
         </p>
       </div>
 
