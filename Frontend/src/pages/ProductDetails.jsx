@@ -374,7 +374,7 @@ const ProductDetails = () => {
           <div className="fixed bottom-0 left-0 right-0 w-full bg-white border-t border-light-border/60 p-4 z-40 flex gap-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] md:static md:w-auto md:bg-transparent md:border-0 md:p-0 md:shadow-none md:mt-6 md:z-auto">
             <button
               onClick={handleWishlistToggle}
-              className={`w-12 h-12 flex-shrink-0 md:w-auto md:h-auto md:flex-none py-3 px-5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 border cursor-pointer outline-none ${
+              className={`w-12 h-12 p-0 flex-shrink-0 md:w-auto md:h-auto md:flex-none md:py-3 md:px-5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 border cursor-pointer outline-none ${
                 isWishlisted
                   ? "bg-rose-50 border-rose-100 text-rose-500 hover:bg-rose-100/50"
                   : "bg-white border-light-border text-dark-navy hover:bg-slate-50"
