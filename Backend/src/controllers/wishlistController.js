@@ -37,7 +37,6 @@ const toggleWishlist = async (req, res) => {
       // Add it
       let targetVariantId = variantId;
       if (!targetVariantId) {
-        // Fallback to first available variant if product has variants
         const firstVariant = await Variant.findOne({ productId, isDeleted: false });
         if (firstVariant) {
           targetVariantId = firstVariant._id;
@@ -50,7 +49,6 @@ const toggleWishlist = async (req, res) => {
         variantId: targetVariantId,
       });
 
-      // Fetch all wishlisted product IDs for the user
       const allWishlisted = await Wishlist.find({ userId }).select("productId");
       const allWishlistedIds = allWishlisted.map((w) => w.productId.toString());
 
