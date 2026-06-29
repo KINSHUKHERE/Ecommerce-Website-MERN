@@ -100,29 +100,29 @@ const ContactDetails = () => {
   }, [contacts, search, dateFilter, sortOrder]);
 
   return (
-    <div className="relative leading-normal">
+    <div className="relative text-dark-navy antialiased text-left">
       {/* Toast Alert Widget */}
       {message && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
+        <div className="fixed bottom-5 right-5 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn">
           <div
-            className={`w-6 h-6 rounded-full flex items-center justify-center ${
+            className={`w-5 h-5 rounded-full flex items-center justify-center ${
               toastType === "success"
-                ? "bg-green-50 text-green-600 border border-green-100"
-                : "bg-red-50 text-red-655 border border-red-100"
+                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                : "bg-red-500/10 text-red-400 border border-red-500/20"
             }`}
           >
-            {toastType === "success" ? <Check size={14} /> : <X size={14} />}
+            {toastType === "success" ? <Check size={12} /> : <X size={12} />}
           </div>
-          <span className="text-sm font-medium text-gray-800">{message}</span>
+          <span className="font-semibold">{message}</span>
         </div>
       )}
 
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 leading-normal">
+      <div className="mb-6 border-b border-light-border/40 pb-4">
+        <h1 className="text-2xl font-extrabold text-dark-navy tracking-tight">
           Contact Queries
         </h1>
-        <p className="text-[13px] font-normal text-gray-500 mt-1 leading-relaxed">
+        <p className="text-xs text-muted-gray font-semibold mt-1">
           Review and search client inquiries submitted via the store contact form.
         </p>
       </div>
@@ -131,36 +131,36 @@ const ContactDetails = () => {
       <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
         <div
           onClick={() => setDateFilter("all")}
-          className={`flex flex-col p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
-            dateFilter === "all" ? "border-[#088178] ring-2 ring-[#088178]/5" : "border-slate-100"
+          className={`flex flex-col p-4 bg-white border rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-300 cursor-pointer ${
+            dateFilter === "all" ? "border-primary ring-2 ring-primary/5" : "border-light-border/60"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Total Queries</span>
-            <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+            <span className="text-[11px] sm:text-xs font-extrabold text-muted-gray uppercase tracking-widest">Total Queries</span>
+            <div className="p-1.5 rounded-xl bg-primary/5 text-primary">
               <MessageSquare size={16} />
             </div>
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.total}</span>
+          <span className="text-lg sm:text-2xl font-extrabold text-dark-navy mt-2 leading-tight">{stats.total}</span>
         </div>
 
-        <div className="flex flex-col p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="flex flex-col p-4 bg-white border border-light-border/60 rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-300">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Unique Senders</span>
-            <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
+            <span className="text-[11px] sm:text-xs font-extrabold text-muted-gray uppercase tracking-widest">Unique Senders</span>
+            <div className="p-1.5 rounded-xl bg-primary/5 text-primary">
               <User size={16} />
             </div>
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.uniqueEmails}</span>
+          <span className="text-lg sm:text-2xl font-extrabold text-dark-navy mt-2 leading-tight">{stats.uniqueEmails}</span>
         </div>
       </div>
 
       {/* Search & Filters Block */}
-      <div className="bg-white border border-slate-100 rounded-xl p-4 mb-6 shadow-sm shadow-slate-100/30">
+      <div className="bg-white border border-light-border/60 rounded-2xl p-4 mb-6 shadow-2xs">
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
               <Search size={15} />
             </span>
             <input
@@ -168,12 +168,12 @@ const ContactDetails = () => {
               placeholder="Search by sender name, email, message keyword..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-8 py-2 bg-slate-50/70 border border-slate-100 rounded-lg focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all duration-300"
+              className="w-full pl-9 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy h-[36px]"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-450 hover:text-gray-600 cursor-pointer"
+                className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray hover:text-dark-navy cursor-pointer"
               >
                 <X size={14} />
               </button>
@@ -185,13 +185,13 @@ const ContactDetails = () => {
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="w-full pl-3 pr-8 py-2 rounded-lg border border-slate-100 bg-slate-50/70 focus:bg-white focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 appearance-none cursor-pointer"
+              className="w-full pl-3 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy appearance-none cursor-pointer h-[36px]"
             >
               <option value="all">All Dates</option>
               <option value="today">Last 24 Hours</option>
               <option value="week">Last 7 Days</option>
             </select>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </span>
           </div>
@@ -201,12 +201,12 @@ const ContactDetails = () => {
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="w-full pl-3 pr-8 py-2 rounded-lg border border-slate-100 bg-slate-50/70 focus:bg-white focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 appearance-none cursor-pointer"
+              className="w-full pl-3 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy appearance-none cursor-pointer h-[36px]"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
             </select>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </span>
           </div>
@@ -215,7 +215,7 @@ const ContactDetails = () => {
           {(search || dateFilter !== "all" || sortOrder !== "newest") && (
             <button
               onClick={handleResetFilters}
-              className="inline-flex items-center justify-center gap-1.5 border border-red-100 text-red-500 hover:bg-red-50/40 py-2 px-3.5 rounded-lg text-xs font-bold transition-all duration-300 cursor-pointer h-[34px]"
+              className="inline-flex items-center justify-center gap-1.5 border border-red-200 text-red-500 hover:bg-red-50 py-2 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer h-[36px]"
             >
               <RotateCcw size={12} />
               Reset
@@ -225,28 +225,28 @@ const ContactDetails = () => {
       </div>
 
       {/* Content Table/Grid */}
-      <div className="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm shadow-slate-100/30">
-        <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/20">
-          <h2 className="text-base font-semibold text-slate-800">Messages Registry</h2>
-          <span className="text-[13px] font-normal text-gray-500">
+      <div className="bg-white border border-light-border/60 rounded-3xl overflow-hidden shadow-2xs">
+        <div className="px-5 py-4 border-b border-light-border/40 flex justify-between items-center bg-slate-50/20">
+          <h2 className="text-xs font-extrabold text-dark-navy uppercase tracking-widest">Messages Registry</h2>
+          <span className="text-xs font-bold text-muted-gray">
             Showing {filteredContacts.length} of {contacts.length}
           </span>
         </div>
 
         {loading ? (
           <div className="p-16 flex flex-col items-center justify-center">
-            <Loader2 className="animate-spin text-[#088178] w-8 h-8 mb-4" />
-            <p className="text-xs font-normal text-gray-500 animate-pulse">Loading message registry...</p>
+            <Loader2 className="animate-spin text-primary w-8 h-8 mb-4" />
+            <p className="text-xs font-bold text-muted-gray animate-pulse">Loading message registry...</p>
           </div>
         ) : filteredContacts.length === 0 ? (
-          <div className="p-16 text-center shadow-sm">
-            <Inbox className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-800">No Messages Found</h3>
-            <p className="text-[13px] font-normal text-gray-500 mt-1">Try resetting filters or adjusting search queries.</p>
+          <div className="p-16 text-center">
+            <Inbox className="w-12 h-12 text-muted-gray/50 mx-auto mb-3" />
+            <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-widest">No Messages Found</h3>
+            <p className="text-xs font-semibold text-muted-gray mt-1">Try resetting filters or adjusting search queries.</p>
             {(search || dateFilter !== "all") && (
               <button
                 onClick={handleResetFilters}
-                className="mt-3 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all cursor-pointer"
+                className="mt-4 px-4 py-2 border border-light-border hover:bg-slate-50 text-dark-navy text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs"
               >
                 Clear Filters
               </button>
@@ -257,44 +257,44 @@ const ContactDetails = () => {
             {/* Desktop Table View */}
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/65 text-gray-500 border-b border-slate-100 text-[13px] font-normal">
-                  <th className="py-3 px-4 w-1/4">Sender Details</th>
-                  <th className="py-3 px-4 w-[55%]">Message Body</th>
-                  <th className="py-3 px-4 text-center w-[20%]">Submitted At</th>
+                <tr className="bg-slate-50/65 text-muted-gray border-b border-light-border/40 text-[10px] font-extrabold uppercase tracking-widest">
+                  <th className="py-3.5 px-6 text-left w-1/4">Sender Details</th>
+                  <th className="py-3.5 px-6 w-[55%]">Message Body</th>
+                  <th className="py-3.5 px-6 text-center w-[20%]">Submitted At</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-100 text-[14px] font-normal text-slate-800">
+              <tbody className="divide-y divide-light-border/40 text-sm font-semibold text-dark-navy">
                 {filteredContacts.map((contact) => (
                   <tr
                     key={contact._id}
                     className="hover:bg-slate-50/30 transition-all duration-200"
                   >
                     {/* Sender column */}
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-6">
                       <div className="flex flex-col gap-0.5">
-                        <span className="font-medium text-slate-800 text-[14px] flex items-center gap-1.5">
-                          <User size={13} className="text-slate-400" />
+                        <span className="font-bold text-dark-navy text-sm flex items-center gap-1.5">
+                          <User size={13} className="text-muted-gray" />
                           {contact.Name || "Anonymous"}
                         </span>
-                        <span className="text-[13px] font-normal text-gray-500 flex items-center gap-1.5">
-                          <Mail size={12} className="text-slate-400" />
+                        <span className="text-xs font-semibold text-muted-gray flex items-center gap-1.5 mt-0.5">
+                          <Mail size={12} className="text-muted-gray" />
                           {contact.Email || "No Email"}
                         </span>
                       </div>
                     </td>
 
                     {/* Message column */}
-                    <td className="py-4 px-4">
-                      <p className="text-slate-700 leading-relaxed max-w-2xl text-[14px] whitespace-pre-wrap">
+                    <td className="py-4 px-6">
+                      <p className="text-dark-navy leading-relaxed max-w-2xl text-xs font-semibold whitespace-pre-wrap">
                         {contact.Message}
                       </p>
                     </td>
 
                     {/* Time column */}
-                    <td className="py-4 px-4 text-center text-[13px] font-normal text-gray-500 whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg">
-                        <Clock size={11} className="text-slate-400" />
+                    <td className="py-4 px-6 text-center text-xs font-semibold text-muted-gray whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 bg-slate-100 border border-light-border/45 px-2.5 py-1 rounded-xl text-dark-navy font-bold">
+                        <Clock size={11} className="text-muted-gray" />
                         {new Date(contact.createdAt).toLocaleTimeString("en-US", {
                           day: "numeric",
                           month: "short",

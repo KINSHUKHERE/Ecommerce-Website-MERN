@@ -25,4 +25,14 @@ export const googleLogin = async (data) => {
 
 export const completeProfile = async (data) => {
   return await api.put("/complete-profile", data);
+};
+
+export const uploadAvatarApi = async (file) => {
+  const formData = new FormData();
+  formData.append("image", file);
+  return await api.post("/upload-avatar", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };

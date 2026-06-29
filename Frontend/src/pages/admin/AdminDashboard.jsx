@@ -6,11 +6,7 @@ import {
   IndianRupee,
   MessageSquare,
 } from "lucide-react";
-// import { getProduct } from "../../api/ProductApi";
-// import { getContact } from "../../api/ContactApi";
-// import { allUsers } from "../../api/AuthApi";
-// import { getAllOrders } from "../../api/OrderApi";
-import {getDashboardData} from "../../api/DashboardApi"
+import { getDashboardData } from "../../api/DashboardApi";
 
 const AdminDashboard = () => {
   const [totalProducts, setTotalProducts] = useState(0);
@@ -22,7 +18,7 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     try {
       const getInfo = await getDashboardData();
-      setTotalProducts(getInfo.totalPro)
+      setTotalProducts(getInfo.totalPro);
       setTotalOrders(getInfo.totalOrd);
       setTotalUsers(getInfo.totalUse);
       setTotalContacts(getInfo.totalCon);
@@ -40,27 +36,32 @@ const AdminDashboard = () => {
     {
       title: "Total Products",
       value: totalProducts,
-      icon: <Package size={28} />,
+      icon: <Package size={20} />,
+      badge: "Catalog",
     },
     {
       title: "Total Users",
       value: totalUsers > 0 ? totalUsers - 1 : 0,
-      icon: <Users size={28} />,
+      icon: <Users size={20} />,
+      badge: "Accounts",
     },
     {
       title: "Total Orders",
       value: totalOrders,
-      icon: <ShoppingCart size={28} />,
+      icon: <ShoppingCart size={20} />,
+      badge: "Sales",
     },
     {
       title: "Revenue",
       value: `₹${totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-      icon: <IndianRupee size={28} />,
+      icon: <IndianRupee size={20} />,
+      badge: "Revenue",
     },
     {
       title: "Contact Queries",
       value: totalContacts,
-      icon: <MessageSquare size={28} />,
+      icon: <MessageSquare size={20} />,
+      badge: "Support",
     },
   ];
 
@@ -71,36 +72,41 @@ const AdminDashboard = () => {
   const firstName = user?.name ? user.name.split(" ")[0] : "Admin";
 
   return (
-    <div className="space-y-5 sm:space-y-6">
+    <div className="space-y-6 text-dark-navy antialiased">
       {/* Header */}
-      <div className="mb-4 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight">
+      <div className="mb-4 sm:mb-8 text-left">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-dark-navy tracking-tight leading-tight">
           Welcome back, {firstName}! 👋
         </h1>
-        <p className="text-sm sm:text-base text-gray-500 mt-1">
+        <p className="text-xs sm:text-sm text-muted-gray mt-1.5 font-medium leading-relaxed">
           Here's a comprehensive snapshot of your YoCart store's performance, catalog overview, and customer inquiries.
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-2 lg:grid-cols-3">
         {cards.map((card, index) => (
           <div
             key={index}
-            className="bg-white rounded-2xl shadow-md p-4 sm:p-6 hover:shadow-xl transition duration-300"
+            className="bg-white border border-light-border/60 rounded-3xl p-5 sm:p-6 shadow-2xs hover:shadow-md transition-all duration-300 text-left relative overflow-hidden group"
           >
+            {/* Corner Decorative Accent Bar */}
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-light-border/30 group-hover:bg-primary transition-colors duration-300"></div>
+            
             <div className="flex items-center justify-between">
-              <div className="text-[#15877F] scale-90 sm:scale-100 origin-left">{card.icon}</div>
-              <span className="text-[10px] sm:text-xs bg-[#15877F]/10 text-[#15877F] px-2 py-1 rounded-full whitespace-nowrap">
-                Store
+              <div className="text-primary bg-primary/5 border border-primary/10 w-10 h-10 rounded-2xl flex items-center justify-center">
+                {card.icon}
+              </div>
+              <span className="text-[10px] sm:text-xs font-extrabold uppercase bg-primary/5 text-primary border border-primary/10 px-2.5 py-0.5 rounded-full">
+                {card.badge}
               </span>
             </div>
 
-            <h3 className="mt-3 sm:mt-4 text-gray-500 text-[11px] sm:text-sm leading-snug">
+            <h3 className="mt-4 text-xs font-extrabold text-muted-gray uppercase tracking-widest leading-none">
               {card.title}
             </h3>
 
-            <p className="mt-2 text-lg sm:text-2xl font-bold text-gray-800 break-words">
+            <p className="mt-2 text-xl sm:text-3xl font-black text-dark-navy tracking-tight break-words">
               {card.value}
             </p>
           </div>

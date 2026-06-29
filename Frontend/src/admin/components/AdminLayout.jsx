@@ -28,19 +28,19 @@ const AdminLayout = ({ children }) => {
   }, [location.pathname]);
 
   return (
-    <div className="flex w-full min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
+    <div className="flex w-full min-h-screen bg-soft-bg text-dark-navy font-sans antialiased">
       {/* Sidebar Navigation */}
       <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       {/* Main Layout Area */}
       <div className="flex-1 flex flex-col lg:pl-64 min-w-0">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 h-16 px-4 sm:px-6 flex items-center justify-between shadow-sm shadow-slate-100/40">
+        <header className="sticky top-0 z-30 bg-white/75 backdrop-blur-md border-b border-light-border/40 h-16 px-4 sm:px-6 flex items-center justify-between shadow-2xs">
           {/* Left Side: Mobile Hamburger & Logo */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-1.5 text-gray-500 hover:text-gray-800 rounded-lg hover:bg-gray-100 lg:hidden cursor-pointer"
+              className="p-1.5 text-muted-gray hover:text-dark-navy rounded-xl hover:bg-slate-50 lg:hidden cursor-pointer"
             >
               <Menu size={20} />
             </button>
@@ -55,20 +55,20 @@ const AdminLayout = ({ children }) => {
             <div className="relative">
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2.5 py-1.5 px-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer outline-none focus:outline-none"
+                className="flex items-center gap-2.5 py-1.5 px-2.5 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer outline-none focus:outline-none"
               >
-                <div className="w-8 h-8 rounded-full bg-[#088178] text-white flex items-center justify-center font-extrabold text-sm border-2 border-white shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-extrabold text-sm border-2 border-white shadow-xs">
                   {(user?.name?.[0] || "P").toUpperCase()}
                 </div>
-                <div className="hidden sm:block text-left">
-                  <span className="block text-xs font-bold text-gray-950 leading-tight">
+                <div className="hidden sm:block text-left select-none">
+                  <span className="block text-xs font-bold text-dark-navy leading-tight">
                     {user?.name || "Prachi Jain"}
                   </span>
-                  <span className="text-[10px] text-gray-400 font-semibold uppercase leading-none">
+                  <span className="text-[10px] text-muted-gray font-bold uppercase leading-none mt-0.5 block">
                     {user?.role || "admin"}
                   </span>
                 </div>
-                <ChevronDown size={14} className="text-gray-400" />
+                <ChevronDown size={14} className="text-muted-gray" />
               </button>
 
               {profileMenuOpen && (
@@ -77,36 +77,36 @@ const AdminLayout = ({ children }) => {
                     className="fixed inset-0 z-10"
                     onClick={() => setProfileMenuOpen(false)}
                   />
-                  <div className="absolute right-0 mt-1.5 w-48 bg-white border border-gray-150 rounded-xl shadow-lg py-1.5 z-20 animate-slideDown">
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-xs text-gray-400 font-bold uppercase">
+                  <div className="absolute right-0 mt-1.5 w-48 bg-white border border-light-border rounded-2xl shadow-lg py-1.5 z-20 animate-slideDown">
+                    <div className="px-4 py-2 border-b border-light-border/40">
+                      <p className="text-[10px] text-muted-gray font-extrabold uppercase tracking-wider">
                         Account
                       </p>
-                      <p className="text-sm font-semibold text-gray-800 mt-0.5 truncate">
+                      <p className="text-xs font-semibold text-dark-navy mt-0.5 truncate">
                         {user?.email || "herekinshuk@gmail.com"}
                       </p>
                     </div>
                     <Link
                       to="/admin"
                       onClick={() => setProfileMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-650 hover:bg-gray-50 hover:text-gray-950 font-medium transition-colors outline-none focus:outline-none"
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-muted-gray hover:bg-slate-50 hover:text-dark-navy font-bold uppercase tracking-wider transition-colors outline-none focus:outline-none"
                     >
-                      <Shield size={16} />
+                      <Shield size={14} className="text-primary" />
                       Admin Panel
                     </Link>
                     <Link
                       to="/admin/profile"
                       onClick={() => setProfileMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-650 hover:bg-gray-50 hover:text-gray-950 font-medium transition-colors outline-none focus:outline-none"
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-muted-gray hover:bg-slate-50 hover:text-dark-navy font-bold uppercase tracking-wider transition-colors outline-none focus:outline-none"
                     >
-                      <User size={16} />
+                      <User size={14} className="text-primary" />
                       My Profile
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-medium transition-colors border-t border-gray-100 cursor-pointer outline-none focus:outline-none"
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-655 hover:bg-red-50 hover:text-red-700 font-bold uppercase tracking-wider transition-colors border-t border-light-border/40 cursor-pointer outline-none focus:outline-none"
                     >
-                      <LogOut size={16} />
+                      <LogOut size={14} />
                       Logout
                     </button>
                   </div>
@@ -117,7 +117,7 @@ const AdminLayout = ({ children }) => {
         </header>
 
         {/* Scrollable Content Body */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 pb-20">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-6 pb-20 bg-soft-bg">
           {children || <Outlet />}
         </main>
       </div>

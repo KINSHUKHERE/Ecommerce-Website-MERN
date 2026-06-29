@@ -1,17 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --color-gray-150: #eceef0;
-  --color-gray-250: #dee2e6;
-  --color-gray-450: #858e96;
-  --color-gray-650: #4a5560;
-  --color-gray-655: #3e4750;
+  --font-sans: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --color-primary: #0F9D8A;
+  --color-primary-hover: #0C7D6E;
+  --color-accent: #14B8A6;
+  --color-accent-light: #e8f6ea;
+  --color-dark-navy: #0F172A;
+  --color-muted-gray: #64748B;
+  --color-light-border: #E2E8F0;
+  --color-soft-bg: #F8FAFC;
+  --color-white: #FFFFFF;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
+  background-color: var(--color-white);
+  color: var(--color-dark-navy);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Global focus styling resets to prevent default browser outline flash on refresh/hydration */
@@ -21,7 +28,7 @@ a, button {
 
 /* Maintain accessibility: show outline only when navigating via keyboard */
 a:focus-visible, button:focus-visible {
-  outline: 2px solid #15877F;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -41,3 +48,9 @@ a:focus-visible, button:focus-visible {
   animation: fadeIn 0.25s ease-out forwards;
 }
 
+/* Form floating label focus animations */
+.floating-label-input:focus ~ label,
+.floating-label-input:not(:placeholder-shown) ~ label {
+  transform: translateY(-1.25rem) scale(0.85);
+  color: var(--color-primary);
+}

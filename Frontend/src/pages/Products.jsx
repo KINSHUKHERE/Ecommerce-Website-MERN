@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import { Link } from "react-router-dom";
-import { Search, SlidersHorizontal, X, RotateCcw } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Search, SlidersHorizontal, X, RotateCcw, Loader2 } from "lucide-react";
 import EachProduct from "../components/EachProduct";
 import { getProduct } from "../api/ProductApi";
 import {
@@ -10,24 +10,23 @@ import {
 
 // Premium Skeleton Card Loader Component
 const ProductSkeleton = () => (
-  <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8 w-full">
+  <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full">
     {Array.from({ length: 6 }).map((_, idx) => (
       <div
         key={idx}
-        className="w-full max-w-sm mx-auto p-2.5 sm:p-4 border border-gray-100 rounded-2xl sm:rounded-3xl shadow-sm bg-white animate-pulse flex flex-col justify-between h-full"
+        className="w-full max-w-sm mx-auto p-3 border border-light-border/60 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.005)] bg-white animate-pulse flex flex-col justify-between h-full"
       >
         <div>
-          <div className="w-full h-36 sm:h-48 md:h-56 lg:h-60 bg-gray-200 rounded-xl sm:rounded-2xl"></div>
-          <div className="pt-2 sm:pt-3 px-1 pb-1 flex flex-col gap-2">
-            <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-            <div className="h-3.5 bg-gray-200 rounded w-3/4 mt-1"></div>
-            <div className="h-3 bg-gray-200 rounded w-full mt-2"></div>
-            <div className="h-3 bg-gray-200 rounded w-5/6 mt-1"></div>
+          <div className="w-full h-36 sm:h-48 bg-slate-100 rounded-2xl"></div>
+          <div className="pt-3 px-1 pb-1 flex flex-col gap-2">
+            <div className="h-3 bg-slate-200 rounded w-1/3"></div>
+            <div className="h-3.5 bg-slate-200 rounded w-3/4 mt-1"></div>
+            <div className="h-3 bg-slate-200 rounded w-full mt-2"></div>
           </div>
         </div>
-        <div className="flex justify-between items-center mt-4 pt-2 border-t border-gray-50 px-1">
-          <div className="h-5 bg-gray-200 rounded w-1/4"></div>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded-full"></div>
+        <div className="flex justify-between items-center mt-4 pt-3 border-t border-light-border/40 px-1">
+          <div className="h-5 bg-slate-200 rounded w-1/4"></div>
+          <div className="w-8 h-8 bg-slate-200 rounded-full"></div>
         </div>
       </div>
     ))}
@@ -40,6 +39,7 @@ const Products = () => {
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [searchParams] = useSearchParams();
 
   // Infinite Scroll Pagination states
   const [visibleCount, setVisibleCount] = useState(10);
@@ -67,6 +67,17 @@ const Products = () => {
     loadAllData();
   }, []);
 
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat) {
+      setSelectedCategory(cat);
+    }
+    const br = searchParams.get("brand");
+    if (br) {
+      setSelectedBrand(br);
+    }
+  }, [searchParams]);
+
   // Reset visibleCount when any filter/search changes
   useEffect(() => {
     setVisibleCount(10);
@@ -85,7 +96,6 @@ const Products = () => {
   const fetchCategories = async () => {
     try {
       const res = await getCategories();
-      console.log("fetchCategories API response:", res.data);
       setCategories(res.data?.categories || []);
     } catch (err) {
       console.error("fetchCategories error:", err);
@@ -95,7 +105,6 @@ const Products = () => {
   const fetchBrands = async () => {
     try {
       const res = await getBrands();
-      console.log("fetchBrands API response:", res.data);
       setBrands(res.data?.brands || []);
     } catch (err) {
       console.error("fetchBrands error:", err);
@@ -104,10 +113,9 @@ const Products = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter((item) => {
-      // Safe checks to avoid undefined.toLowerCase() or undefined.includes() exceptions
       const itemHeading = item.heading || "";
       const itemCategoryName = item.categoryId?.name || item.category || "";
-      const itemBrandName = item.brandId?.name || item.brand || item.brand || "";
+      const itemBrandName = item.brandId?.name || item.brand || "";
 
       const matchesSearch =
         itemHeading.toLowerCase().includes(search.toLowerCase()) ||
@@ -124,8 +132,7 @@ const Products = () => {
         selectedBrand === "" ||
         itemBrandId.toString() === selectedBrand.toString();
 
-      const isMatch = matchesSearch && matchesCategory && matchesBrand;
-      return isMatch;
+      return matchesSearch && matchesCategory && matchesBrand;
     });
   }, [
     products,
@@ -135,7 +142,6 @@ const Products = () => {
   ]);
 
   const visibleProducts = useMemo(() => {
-    console.log("Filtered products list count:", filteredProducts.length);
     return filteredProducts.slice(0, visibleCount);
   }, [filteredProducts, visibleCount]);
 
@@ -155,7 +161,7 @@ const Products = () => {
           setTimeout(() => {
             setVisibleCount((prev) => Math.min(prev + 10, filteredProducts.length));
             setScrollingLoading(false);
-          }, 450); // 450ms premium transition delay
+          }, 450);
         }
       },
       { threshold: 0.1 }
@@ -180,37 +186,37 @@ const Products = () => {
   };
 
   return (
-    <div className="flex-grow w-full bg-gray-50 py-8">
-
+    <div className="flex-grow w-full bg-soft-bg/30 py-12">
 
       {/* Heading & Search Box */}
-      <div className="text-center mb-6 px-4">
-        <h1 className="text-4xl md:text-5xl font-bold text-[#222]">
+      <div className="text-center mb-10 px-6">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-dark-navy tracking-tight relative pb-3 w-fit mx-auto">
           All Products
+          <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full"></span>
         </h1>
-        <p className="text-[#465B52] mt-2 text-sm md:text-base">
-          Find your favourite premium electronics
+        <p className="text-muted-gray mt-3 text-xs sm:text-sm font-medium">
+          Find your favourite premium tech gadgets and setups
         </p>
 
         {/* Enhanced Search Input */}
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center mt-8">
           <div className="relative w-full max-w-2xl">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-              <Search size={20} />
+            <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-muted-gray/80">
+              <Search size={18} />
             </span>
             <input
               type="text"
               placeholder="Search by product name, category, or brand..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-10 py-3.5 rounded-2xl border border-gray-200 bg-white shadow-sm hover:border-[#15877F] focus:outline-none focus:ring-2 focus:ring-[#15877F]/20 focus:border-[#15877F] transition-all text-gray-800 font-medium"
+              className="w-full pl-11 pr-10 py-3.5 rounded-2xl border border-light-border bg-white shadow-2xs hover:border-primary/30 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all text-dark-navy font-medium placeholder-muted-gray/50 text-sm"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 flex items-center pr-4 text-muted-gray hover:text-dark-navy cursor-pointer"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             )}
           </div>
@@ -218,29 +224,29 @@ const Products = () => {
       </div>
 
       {/* Mobile Filter Action Panel (Mobile only) */}
-      <div className="block lg:hidden px-4 mb-6">
-        <div className="flex justify-between items-center bg-white p-4 border border-gray-100 rounded-2xl shadow-sm">
-          <span className="text-sm font-bold text-gray-700">
+      <div className="block lg:hidden px-6 mb-6">
+        <div className="flex justify-between items-center bg-white p-4 border border-light-border/60 rounded-3xl shadow-2xs">
+          <span className="text-xs font-extrabold text-dark-navy uppercase tracking-wider">
             Products ({filteredProducts.length})
           </span>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-bold text-xs transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border font-bold text-xs transition-all cursor-pointer outline-none ${
                 mobileFiltersOpen
-                  ? "bg-[#15877F] text-white border-[#15877F] shadow-sm"
-                  : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  ? "bg-primary text-white border-primary shadow-xs"
+                  : "bg-white text-muted-gray border-light-border hover:bg-slate-50"
               }`}
             >
-              <SlidersHorizontal size={14} />
+              <SlidersHorizontal size={13} />
               Filters {selectedCategory || selectedBrand ? "•" : ""}
             </button>
             {(selectedCategory || selectedBrand || search) && (
               <button
                 onClick={clearFilters}
-                className="flex items-center gap-1 text-red-500 font-bold text-xs hover:text-red-600 transition cursor-pointer"
+                className="flex items-center gap-1 text-red-500 font-bold text-xs hover:text-red-655 transition cursor-pointer"
               >
-                <RotateCcw size={12} />
+                <RotateCcw size={11} />
                 Reset
               </button>
             )}
@@ -251,20 +257,20 @@ const Products = () => {
         <div
           className={`overflow-hidden transition-all duration-300 ${
             mobileFiltersOpen
-              ? "max-h-[500px] mt-3 border border-gray-100 p-5 rounded-2xl bg-white shadow-md"
+              ? "max-h-[500px] mt-3 border border-light-border/60 p-5 rounded-3xl bg-white shadow-xs"
               : "max-h-0"
           }`}
         >
           <div className="flex flex-col gap-5">
             {/* Categories Mobile */}
             <div>
-              <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-2">
+              <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-3">
                 Categories
               </h3>
               <div className="flex flex-wrap gap-2">
                 {loading ? (
                   Array.from({ length: 4 }).map((_, idx) => (
-                    <div key={idx} className="h-7 w-16 bg-gray-200 rounded-xl animate-pulse"></div>
+                    <div key={idx} className="h-7 w-16 bg-slate-100 rounded-xl animate-pulse"></div>
                   ))
                 ) : (
                   <>
@@ -273,10 +279,10 @@ const Products = () => {
                         setSelectedCategory("");
                         setSelectedBrand("");
                       }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                         selectedCategory === ""
-                          ? "bg-[#15877F] text-white border-[#15877F] shadow-sm"
-                          : "bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100"
+                          ? "bg-primary text-white border-primary shadow-xs"
+                          : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
                       }`}
                     >
                       All
@@ -288,10 +294,10 @@ const Products = () => {
                           setSelectedCategory(category._id);
                           setSelectedBrand("");
                         }}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                           selectedCategory === category._id
-                            ? "bg-[#15877F] text-white border-[#15877F] shadow-sm"
-                            : "bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100"
+                            ? "bg-primary text-white border-primary shadow-xs"
+                            : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
                         }`}
                       >
                         {category.name}
@@ -304,22 +310,22 @@ const Products = () => {
 
             {/* Brands Mobile */}
             <div>
-              <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-2">
+              <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-3">
                 Brands
               </h3>
               <div className="flex flex-wrap gap-2">
                 {loading ? (
                   Array.from({ length: 5 }).map((_, idx) => (
-                    <div key={idx} className="h-7 w-16 bg-gray-200 rounded-xl animate-pulse"></div>
+                    <div key={idx} className="h-7 w-16 bg-slate-100 rounded-xl animate-pulse"></div>
                   ))
                 ) : (
                   <>
                     <button
                       onClick={() => setSelectedBrand("")}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                         selectedBrand === ""
-                          ? "bg-[#15877F] text-white border-[#15877F] shadow-sm"
-                          : "bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100"
+                          ? "bg-primary text-white border-primary shadow-xs"
+                          : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
                       }`}
                     >
                       All Brands
@@ -334,10 +340,10 @@ const Products = () => {
                         <button
                           key={brand._id}
                           onClick={() => setSelectedBrand(brand._id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                             selectedBrand === brand._id
-                              ? "bg-[#15877F] text-white border-[#15877F] shadow-sm"
-                              : "bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100"
+                              ? "bg-primary text-white border-primary shadow-xs"
+                              : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
                           }`}
                         >
                           {brand.name}
@@ -352,25 +358,25 @@ const Products = () => {
       </div>
 
       {/* Main Content Layout Grid */}
-      <div className="px-4 md:px-10">
+      <div className="px-6 sm:px-12 lg:px-16 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Desktop Filters Sidebar */}
           <div className="hidden lg:block lg:col-span-1">
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 h-fit sticky top-24">
+            <div className="bg-white rounded-3xl border border-light-border/60 shadow-[0_8px_30px_rgb(0,0,0,0.005)] p-6 h-fit sticky top-24">
               
               {/* Sidebar Header */}
-              <div className="flex justify-between items-center pb-4 mb-6 border-b border-gray-100">
-                <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  <SlidersHorizontal size={18} className="text-[#15877F]" />
+              <div className="flex justify-between items-center pb-4 mb-6 border-b border-light-border/60">
+                <h2 className="text-base font-bold text-dark-navy flex items-center gap-2">
+                  <SlidersHorizontal size={16} className="text-primary" />
                   Filters
                 </h2>
                 {(selectedCategory || selectedBrand || search) && (
                   <button
                     onClick={clearFilters}
-                    className="text-red-500 text-xs font-bold hover:text-red-600 transition flex items-center gap-1 cursor-pointer"
+                    className="text-red-500 text-xs font-bold hover:text-red-655 transition flex items-center gap-1 cursor-pointer"
                   >
-                    <RotateCcw size={12} />
+                    <RotateCcw size={11} />
                     Reset
                   </button>
                 )}
@@ -378,13 +384,13 @@ const Products = () => {
 
               {/* Categories Sidebar Section */}
               <div className="mb-8">
-                <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-4">
+                <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-4">
                   Categories
                 </h3>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5">
                   {loading ? (
                     Array.from({ length: 4 }).map((_, idx) => (
-                      <div key={idx} className="h-10 bg-gray-100 rounded-xl animate-pulse mb-1.5"></div>
+                      <div key={idx} className="h-9.5 bg-slate-150 rounded-xl animate-pulse"></div>
                     ))
                   ) : (
                     <>
@@ -393,10 +399,10 @@ const Products = () => {
                           setSelectedCategory("");
                           setSelectedBrand("");
                         }}
-                        className={`px-4 py-2.5 rounded-xl text-left text-sm font-semibold transition-all border-l-2 cursor-pointer ${
+                        className={`px-4 py-2.5 rounded-xl text-left text-xs font-bold transition-all border-l-2 cursor-pointer ${
                           selectedCategory === ""
-                            ? "bg-[#15877F]/5 border-[#15877F] text-[#15877F]"
-                            : "border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                            ? "bg-primary/5 border-primary text-primary"
+                            : "border-transparent text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
                         }`}
                       >
                         All Categories
@@ -408,10 +414,10 @@ const Products = () => {
                             setSelectedCategory(category._id);
                             setSelectedBrand("");
                           }}
-                          className={`px-4 py-2.5 rounded-xl text-left text-sm font-semibold transition-all border-l-2 cursor-pointer ${
+                          className={`px-4 py-2.5 rounded-xl text-left text-xs font-bold transition-all border-l-2 cursor-pointer ${
                             selectedCategory === category._id
-                              ? "bg-[#15877F]/5 border-[#15877F] text-[#15877F]"
-                              : "border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                              ? "bg-primary/5 border-primary text-primary"
+                              : "border-transparent text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
                           }`}
                         >
                           {category.name}
@@ -424,22 +430,22 @@ const Products = () => {
 
               {/* Brands Sidebar Section */}
               <div>
-                <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-wider mb-4">
+                <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-4">
                   Brands
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {loading ? (
                     Array.from({ length: 5 }).map((_, idx) => (
-                      <div key={idx} className="h-8 w-16 bg-gray-100 rounded-xl animate-pulse"></div>
+                      <div key={idx} className="h-8 w-16 bg-slate-100 rounded-xl animate-pulse"></div>
                     ))
                   ) : (
                     <>
                       <button
                         onClick={() => setSelectedBrand("")}
-                        className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                        className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                           selectedBrand === ""
-                            ? "bg-[#15877F] text-white border-[#15877F] shadow-sm shadow-[#15877F]/20"
-                            : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                            ? "bg-primary text-white border-primary shadow-xs"
+                            : "bg-white text-muted-gray border-light-border hover:bg-slate-50 hover:border-light-border"
                         }`}
                       >
                         All Brands
@@ -454,10 +460,10 @@ const Products = () => {
                           <button
                             key={brand._id}
                             onClick={() => setSelectedBrand(brand._id)}
-                            className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                               selectedBrand === brand._id
-                                ? "bg-[#15877F] text-white border-[#15877F] shadow-sm shadow-[#15877F]/20"
-                                : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                                ? "bg-primary text-white border-primary shadow-xs"
+                                : "bg-white text-muted-gray border-light-border hover:bg-slate-50 hover:border-light-border"
                             }`}
                           >
                             {brand.name}
@@ -474,31 +480,31 @@ const Products = () => {
           {/* Products Grid Content */}
           <div className="lg:col-span-3">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-xl text-gray-800 hidden lg:block">
-                Products ({filteredProducts.length})
+              <h2 className="font-extrabold text-base text-dark-navy hidden lg:block uppercase tracking-wider">
+                Products found ({filteredProducts.length})
               </h2>
             </div>
 
             {loading ? (
               <ProductSkeleton />
             ) : visibleProducts.length === 0 ? (
-              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-12 text-center">
-                <h2 className="text-2xl font-bold text-gray-800">
+              <div className="bg-white rounded-3xl border border-light-border/60 shadow-2xs p-12 text-center">
+                <h2 className="text-xl font-extrabold text-dark-navy">
                   No Products Found
                 </h2>
-                <p className="text-gray-500 mt-2">
+                <p className="text-xs text-muted-gray mt-2 font-medium">
                   Try adjusting your search criteria or clearing filters.
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="mt-6 px-6 py-3 rounded-xl bg-[#088178] hover:bg-[#06635c] text-white font-bold transition shadow-md shadow-[#088178]/10 cursor-pointer"
+                  className="mt-6 px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white font-bold text-xs transition shadow-md hover:shadow-lg cursor-pointer active:scale-95"
                 >
                   Clear Filters
                 </button>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                   {visibleProducts.map((product) => (
                     <EachProduct
                       key={product._id}
@@ -516,8 +522,8 @@ const Products = () => {
                   >
                     {scrollingLoading ? (
                       <div className="flex flex-col items-center gap-3">
-                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#15877F]"></div>
-                        <p className="text-gray-500 text-sm animate-pulse">Loading more premium products...</p>
+                        <Loader2 className="animate-spin text-primary w-8 h-8" />
+                        <p className="text-muted-gray text-xs font-semibold animate-pulse">Loading more premium products...</p>
                       </div>
                     ) : (
                       <div className="h-4"></div>

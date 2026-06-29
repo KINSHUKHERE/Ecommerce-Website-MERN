@@ -179,29 +179,29 @@ const CategoryManagement = () => {
   }, [filteredCategories, currentPage, itemsPerPage]);
 
   return (
-    <div className="relative leading-normal">
+    <div className="relative text-dark-navy antialiased text-left">
       {/* Toast Alert Widget */}
       {message && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
+        <div className="fixed bottom-5 right-5 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn">
           <div
-            className={`w-6 h-6 rounded-full flex items-center justify-center ${
+            className={`w-5 h-5 rounded-full flex items-center justify-center ${
               toastType === "success"
-                ? "bg-green-50 text-green-600 border border-green-100"
-                : "bg-red-50 text-red-655 border border-red-100"
+                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                : "bg-red-500/10 text-red-400 border border-red-500/20"
             }`}
           >
-            {toastType === "success" ? <Check size={14} /> : <X size={14} />}
+            {toastType === "success" ? <Check size={12} /> : <X size={12} />}
           </div>
-          <span className="text-sm font-medium text-gray-800">{message}</span>
+          <span className="font-semibold">{message}</span>
         </div>
       )}
 
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 leading-normal">
+      <div className="mb-6 border-b border-light-border/40 pb-4">
+        <h1 className="text-2xl font-extrabold text-dark-navy tracking-tight">
           Category Management
         </h1>
-        <p className="text-[13px] font-normal text-gray-550 mt-1 leading-relaxed">
+        <p className="text-xs text-muted-gray font-semibold mt-1">
           Create, update and manage product categories.
         </p>
       </div>
@@ -209,64 +209,61 @@ const CategoryManagement = () => {
       {/* Analytics Stats Section */}
       <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
         <div
-          onClick={() => {
-            setStatusFilter("");
-          }}
-          className={`flex flex-col p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
-            !statusFilter ? "border-[#088178] ring-2 ring-[#088178]/5" : "border-slate-100"
+          onClick={() => setStatusFilter("")}
+          className={`flex flex-col p-4 bg-white border rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-300 cursor-pointer ${
+            !statusFilter ? "border-primary ring-2 ring-primary/5" : "border-light-border/60"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Total Categories</span>
-            <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+            <span className="text-[11px] sm:text-xs font-extrabold text-muted-gray uppercase tracking-widest">Total</span>
+            <div className="p-1.5 rounded-xl bg-primary/5 text-primary">
               <Tag size={15} />
             </div>
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.total}</span>
+          <span className="text-lg sm:text-2xl font-extrabold text-dark-navy mt-2 leading-tight">{stats.total}</span>
         </div>
 
         <div
           onClick={() => setStatusFilter("active")}
-          className={`flex flex-col p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
-            statusFilter === "active" ? "border-[#088178] ring-2 ring-[#088178]/5" : "border-slate-100"
+          className={`flex flex-col p-4 bg-white border rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-300 cursor-pointer ${
+            statusFilter === "active" ? "border-primary ring-2 ring-primary/5" : "border-light-border/60"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Active Categories</span>
-            <div className="p-1.5 rounded-lg bg-green-50 text-green-600">
+            <span className="text-[11px] sm:text-xs font-extrabold text-emerald-600 uppercase tracking-widest">Active</span>
+            <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600">
               <CheckCircle size={15} />
             </div>
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.active}</span>
+          <span className="text-lg sm:text-2xl font-extrabold text-dark-navy mt-2 leading-tight">{stats.active}</span>
         </div>
 
         <div
           onClick={() => setStatusFilter("inactive")}
-          className={`flex flex-col p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
-            statusFilter === "inactive" ? "border-[#088178] ring-2 ring-[#088178]/5" : "border-slate-100"
+          className={`flex flex-col p-4 bg-white border rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-300 cursor-pointer ${
+            statusFilter === "inactive" ? "border-primary ring-2 ring-primary/5" : "border-light-border/60"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Inactive Categories</span>
-            <div className="p-1.5 rounded-lg bg-red-50 text-red-650">
+            <span className="text-[11px] sm:text-xs font-extrabold text-rose-600 uppercase tracking-widest">Inactive</span>
+            <div className="p-1.5 rounded-xl bg-rose-500/10 text-rose-600">
               <XCircle size={15} />
             </div>
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.inactive}</span>
+          <span className="text-lg sm:text-2xl font-extrabold text-dark-navy mt-2 leading-tight">{stats.inactive}</span>
         </div>
       </div>
 
       {/* Add Category Card */}
-      <div className="bg-white border border-slate-100 rounded-xl p-5 mb-6 shadow-sm shadow-slate-100/30 relative overflow-hidden">
-
-        <h2 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <PlusCircle size={16} className="text-[#088178]" />
+      <div className="bg-white border border-light-border/60 rounded-3xl p-5 mb-6 shadow-2xs relative overflow-hidden">
+        <h2 className="text-xs font-extrabold text-dark-navy mb-4 uppercase tracking-widest flex items-center gap-2">
+          <PlusCircle size={16} className="text-primary" />
           Add New Category
         </h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
               <Tag size={15} />
             </span>
             <input
@@ -274,13 +271,13 @@ const CategoryManagement = () => {
               placeholder="Enter category name (e.g. Electronics, Clothing)"
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-slate-50/70 border border-slate-100 rounded-lg focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all h-[38px]"
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy h-[38px]"
             />
           </div>
 
           <button
             type="submit"
-            className="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-[#088178] hover:bg-[#088178]/90 text-white text-sm font-medium rounded-lg shadow-sm transition-all cursor-pointer h-[38px]"
+            className="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer h-[38px] active:scale-95"
           >
             <Plus size={15} />
             Add Category
@@ -289,11 +286,11 @@ const CategoryManagement = () => {
       </div>
 
       {/* Search & Filters Block */}
-      <div className="bg-white border border-slate-100 rounded-xl p-4 mb-6 shadow-sm shadow-slate-100/30">
+      <div className="bg-white border border-light-border/60 rounded-2xl p-4 mb-6 shadow-2xs">
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
               <Search size={15} />
             </span>
             <input
@@ -301,12 +298,12 @@ const CategoryManagement = () => {
               placeholder="Search categories by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-8 py-2 bg-slate-50/70 border border-slate-100 rounded-lg focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all"
+              className="w-full pl-9 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy h-[36px]"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-450 hover:text-gray-600 cursor-pointer"
+                className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray hover:text-dark-navy cursor-pointer"
               >
                 <X size={14} />
               </button>
@@ -318,13 +315,13 @@ const CategoryManagement = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-3 pr-8 py-2 rounded-lg border border-slate-100 bg-slate-50/70 focus:bg-white focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 appearance-none cursor-pointer"
+              className="w-full pl-3 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy appearance-none cursor-pointer h-[36px]"
             >
               <option value="">All Statuses</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </span>
           </div>
@@ -333,7 +330,7 @@ const CategoryManagement = () => {
           {(search || statusFilter) && (
             <button
               onClick={handleResetFilters}
-              className="inline-flex items-center justify-center gap-1.5 border border-red-100 text-red-500 hover:bg-red-50/40 py-2 px-3.5 rounded-lg text-xs font-bold transition-all duration-300 cursor-pointer h-[32px]"
+              className="inline-flex items-center justify-center gap-1.5 border border-red-200 text-red-500 hover:bg-red-50 py-2 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer h-[36px]"
             >
               <RotateCcw size={12} />
               Reset
@@ -343,28 +340,28 @@ const CategoryManagement = () => {
       </div>
 
       {/* Categories Table */}
-      <div className="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm shadow-slate-100/30">
-        <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/20">
-          <h2 className="text-base font-semibold text-slate-800">All Categories</h2>
-          <span className="text-[13px] font-normal text-gray-500">
+      <div className="bg-white border border-light-border/60 rounded-3xl overflow-hidden shadow-2xs">
+        <div className="px-5 py-4 border-b border-light-border/40 flex justify-between items-center bg-slate-50/20">
+          <h2 className="text-xs font-extrabold text-dark-navy uppercase tracking-widest">All Categories</h2>
+          <span className="text-xs font-bold text-muted-gray">
             Showing {filteredCategories.length} of {categories.length}
           </span>
         </div>
 
         {loading ? (
           <div className="p-12 flex flex-col items-center justify-center">
-            <Loader2 className="animate-spin text-[#088178] w-8 h-8 mb-4" />
-            <p className="text-xs font-normal text-gray-500 animate-pulse">Fetching categories...</p>
+            <Loader2 className="animate-spin text-primary w-8 h-8 mb-4" />
+            <p className="text-xs font-bold text-muted-gray animate-pulse">Fetching categories...</p>
           </div>
         ) : filteredCategories.length === 0 ? (
-          <div className="p-12 text-center shadow-sm">
-            <Inbox className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-800">No Categories Found</h3>
-            <p className="text-[13px] font-normal text-gray-500 mt-1">Try resetting filters or adjusting search keys.</p>
+          <div className="p-12 text-center">
+            <Inbox className="w-12 h-12 text-muted-gray/50 mx-auto mb-3" />
+            <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-widest">No Categories Found</h3>
+            <p className="text-xs font-semibold text-muted-gray mt-1">Try resetting filters or adjusting search keys.</p>
             {(search || statusFilter) && (
               <button
                 onClick={handleResetFilters}
-                className="mt-3 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all cursor-pointer"
+                className="mt-4 px-4 py-2 border border-light-border hover:bg-slate-50 text-dark-navy text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs"
               >
                 Clear Filters
               </button>
@@ -374,14 +371,14 @@ const CategoryManagement = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/65 text-gray-500 border-b border-slate-100 text-[13px] font-normal">
-                  <th className="py-3 px-6 text-left">Category Name</th>
-                  <th className="py-3 px-6 text-center">Status</th>
-                  <th className="py-3 px-6 text-center w-[180px]">Actions</th>
+                <tr className="bg-slate-50/65 text-muted-gray border-b border-light-border/40 text-[10px] font-extrabold uppercase tracking-widest">
+                  <th className="py-3.5 px-6 text-left">Category Name</th>
+                  <th className="py-3.5 px-6 text-center">Status</th>
+                  <th className="py-3.5 px-6 text-center w-[180px]">Actions</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-100 text-[14px] font-normal text-slate-800">
+              <tbody className="divide-y divide-light-border/40 text-sm font-semibold text-dark-navy">
                 {paginatedCategories.map((category) => {
                   const isEditing = editingId === category._id;
 
@@ -389,45 +386,45 @@ const CategoryManagement = () => {
                     return (
                       <tr
                         key={category._id}
-                        className="bg-slate-50/80 border-y border-slate-100 transition-all duration-300 animate-fadeIn"
+                        className="bg-slate-50/40 border-y border-light-border/60 transition-all duration-300 animate-fadeIn"
                       >
                         <td colSpan={3} className="py-5 px-6">
                           <div className="flex flex-col gap-4">
-                            <div className="flex items-center gap-1.5 text-sm font-semibold text-[#088178]">
+                            <div className="flex items-center gap-1.5 text-xs font-extrabold text-primary uppercase tracking-widest">
                               <Edit3 size={14} />
-                              <span>Editing Category: <span className="text-slate-800 underline decoration-slate-300">{category.name}</span></span>
+                              <span>Editing Category: <span className="text-dark-navy underline decoration-primary/45">{category.name}</span></span>
                             </div>
 
                             <div className="flex flex-col gap-1.5">
-                              <label className="text-[13px] font-normal text-gray-500">Category Name</label>
+                              <label className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Category Name</label>
                               <div className="relative">
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                                   <Tag size={14} />
                                 </span>
                                 <input
                                   type="text"
                                   value={editCategoryName}
                                   onChange={(e) => setEditCategoryName(e.target.value)}
-                                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all duration-300 shadow-sm"
+                                  className="w-full pl-9 pr-4 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy transition-all duration-300 bg-white"
                                   placeholder="Enter category name"
                                 />
                               </div>
                             </div>
 
-                            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100/70 mt-1">
+                            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-light-border/40 mt-1">
                               <button
                                 onClick={() => {
                                   setEditingId(null);
                                   setEditCategoryName("");
                                 }}
-                                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-all duration-300 cursor-pointer flex items-center gap-1.5"
+                                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-dark-navy text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
                               >
                                 <X size={14} />
                                 Cancel
                               </button>
                               <button
                                 onClick={() => handleUpdateInline(category._id)}
-                                className="px-4 py-2 bg-[#088178] hover:bg-[#088178]/90 text-white text-sm font-medium rounded-lg transition-all duration-300 cursor-pointer flex items-center gap-1.5"
+                                className="px-4 py-2 bg-primary hover:bg-primary/95 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
                               >
                                 <Check size={14} />
                                 Save Changes
@@ -440,46 +437,46 @@ const CategoryManagement = () => {
                   }
 
                   return (
-                    <tr key={category._id} className="hover:bg-slate-50/50 transition-all duration-200">
+                    <tr key={category._id} className="hover:bg-slate-50/30 transition-all duration-200">
                       <td className="py-3.5 px-6">
-                        <span className="font-medium text-slate-800 text-sm">{category.name}</span>
+                        <span className="font-semibold text-dark-navy text-sm">{category.name}</span>
                       </td>
 
-                      <td className="py-3.5 px-6 text-center">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-normal ${
-                            category.isActive ?? true
-                              ? "bg-green-50 text-green-700 border border-green-100"
-                              : "bg-red-50 text-red-755 border border-red-100"
-                          }`}
-                        >
-                          {(category.isActive ?? true) ? "Active" : "Inactive"}
-                        </span>
+                      <td className="py-3.5 px-6">
+                        <div className="flex items-center justify-center gap-2.5">
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={category.isActive ?? true}
+                              onChange={() => handleToggleStatus(category._id)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-8 h-4.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[14px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-primary"></div>
+                          </label>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
+                              category.isActive ?? true
+                                ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                                : "bg-rose-500/10 text-rose-600 border border-rose-500/20"
+                            }`}
+                          >
+                            {(category.isActive ?? true) ? "Active" : "Inactive"}
+                          </span>
+                        </div>
                       </td>
 
                       <td className="py-3.5 px-6">
                         <div className="flex justify-center gap-2">
                           <button
-                            onClick={() => handleToggleStatus(category._id)}
-                            className={`p-1.5 rounded-lg transition-all duration-300 cursor-pointer ${
-                              (category.isActive ?? true)
-                                ? "text-gray-500 hover:text-amber-600 hover:bg-amber-50"
-                                : "text-gray-500 hover:text-green-600 hover:bg-green-50"
-                            }`}
-                            title={(category.isActive ?? true) ? "Deactivate Category" : "Activate Category"}
-                          >
-                            {(category.isActive ?? true) ? <XCircle size={15} /> : <CheckCircle size={15} />}
-                          </button>
-                          <button
                             onClick={() => handleEdit(category)}
-                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 cursor-pointer"
+                            className="p-1.5 text-muted-gray hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
                             title="Edit Category"
                           >
                             <Edit3 size={15} />
                           </button>
                           <button
                             onClick={() => handleDelete(category._id)}
-                            className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
+                            className="p-1.5 text-muted-gray hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
                             title="Delete Category"
                           >
                             <Trash2 size={15} />
@@ -494,37 +491,37 @@ const CategoryManagement = () => {
             
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4">
+              <div className="flex items-center justify-between border-t border-light-border/40 bg-white px-6 py-4">
                 <div className="flex flex-1 justify-between sm:hidden">
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="relative inline-flex items-center rounded-xl border border-light-border bg-white px-4 py-2 text-xs font-bold text-dark-navy hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="relative ml-3 inline-flex items-center rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="relative ml-3 inline-flex items-center rounded-xl border border-light-border bg-white px-4 py-2 text-xs font-bold text-dark-navy hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   >
                     Next
                   </button>
                 </div>
                 <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-[13px] font-normal text-gray-500">
-                      Showing <span className="font-semibold text-slate-800">{Math.min(filteredCategories.length, (currentPage - 1) * itemsPerPage + 1)}</span> to{" "}
-                      <span className="font-semibold text-slate-800">{Math.min(filteredCategories.length, currentPage * itemsPerPage)}</span> of{" "}
-                      <span className="font-semibold text-slate-800">{filteredCategories.length}</span> categories
+                    <p className="text-xs font-semibold text-muted-gray">
+                      Showing <span className="font-bold text-dark-navy">{Math.min(filteredCategories.length, (currentPage - 1) * itemsPerPage + 1)}</span> to{" "}
+                      <span className="font-bold text-dark-navy">{Math.min(filteredCategories.length, currentPage * itemsPerPage)}</span> of{" "}
+                      <span className="font-bold text-dark-navy">{filteredCategories.length}</span> categories
                     </p>
                   </div>
                   <div>
-                    <nav className="isolate inline-flex -space-x-px rounded-lg shadow-sm border border-slate-200" aria-label="Pagination">
+                    <nav className="isolate inline-flex -space-x-px rounded-xl shadow-2xs border border-light-border" aria-label="Pagination">
                       <button
                         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
-                        className="relative inline-flex items-center rounded-l-lg px-2.5 py-2 text-gray-400 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 border-r border-slate-200"
+                        className="relative inline-flex items-center rounded-l-xl px-2.5 py-2 text-muted-gray hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 border-r border-light-border"
                       >
                         <span className="sr-only">Previous</span>
                         &lsaquo;
@@ -535,11 +532,11 @@ const CategoryManagement = () => {
                           <button
                             key={pageNum}
                             onClick={() => setCurrentPage(pageNum)}
-                            className={`relative inline-flex items-center px-4 py-2 text-sm font-medium transition-all duration-300 ${
+                            className={`relative inline-flex items-center px-4 py-2 text-xs font-bold transition-all duration-300 ${
                               currentPage === pageNum
-                                ? "z-10 bg-[#088178] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#088178]"
-                                : "text-slate-700 hover:bg-slate-50"
-                            } ${pageNum !== totalPages ? "border-r border-slate-200" : ""}`}
+                                ? "z-10 bg-primary text-white"
+                                : "text-dark-navy hover:bg-slate-50"
+                            } ${pageNum !== totalPages ? "border-r border-light-border" : ""}`}
                           >
                             {pageNum}
                           </button>
@@ -548,7 +545,7 @@ const CategoryManagement = () => {
                       <button
                         onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
-                        className="relative inline-flex items-center rounded-r-lg px-2.5 py-2 text-gray-400 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 border-l border-slate-200"
+                        className="relative inline-flex items-center rounded-r-xl px-2.5 py-2 text-muted-gray hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 border-l border-light-border"
                       >
                         <span className="sr-only">Next</span>
                         &rsaquo;

@@ -26,57 +26,59 @@ const ProductStats = ({ products = [], activeFilter = "", onCardClick }) => {
       id: "",
       title: "Total Products",
       value: totalProducts,
-      icon: <Package size={20} />,
-      colorClass: "bg-blue-50 text-blue-600 border-blue-100",
-      accentBg: "bg-blue-500/10"
+      icon: <Package size={16} />,
+      colorClass: "bg-blue-50 text-blue-600 border-blue-100/50",
+      accentBg: "bg-blue-500/5"
     },
     {
       id: "Active",
       title: "Active Products",
       value: activeProducts,
-      icon: <CheckCircle size={20} />,
-      colorClass: "bg-green-50 text-green-600 border-green-100",
-      accentBg: "bg-green-500/10"
+      icon: <CheckCircle size={16} />,
+      colorClass: "bg-emerald-50 text-emerald-600 border-emerald-100/50",
+      accentBg: "bg-emerald-500/5"
     },
     {
       id: "Low Stock",
       title: "Low Stock Products",
       value: lowStockProducts,
-      icon: <AlertTriangle size={20} />,
-      colorClass: "bg-amber-50 text-amber-600 border-amber-100",
-      accentBg: "bg-amber-500/10"
+      icon: <AlertTriangle size={16} />,
+      colorClass: "bg-amber-50 text-amber-600 border-amber-100/50",
+      accentBg: "bg-amber-500/5"
     },
     {
       id: "Sold",
       title: "Out Of Stock Products",
       value: outOfStockProducts,
-      icon: <XCircle size={20} />,
-      colorClass: "bg-red-50 text-red-650 border-red-100",
-      accentBg: "bg-red-500/10"
+      icon: <XCircle size={16} />,
+      colorClass: "bg-red-50 text-red-655 border-red-100/50",
+      accentBg: "bg-red-500/5"
     }
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-dark-navy antialiased">
       {statCards.map((card) => {
         const isCurrentlyActive = activeFilter === card.id;
         return (
           <div
             key={card.title}
             onClick={() => onCardClick && onCardClick(card.id)}
-            className={`flex flex-col p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
-              isCurrentlyActive ? "border-[#088178] ring-2 ring-[#088178]/5" : "border-gray-150"
+            className={`flex flex-col p-5 bg-white border rounded-3xl shadow-2xs hover:shadow-md transition-all duration-300 cursor-pointer relative overflow-hidden group text-left ${
+              isCurrentlyActive ? "border-primary ring-4 ring-primary/5 bg-primary/[0.01]" : "border-light-border/60"
             }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-light-border/20 group-hover:bg-primary transition-colors duration-300"></div>
+            
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block truncate">
                 {card.title}
               </span>
-              <div className={`p-1.5 rounded-lg ${card.accentBg} ${card.colorClass.split(" ")[1]}`}>
+              <div className={`p-1.5 rounded-lg flex-shrink-0 flex items-center justify-center ${card.accentBg} ${card.colorClass.split(" ")[1]}`}>
                 {card.icon}
               </div>
             </div>
-            <span className="text-2xl font-extrabold text-gray-900 mt-2.5 leading-none">
+            <span className="text-xl sm:text-3xl font-black text-dark-navy mt-3.5 leading-none">
               {card.value}
             </span>
           </div>

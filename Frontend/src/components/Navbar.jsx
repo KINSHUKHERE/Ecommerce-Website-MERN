@@ -119,10 +119,10 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const navLink = (path) =>
-    `relative transition-colors duration-300 hover:text-[#15877F] py-1 ${
+    `relative transition-colors duration-300 hover:text-primary py-1.5 text-sm font-medium ${
       isActive(path)
-        ? "text-[#15877F] font-semibold after:absolute after:left-0 after:-bottom-1.5 after:h-[2px] after:w-full after:bg-[#15877F]"
-        : "text-gray-700"
+        ? "text-primary font-semibold after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-primary"
+        : "text-muted-gray"
     }`;
 
   const handleLogout = () => {
@@ -139,7 +139,7 @@ const Navbar = () => {
   if (isAuthPage) return null;
 
   return (
-    <nav className={`sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-transform duration-300 ${
+    <nav className={`sticky top-0 z-50 w-full bg-white/75 backdrop-blur-md border-b border-light-border/40 shadow-xs transition-transform duration-300 ${
       visible ? "translate-y-0" : "-translate-y-full"
     }`}>
       <div className="flex h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
@@ -178,13 +178,13 @@ const Navbar = () => {
             <>
               <Link
                 to="/login"
-                className="px-4 py-2 border border-[#15877F] text-[#15877F] rounded-lg hover:bg-[#15877F] hover:text-white transition font-medium"
+                className="px-4 py-2 border border-primary/20 text-primary rounded-xl hover:bg-primary/5 transition font-semibold text-sm cursor-pointer"
               >
                 Log In
               </Link>
               <Link
                 to="/register"
-                className="px-4 py-2 bg-[#15877F] text-white rounded-lg hover:bg-[#126b64] transition font-medium"
+                className="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-xl shadow-xs hover:shadow-sm hover:opacity-95 transition font-semibold text-sm cursor-pointer"
               >
                 Sign Up
               </Link>
@@ -193,11 +193,11 @@ const Navbar = () => {
             <>
               <Link
                 to="/wishlist"
-                className="relative transition-[color,transform] duration-300 hover:text-[#15877F] p-2 hover:scale-105 outline-none focus:outline-none"
+                className="relative transition-[color,transform] duration-300 hover:text-primary p-2 hover:scale-105 outline-none focus:outline-none"
               >
                 <Heart size={22} />
                 {wishlistCount > 0 && (
-                  <span className="absolute top-0 right-0 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+                  <span className="absolute top-0 right-0 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
                     {wishlistCount}
                   </span>
                 )}
@@ -205,11 +205,11 @@ const Navbar = () => {
 
               <Link
                 to="/cart"
-                className="relative transition-[color,transform] duration-300 hover:text-[#15877F] p-2 hover:scale-105 outline-none focus:outline-none"
+                className="relative transition-[color,transform] duration-300 hover:text-primary p-2 hover:scale-105 outline-none focus:outline-none"
               >
                 <ShoppingCart size={22} />
                 {cartCount > 0 && (
-                  <span className="absolute top-0 right-0 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+                  <span className="absolute top-0 right-0 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
                     {cartCount}
                   </span>
                 )}
@@ -220,9 +220,13 @@ const Navbar = () => {
                 to="/profile"
                 className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
               >
-                <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
-                  {currentUser.name.charAt(0)}
-                </div>
+                {currentUser.avatar ? (
+                  <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full object-cover shadow-inner" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
+                    {currentUser.name.charAt(0)}
+                  </div>
+                )}
                 <span className="font-medium text-gray-700 text-sm hidden lg:block max-w-30 truncate">
                   {currentUser.name}
                 </span>
@@ -337,14 +341,14 @@ const Navbar = () => {
               <Link
                 to="/login"
                 onClick={() => setIsOpen(false)}
-                className="w-full text-center py-2.5 border border-[#15877F] text-[#15877F] rounded-lg font-semibold hover:bg-gray-100"
+                className="w-full text-center py-2.5 border border-primary/20 text-primary rounded-xl font-semibold hover:bg-slate-50 transition"
               >
                 Log In
               </Link>
               <Link
                 to="/register"
                 onClick={() => setIsOpen(false)}
-                className="w-full text-center py-2.5 bg-[#15877F] text-white rounded-lg font-semibold hover:bg-[#126b64]"
+                className="w-full text-center py-2.5 bg-gradient-to-r from-primary to-accent text-white rounded-xl font-semibold hover:opacity-95 transition"
               >
                 Sign Up
               </Link>
@@ -356,10 +360,14 @@ const Navbar = () => {
                 onClick={() => setIsOpen(false)}
                 className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
               >
-                <div className="w-8 h-8 rounded-full bg-[#15877F] text-white flex justify-center items-center font-bold text-xs uppercase">
-                  {currentUser.name.charAt(0)}
-                </div>
-                <span className="font-medium text-gray-700 text-sm">
+                {currentUser.avatar ? (
+                  <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full object-cover" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary text-white flex justify-center items-center font-bold text-xs uppercase">
+                    {currentUser.name.charAt(0)}
+                  </div>
+                )}
+                <span className="font-semibold text-dark-navy text-sm">
                   {currentUser.name}
                 </span>
               </Link>

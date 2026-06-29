@@ -7,7 +7,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const signup = async (req, res) => {
   try {
-    const { name, role, phoneNumber, email, password } = req.body;
+    const { name, role, phoneNumber, email, password, avatar } = req.body;
     const existUser = await User.findOne({ email });
     console.log(existUser);
     if (existUser) {
@@ -25,6 +25,7 @@ const signup = async (req, res) => {
       email,
       password: hashPassword,
       isProfileComplete: true,
+      avatar: avatar || "",
     });
     res.status(201).json({
       msg: "User Created",
@@ -181,7 +182,7 @@ const getUserProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { name, phoneNumber, password } = req.body;
+    const { name, phoneNumber, password, avatar } = req.body;
     const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
@@ -199,6 +200,10 @@ const updateProfile = async (req, res) => {
       user.password = await bcrypt.hash(password, 10);
     }
 
+    if (avatar !== undefined) {
+      user.avatar = avatar;
+    }
+
     await user.save();
 
     res.status(200).json({
@@ -209,6 +214,7 @@ const updateProfile = async (req, res) => {
         email: user.email,
         role: user.role,
         phoneNumber: user.phoneNumber,
+        avatar: user.avatar,
       },
     });
   } catch (err) {
@@ -235,7 +241,7 @@ const logout = async (req, res) => {
 
 const completeProfile = async (req, res) => {
   try {
-    const { phoneNumber, password } = req.body;
+    const { phoneNumber, password, avatar } = req.body;
 
     if (!phoneNumber) {
       return res.status(400).json({
@@ -255,6 +261,10 @@ const completeProfile = async (req, res) => {
 
     if (password && password.trim() !== "") {
       user.password = await bcrypt.hash(password, 10);
+    }
+
+    if (avatar !== undefined) {
+      user.avatar = avatar;
     }
 
     await user.save();

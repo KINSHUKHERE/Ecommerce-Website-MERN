@@ -42,43 +42,43 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
     {
       title: "Dashboard",
       path: "/admin",
-      icon: <LayoutDashboard size={18} />,
+      icon: <LayoutDashboard size={16} />,
     },
     {
       title: "Products",
-      icon: <ShoppingBag size={18} />,
+      icon: <ShoppingBag size={16} />,
       submenu: [
         {
           title: "All Products",
           path: "/admin/products",
-          icon: <List size={16} />,
+          icon: <List size={14} />,
         },
         {
           title: "Create Product",
           path: "/create-product",
-          icon: <PlusCircle size={16} />,
+          icon: <PlusCircle size={14} />,
         },
       ],
     },
     {
       title: "Categories",
       path: "/categories",
-      icon: <Tag size={18} />,
+      icon: <Tag size={16} />,
     },
     {
       title: "Brands",
       path: "/brands",
-      icon: <Layers size={18} />,
+      icon: <Layers size={16} />,
     },
     {
       title: "Orders",
       path: "/order-details",
-      icon: <FileText size={18} />,
+      icon: <FileText size={16} />,
     },
     {
       title: "Contact Queries",
       path: "/contact-details",
-      icon: <MessageSquare size={18} />,
+      icon: <MessageSquare size={16} />,
     },
   ];
 
@@ -94,12 +94,12 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
 
       {/* Sidebar Container */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white border-r border-gray-150 transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-white border-r border-light-border/40 transition-transform duration-300 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Header / Logo */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-light-border/40">
           <Link
             to="/admin"
             className="flex items-center"
@@ -109,24 +109,25 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           </Link>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-1 text-gray-450 hover:text-gray-650 lg:hidden cursor-pointer"
+            className="p-1.5 text-muted-gray hover:text-dark-navy lg:hidden cursor-pointer"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Navigation Links */}
-        <div className="flex-1 px-4 py-6 overflow-y-auto space-y-1.5">
+        <div className="flex-1 px-4 py-6 overflow-y-auto space-y-2 select-none text-left">
           {menuItems.map((item, idx) => {
             if (item.submenu) {
+              const isSubmenuActive = isActive("/admin/products") || isActive("/create-product");
               return (
                 <div key={idx} className="space-y-1">
                   <button
                     onClick={() => setProductsMenuOpen(!productsMenuOpen)}
-                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                      isActive("/admin/products") || isActive("/create-product")
-                        ? "bg-[#088178]/5 text-[#088178]"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all cursor-pointer ${
+                      isSubmenuActive
+                        ? "bg-primary/5 text-primary"
+                        : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -146,10 +147,10 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                           key={sIdx}
                           to={sub.path}
                           onClick={() => setIsOpen(false)}
-                          className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium transition-all ${
+                          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                             isActive(sub.path)
-                              ? "bg-[#088178]/10 text-[#088178]"
-                              : "text-gray-500 hover:bg-gray-50 hover:text-gray-950"
+                              ? "bg-primary/10 text-primary"
+                              : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
                           }`}
                         >
                           {sub.icon}
@@ -162,15 +163,16 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
               );
             }
 
+            const isCurrentActive = isActive(item.path);
             return (
               <Link
                 key={idx}
                 to={item.path}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  isActive(item.path)
-                    ? "bg-[#088178]/10 text-[#088178]"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all ${
+                  isCurrentActive
+                    ? "bg-primary/5 text-primary"
+                    : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
                 }`}
               >
                 {item.icon}
@@ -181,12 +183,12 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* Footer / Logout */}
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-light-border/40">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider text-red-655 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
           >
-            <LogOut size={18} />
+            <LogOut size={16} />
             <span>Logout</span>
           </button>
         </div>

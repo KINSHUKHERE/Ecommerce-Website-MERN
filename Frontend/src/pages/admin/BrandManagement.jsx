@@ -284,30 +284,30 @@ const BrandManagement = () => {
   };
 
   return (
-    <div className="relative leading-normal">
+    <div className="relative text-dark-navy antialiased text-left">
       {/* Toast Alert Widget */}
       {message && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
+        <div className="fixed bottom-5 right-5 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn">
           <div
-            className={`w-6 h-6 rounded-full flex items-center justify-center ${
+            className={`w-5 h-5 rounded-full flex items-center justify-center ${
               toastType === "success"
-                ? "bg-green-50 text-green-600 border border-green-100"
-                : "bg-red-50 text-red-655 border border-red-100"
+                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                : "bg-red-500/10 text-red-400 border border-red-500/20"
             }`}
           >
-            {toastType === "success" ? <Check size={14} /> : <X size={14} />}
+            {toastType === "success" ? <Check size={12} /> : <X size={12} />}
           </div>
-          <span className="text-sm font-medium text-gray-800">{message}</span>
+          <span className="font-semibold">{message}</span>
         </div>
       )}
 
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 leading-normal">
+      <div className="mb-6 border-b border-light-border/40 pb-4">
+        <h1 className="text-2xl font-extrabold text-dark-navy tracking-tight">
           Brand Management
         </h1>
-        <p className="text-[13px] font-normal text-gray-500 mt-1 leading-relaxed">
-          Manage product brands and brands.
+        <p className="text-xs text-muted-gray font-semibold mt-1">
+          Manage product brands and configurations.
         </p>
       </div>
 
@@ -318,78 +318,77 @@ const BrandManagement = () => {
             setSelectedStatusFilter("");
             setSelectedCategoryFilter("");
           }}
-          className={`flex flex-col p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
-            !selectedStatusFilter && !selectedCategoryFilter ? "border-[#088178] ring-2 ring-[#088178]/5" : "border-slate-100"
+          className={`flex flex-col p-4 bg-white border rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-300 cursor-pointer ${
+            !selectedStatusFilter && !selectedCategoryFilter ? "border-primary ring-2 ring-primary/5" : "border-light-border/60"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Total Brands</span>
-            <div className="p-1.5 rounded-lg bg-blue-50 text-blue-650">
+            <span className="text-[11px] sm:text-xs font-extrabold text-muted-gray uppercase tracking-widest">Total</span>
+            <div className="p-1.5 rounded-xl bg-primary/5 text-primary">
               <Layers size={16} />
             </div>
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.total}</span>
+          <span className="text-lg sm:text-2xl font-extrabold text-dark-navy mt-2 leading-tight">{stats.total}</span>
         </div>
 
         <div
           onClick={() => setSelectedStatusFilter("active")}
-          className={`flex flex-col p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
-            selectedStatusFilter === "active" ? "border-[#088178] ring-2 ring-[#088178]/5" : "border-slate-100"
+          className={`flex flex-col p-4 bg-white border rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-300 cursor-pointer ${
+            selectedStatusFilter === "active" ? "border-primary ring-2 ring-primary/5" : "border-light-border/60"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Active Brands</span>
-            <div className="p-1.5 rounded-lg bg-green-50 text-green-600">
+            <span className="text-[11px] sm:text-xs font-extrabold text-emerald-600 uppercase tracking-widest">Active</span>
+            <div className="p-1.5 rounded-xl bg-emerald-500/10 text-emerald-600">
               <CheckCircle size={16} />
             </div>
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.active}</span>
+          <span className="text-lg sm:text-2xl font-extrabold text-dark-navy mt-2 leading-tight">{stats.active}</span>
         </div>
 
         <div
           onClick={() => setSelectedStatusFilter("inactive")}
-          className={`flex flex-col p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
-            selectedStatusFilter === "inactive" ? "border-[#088178] ring-2 ring-[#088178]/5" : "border-slate-100"
+          className={`flex flex-col p-4 bg-white border rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-300 cursor-pointer ${
+            selectedStatusFilter === "inactive" ? "border-primary ring-2 ring-primary/5" : "border-light-border/60"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Inactive Brands</span>
-            <div className="p-1.5 rounded-lg bg-red-50 text-red-600">
+            <span className="text-[11px] sm:text-xs font-extrabold text-rose-600 uppercase tracking-widest">Inactive</span>
+            <div className="p-1.5 rounded-xl bg-rose-500/10 text-rose-600">
               <XCircle size={16} />
             </div>
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.inactive}</span>
+          <span className="text-lg sm:text-2xl font-extrabold text-dark-navy mt-2 leading-tight">{stats.inactive}</span>
         </div>
 
-        <div className="flex flex-col p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="flex flex-col p-4 bg-white border border-light-border/60 rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-300">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] sm:text-[13px] font-normal text-gray-500">Categories</span>
-            <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
+            <span className="text-[11px] sm:text-xs font-extrabold text-muted-gray uppercase tracking-widest">Categories</span>
+            <div className="p-1.5 rounded-xl bg-purple-500/10 text-purple-650">
               <TrendingUp size={16} />
             </div>
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-slate-800 mt-2 leading-tight">{stats.uniqueCats}</span>
+          <span className="text-lg sm:text-2xl font-extrabold text-dark-navy mt-2 leading-tight">{stats.uniqueCats}</span>
         </div>
       </div>
 
       {/* Add Brand Form Card */}
-      <div className="bg-white border border-slate-100 rounded-xl p-5 mb-6 shadow-sm shadow-slate-100/30 relative overflow-hidden">
-        
-        <h2 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <PlusCircle size={16} className="text-[#088178]" />
-          Add Brand / Brand
+      <div className="bg-white border border-light-border/60 rounded-3xl p-5 mb-6 shadow-2xs relative overflow-hidden">
+        <h2 className="text-xs font-extrabold text-dark-navy mb-4 uppercase tracking-widest flex items-center gap-2">
+          <PlusCircle size={16} className="text-primary" />
+          Add Brand Name
         </h2>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Category Dropdown */}
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
               <Tag size={15} />
             </span>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 border border-slate-100 bg-slate-50/70 focus:bg-white focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none transition-all text-sm font-normal text-slate-800 appearance-none cursor-pointer rounded-lg h-[38px]"
+              className="w-full pl-9 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-xs font-semibold text-dark-navy appearance-none cursor-pointer h-[38px]"
             >
               <option value="">Select Category</option>
               {categories.map((category) => (
@@ -398,14 +397,14 @@ const BrandManagement = () => {
                 </option>
               ))}
             </select>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </span>
           </div>
 
           {/* Brand Input */}
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
               <Layers size={15} />
             </span>
             <input
@@ -413,14 +412,14 @@ const BrandManagement = () => {
               placeholder="Enter Brand Name (e.g. Apple, Sony)"
               value={brandName}
               onChange={(e) => setBrandName(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50/70 border border-slate-100 rounded-lg focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all h-[38px]"
+              className="w-full pl-9 pr-4 py-2.5 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy h-[38px]"
             />
           </div>
 
           {/* Submit Action */}
           <button
             type="submit"
-            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#088178] hover:bg-[#088178]/90 text-white text-sm font-medium rounded-lg shadow-sm transition-all cursor-pointer h-[38px]"
+            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer h-[38px] active:scale-95"
           >
             <Plus size={15} />
             Add Brand
@@ -429,11 +428,11 @@ const BrandManagement = () => {
       </div>
 
       {/* Search & Filters Block */}
-      <div className="bg-white border border-slate-100 rounded-xl p-4 mb-6 shadow-sm shadow-slate-100/30">
+      <div className="bg-white border border-light-border/60 rounded-2xl p-4 mb-6 shadow-2xs">
         <div className="flex flex-col md:flex-row gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
               <Search size={15} />
             </span>
             <input
@@ -441,12 +440,12 @@ const BrandManagement = () => {
               placeholder="Search brands by name or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-8 py-2 bg-slate-50/70 border border-slate-100 rounded-lg focus:bg-white focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all"
+              className="w-full pl-9 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy h-[36px]"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-450 hover:text-gray-600 cursor-pointer"
+                className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray hover:text-dark-navy cursor-pointer"
               >
                 <X size={14} />
               </button>
@@ -458,14 +457,14 @@ const BrandManagement = () => {
             <select
               value={selectedCategoryFilter}
               onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              className="w-full pl-3 pr-8 py-2 rounded-lg border border-slate-100 bg-slate-50/70 focus:bg-white focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 appearance-none cursor-pointer"
+              className="w-full pl-3 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy appearance-none cursor-pointer h-[36px]"
             >
               <option value="">All Categories</option>
               {categories.map((c) => (
                 <option key={c._id} value={c._id}>{c.name}</option>
               ))}
             </select>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </span>
           </div>
@@ -475,13 +474,13 @@ const BrandManagement = () => {
             <select
               value={selectedStatusFilter}
               onChange={(e) => setSelectedStatusFilter(e.target.value)}
-              className="w-full pl-3 pr-8 py-2 rounded-lg border border-slate-100 bg-slate-50/70 focus:bg-white focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 appearance-none cursor-pointer"
+              className="w-full pl-3 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy appearance-none cursor-pointer h-[36px]"
             >
               <option value="">All Statuses</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 pointer-events-none">
+            <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </span>
           </div>
@@ -490,7 +489,7 @@ const BrandManagement = () => {
           {(search || selectedCategoryFilter || selectedStatusFilter) && (
             <button
               onClick={handleResetFilters}
-              className="inline-flex items-center justify-center gap-1.5 border border-red-100 text-red-500 hover:bg-red-50/40 py-2 px-3.5 rounded-lg text-xs font-bold transition-all duration-300 cursor-pointer h-[34px]"
+              className="inline-flex items-center justify-center gap-1.5 border border-red-200 text-red-500 hover:bg-red-50 py-2 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer h-[36px]"
             >
               <RotateCcw size={12} />
               Reset
@@ -500,55 +499,55 @@ const BrandManagement = () => {
       </div>
 
       {/* Brands Registry Table */}
-      <div className="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm shadow-slate-100/30">
-        <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/20">
-          <h2 className="text-base font-semibold text-slate-800">All Brands</h2>
-          <span className="text-[13px] font-normal text-gray-500">
+      <div className="bg-white border border-light-border/60 rounded-3xl overflow-hidden shadow-2xs">
+        <div className="px-5 py-4 border-b border-light-border/40 flex justify-between items-center bg-slate-50/20">
+          <h2 className="text-xs font-extrabold text-dark-navy uppercase tracking-widest">All Brands</h2>
+          <span className="text-xs font-bold text-muted-gray">
             Showing {filteredBrands.length} of {brands.length}
           </span>
         </div>
 
         {loading ? (
           <div className="p-12 flex flex-col items-center justify-center">
-            <Loader2 className="animate-spin text-[#088178] w-8 h-8 mb-4" />
-            <p className="text-xs font-normal text-gray-500 animate-pulse">Fetching brands...</p>
+            <Loader2 className="animate-spin text-primary w-8 h-8 mb-4" />
+            <p className="text-xs font-bold text-muted-gray animate-pulse">Fetching brands...</p>
           </div>
         ) : filteredBrands.length === 0 ? (
-          <div className="p-12 text-center shadow-sm">
-            <Inbox className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-slate-800">No Brands Found</h3>
-            <p className="text-[13px] font-normal text-gray-500 mt-1">Try resetting filters or adjusting search keys.</p>
+          <div className="p-12 text-center">
+            <Inbox className="w-12 h-12 text-muted-gray/50 mx-auto mb-3" />
+            <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-widest">No Brands Found</h3>
+            <p className="text-xs font-semibold text-muted-gray mt-1">Try resetting filters or adjusting search keys.</p>
             {(search || selectedCategoryFilter || selectedStatusFilter) && (
               <button
                 onClick={handleResetFilters}
-                className="mt-3 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-all cursor-pointer"
+                className="mt-4 px-4 py-2 border border-light-border hover:bg-slate-50 text-dark-navy text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs"
               >
                 Clear Filters
               </button>
             )}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 p-4 bg-slate-50/40">
             {groupedBrands.map((group) => {
               const catId = group.categoryId;
               const isExpanded = !!expandedCategories[catId];
               
               return (
-                <div key={catId} className="border border-slate-100 bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300">
+                <div key={catId} className="border border-light-border/60 bg-white rounded-2xl shadow-2xs overflow-hidden transition-all duration-300">
                   {/* Accordion Group Header */}
                   <div
                     onClick={() => toggleCategoryExpand(catId)}
-                    className="flex items-center justify-between px-6 py-4 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-colors duration-200 border-b border-slate-100 select-none"
+                    className="flex items-center justify-between px-6 py-4 bg-slate-50/40 hover:bg-slate-50/65 cursor-pointer transition-colors duration-200 border-b border-light-border/40 select-none"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-slate-800 text-[14px]">
+                      <span className="font-bold text-dark-navy text-sm">
                         {group.categoryName}
                       </span>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#088178]/10 text-[#088178] border border-[#088178]/20">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-primary/5 text-primary border border-primary/10 uppercase tracking-wider">
                         {group.brands.length} {group.brands.length === 1 ? "Brand" : "Brands"}
                       </span>
                     </div>
-                    <div className="text-gray-400 hover:text-slate-600 transition-colors duration-200">
+                    <div className="text-muted-gray hover:text-dark-navy transition-colors duration-200">
                       {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </div>
                   </div>
@@ -557,20 +556,20 @@ const BrandManagement = () => {
                   {isExpanded && (
                     <div className="overflow-x-auto">
                       {group.brands.length === 0 ? (
-                        <div className="py-6 text-center text-gray-400 text-[13px] font-normal">
+                        <div className="py-8 text-center text-muted-gray text-xs font-semibold">
                           No brands in this category.
                         </div>
                       ) : (
                         <table className="w-full text-left border-collapse">
                           <thead>
-                            <tr className="bg-slate-50/20 text-gray-500 border-b border-slate-100 text-[12px] font-medium uppercase tracking-wider">
+                            <tr className="bg-slate-50/65 text-muted-gray border-b border-light-border/40 text-[10px] font-extrabold uppercase tracking-widest">
                               <th className="py-3 px-6">Brand Name</th>
                               <th className="py-3 px-6 text-center w-[120px]">Status</th>
                               <th className="py-3 px-6 text-center w-[180px]">Actions</th>
                             </tr>
                           </thead>
 
-                          <tbody className="divide-y divide-gray-100 text-[14px] font-normal text-slate-800">
+                          <tbody className="divide-y divide-light-border/40 text-sm font-semibold text-dark-navy">
                             {group.brands.map((brand) => {
                               const isEditing = editingId === brand._id;
 
@@ -578,42 +577,42 @@ const BrandManagement = () => {
                                 return (
                                   <tr
                                     key={brand._id}
-                                    className="bg-slate-50/80 border-y border-slate-100 transition-all duration-300 animate-fadeIn"
+                                    className="bg-slate-50/40 border-y border-light-border/60 transition-all duration-300 animate-fadeIn"
                                   >
-                                    <td colSpan={3} className="py-5 px-6">
+                                    <td colSpan={3} className="py-5 px-6 text-left">
                                       <div className="flex flex-col gap-4">
-                                        <div className="flex items-center gap-1.5 text-sm font-semibold text-[#088178]">
+                                        <div className="flex items-center gap-1.5 text-xs font-extrabold text-primary uppercase tracking-widest">
                                           <Edit3 size={14} />
-                                          <span>Editing Brand: <span className="text-slate-800 underline decoration-slate-300">{brand.name}</span></span>
+                                          <span>Editing Brand: <span className="text-dark-navy underline decoration-primary/45">{brand.name}</span></span>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                           <div className="flex flex-col gap-1.5">
-                                            <label className="text-[13px] font-normal text-gray-500">Brand Name</label>
+                                            <label className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Brand Name</label>
                                             <div className="relative">
-                                              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                                              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                                                 <Layers size={14} />
                                               </span>
                                               <input
                                                 type="text"
                                                 value={editBrandName}
                                                 onChange={(e) => setEditBrandName(e.target.value)}
-                                                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 transition-all duration-300 shadow-sm"
+                                                className="w-full pl-9 pr-4 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy transition-all duration-300 bg-white"
                                                 placeholder="Enter Brand Name"
                                               />
                                             </div>
                                           </div>
 
                                           <div className="flex flex-col gap-1.5">
-                                            <label className="text-[13px] font-normal text-gray-500">Category Type</label>
+                                            <label className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Category Type</label>
                                             <div className="relative">
-                                              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                                              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                                                 <Tag size={14} />
                                               </span>
                                               <select
                                                 value={editCategoryId}
                                                 onChange={(e) => setEditCategoryId(e.target.value)}
-                                                className="w-full pl-9 pr-8 py-2 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-[#088178]/30 focus:ring-4 focus:ring-[#088178]/5 outline-none text-sm font-normal text-slate-800 appearance-none cursor-pointer shadow-sm"
+                                                className="w-full pl-9 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy appearance-none cursor-pointer"
                                               >
                                                 <option value="">Select Category</option>
                                                 {categories.map((category) => (
@@ -622,28 +621,28 @@ const BrandManagement = () => {
                                                   </option>
                                                 ))}
                                               </select>
-                                              <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 pointer-events-none">
+                                              <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                               </span>
                                             </div>
                                           </div>
                                         </div>
 
-                                        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100/70 mt-1">
+                                        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-light-border/40 mt-1">
                                           <button
                                             onClick={() => {
                                               setEditingId(null);
                                               setEditBrandName("");
                                               setEditCategoryId("");
                                             }}
-                                            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-all duration-300 cursor-pointer flex items-center gap-1.5"
+                                            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-dark-navy text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
                                           >
                                             <X size={14} />
                                             Cancel
                                           </button>
                                           <button
                                             onClick={() => handleUpdateInline(brand._id)}
-                                            className="px-4 py-2 bg-[#088178] hover:bg-[#088178]/90 text-white text-sm font-medium rounded-lg transition-all duration-300 cursor-pointer flex items-center gap-1.5"
+                                            className="px-4 py-2 bg-primary hover:bg-primary/95 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
                                           >
                                             <Check size={14} />
                                             Save Changes
@@ -656,46 +655,46 @@ const BrandManagement = () => {
                               }
 
                               return (
-                                <tr key={brand._id} className="hover:bg-slate-50/50 transition-all duration-200">
+                                <tr key={brand._id} className="hover:bg-slate-50/30 transition-all duration-200">
                                   <td className="py-3.5 px-6">
-                                    <span className="font-medium text-slate-800 text-sm">{brand.name}</span>
+                                    <span className="font-semibold text-dark-navy text-sm">{brand.name}</span>
                                   </td>
 
-                                  <td className="py-3.5 px-6 text-center">
-                                    <span
-                                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-normal ${
-                                        brand.isActive ?? true
-                                          ? "bg-green-50 text-green-700 border border-green-100"
-                                          : "bg-red-50 text-red-700 border border-red-100"
-                                      }`}
-                                    >
-                                      {(brand.isActive ?? true) ? "Active" : "Inactive"}
-                                    </span>
+                                  <td className="py-3.5 px-6">
+                                    <div className="flex items-center justify-center gap-2.5">
+                                      <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                          type="checkbox"
+                                          checked={brand.isActive ?? true}
+                                          onChange={() => handleToggleStatus(brand._id)}
+                                          className="sr-only peer"
+                                        />
+                                        <div className="w-8 h-4.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[14px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-primary"></div>
+                                      </label>
+                                      <span
+                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider ${
+                                          brand.isActive ?? true
+                                            ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                                            : "bg-rose-500/10 text-rose-600 border border-rose-500/20"
+                                        }`}
+                                      >
+                                        {(brand.isActive ?? true) ? "Active" : "Inactive"}
+                                      </span>
+                                    </div>
                                   </td>
 
                                   <td className="py-3.5 px-6">
                                     <div className="flex justify-center gap-2">
                                       <button
-                                        onClick={() => handleToggleStatus(brand._id)}
-                                        className={`p-1.5 rounded-lg transition-all duration-300 cursor-pointer ${
-                                          (brand.isActive ?? true)
-                                            ? "text-gray-500 hover:text-amber-600 hover:bg-amber-50"
-                                            : "text-gray-500 hover:text-green-600 hover:bg-green-50"
-                                        }`}
-                                        title={(brand.isActive ?? true) ? "Deactivate Brand" : "Activate Brand"}
-                                      >
-                                        {(brand.isActive ?? true) ? <XCircle size={15} /> : <CheckCircle size={15} />}
-                                      </button>
-                                      <button
                                         onClick={() => handleEdit(brand)}
-                                        className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300 cursor-pointer"
+                                        className="p-1.5 text-muted-gray hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
                                         title="Edit Brand"
                                       >
                                         <Edit3 size={15} />
                                       </button>
                                       <button
                                         onClick={() => handleDelete(brand._id)}
-                                        className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 cursor-pointer"
+                                        className="p-1.5 text-muted-gray hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
                                         title="Delete Brand"
                                       >
                                         <Trash2 size={15} />

@@ -3,26 +3,28 @@ import React from "react";
 const HeroContent = (props) => {
   return (
     <div 
-      className="w-full h-full flex-shrink-0 bg-cover bg-right bg-no-repeat flex items-center relative select-none" 
-      style={{ backgroundImage: `url(${props.bgImage})` }}
+      className="w-full h-full flex-shrink-0 bg-cover bg-center bg-no-repeat flex items-center relative select-none" 
+      style={{ 
+        backgroundImage: `linear-gradient(to right, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.45) 50%, rgba(15, 23, 42, 0.1) 100%), url(${props.bgImage})` 
+      }}
     >
-      <div className="absolute inset-0 bg-black/20 pointer-events-none" />
-
-      <div className="relative z-10 w-[85%] sm:w-[70%] md:w-[50%] lg:w-[45%] ml-4 sm:ml-6 md:ml-16 p-4 sm:p-6 md:p-8 flex flex-col justify-center rounded-2xl bg-black/20 backdrop-blur-sm border border-white/10">
-        <span className="text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-wider text-emerald-400">
+      <div className="relative z-10 w-[90%] sm:w-[75%] md:w-[60%] lg:w-[50%] ml-6 sm:ml-12 md:ml-20 flex flex-col justify-center text-left text-white">
+        <span className="text-[10px] sm:text-xs md:text-sm font-extrabold uppercase tracking-widest text-[#2ee0d2] mb-1 sm:mb-2">
           {props.topHeading}
         </span>
 
-        <h2 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-black text-white leading-tight mt-0.5 sm:mt-1 drop-shadow-md">
+        <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight">
           {props.midHeading} <br />
-          <span className="text-[#2ee0d2]"> {props.offerText}</span>
+          <span className="text-[#088178] bg-white/95 border border-[#088178]/10 px-3 py-1 rounded-xl text-xs sm:text-sm md:text-base font-extrabold mt-2 sm:mt-3 inline-block shadow-sm">
+            {props.offerText}
+          </span>
         </h2>
 
-        <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs md:text-sm font-medium text-slate-200 max-w-sm drop-shadow-sm line-clamp-1 sm:line-clamp-none">
+        <p className="mt-3 sm:mt-4 text-xs sm:text-sm md:text-base font-medium text-slate-350 max-w-sm sm:max-w-md leading-relaxed">
           {props.description}
         </p>
 
-        <button className="mt-2.5 sm:mt-4 bg-[#15877F] text-white text-xs sm:text-sm md:text-base font-semibold py-1.5 sm:py-2.5 px-4 sm:px-6 rounded-full hover:bg-[#116d66] transition-all w-max shadow-md cursor-pointer">
+        <button className="mt-6 sm:mt-7 bg-[#088178] hover:bg-[#06635c] text-white text-xs sm:text-sm font-extrabold py-3 px-8 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg active:scale-98 cursor-pointer w-fit">
           Shop Now
         </button>
       </div>

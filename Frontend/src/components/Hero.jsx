@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import HeroContent from "./HeroContent";
 
 const Hero = () => {
@@ -91,7 +92,7 @@ const Hero = () => {
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      className="w-full relative overflow-hidden h-[260px] sm:h-[350px] md:h-[500px] mt-2 group touch-pan-y"
+      className="w-full relative overflow-hidden h-[220px] sm:h-[300px] md:h-[400px] mt-2 group touch-pan-y"
     >
       <div
         className="flex w-full h-full transition-transform duration-500 ease-out"
@@ -109,44 +110,36 @@ const Hero = () => {
         ))}
       </div>
 
+      {/* Slider Indicators */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-25">
+        {bannerData.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`transition-all duration-300 rounded-full ${
+              currentIndex === index
+                ? "w-7 h-1.5 bg-[#088178] shadow-xs"
+                : "w-1.5 h-1.5 bg-white/60 hover:bg-white"
+            }`}
+            title={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-3 rounded-full z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-[#088178] text-slate-700 hover:text-white rounded-full z-20 opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-md transition-all duration-300 active:scale-90 cursor-pointer"
+        title="Previous slide"
       >
-        <svg
-        className="h-6 w-6"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M3 12L10 5V9H20.2C20.48 9 20.62 9 20.727 9.0545C20.8211 9.10243 20.8976 9.17892 20.9455 9.273C21 9.37996 21 9.51997 21 9.8V14.2C21 14.48 21 14.62 20.9455 14.727C20.8976 14.8211 20.8211 14.8976 20.727 14.9455C20.62 15 20.48 15 20.2 15H10V19L3 12Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <ChevronLeft size={20} className="stroke-[2.5]" />
       </button>
 
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-3 rounded-full z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-[#088178] text-slate-700 hover:text-white rounded-full z-20 opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-md transition-all duration-300 active:scale-90 cursor-pointer"
+        title="Next slide"
       >
-        <svg
-        className="h-6 w-6"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M21 12L14 5V9H3.8C3.51997 9 3.37996 9 3.273 9.0545C3.17892 9.10243 3.10243 9.17892 3.0545 9.273C3 9.37996 3 9.51997 3 9.8V14.2C3 14.48 3 14.62 3.0545 14.727C3.10243 14.8211 3.17892 14.8976 3.273 14.9455C3.37996 15 3.51997 15 3.8 15H14V19L21 12Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <ChevronRight size={20} className="stroke-[2.5]" />
       </button>
     </div>
   );

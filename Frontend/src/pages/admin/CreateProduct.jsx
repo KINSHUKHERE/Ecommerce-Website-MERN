@@ -63,6 +63,10 @@ const CreateProduct = () => {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [draggedVariantImgIndex, setDraggedVariantImgIndex] = useState(null);
   const [imageSyncAttribute, setImageSyncAttribute] = useState("");
+  const [excludedVariantKeys, setExcludedVariantKeys] = useState([]);
+
+  const getVariantKey = (attributes) => attributes.map(a => a.value.trim().toLowerCase()).sort().join("|");
+
 
   const showToast = (msg, type = "error") => {
     setMessage(msg);
@@ -290,9 +294,23 @@ const CreateProduct = () => {
         attributes: combo,
       };
     });
+
+    // Filter out any generated combinations that are in excludedVariantKeys
+    const filteredVariants = newVariants.filter(v => {
+      const key = getVariantKey(v.attributes);
+      return !excludedVariantKeys.includes(key);
+    });
     
-    setVariants(newVariants);
-  }, [options, hasVariants, formData.heading, formData.brandId]);
+    setVariants(filteredVariants);
+  }, [options, hasVariants, formData.heading, formData.brandId, excludedVariantKeys]);
+
+  const handleExcludeVariant = (vIdx) => {
+    const variantToExclude = variants[vIdx];
+    if (!variantToExclude) return;
+    const key = getVariantKey(variantToExclude.attributes);
+    setExcludedVariantKeys(prev => [...prev, key]);
+    showToast("Variant combination excluded from matrix list.", "success");
+  };
 
   // Options Handlers
   const handleAddOptionField = () => {
@@ -537,22 +555,22 @@ const CreateProduct = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-teal-50/10 to-slate-100 p-2 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl">
+    <div className="text-dark-navy antialiased">
       <div className="max-w-4xl mx-auto text-left">
         {/* Back Link */}
-        <div className="mb-4">
+        <div className="mb-6">
           <Link
             to="/admin/products"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900 text-xs font-bold rounded-lg transition-all shadow-sm cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 border border-light-border hover:bg-slate-50 text-muted-gray hover:text-dark-navy text-xs font-bold rounded-xl transition-all shadow-2xs cursor-pointer"
           >
             <ArrowLeft size={14} />
             Back to Registry
           </Link>
         </div>
 
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-150 p-4 sm:p-7 relative overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-2xs border border-light-border/60 p-5 sm:p-8 relative overflow-hidden">
           {/* Decorative Top Accent Bar */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#15877F] to-[#088178]"></div>
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary to-accent"></div>
 
           {isSubmitted && (
             <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-lg font-bold text-center border border-green-200 shadow-sm text-sm animate-fadeIn">
@@ -560,11 +578,11 @@ const CreateProduct = () => {
             </div>
           )}
 
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#15877F] to-[#088178] mb-1.5">
+          <div className="text-center mb-8 border-b border-light-border/40 pb-5">
+            <h1 className="text-2xl font-extrabold text-dark-navy tracking-tight mb-1">
               Add New Product Catalog
             </h1>
-            <p className="text-gray-500 font-medium text-xs sm:text-sm">
+            <p className="text-muted-gray font-semibold text-xs sm:text-sm">
               List a new premium electronic item with options and stock tracking.
             </p>
           </div>
@@ -573,18 +591,18 @@ const CreateProduct = () => {
             {/* Grid for Category & Brand */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block mb-1.5 text-xs font-bold text-gray-650 uppercase tracking-wider">
+                <label className="block mb-1.5 text-xs font-extrabold text-muted-gray uppercase tracking-widest">
                   Category
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                     <Tag size={16} />
                   </span>
                   <select
                     value={formData.categoryId}
                     onChange={handleCategoryChange}
                     required
-                    className="w-full pl-9 pr-10 py-2 rounded-lg border border-gray-200 bg-white focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-800 text-sm font-medium appearance-none cursor-pointer h-[38px]"
+                    className="w-full pl-9 pr-10 py-2 border border-light-border rounded-xl bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-dark-navy text-sm font-semibold appearance-none cursor-pointer h-[38px]"
                   >
                     <option value="">Select Category</option>
                     {categories.map((category) => (
@@ -593,18 +611,18 @@ const CreateProduct = () => {
                       </option>
                     ))}
                   </select>
-                  <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 pointer-events-none">
+                  <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block mb-1.5 text-xs font-bold text-gray-655 uppercase tracking-wider">
+                <label className="block mb-1.5 text-xs font-extrabold text-muted-gray uppercase tracking-widest">
                   Brand
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                     <Layers size={16} />
                   </span>
                   <select
@@ -617,7 +635,7 @@ const CreateProduct = () => {
                     }
                     required
                     disabled={!formData.categoryId}
-                    className="w-full pl-9 pr-10 py-2 rounded-lg border border-gray-200 bg-white focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-850 text-sm font-medium appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed h-[38px]"
+                    className="w-full pl-9 pr-10 py-2 border border-light-border rounded-xl bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-dark-navy text-sm font-semibold appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed h-[38px]"
                   >
                     <option value="">Select Brand</option>
                     {brands.map((brand) => (
@@ -626,7 +644,7 @@ const CreateProduct = () => {
                       </option>
                     ))}
                   </select>
-                  <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 pointer-events-none">
+                  <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                   </span>
                 </div>
@@ -645,11 +663,11 @@ const CreateProduct = () => {
 
             {/* Product Description */}
             <div>
-              <label className="block mb-1.5 text-xs font-bold text-gray-655 uppercase tracking-wider">
+              <label className="block mb-1.5 text-xs font-extrabold text-muted-gray uppercase tracking-widest">
                 Description
               </label>
               <div className="relative">
-                <span className="absolute top-2.5 left-3.5 text-gray-400 pointer-events-none">
+                <span className="absolute top-3.5 left-3.5 text-muted-gray pointer-events-none">
                   <AlignLeft size={16} />
                 </span>
                 <textarea
@@ -659,16 +677,16 @@ const CreateProduct = () => {
                   onChange={dataEntered}
                   required
                   placeholder="Describe the product specs and configurations..."
-                  className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all resize-none text-gray-800 text-sm font-medium placeholder-gray-400 bg-white"
+                  className="w-full pl-9 pr-4 py-3.5 rounded-xl border border-light-border focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all resize-none text-dark-navy text-sm font-semibold placeholder-muted-gray/50 bg-white"
                 />
               </div>
             </div>
 
             {/* Product Variants Toggle */}
-            <div className="flex items-center justify-between p-4 bg-teal-50/30 border border-teal-100 rounded-xl my-4 text-left">
+            <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/10 rounded-2xl my-4 text-left">
               <div>
-                <span className="text-sm font-bold text-slate-800 block">Product Variants</span>
-                <span className="text-xs text-gray-500 font-medium">This product has multiple options like Color, Storage, or Size.</span>
+                <span className="text-xs font-extrabold text-dark-navy block uppercase tracking-wider">Product Variants</span>
+                <span className="text-[11px] text-muted-gray font-semibold mt-0.5 block leading-normal">This product has multiple options like Color, Storage, or Size.</span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -677,7 +695,7 @@ const CreateProduct = () => {
                   onChange={(e) => setHasVariants(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-350 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#088178] cursor-pointer"></div>
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary cursor-pointer"></div>
               </label>
             </div>
 
@@ -707,26 +725,26 @@ const CreateProduct = () => {
 
             {/* Unified Product Images Manager */}
             {!hasVariants && (
-              <div className="space-y-4 border-t border-slate-100 pt-5 mt-4 animate-fadeIn">
+              <div className="space-y-4 border-t border-light-border/40 pt-5 mt-4 animate-fadeIn">
                 <div className="flex justify-between items-center flex-wrap gap-2">
                   <div className="space-y-0.5 text-left">
-                    <label className="block text-xs font-bold text-gray-655 uppercase tracking-wider">
+                    <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest">
                       Product Media Images ({productImages.length}/6)
                     </label>
-                    <p className="text-[10px] text-gray-450 font-medium">
+                    <p className="text-[10px] text-muted-gray font-semibold mt-0.5 block leading-normal">
                       The first image will automatically be set as the Primary Cover.
                     </p>
                   </div>
                   
                   {productImages.length < 6 && (
-                    <div className="flex gap-1.5 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                    <div className="flex gap-1 bg-slate-100 p-0.5 rounded-xl border border-light-border/40">
                       <button
                         type="button"
                         onClick={() => setImageInputMethod("upload")}
-                        className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all cursor-pointer ${
+                        className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                           imageInputMethod === "upload"
-                            ? "bg-white text-slate-800 shadow-sm"
-                            : "text-gray-550 hover:text-gray-800"
+                            ? "bg-white text-dark-navy shadow-xs"
+                            : "text-muted-gray hover:text-dark-navy"
                         }`}
                       >
                         Upload File
@@ -734,10 +752,10 @@ const CreateProduct = () => {
                       <button
                         type="button"
                         onClick={() => setImageInputMethod("url")}
-                        className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all cursor-pointer ${
+                        className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                           imageInputMethod === "url"
-                            ? "bg-white text-slate-800 shadow-sm"
-                            : "text-gray-555 hover:text-gray-800"
+                            ? "bg-white text-dark-navy shadow-xs"
+                            : "text-muted-gray hover:text-dark-navy"
                         }`}
                       >
                         Image Link URL
@@ -748,17 +766,17 @@ const CreateProduct = () => {
 
                 {productImages.length < 6 ? (
                   imageInputMethod === "upload" ? (
-                    <label className="w-full h-24 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-3 hover:border-[#088178] hover:bg-[#088178]/5 transition-all cursor-pointer">
+                    <label className="w-full h-24 border-2 border-dashed border-light-border hover:border-primary hover:bg-primary/5 rounded-2xl flex flex-col items-center justify-center p-3 transition-all cursor-pointer">
                       {uploading ? (
-                        <div className="flex flex-col items-center justify-center text-[#088178]">
+                        <div className="flex flex-col items-center justify-center text-primary">
                           <Loader2 className="animate-spin mb-1.5" size={20} />
-                          <span className="text-[10px] font-semibold">Uploading to Cloudinary...</span>
+                          <span className="text-[10px] font-bold">Uploading to Cloudinary...</span>
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center text-gray-400 text-center">
+                        <div className="flex flex-col items-center justify-center text-muted-gray text-center">
                           <Upload className="mb-1" size={20} />
-                          <span className="text-[11px] font-bold text-gray-500">Upload Product Photos</span>
-                          <span className="text-[9px] text-gray-400 mt-0.5">Select up to {6 - productImages.length} more file(s)</span>
+                          <span className="text-[11px] font-extrabold text-dark-navy uppercase tracking-wider">Upload Product Photos</span>
+                          <span className="text-[9px] mt-0.5 font-semibold">Select up to {6 - productImages.length} more file(s)</span>
                         </div>
                       )}
                       <input
@@ -773,7 +791,7 @@ const CreateProduct = () => {
                   ) : (
                     <div className="flex gap-2">
                       <div className="relative flex-1">
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                           <LinkIcon size={15} />
                         </span>
                         <input
@@ -781,20 +799,20 @@ const CreateProduct = () => {
                           value={urlInput}
                           onChange={(e) => setUrlInput(e.target.value)}
                           placeholder="Paste image link URL here..."
-                          className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-800 text-xs bg-white placeholder-gray-400 font-medium h-[36px]"
+                          className="w-full pl-9 pr-4 py-2 rounded-xl border border-light-border focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-dark-navy text-xs bg-white placeholder-muted-gray/50 font-semibold h-[36px]"
                         />
                       </div>
                       <button
                         type="button"
                         onClick={addImageUrl}
-                        className="px-4 py-1.5 bg-[#088178] hover:bg-[#06635c] text-white text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center h-[36px]"
+                        className="px-4 py-1.5 bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center h-[36px]"
                       >
                         Add URL
                       </button>
                     </div>
                   )
                 ) : (
-                  <div className="p-3 bg-teal-50/50 border border-teal-100 rounded-xl text-center text-xs font-semibold text-teal-800">
+                  <div className="p-3 bg-primary/5 border border-primary/10 rounded-2xl text-center text-xs font-bold text-primary">
                     Maximum photo limit of 6 reached. Delete existing ones to add different images.
                   </div>
                 )}
@@ -871,57 +889,85 @@ const CreateProduct = () => {
                 {/* Variants Combinations Matrix Preview */}
                 {variants.length > 0 && (
                   <div className="space-y-4 mt-6">
-                    <div className="border border-slate-150 rounded-xl p-4 bg-slate-50/50 flex flex-col sm:flex-row gap-3.5 sm:items-center justify-between">
-                      <div className="text-left flex items-start gap-2">
-                        <Info size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <span className="text-xs font-bold text-slate-700 block">Generated Variants Matrix ({variants.length} combinations)</span>
-                          <span className="text-[10px] text-gray-500 font-medium">Use bulk editor below or edit individual variant fields below.</span>
+                    <div className="border border-slate-150 rounded-xl p-4 bg-slate-50/50 flex flex-col gap-3.5">
+                      <div className="flex flex-col sm:flex-row gap-3.5 sm:items-center justify-between">
+                        <div className="text-left flex items-start gap-2">
+                          <Info size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="text-xs font-bold text-slate-700 block">Generated Variants Matrix ({variants.length} combinations)</span>
+                            <span className="text-[10px] text-gray-500 font-medium">Use bulk editor below or edit individual variant fields below. You can also exclude combinations that are not sold.</span>
+                          </div>
                         </div>
-                      </div>
-                      
-                      {/* Bulk editing bar */}
-                      <div className="flex flex-wrap items-center gap-2">
-                        {/* Image Sync Dropdown */}
-                        <div className="flex items-center gap-1.5 mr-2">
-                          <label className="text-[11px] font-bold text-slate-650 whitespace-nowrap">Link Images By:</label>
-                          <select
-                            value={imageSyncAttribute}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setImageSyncAttribute(val);
-                              triggerImageSyncAll(val);
-                            }}
-                            className="px-2.5 py-1 text-xs border border-slate-200 rounded-lg bg-white font-semibold cursor-pointer outline-none focus:border-slate-400"
+                        
+                        {/* Bulk editing bar */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* Image Sync Dropdown */}
+                          <div className="flex items-center gap-1.5 mr-2">
+                            <label className="text-[11px] font-bold text-slate-650 whitespace-nowrap">Link Images By:</label>
+                            <div className="relative">
+                              <select
+                                value={imageSyncAttribute}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setImageSyncAttribute(val);
+                                  triggerImageSyncAll(val);
+                                }}
+                                className="appearance-none pl-2.5 pr-7 py-1 text-xs border border-slate-200 rounded-lg bg-white font-semibold cursor-pointer outline-none focus:border-slate-400 focus:ring-2 focus:ring-primary/5 h-[26px]"
+                              >
+                                <option value="">Individual Images</option>
+                                {options.filter(o => o.name).map((o, idx) => (
+                                  <option key={idx} value={o.name}>{o.name}</option>
+                                ))}
+                              </select>
+                              <span className="absolute inset-y-0 right-0 flex items-center pr-2 text-slate-400 pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                              </span>
+                            </div>
+                          </div>
+                          <input
+                            type="number"
+                            placeholder="Price (₹)"
+                            value={bulkPrice}
+                            onChange={(e) => setBulkPrice(e.target.value)}
+                            className="px-2.5 py-1 text-xs border rounded-lg max-w-[90px] font-semibold bg-white"
+                          />
+                          <input
+                            type="number"
+                            placeholder="Stock"
+                            value={bulkQty}
+                            onChange={(e) => setBulkQty(e.target.value)}
+                            className="px-2.5 py-1 text-xs border rounded-lg max-w-[70px] font-semibold bg-white"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleApplyBulk}
+                            className="px-3 py-1 bg-slate-800 text-white hover:bg-black text-[11px] font-bold rounded-lg transition cursor-pointer"
                           >
-                            <option value="">Individual Images</option>
-                            {options.filter(o => o.name).map((o, idx) => (
-                              <option key={idx} value={o.name}>{o.name}</option>
-                            ))}
-                          </select>
+                            Apply to All
+                          </button>
                         </div>
-                        <input
-                          type="number"
-                          placeholder="Price (₹)"
-                          value={bulkPrice}
-                          onChange={(e) => setBulkPrice(e.target.value)}
-                          className="px-2.5 py-1 text-xs border rounded-lg max-w-[90px] font-semibold bg-white"
-                        />
-                        <input
-                          type="number"
-                          placeholder="Stock"
-                          value={bulkQty}
-                          onChange={(e) => setBulkQty(e.target.value)}
-                          className="px-2.5 py-1 text-xs border rounded-lg max-w-[70px] font-semibold bg-white"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleApplyBulk}
-                          className="px-3 py-1 bg-slate-800 text-white hover:bg-black text-[11px] font-bold rounded-lg transition cursor-pointer"
-                        >
-                          Apply to All
-                        </button>
                       </div>
+
+                      {/* Excluded combinations pills */}
+                      {excludedVariantKeys.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-dashed border-slate-200">
+                          <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-wider">Excluded ({excludedVariantKeys.length}):</span>
+                          {excludedVariantKeys.map((key) => {
+                            const label = key.split("|").map(val => val.charAt(0).toUpperCase() + val.slice(1)).join(" • ");
+                            return (
+                              <span
+                                key={key}
+                                onClick={() => setExcludedVariantKeys(prev => prev.filter(k => k !== key))}
+                                className="inline-flex items-center gap-1 bg-rose-50 border border-rose-100 hover:border-emerald-500 hover:bg-emerald-50 text-rose-600 hover:text-emerald-600 text-[10px] font-extrabold px-2 py-0.5 rounded-xl cursor-pointer transition-all hover:scale-105"
+                                title="Click to restore combination"
+                              >
+                                {label}
+                                <Plus size={10} strokeWidth={3} />
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     {/* Table View of Variants */}
@@ -933,6 +979,7 @@ const CreateProduct = () => {
                             <th className="py-2.5 px-4">Variant Attributes</th>
                             <th className="py-2.5 px-4">Price (₹)</th>
                             <th className="py-2.5 px-4">Stock</th>
+                            <th className="py-2.5 px-4 w-12 text-center">Exclude</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
@@ -979,6 +1026,16 @@ const CreateProduct = () => {
                                     className="px-2 py-1 text-xs border rounded w-[65px] bg-white font-medium"
                                   />
                                 </td>
+                                <td className="py-2.5 px-4 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleExcludeVariant(vIdx)}
+                                    className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
+                                    title="Exclude variant combination"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </td>
                               </tr>
                             );
                           })}
@@ -993,7 +1050,7 @@ const CreateProduct = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-[#15877F] to-[#088178] text-white font-bold py-2.5 rounded-lg hover:from-[#126b64] hover:to-[#06635c] transition-all duration-300 shadow-sm hover:shadow shadow-[#088178]/10 active:scale-[0.99] flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider mt-2 cursor-pointer h-[40px]"
+              className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider mt-4 h-[44px] active:scale-95"
             >
               Submit Product details
             </button>
@@ -1003,17 +1060,17 @@ const CreateProduct = () => {
 
       {/* Toast Alert Widget */}
       {message && (
-        <div className="fixed top-4 right-4 z-[9999] flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-150 shadow-md animate-slideIn">
+        <div className="fixed bottom-5 right-5 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn">
           <div
-            className={`w-6 h-6 rounded-full flex items-center justify-center ${
+            className={`w-5 h-5 rounded-full flex items-center justify-center ${
               toastType === "success"
-                ? "bg-green-50 text-green-600 border border-green-100"
-                : "bg-red-50 text-red-655 border border-red-100"
+                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                : "bg-red-500/10 text-red-400 border border-red-500/20"
             }`}
           >
-            {toastType === "success" ? <Check size={14} /> : <X size={14} />}
+            {toastType === "success" ? <Check size={12} /> : <X size={12} />}
           </div>
-          <span className="text-sm font-medium text-gray-800">{message}</span>
+          <span className="font-semibold">{message}</span>
         </div>
       )}
 
@@ -1217,17 +1274,17 @@ const OptionInput = ({ option, onChangeName, onAddValue, onRemoveValue, onRemove
   };
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 relative text-left shadow-sm">
+    <div className="bg-soft-bg/85 border border-light-border/60 rounded-2xl p-4 space-y-3 relative text-left shadow-2xs">
       <button
         type="button"
         onClick={onRemoveOption}
-        className="absolute top-3 right-3 text-gray-400 hover:text-red-500 cursor-pointer"
+        className="absolute top-3 right-3 text-muted-gray hover:text-red-500 cursor-pointer"
       >
         <X size={15} />
       </button>
       
       <div>
-        <label className="block mb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+        <label className="block mb-1 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
           Option Name (e.g. Size)
         </label>
         <input
@@ -1235,19 +1292,19 @@ const OptionInput = ({ option, onChangeName, onAddValue, onRemoveValue, onRemove
           value={option.name}
           onChange={(e) => onChangeName(e.target.value)}
           placeholder="e.g. Color, Size, Storage"
-          className="w-full px-3 py-1.5 rounded-lg border border-gray-250 focus:border-[#088178] outline-none text-xs font-semibold bg-white"
+          className="w-full px-3.5 py-1.5 rounded-xl border border-light-border focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold bg-white text-dark-navy"
         />
       </div>
 
       <div>
-        <label className="block mb-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+        <label className="block mb-1 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
           Option Values
         </label>
         <div className="flex flex-wrap gap-1.5 mb-2 max-h-24 overflow-y-auto">
           {option.values.map((val, vIdx) => (
             <span
               key={vIdx}
-              className="inline-flex items-center gap-1.5 bg-[#e8f6ea] text-[#088178] text-[10px] font-bold px-2 py-1 rounded"
+              className="inline-flex items-center gap-1.5 bg-primary/5 text-primary text-[10px] font-extrabold px-2.5 py-1 rounded-lg border border-primary/10 uppercase tracking-wider"
             >
               {val}
               <button
@@ -1260,19 +1317,19 @@ const OptionInput = ({ option, onChangeName, onAddValue, onRemoveValue, onRemove
             </span>
           ))}
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 items-stretch">
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Add value (press Enter)"
-            className="flex-1 px-3 py-1.5 rounded-lg border border-gray-250 focus:border-[#088178] outline-none text-xs font-semibold bg-white"
+            placeholder="Add value..."
+            className="flex-1 min-w-0 px-3.5 py-1.5 rounded-xl border border-light-border focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold bg-white text-dark-navy h-[34px]"
           />
           <button
             type="button"
             onClick={handleAddClick}
-            className="px-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg transition cursor-pointer"
+            className="px-3 flex-shrink-0 min-w-[50px] bg-slate-100 hover:bg-slate-200 text-dark-navy text-xs font-bold rounded-xl transition cursor-pointer flex items-center justify-center h-[34px]"
           >
             Add
           </button>
@@ -1293,12 +1350,12 @@ const InputField = ({
   icon: Icon,
 }) => (
   <div>
-    <label className="block mb-1.5 text-xs font-bold text-gray-655 uppercase tracking-wider text-left">
+    <label className="block mb-1.5 text-xs font-extrabold text-muted-gray uppercase tracking-widest text-left">
       {label}
     </label>
     <div className="relative">
       {Icon && (
-        <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+        <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
           <Icon size={16} />
         </span>
       )}
@@ -1311,7 +1368,7 @@ const InputField = ({
         placeholder={placeholder}
         className={`w-full ${
           Icon ? "pl-9" : "px-4"
-        } pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#088178] focus:ring-2 focus:ring-[#088178]/20 outline-none transition-all text-gray-800 text-sm bg-white placeholder-gray-400 font-medium h-[38px]`}
+        } pr-4 py-2 rounded-xl border border-light-border focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-dark-navy text-sm bg-white placeholder-muted-gray/50 font-semibold h-[38px]`}
       />
     </div>
   </div>

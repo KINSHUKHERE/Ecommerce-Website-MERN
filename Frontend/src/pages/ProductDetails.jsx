@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { getProduct } from "../api/ProductApi";
 import { sentToCart } from "../api/CartApi";
 import { toggleWishlist } from "../api/WishlistApi";
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Loader2, ArrowLeft } from "lucide-react";
 
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -103,6 +103,7 @@ const ProductDetails = () => {
       setActiveImgIndex(0);
     }
   }, [product]);
+
   // Find variant matching current selection
   const activeVariant = product?.variants?.find((v) => {
     return v.attributes.every(
@@ -118,9 +119,9 @@ const ProductDetails = () => {
   // If wrong productId or product not found
   if (!product) {
     return (
-      <div className="flex-grow w-full bg-gray-50 py-20 flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-        <p className="text-gray-500 mt-4 animate-pulse">
+      <div className="flex-grow w-full bg-soft-bg/30 py-20 flex flex-col items-center justify-center min-h-[500px]">
+        <Loader2 className="animate-spin text-primary w-10 h-10 mb-4" />
+        <p className="text-muted-gray text-sm font-semibold animate-pulse">
           Loading product details...
         </p>
       </div>
@@ -162,7 +163,7 @@ const ProductDetails = () => {
         quantity: 1,
       };
 
-      const response = await sentToCart(cartData);
+      await sentToCart(cartData);
       window.dispatchEvent(new Event("cartUpdated"));
 
       setToast(`"${product.heading}" added to cart!`);
@@ -217,20 +218,32 @@ const ProductDetails = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-8 pb-24 md:pb-8">
-      <div className="grid md:grid-cols-2 gap-8 items-start">
+    <div className="max-w-6xl mx-auto p-6 md:p-8 pb-24 md:pb-12 text-dark-navy antialiased">
+      
+      {/* Back button */}
+      <div className="mb-6">
+        <Link
+          to="/products"
+          className="group inline-flex items-center gap-2 px-5 py-2 bg-white border border-light-border text-dark-navy rounded-xl hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-all duration-300 shadow-2xs font-semibold text-xs cursor-pointer"
+        >
+          <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+          Back to Shop
+        </Link>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-10 items-start">
         {/* Interactive Image Slider */}
         <div className="flex flex-col gap-4 w-full">
           <div
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
-            className="bg-gray-100 rounded-2xl p-4 flex justify-center items-center relative aspect-[4/3] max-h-96 w-full group overflow-hidden border border-gray-150 shadow-sm touch-pan-y"
+            className="bg-soft-bg/80 rounded-3xl p-4 flex justify-center items-center relative aspect-[4/3] max-h-96 w-full group overflow-hidden border border-light-border/40 shadow-2xs touch-pan-y"
           >
             <img
               src={allImages[activeImgIndex]}
               alt={product.heading}
-              className="max-h-full max-w-full object-contain rounded-lg transition-all duration-300 transform scale-100 hover:scale-105"
+              className="max-h-full max-w-full object-contain rounded-xl transition-all duration-300 transform scale-100 hover:scale-103"
             />
 
             {allImages.length > 1 && (
@@ -238,16 +251,16 @@ const ProductDetails = () => {
                 {/* Left Arrow */}
                 <button
                   onClick={prevSlide}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-[#088178] hover:text-white text-gray-800 p-2 rounded-full shadow-md backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100 cursor-pointer"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-primary hover:text-white text-dark-navy p-2.5 rounded-full shadow-xs backdrop-blur-xs transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer"
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={18} />
                 </button>
                 {/* Right Arrow */}
                 <button
                   onClick={nextSlide}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-[#088178] hover:text-white text-gray-800 p-2 rounded-full shadow-md backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-primary hover:text-white text-dark-navy p-2.5 rounded-full shadow-xs backdrop-blur-xs transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer"
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={18} />
                 </button>
               </>
             )}
@@ -261,10 +274,10 @@ const ProductDetails = () => {
                   key={idx}
                   onMouseEnter={() => setActiveImgIndex(idx)}
                   onClick={() => setActiveImgIndex(idx)}
-                  className={`relative w-20 h-20 flex-shrink-0 bg-white border rounded-xl overflow-hidden p-1.5 transition-all duration-200 cursor-pointer ${
+                  className={`relative w-20 h-20 flex-shrink-0 bg-white border rounded-2xl overflow-hidden p-1.5 transition-all duration-300 cursor-pointer ${
                     activeImgIndex === idx
-                      ? "border-[#088178] ring-2 ring-[#088178]/25 shadow-sm"
-                      : "border-gray-200 hover:border-[#088178]/50"
+                      ? "border-primary ring-2 ring-primary/20 shadow-xs"
+                      : "border-light-border hover:border-primary/50"
                   }`}
                 >
                   <img
@@ -277,34 +290,36 @@ const ProductDetails = () => {
             </div>
           )}
         </div>
+
+        {/* Product details panel */}
         <div className="flex flex-col gap-4 text-left">
-          <div className="flex gap-3 items-center flex-wrap">
-            <span className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700">
+          <div className="flex gap-2.5 items-center flex-wrap">
+            <span className="bg-slate-100 px-3.5 py-1 rounded-full text-xs text-muted-gray font-semibold select-none">
               {product.categoryId?.name}
             </span>
 
-            <span className="bg-[#15877F]/10 px-3 py-1 rounded-full text-sm text-[#15877F] font-medium">
+            <span className="bg-accent-light px-3.5 py-1 rounded-full text-xs text-primary font-bold border border-primary/5 select-none">
               {product.brandId?.name}
             </span>
 
             <span
-              className={`px-3 py-1 rounded-full text-sm font-bold ${
+              className={`px-3.5 py-1 rounded-full text-xs font-bold border ${
                 isOutOfStock
-                  ? "bg-red-50 text-red-600"
+                  ? "bg-red-50 border-red-100 text-red-600"
                   : stockCount <= 3
-                    ? "bg-amber-50 text-amber-600 animate-pulse"
-                    : "bg-green-50 text-green-600"
+                    ? "bg-amber-50 border-amber-100 text-amber-600 animate-pulse"
+                    : "bg-emerald-50 border-emerald-100 text-emerald-600"
               }`}
             >
-              {isOutOfStock ? "Sold Out" : `${stockCount} Items Left`}
+              {isOutOfStock ? "Sold Out" : `${stockCount} In Stock`}
             </span>
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-dark-navy leading-tight tracking-tight mt-1.5">
             {product.heading}
           </h1>
 
-          <p className="text-2xl font-bold text-indigo-650">
+          <p className="text-2xl font-extrabold text-primary mt-1">
             ₹
             {(activeVariant
               ? activeVariant.price
@@ -314,13 +329,13 @@ const ProductDetails = () => {
 
           {/* Option Selectors Swatches */}
           {product.options && product.options.length > 0 && (
-            <div className="flex flex-col gap-4 border-y py-4 my-2">
+            <div className="flex flex-col gap-4 border-y border-light-border/40 py-5 my-2">
               {product.options.map((opt) => (
                 <div key={opt.name} className="flex flex-col gap-2">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
                     Select {opt.name}
                   </span>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2.5">
                     {opt.values.map((val) => {
                       const isSelected = selectedOptions[opt.name] === val;
                       return (
@@ -333,10 +348,10 @@ const ProductDetails = () => {
                               [opt.name]: val,
                             }))
                           }
-                          className={`px-4 py-2 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
+                          className={`px-4.5 py-2 text-xs font-bold rounded-xl border transition-all duration-300 cursor-pointer ${
                             isSelected
-                              ? "bg-[#088178] border-[#088178] text-white shadow-sm shadow-[#088178]/20"
-                              : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                              ? "bg-primary border-primary text-white shadow-xs"
+                              : "border-light-border bg-white text-muted-gray hover:border-muted-gray"
                           }`}
                         >
                           {val}
@@ -349,64 +364,46 @@ const ProductDetails = () => {
             </div>
           )}
 
-          <div className=" pt-4">
-            <h3 className="text-lg font-semibold mb-2">Product Description</h3>
-            <p className="text-gray-600 leading-relaxed text-justify whitespace-pre-wrap">
+          <div className="pt-2">
+            <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-wider mb-2">Product Description</h3>
+            <p className="text-xs sm:text-sm text-muted-gray leading-relaxed text-justify whitespace-pre-wrap font-medium">
               {activeVariant?.description || product.description}
             </p>
           </div>
 
-          <div className="fixed bottom-0 left-0 right-0 w-full bg-white border-t border-gray-150 p-3.5 z-40 flex gap-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] md:static md:w-auto md:bg-transparent md:border-0 md:p-0 md:shadow-none md:mt-6 md:z-auto">
+          <div className="fixed bottom-0 left-0 right-0 w-full bg-white border-t border-light-border/60 p-4 z-40 flex gap-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] md:static md:w-auto md:bg-transparent md:border-0 md:p-0 md:shadow-none md:mt-6 md:z-auto">
             <button
               onClick={handleWishlistToggle}
-              className={`w-12 h-12 flex-shrink-0 md:w-auto md:h-auto md:flex-none py-3.5 md:px-6 rounded-xl md:rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2 border ${
+              className={`w-12 h-12 flex-shrink-0 md:w-auto md:h-auto md:flex-none py-3 px-5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 border cursor-pointer outline-none ${
                 isWishlisted
-                  ? "bg-rose-50 border-rose-100 text-rose-500 hover:bg-rose-100/70"
-                  : "bg-white border-gray-200 text-gray-750 hover:bg-gray-50"
+                  ? "bg-rose-50 border-rose-100 text-rose-500 hover:bg-rose-100/50"
+                  : "bg-white border-light-border text-dark-navy hover:bg-slate-50"
               }`}
             >
               <Heart
                 size={18}
                 className={
-                  isWishlisted ? "fill-rose-500 text-rose-500" : "text-gray-500"
+                  isWishlisted ? "fill-rose-500 text-rose-500" : "text-muted-gray"
                 }
               />
-              <span className="hidden md:inline">
+              <span className="hidden md:inline text-xs">
                 {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
               </span>
             </button>
+            
             <button
-              className={`flex-1 md:flex-none py-3.5 px-6 rounded-xl md:rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2 ${
+              className={`flex-1 md:flex-none py-3.5 px-8 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 text-xs uppercase tracking-wider ${
                 isOutOfStock
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  : "bg-[#088178] hover:bg-[#06635c] text-white cursor-pointer shadow-md shadow-[#088178]/10 active:scale-98"
+                  ? "bg-slate-200 text-slate-400 cursor-not-allowed border border-light-border/30"
+                  : "bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white cursor-pointer shadow-md hover:shadow-lg active:scale-95"
               }`}
               onClick={handleAddToCart}
               disabled={isOutOfStock || adding}
             >
               {adding ? (
                 <>
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Adding...
+                  <Loader2 size={14} className="animate-spin text-current" />
+                  <span>Adding...</span>
                 </>
               ) : isOutOfStock ? (
                 "Sold Out"
@@ -417,9 +414,10 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+      
       {toast && (
-        <div className="fixed bottom-4 right-4 z-50 bg-gray-900/95 border border-gray-800 text-white px-4 py-2.5 rounded-lg shadow-lg text-xs font-semibold flex items-center gap-2 animate-fadeIn">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div className="fixed bottom-5 right-5 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn">
+          <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
           {toast}
         </div>
       )}
