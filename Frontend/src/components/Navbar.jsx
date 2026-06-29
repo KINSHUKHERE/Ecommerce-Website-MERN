@@ -139,7 +139,7 @@ const Navbar = () => {
   if (isAuthPage) return null;
 
   return (
-    <nav className={`sticky top-0 z-50 w-full bg-white/75 backdrop-blur-md border-b border-light-border/40 shadow-xs transition-transform duration-300 ${
+    <nav className={`sticky top-0 z-50 w-full bg-white/50 backdrop-blur-lg border-b border-light-border/40 shadow-xs transition-transform duration-300 ${
       visible ? "translate-y-0" : "-translate-y-full"
     }`}>
       <div className="flex h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
@@ -283,7 +283,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Drawer */}
       <div
-        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-all duration-300 border-b border-light-border/40 bg-white/95 backdrop-blur-md shadow-lg ${
+        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-all duration-300 border-b border-light-border/40 bg-white/70 backdrop-blur-lg shadow-lg ${
           isOpen ? "max-h-125 border-t border-light-border/40" : "max-h-0"
         }`}
       >
