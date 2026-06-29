@@ -10,6 +10,8 @@ const Navbar = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const [prevScrollPos, setPrevScrollPos] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -87,6 +89,31 @@ const Navbar = () => {
     };
   }, [location.pathname]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.scrollY;
+
+      if (Math.abs(prevScrollPos - currentScrollPos) < 12) {
+        return;
+      }
+
+      if (currentScrollPos < 65) {
+        setVisible(true);
+      } else if (currentScrollPos > prevScrollPos) {
+        if (!isOpen) {
+          setVisible(false);
+        }
+      } else {
+        setVisible(true);
+      }
+
+      setPrevScrollPos(currentScrollPos);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [prevScrollPos, isOpen]);
+
   const isAuthPage =
     location.pathname === "/register" || location.pathname === "/login";
   const isActive = (path) => location.pathname === path;
@@ -112,7 +139,9 @@ const Navbar = () => {
   if (isAuthPage) return null;
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b-0 md:border-b border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.08)]">
+    <nav className={`sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b-0 md:border-b border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-transform duration-300 ${
+      visible ? "translate-y-0" : "-translate-y-full md:translate-y-0"
+    }`}>
       <div className="flex h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
         <Link className="flex items-center gap-1 h-full" to="/">
           <img src={logo} alt="YoCart" className="h-9 sm:h-10 w-auto object-contain" />

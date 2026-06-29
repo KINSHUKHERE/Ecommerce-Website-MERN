@@ -44,6 +44,9 @@ const Hero = () => {
     },
   ];
 
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev === bannerData.length - 1 ? 0 : prev + 1));
@@ -60,8 +63,36 @@ const Hero = () => {
     setCurrentIndex((prev) => (prev === bannerData.length - 1 ? 0 : prev + 1));
   };
 
+  const onTouchStart = (e) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStartX || !touchEndX) return;
+    const diff = touchStartX - touchEndX;
+    if (diff > 50) {
+      // Swiped left -> next slide
+      nextSlide();
+    } else if (diff < -50) {
+      // Swiped right -> prev slide
+      prevSlide();
+    }
+    // Reset values
+    setTouchStartX(0);
+    setTouchEndX(0);
+  };
+
   return (
-    <div className="w-full relative overflow-hidden h-[260px] sm:h-[350px] md:h-[500px] mt-2 group">
+    <div
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      className="w-full relative overflow-hidden h-[260px] sm:h-[350px] md:h-[500px] mt-2 group touch-pan-y"
+    >
       <div
         className="flex w-full h-full transition-transform duration-500 ease-out"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
