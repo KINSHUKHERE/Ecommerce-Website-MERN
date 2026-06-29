@@ -57,8 +57,16 @@ const AdminLayout = ({ children }) => {
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                 className="flex items-center gap-2.5 py-1.5 px-2.5 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer outline-none focus:outline-none"
               >
-                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-extrabold text-sm border-2 border-white shadow-xs">
-                  {(user?.name?.[0] || "P").toUpperCase()}
+                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-extrabold text-sm border-2 border-white shadow-xs overflow-hidden">
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user?.name || "Profile"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    (user?.name?.[0] || "P").toUpperCase()
+                  )}
                 </div>
                 <div className="hidden sm:block text-left select-none">
                   <span className="block text-xs font-bold text-dark-navy leading-tight">
