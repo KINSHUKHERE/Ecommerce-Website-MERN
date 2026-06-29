@@ -206,7 +206,7 @@ const ProductDetails = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-8">
+    <div className="max-w-6xl mx-auto p-4 md:p-8 pb-24 md:pb-8">
 
       <div className="grid md:grid-cols-2 gap-8 items-start">
         {/* Interactive Image Slider */}
@@ -343,12 +343,12 @@ const ProductDetails = () => {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 mt-4">
+          <div className="fixed bottom-0 left-0 right-0 w-full bg-white border-t border-gray-150 p-3.5 z-40 flex gap-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] md:static md:w-auto md:bg-transparent md:border-0 md:p-0 md:shadow-none md:mt-6 md:z-auto">
             <button
-              className={`py-3 px-6 rounded-lg font-semibold transition duration-300 flex items-center justify-center gap-2 ${
+              className={`flex-1 md:flex-none py-3.5 px-6 rounded-xl md:rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2 ${
                 isOutOfStock
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  : "bg-[#088178] hover:bg-[#06635c] text-white cursor-pointer shadow-md shadow-[#088178]/10"
+                  : "bg-[#088178] hover:bg-[#06635c] text-white cursor-pointer shadow-md shadow-[#088178]/10 active:scale-98"
               }`}
               onClick={handleAddToCart}
               disabled={isOutOfStock || adding}
@@ -368,15 +368,15 @@ const ProductDetails = () => {
 
             <button
               onClick={handleWishlistToggle}
-              className={`py-3 px-6 rounded-lg font-semibold transition duration-300 flex items-center justify-center gap-2 border ${
+              className={`flex-1 md:flex-none py-3.5 px-6 rounded-xl md:rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2 border ${
                 isWishlisted
-                  ? "bg-red-50 border-red-200 text-red-500 hover:bg-red-100"
-                  : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                  ? "bg-rose-50 border-rose-100 text-rose-500 hover:bg-rose-100/70"
+                  : "bg-white border-gray-200 text-gray-750 hover:bg-gray-50"
               }`}
             >
               <Heart
                 size={18}
-                className={isWishlisted ? "fill-red-500 text-red-500" : "text-gray-500"}
+                className={isWishlisted ? "fill-rose-500 text-rose-500" : "text-gray-500"}
               />
               {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
             </button>

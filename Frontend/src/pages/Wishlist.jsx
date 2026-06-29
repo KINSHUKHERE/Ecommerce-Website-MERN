@@ -210,7 +210,7 @@ const Wishlist = () => {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {wishlist.map((item) => {
             const product = item.productId;
             if (!product) return null;
@@ -224,36 +224,36 @@ const Wishlist = () => {
               <div
                 key={item._id}
                 onClick={() => navigate(`/products/${product._id}`)}
-                className="w-full max-w-sm mx-auto group relative bg-white border border-[#cce7d0] hover:border-[#088178]/20 rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer h-full"
+                className="group relative bg-white border border-[#cce7d0] hover:border-[#088178]/20 rounded-2xl p-3 sm:p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer h-full"
               >
+                {/* Remove Icon */}
+                <button
+                  onClick={(e) => handleRemove(product._id, e)}
+                  disabled={removingId === product._id}
+                  className="absolute top-3.5 right-3.5 z-10 p-1.5 bg-white/90 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full border border-slate-100 shadow-sm transition-all outline-none focus:outline-none disabled:cursor-not-allowed"
+                  title="Remove from wishlist"
+                >
+                  {removingId === product._id ? (
+                    <Loader2 size={15} className="animate-spin text-red-500" />
+                  ) : (
+                    <X size={15} />
+                  )}
+                </button>
+
                 <div>
                   {/* Image */}
                   <div
-                    className={`w-full h-36 sm:h-48 md:h-52 bg-[#f0f2f5] rounded-xl sm:rounded-2xl flex items-center justify-center p-2 overflow-hidden relative ${
+                    className={`w-full h-36 sm:h-44 bg-[#f0f2f5] rounded-xl flex items-center justify-center p-2 overflow-hidden relative ${
                       isOutOfStock ? "grayscale" : ""
                     }`}
                   >
-                    {/* Remove Icon */}
-                    <button
-                      onClick={(e) => handleRemove(product._id, e)}
-                      disabled={removingId === product._id}
-                      className="absolute top-2.5 right-2.5 z-10 p-1.5 sm:p-2 bg-white/90 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full border border-slate-100 shadow-sm transition-all outline-none focus:outline-none disabled:cursor-not-allowed"
-                      title="Remove from wishlist"
-                    >
-                      {removingId === product._id ? (
-                        <Loader2 size={14} className="animate-spin text-red-500" />
-                      ) : (
-                        <X size={14} />
-                      )}
-                    </button>
-
                     <img
                       src={product.imgUrl}
                       alt={product.heading}
                       className="h-full w-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                     />
                     {isOutOfStock && (
-                      <div className="absolute inset-0 bg-black/45 flex justify-center items-center rounded-xl sm:rounded-2xl">
+                      <div className="absolute inset-0 bg-black/45 flex justify-center items-center rounded-xl">
                         <span className="bg-red-600 text-white font-extrabold text-[10px] sm:text-xs px-2.5 py-1 rounded uppercase tracking-wider shadow">
                           SOLD OUT
                         </span>
@@ -262,11 +262,11 @@ const Wishlist = () => {
                   </div>
 
                   {/* Metadata */}
-                  <div className="mt-3 text-left px-1">
+                  <div className="mt-3 text-left">
                     <span className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">
                       {product.categoryId?.name || "Product"}
                     </span>
-                    <h3 className="font-bold text-slate-800 text-[13px] sm:text-[15px] leading-snug mt-1.5 line-clamp-2 h-10">
+                    <h3 className="font-bold text-slate-850 text-sm leading-tight mt-0.5 line-clamp-1">
                       {product.heading}
                     </h3>
                     <span className="text-[11px] text-gray-400 font-semibold mt-0.5 block">
@@ -276,9 +276,9 @@ const Wishlist = () => {
                 </div>
 
                 {/* Pricing & CTA */}
-                <div className="mt-4 px-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="font-extrabold text-[14px] sm:text-[16px] text-[#088178]">
+                <div className="mt-4">
+                  <div className="flex items-center gap-2 mb-3.5">
+                    <span className="font-extrabold text-[15px] sm:text-[17px] text-[#088178]">
                       ₹{getMinPrice(product).toLocaleString()}
                     </span>
                   </div>
@@ -286,7 +286,7 @@ const Wishlist = () => {
                   <button
                     disabled={isOutOfStock}
                     onClick={(e) => handleMoveToCart(item, e)}
-                    className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors duration-300 active:scale-[0.98] ${
+                    className={`w-full py-2 px-3 rounded-lg font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors duration-300 ${
                       isOutOfStock
                         ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-150"
                         : "bg-[#e8f6ea] hover:bg-[#088178] text-[#088178] hover:text-white border border-[#e8f6ea] hover:border-[#088178] cursor-pointer"

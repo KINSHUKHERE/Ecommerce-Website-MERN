@@ -3,6 +3,11 @@
 
 @theme {
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --color-gray-150: #eceef0;
+  --color-gray-250: #dee2e6;
+  --color-gray-450: #858e96;
+  --color-gray-650: #4a5560;
+  --color-gray-655: #3e4750;
 }
 
 body {
