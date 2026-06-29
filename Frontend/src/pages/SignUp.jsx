@@ -96,14 +96,12 @@ const SignUp = () => {
         navigate("/");
       }
     } catch (err) {
-      console.log(err);
       setError("Google Sign Up Failed");
       setIsSubmitting(false);
     }
   };
 
   const handleGoogleError = () => {
-    console.log("Google Sign Up Failed");
     setError("Google Sign Up Failed");
     setIsSubmitting(false);
   };
@@ -111,11 +109,14 @@ const SignUp = () => {
   return (
     <div className="min-h-screen w-full bg-soft-bg/40 flex items-center justify-center px-6 py-12 text-dark-navy antialiased">
       {isSubmitting && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex flex-col items-center justify-center transition-all duration-300">
-          <div className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center max-w-xs w-full mx-4 border border-light-border/40">
-            <Loader2 className="animate-spin text-primary w-10 h-10 mb-4" />
-            <p className="text-dark-navy font-bold text-base text-center">Processing Request</p>
-            <p className="text-muted-gray text-xs text-center mt-1 font-semibold">Please wait while we secure your account details...</p>
+        <div className="fixed inset-0 bg-[#0F172A]/30 backdrop-blur-xs z-50 flex flex-col items-center justify-center animate-fadeIn">
+          <div className="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-xl flex flex-col items-center max-w-sm w-[90%] mx-auto border border-light-border/40 text-center animate-scaleUp">
+            <div className="relative flex items-center justify-center mb-5">
+              <div className="absolute w-12 h-12 bg-primary/10 rounded-full animate-ping"></div>
+              <Loader2 className="animate-spin text-primary relative z-10 w-8 h-8" />
+            </div>
+            <h3 className="text-dark-navy font-extrabold text-base tracking-tight">Creating your profile</h3>
+            <p className="text-muted-gray text-xs mt-1.5 font-semibold px-4">We're setting up your personalized shopping workspace...</p>
           </div>
         </div>
       )}

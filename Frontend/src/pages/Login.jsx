@@ -47,7 +47,6 @@ const Login = () => {
       setError(
         err.response?.data?.msg || "Unable to Login. Please try again later.",
       );
-      console.log("Unable to Login!!");
       setIsLoggingIn(false);
     }
   };
@@ -75,14 +74,12 @@ const Login = () => {
         navigate("/");
       }
     } catch (err) {
-      console.log(err);
       setError("Google Login Failed");
       setIsLoggingIn(false);
     }
   };
 
   const handleGoogleError = () => {
-    console.log("Google Login Failed");
     setError("Google Login Failed");
     setIsLoggingIn(false);
   };
@@ -90,11 +87,14 @@ const Login = () => {
   return (
     <div className="min-h-screen w-full bg-soft-bg/40 flex items-center justify-center px-6 py-12 text-dark-navy antialiased">
       {isLoggingIn && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex flex-col items-center justify-center transition-all duration-300">
-          <div className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center max-w-xs w-full mx-4 border border-light-border/40">
-            <Loader2 className="animate-spin text-primary w-10 h-10 mb-4" />
-            <p className="text-dark-navy font-bold text-base text-center">Authenticating</p>
-            <p className="text-muted-gray text-xs text-center mt-1 font-semibold">Please wait while we secure your session...</p>
+        <div className="fixed inset-0 bg-[#0F172A]/30 backdrop-blur-xs z-50 flex flex-col items-center justify-center animate-fadeIn">
+          <div className="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-xl flex flex-col items-center max-w-sm w-[90%] mx-auto border border-light-border/40 text-center animate-scaleUp">
+            <div className="relative flex items-center justify-center mb-5">
+              <div className="absolute w-12 h-12 bg-primary/10 rounded-full animate-ping"></div>
+              <Loader2 className="animate-spin text-primary relative z-10 w-8 h-8" />
+            </div>
+            <h3 className="text-dark-navy font-extrabold text-base tracking-tight">Signing you in</h3>
+            <p className="text-muted-gray text-xs mt-1.5 font-semibold px-4">Welcome back! Preparing your premium dashboard experience...</p>
           </div>
         </div>
       )}
