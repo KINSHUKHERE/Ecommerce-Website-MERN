@@ -54,3 +54,13 @@ a:focus-visible, button:focus-visible {
   transform: translateY(-1.25rem) scale(0.85);
   color: var(--color-primary);
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
