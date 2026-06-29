@@ -210,7 +210,7 @@ const Wishlist = () => {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
           {wishlist.map((item) => {
             const product = item.productId;
             if (!product) return null;
@@ -224,7 +224,7 @@ const Wishlist = () => {
               <div
                 key={item._id}
                 onClick={() => navigate(`/products/${product._id}`)}
-                className="group relative bg-white border border-[#cce7d0] hover:border-[#088178]/20 rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer h-full"
+                className="w-full max-w-sm mx-auto group relative bg-white border border-[#cce7d0] hover:border-[#088178]/20 rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer h-full"
               >
                 <div>
                   {/* Image */}
