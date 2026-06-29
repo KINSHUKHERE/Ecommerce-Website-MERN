@@ -139,8 +139,8 @@ const Navbar = () => {
   if (isAuthPage) return null;
 
   return (
-    <nav className={`sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b-0 md:border-b border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-transform duration-300 ${
-      visible ? "translate-y-0" : "-translate-y-full md:translate-y-0"
+    <nav className={`sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-transform duration-300 ${
+      visible ? "translate-y-0" : "-translate-y-full"
     }`}>
       <div className="flex h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
         <Link className="flex items-center gap-1 h-full" to="/">
