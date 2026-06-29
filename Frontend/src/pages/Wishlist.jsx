@@ -165,21 +165,18 @@ const Wishlist = () => {
       )}
 
       {/* Header */}
-      <div className="mb-8 md:mb-12 border-b border-slate-100 pb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2.5">
-            <Heart size={28} className="text-rose-500 fill-rose-500/10 stroke-[2.5]" />
-            My Wishlist
-          </h1>
-          <p className="text-sm text-gray-500 mt-1.5 font-normal">
-            Manage your saved products and move them to your shopping cart.
-          </p>
-        </div>
-        {wishlist.length > 0 && (
-          <span className="bg-rose-50 text-rose-600 border border-rose-100/50 text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-sm">
-            {wishlist.length} {wishlist.length === 1 ? "Item" : "Items"}
-          </span>
-        )}
+      <div className="mb-8 md:mb-12 border-b border-slate-100 pb-5">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2.5">
+          My Wishlist
+          {wishlist.length > 0 && (
+            <span className="bg-rose-50 text-rose-600 border border-rose-100/50 text-xs font-extrabold px-2.5 py-0.5 rounded-full shadow-sm ml-2">
+              {wishlist.length}
+            </span>
+          )}
+        </h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-2 font-normal">
+          Manage your saved products and move them to your shopping cart.
+        </p>
       </div>
 
       {wishlist.length === 0 ? (
@@ -224,26 +221,26 @@ const Wishlist = () => {
               <div
                 key={item._id}
                 onClick={() => navigate(`/products/${product._id}`)}
-                className="group relative bg-white border border-[#cce7d0] hover:border-[#088178]/20 rounded-2xl p-3 sm:p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer h-full"
+                className="group relative bg-white border border-gray-100 rounded-2xl flex flex-col justify-between shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_30px_-5px_rgba(0,0,0,0.07)] transition-all duration-300 cursor-pointer h-full overflow-hidden"
               >
                 {/* Remove Icon */}
                 <button
                   onClick={(e) => handleRemove(product._id, e)}
                   disabled={removingId === product._id}
-                  className="absolute top-3.5 right-3.5 z-10 p-1.5 bg-white/90 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full border border-slate-100 shadow-sm transition-all outline-none focus:outline-none disabled:cursor-not-allowed"
+                  className="absolute top-2.5 right-2.5 z-10 p-1.5 bg-white/95 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full border border-gray-100 shadow-sm transition-all duration-200 disabled:cursor-not-allowed"
                   title="Remove from wishlist"
                 >
                   {removingId === product._id ? (
-                    <Loader2 size={15} className="animate-spin text-red-500" />
+                    <Loader2 size={13} className="animate-spin text-red-500" />
                   ) : (
-                    <X size={15} />
+                    <X size={13} />
                   )}
                 </button>
 
                 <div>
                   {/* Image */}
                   <div
-                    className={`w-full h-36 sm:h-44 bg-[#f0f2f5] rounded-xl flex items-center justify-center p-2 overflow-hidden relative ${
+                    className={`w-full h-36 sm:h-44 bg-gray-50 flex items-center justify-center p-3.5 overflow-hidden relative border-b border-gray-50 ${
                       isOutOfStock ? "grayscale" : ""
                     }`}
                   >
@@ -262,23 +259,25 @@ const Wishlist = () => {
                   </div>
 
                   {/* Metadata */}
-                  <div className="mt-3 text-left">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">
-                      {product.categoryId?.name || "Product"}
-                    </span>
-                    <h3 className="font-bold text-slate-850 text-sm leading-tight mt-0.5 line-clamp-1">
-                      {product.heading}
-                    </h3>
-                    <span className="text-[11px] text-gray-400 font-semibold mt-0.5 block">
-                      {product.brandId?.name}
-                    </span>
+                  <div className="p-3 sm:p-4 flex-grow flex flex-col justify-between text-left">
+                    <div>
+                      <span className="text-[9px] sm:text-[10px] text-gray-400 uppercase tracking-wider font-extrabold block">
+                        {product.categoryId?.name || "Product"}
+                      </span>
+                      <h3 className="font-bold text-slate-800 text-xs sm:text-sm mt-0.5 line-clamp-2 min-h-[32px] sm:min-h-[40px] leading-snug">
+                        {product.heading}
+                      </h3>
+                      <span className="text-[10px] sm:text-[11px] text-gray-450 font-semibold mt-1 block">
+                        {product.brandId?.name}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Pricing & CTA */}
-                <div className="mt-4">
-                  <div className="flex items-center gap-2 mb-3.5">
-                    <span className="font-extrabold text-[15px] sm:text-[17px] text-[#088178]">
+                <div>
+                  <div className="flex items-center gap-2 mb-3.5 px-3 sm:px-4">
+                    <span className="font-extrabold text-sm sm:text-base text-slate-800">
                       ₹{getMinPrice(product).toLocaleString()}
                     </span>
                   </div>
@@ -286,13 +285,13 @@ const Wishlist = () => {
                   <button
                     disabled={isOutOfStock}
                     onClick={(e) => handleMoveToCart(item, e)}
-                    className={`w-full py-2 px-3 rounded-lg font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors duration-300 ${
+                    className={`w-full py-3 text-center font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors duration-300 border-t ${
                       isOutOfStock
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-150"
-                        : "bg-[#e8f6ea] hover:bg-[#088178] text-[#088178] hover:text-white border border-[#e8f6ea] hover:border-[#088178] cursor-pointer"
+                        ? "bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed"
+                        : "bg-slate-900 hover:bg-[#088178] text-white border-slate-900 hover:border-[#088178] cursor-pointer"
                     }`}
                   >
-                    <ShoppingCart size={14} />
+                    <ShoppingCart size={13} />
                     Move to Cart
                   </button>
                 </div>

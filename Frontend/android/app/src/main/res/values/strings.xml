@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">YoCart</string>
     <string name="title_activity_main">YoCart</string>
-    <string name="package_name">com.veltiq.app</string>
-    <string name="custom_url_scheme">com.veltiq.app</string>
+    <string name="package_name">com.yocart.app</string>
+    <string name="custom_url_scheme">com.yocart.app</string>
 </resources>

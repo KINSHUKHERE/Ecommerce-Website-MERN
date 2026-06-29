@@ -1,4 +1,4 @@
-package com.veltiq.app;
+package com.yocart.app;
 
 import com.getcapacitor.BridgeActivity;
 

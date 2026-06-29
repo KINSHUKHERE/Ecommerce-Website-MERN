@@ -1,5 +1,5 @@
 {
-  "appId": "com.veltiq.app",
+  "appId": "com.yocart.app",
   "appName": "YoCart",
   "webDir": "dist",
   "server": {
