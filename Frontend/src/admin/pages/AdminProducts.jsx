@@ -606,7 +606,7 @@ const AdminProducts = () => {
                     </div>
 
                     {/* Right: Product Basic Details */}
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 pr-20">
                       <span className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest leading-none">
                         {p.brandId?.name || "No Brand"}
                       </span>

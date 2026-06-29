@@ -381,7 +381,7 @@ const ProductDetails = () => {
               }`}
             >
               <Heart
-                size={18}
+                size={22}
                 className={
                   isWishlisted ? "fill-rose-500 text-rose-500" : "text-muted-gray"
                 }
