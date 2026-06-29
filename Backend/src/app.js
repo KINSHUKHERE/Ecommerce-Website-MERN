@@ -65,4 +65,9 @@ app.use("/", uploadRoutes);
 app.use("/", addressRoutes);
 app.use("/", wishlistRoutes);
 
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain");
+  res.send("User-agent: *\nAllow: /");
+});
+
 module.exports = app;
