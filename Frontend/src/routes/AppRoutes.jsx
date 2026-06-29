@@ -15,6 +15,7 @@ import OrderDetails from "../pages/admin/OrderDetails";
 import CategoryManagement from "../pages/admin/CategoryManagement";
 import BrandManagement from "../pages/admin/BrandManagement";
 import Profile from "../pages/Profile";
+import Wishlist from "../pages/Wishlist";
 import Checkout from "../pages/Checkout";
 import TermsConditions from "../pages/TermsConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
@@ -136,6 +137,7 @@ const AppRoutes = () => {
 
         {/* Protected User Routes */}
         <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+        <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
       </Route>

@@ -28,6 +28,10 @@ const variantSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    description: {
+      type: String,
+      required: false,
+    },
     attributes: [
       {
         name: { type: String, required: true },

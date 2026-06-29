@@ -1,15 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart, Menu, X, LogOut, ChevronDown } from "lucide-react";
+import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown } from "lucide-react";
 import logo from "../assets/logo.png";
 import { getDataCart } from "../api/CartApi";
+import { getWishlist } from "../api/WishlistApi";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const fetchWishlistCount = async (userObj) => {
+    try {
+      if (!userObj) {
+        setWishlistCount(0);
+        localStorage.removeItem("yocart_wishlist_ids");
+        return;
+      }
+      const cached = localStorage.getItem("yocart_wishlist_ids");
+      if (cached) {
+        setWishlistCount(JSON.parse(cached).length);
+        return;
+      }
+      const response = await getWishlist();
+      const items = response.data.wishlistData || [];
+      const ids = items.map((item) => item.productId?._id || item.productId).filter(Boolean);
+      localStorage.setItem("yocart_wishlist_ids", JSON.stringify(ids));
+      setWishlistCount(ids.length);
+    } catch (err) {
+      console.log("Unable to fetch wishlist count", err);
+    }
+  };
 
   const fetchCartCount = async (userObj) => {
     try {
@@ -33,16 +57,33 @@ const Navbar = () => {
     const userObj = JSON.parse(localStorage.getItem("user"));
     setCurrentUser(userObj);
     fetchCartCount(userObj);
+    fetchWishlistCount(userObj);
 
     const updateCart = () => {
       const freshUser = JSON.parse(localStorage.getItem("user"));
       fetchCartCount(freshUser);
     };
 
+    const updateWishlist = () => {
+      const freshUser = JSON.parse(localStorage.getItem("user"));
+      if (!freshUser) {
+        setWishlistCount(0);
+        return;
+      }
+      const cached = localStorage.getItem("yocart_wishlist_ids");
+      if (cached) {
+        setWishlistCount(JSON.parse(cached).length);
+      } else {
+        fetchWishlistCount(freshUser);
+      }
+    };
+
     window.addEventListener("cartUpdated", updateCart);
+    window.addEventListener("wishlistUpdated", updateWishlist);
 
     return () => {
       window.removeEventListener("cartUpdated", updateCart);
+      window.removeEventListener("wishlistUpdated", updateWishlist);
     };
   }, [location.pathname]);
 
@@ -60,8 +101,10 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    localStorage.removeItem("yocart_wishlist_ids");
     setCurrentUser(null);
     setCartCount(0);
+    setWishlistCount(0);
     setIsOpen(false);
     navigate("/login");
   };
@@ -120,6 +163,18 @@ const Navbar = () => {
           ) : (
             <>
               <Link
+                to="/wishlist"
+                className="relative transition-[color,transform] duration-300 hover:text-[#15877F] p-2 hover:scale-105 outline-none focus:outline-none"
+              >
+                <Heart size={22} />
+                {wishlistCount > 0 && (
+                  <span className="absolute top-0 right-0 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+
+              <Link
                 to="/cart"
                 className="relative transition-[color,transform] duration-300 hover:text-[#15877F] p-2 hover:scale-105 outline-none focus:outline-none"
               >
@@ -158,17 +213,30 @@ const Navbar = () => {
         {/* Mobile Menu Action Row */}
         <div className="flex items-center gap-4 md:hidden">
           {currentUser && (
-            <Link
-              to="/cart"
-              className="relative p-2 transition-colors duration-300 hover:text-[#15877F] outline-none focus:outline-none"
-            >
-              <ShoppingCart size={22} />
-              {cartCount > 0 && (
-                <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+            <>
+              <Link
+                to="/wishlist"
+                className="relative p-2 transition-colors duration-300 hover:text-[#15877F] outline-none focus:outline-none"
+              >
+                <Heart size={22} />
+                {wishlistCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+              <Link
+                to="/cart"
+                className="relative p-2 transition-colors duration-300 hover:text-[#15877F] outline-none focus:outline-none"
+              >
+                <ShoppingCart size={22} />
+                {cartCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            </>
           )}
 
           <button
@@ -203,6 +271,15 @@ const Navbar = () => {
               onClick={() => setIsOpen(false)}
             >
               Products
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/wishlist"
+              className={`block py-1 hover:text-[#15877F] ${isActive("/wishlist") ? "text-[#15877F]" : ""}`}
+              onClick={() => setIsOpen(false)}
+            >
+              Wishlist
             </Link>
           </li>
           <li>

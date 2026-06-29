@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getProduct } from "../api/ProductApi";
 import { sentToCart } from "../api/CartApi";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { toggleWishlist } from "../api/WishlistApi";
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -15,6 +16,49 @@ const ProductDetails = () => {
   const [touchEnd, setTouchEnd] = useState(null);
   const minSwipeDistance = 50;
   const navigate = useNavigate();
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  useEffect(() => {
+    const checkWishlist = () => {
+      const cached = localStorage.getItem("yocart_wishlist_ids");
+      if (cached) {
+        setIsWishlisted(JSON.parse(cached).includes(productId));
+      }
+    };
+    checkWishlist();
+
+    window.addEventListener("wishlistUpdated", checkWishlist);
+    return () => {
+      window.removeEventListener("wishlistUpdated", checkWishlist);
+    };
+  }, [productId]);
+
+  const handleWishlistToggle = async () => {
+    const userObj = JSON.parse(localStorage.getItem("user"));
+    if (!userObj) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await toggleWishlist(productId);
+      const newIds = res.data.wishlistIds || [];
+      localStorage.setItem("yocart_wishlist_ids", JSON.stringify(newIds));
+      setIsWishlisted(res.data.isWishlisted);
+      window.dispatchEvent(new Event("wishlistUpdated"));
+
+      setToast(
+        res.data.isWishlisted
+          ? `"${product?.heading}" added to wishlist! ❤️`
+          : `"${product?.heading}" removed from wishlist.`
+      );
+      setTimeout(() => setToast(""), 2500);
+    } catch (err) {
+      console.log("Error toggling wishlist", err);
+      setToast("Failed to update wishlist");
+      setTimeout(() => setToast(""), 3000);
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -294,32 +338,49 @@ const ProductDetails = () => {
 
           <div className=" pt-4">
             <h3 className="text-lg font-semibold mb-2">Product Description</h3>
-            <p className="text-gray-600 leading-relaxed text-justify">
-              {product.description}
+            <p className="text-gray-600 leading-relaxed text-justify whitespace-pre-wrap">
+              {activeVariant?.description || product.description}
             </p>
           </div>
 
-          <button
-            className={`py-3 px-6 rounded-lg font-semibold transition duration-300 mt-4 flex items-center justify-center gap-2 ${
-              isOutOfStock
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-[#088178] hover:bg-[#06635c] text-white cursor-pointer shadow-md shadow-[#088178]/10"
-            }`}
-            onClick={handleAddToCart}
-            disabled={isOutOfStock || adding}
-          >
-            {adding ? (
-              <>
-                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Adding...
-              </>
-            ) : (
-              isOutOfStock ? "Sold Out" : "Add to Cart"
-            )}
-          </button>
+          <div className="flex flex-wrap items-center gap-3 mt-4">
+            <button
+              className={`py-3 px-6 rounded-lg font-semibold transition duration-300 flex items-center justify-center gap-2 ${
+                isOutOfStock
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-[#088178] hover:bg-[#06635c] text-white cursor-pointer shadow-md shadow-[#088178]/10"
+              }`}
+              onClick={handleAddToCart}
+              disabled={isOutOfStock || adding}
+            >
+              {adding ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Adding...
+                </>
+              ) : (
+                isOutOfStock ? "Sold Out" : "Add to Cart"
+              )}
+            </button>
+
+            <button
+              onClick={handleWishlistToggle}
+              className={`py-3 px-6 rounded-lg font-semibold transition duration-300 flex items-center justify-center gap-2 border ${
+                isWishlisted
+                  ? "bg-red-50 border-red-200 text-red-500 hover:bg-red-100"
+                  : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <Heart
+                size={18}
+                className={isWishlisted ? "fill-red-500 text-red-500" : "text-gray-500"}
+              />
+              {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
+            </button>
+          </div>
         </div>
       </div>
       {toast && (

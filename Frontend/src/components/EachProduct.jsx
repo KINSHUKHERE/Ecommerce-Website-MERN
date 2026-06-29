@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { sentToCart } from "../api/CartApi";
+import { toggleWishlist } from "../api/WishlistApi";
+import { Heart } from "lucide-react";
 
 const EachProduct = ({ data }) => {
   const navigate = useNavigate();
@@ -10,6 +12,49 @@ const EachProduct = ({ data }) => {
   if (!data) return null;
 
   const user = JSON.parse(localStorage.getItem("user"));
+  const [isWishlisted, setIsWishlisted] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkWishlist = () => {
+      const cached = localStorage.getItem("yocart_wishlist_ids");
+      if (cached) {
+        setIsWishlisted(JSON.parse(cached).includes(data._id));
+      }
+    };
+    checkWishlist();
+
+    window.addEventListener("wishlistUpdated", checkWishlist);
+    return () => {
+      window.removeEventListener("wishlistUpdated", checkWishlist);
+    };
+  }, [data._id]);
+
+  const handleWishlistToggle = async (e) => {
+    e.stopPropagation();
+    try {
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+
+      const res = await toggleWishlist(data._id);
+      const newIds = res.data.wishlistIds || [];
+      localStorage.setItem("yocart_wishlist_ids", JSON.stringify(newIds));
+      setIsWishlisted(res.data.isWishlisted);
+      window.dispatchEvent(new Event("wishlistUpdated"));
+
+      setToast(
+        res.data.isWishlisted
+          ? `"${data.heading}" added to wishlist! ❤️`
+          : `"${data.heading}" removed from wishlist.`
+      );
+      setTimeout(() => setToast(""), 2500);
+    } catch (err) {
+      console.log("Error toggling wishlist", err);
+      setToast("Failed to update wishlist");
+      setTimeout(() => setToast(""), 3000);
+    }
+  };
 
   const getStockCount = (product) => {
     if (product.variants && product.variants.length > 0) {
@@ -88,6 +133,17 @@ const EachProduct = ({ data }) => {
     >
       <div>
         <div className={`w-full h-36 sm:h-48 md:h-56 lg:h-60 bg-[#f0f2f5] rounded-xl sm:rounded-2xl p-2 sm:p-4 flex justify-center items-center overflow-hidden relative ${isOutOfStock ? "grayscale" : ""}`}>
+          <button
+            onClick={handleWishlistToggle}
+            className="absolute top-2.5 right-2.5 p-1.5 sm:p-2 rounded-full bg-white/80 hover:bg-white text-gray-400 hover:text-red-500 transition-all duration-300 z-10 shadow-sm border border-slate-100 outline-none focus:outline-none"
+          >
+            <Heart
+              size={16}
+              className={`transition-colors duration-300 ${
+                isWishlisted ? "fill-red-500 text-red-500" : "text-gray-400"
+              }`}
+            />
+          </button>
           <img
             src={data.imgUrl}
             alt="Image Invalid"
@@ -139,7 +195,7 @@ const EachProduct = ({ data }) => {
       <div>
         <div className="flex justify-between items-center mt-2.5 sm:mt-4 pt-2 border-t border-gray-50 px-1">
           <span className="font-extrabold text-[14px] sm:text-[16px] text-[#088178]">
-            ₹{getMinPrice(data).toLocaleString()}{hasPriceRange(data) ? "+" : ""}
+            ₹{getMinPrice(data).toLocaleString()}
           </span>
 
           <button

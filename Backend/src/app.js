@@ -10,6 +10,7 @@ const contactRoutes = require("./routes/contactRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const addressRoutes = require("./routes/addressRoutes");
+const wishlistRoutes = require("./routes/wishlistRoutes");
 
 const app = express();
 
@@ -62,5 +63,6 @@ app.use("/", contactRoutes);
 app.use("/", orderRoutes);
 app.use("/", uploadRoutes);
 app.use("/", addressRoutes);
+app.use("/", wishlistRoutes);
 
 module.exports = app;
