@@ -118,6 +118,70 @@ const AppRoutes = () => {
     checkAuth();
   }, [navigate, location.pathname]);
 
+  useEffect(() => {
+    let title = "YoCart";
+    let desc = "YoCart - Premium Audio, Flagship Mobiles, Bluetooth Speakers & Gaming Gear.";
+    const path = location.pathname;
+
+    if (path === "/") {
+      title = "YoCart | Premium E-Commerce Store";
+      desc = "Discover flagship smartphones, premium audio headphones, mechanical keyboards, and bluetooth speakers with exclusive discounts.";
+    } else if (path === "/products") {
+      title = "Shop Products | YoCart Catalog";
+      desc = "Browse our full range of high-quality electronics, smartphones, audio devices, and computer peripherals.";
+    } else if (path.startsWith("/products/")) {
+      title = "Product Details | YoCart";
+    } else if (path === "/cart") {
+      title = "Shopping Cart | YoCart";
+      desc = "View your shopping cart items, select quantities, and proceed to checkout.";
+    } else if (path === "/wishlist") {
+      title = "My Wishlist | YoCart";
+      desc = "Your saved products. Move items to your shopping cart or manage your favorites.";
+    } else if (path === "/about") {
+      title = "About Us | YoCart";
+      desc = "Learn more about YoCart, our mission, values, and quality assurance principles.";
+    } else if (path === "/contact") {
+      title = "Contact Us | YoCart Customer Support";
+      desc = "Reach out to our customer support team. Send your inquiries or support tickets.";
+    } else if (path === "/profile" || path === "/admin/profile") {
+      title = "My Profile | YoCart";
+    } else if (path === "/checkout") {
+      title = "Secure Checkout | YoCart";
+    } else if (path === "/complete-profile") {
+      title = "Complete Your Profile | YoCart";
+    } else if (path === "/login") {
+      title = "Log In | YoCart Account";
+    } else if (path === "/register") {
+      title = "Create Account | YoCart";
+    } else if (path.startsWith("/admin")) {
+      title = "Admin Dashboard | YoCart Panel";
+    } else if (path === "/create-product") {
+      title = "Create Product | YoCart Admin";
+    } else if (path === "/contact-details") {
+      title = "Contact Queries | YoCart Admin";
+    } else if (path === "/order-details") {
+      title = "Orders Directory | YoCart Admin";
+    } else if (path === "/categories") {
+      title = "Categories Management | YoCart Admin";
+    } else if (path === "/brands") {
+      title = "Brands Management | YoCart Admin";
+    } else if (path === "/privacy-policy") {
+      title = "Privacy Policy | YoCart";
+    } else if (path === "/terms-conditions") {
+      title = "Terms & Conditions | YoCart";
+    }
+
+    document.title = title;
+
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement("meta");
+      metaDescription.name = "description";
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute("content", desc);
+  }, [location.pathname]);
+
   return (
     <Routes>
       {/* Customer / Public / Guest Routes wrapped in UserLayout */}

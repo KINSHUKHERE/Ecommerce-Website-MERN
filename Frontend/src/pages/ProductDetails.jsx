@@ -79,7 +79,12 @@ const ProductDetails = () => {
 
   useEffect(() => {
     if (product) {
-      document.title = `VELTIQ | ${product.heading || "Product Details"}`;
+      document.title = `${product.heading || "Product Details"} | YoCart`;
+
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute("content", product.description || "");
+      }
 
       // Initialize selected options with first variant's attributes
       const initialOptions = {};
