@@ -1,5 +1,8 @@
 # YoCart - Modern MERN Stack E-Commerce Platform
 
+**Live Deployment Demo URL**: [yocart.onrender.com](https://yocart.onrender.com)
+
+
 YoCart is a premium, fully responsive e-commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The platform is architected with a strict separation between the client-facing store and a dedicated administrative dashboard, secured with modern JSON Web Token (JWT) authorization controls.
 
 ---
