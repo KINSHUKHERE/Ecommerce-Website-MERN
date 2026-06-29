@@ -283,8 +283,8 @@ const Navbar = () => {
 
       {/* Mobile Menu Drawer */}
       <div
-        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-all duration-300 border-b border-gray-250 bg-gray-50 shadow-lg ${
-          isOpen ? "max-h-125 border-t" : "max-h-0"
+        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-all duration-300 border-b border-light-border/40 bg-white/95 backdrop-blur-md shadow-lg ${
+          isOpen ? "max-h-125 border-t border-light-border/40" : "max-h-0"
         }`}
       >
         <ul className="px-6 py-5 flex flex-col gap-4 font-medium text-gray-700">
