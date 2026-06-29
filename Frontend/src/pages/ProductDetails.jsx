@@ -50,7 +50,7 @@ const ProductDetails = () => {
       setToast(
         res.data.isWishlisted
           ? `"${product?.heading}" added to wishlist! ❤️`
-          : `"${product?.heading}" removed from wishlist.`
+          : `"${product?.heading}" removed from wishlist.`,
       );
       setTimeout(() => setToast(""), 2500);
     } catch (err) {
@@ -80,7 +80,7 @@ const ProductDetails = () => {
   useEffect(() => {
     if (product) {
       document.title = `VELTIQ | ${product.heading || "Product Details"}`;
-      
+
       // Initialize selected options with first variant's attributes
       const initialOptions = {};
       if (product.options && product.options.length > 0) {
@@ -100,7 +100,9 @@ const ProductDetails = () => {
   }, [product]);
   // Find variant matching current selection
   const activeVariant = product?.variants?.find((v) => {
-    return v.attributes.every((attr) => selectedOptions[attr.name] === attr.value);
+    return v.attributes.every(
+      (attr) => selectedOptions[attr.name] === attr.value,
+    );
   });
 
   // Reset active image index when active variant changes
@@ -113,7 +115,9 @@ const ProductDetails = () => {
     return (
       <div className="flex-grow w-full bg-gray-50 py-20 flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-        <p className="text-gray-500 mt-4 animate-pulse">Loading product details...</p>
+        <p className="text-gray-500 mt-4 animate-pulse">
+          Loading product details...
+        </p>
       </div>
     );
   }
@@ -125,7 +129,9 @@ const ProductDetails = () => {
     return p.quantity ?? 0;
   };
 
-  const stockCount = activeVariant ? activeVariant.quantity : getProductTotalStock(product);
+  const stockCount = activeVariant
+    ? activeVariant.quantity
+    : getProductTotalStock(product);
   const isOutOfStock = stockCount <= 0 || product.sold;
 
   const handleAddToCart = async () => {
@@ -153,7 +159,7 @@ const ProductDetails = () => {
 
       const response = await sentToCart(cartData);
       window.dispatchEvent(new Event("cartUpdated"));
-      
+
       setToast(`"${product.heading}" added to cart!`);
       setTimeout(() => {
         setToast("");
@@ -170,10 +176,10 @@ const ProductDetails = () => {
     }
   };
 
-  const allImages = (activeVariant && activeVariant.images && activeVariant.images.length > 0)
-    ? activeVariant.images
-    : [product.imgUrl, ...(product.images || [])].filter(Boolean);
-
+  const allImages =
+    activeVariant && activeVariant.images && activeVariant.images.length > 0
+      ? activeVariant.images
+      : [product.imgUrl, ...(product.images || [])].filter(Boolean);
 
   const onTouchStart = (e) => {
     setTouchEnd(null);
@@ -207,11 +213,10 @@ const ProductDetails = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8 pb-24 md:pb-8">
-
       <div className="grid md:grid-cols-2 gap-8 items-start">
         {/* Interactive Image Slider */}
         <div className="flex flex-col gap-4 w-full">
-          <div 
+          <div
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
@@ -222,7 +227,7 @@ const ProductDetails = () => {
               alt={product.heading}
               className="max-h-full max-w-full object-contain rounded-lg transition-all duration-300 transform scale-100 hover:scale-105"
             />
-            
+
             {allImages.length > 1 && (
               <>
                 {/* Left Arrow */}
@@ -242,7 +247,7 @@ const ProductDetails = () => {
               </>
             )}
           </div>
-          
+
           {/* Thumbnails list */}
           {allImages.length > 1 && (
             <div className="flex gap-2.5 overflow-x-auto py-1 scrollbar-none">
@@ -277,26 +282,29 @@ const ProductDetails = () => {
               {product.brandId?.name}
             </span>
 
-            <span className={`px-3 py-1 rounded-full text-sm font-bold ${
-              isOutOfStock
-                ? "bg-red-50 text-red-600"
-                : stockCount <= 3
-                  ? "bg-amber-50 text-amber-600 animate-pulse"
-                  : "bg-green-50 text-green-600"
-            }`}>
-              {isOutOfStock 
-                ? "Sold Out" 
-                : `${stockCount} Items Left`}
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-bold ${
+                isOutOfStock
+                  ? "bg-red-50 text-red-600"
+                  : stockCount <= 3
+                    ? "bg-amber-50 text-amber-600 animate-pulse"
+                    : "bg-green-50 text-green-600"
+              }`}
+            >
+              {isOutOfStock ? "Sold Out" : `${stockCount} Items Left`}
             </span>
           </div>
-          
+
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
             {product.heading}
           </h1>
-          
 
           <p className="text-2xl font-bold text-indigo-650">
-            ₹{(activeVariant ? activeVariant.price : (product.price || 0)).toLocaleString()}
+            ₹
+            {(activeVariant
+              ? activeVariant.price
+              : product.price || 0
+            ).toLocaleString()}
           </p>
 
           {/* Option Selectors Swatches */}
@@ -345,6 +353,24 @@ const ProductDetails = () => {
 
           <div className="fixed bottom-0 left-0 right-0 w-full bg-white border-t border-gray-150 p-3.5 z-40 flex gap-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] md:static md:w-auto md:bg-transparent md:border-0 md:p-0 md:shadow-none md:mt-6 md:z-auto">
             <button
+              onClick={handleWishlistToggle}
+              className={`w-12 h-12 flex-shrink-0 md:w-auto md:h-auto md:flex-none py-3.5 md:px-6 rounded-xl md:rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2 border ${
+                isWishlisted
+                  ? "bg-rose-50 border-rose-100 text-rose-500 hover:bg-rose-100/70"
+                  : "bg-white border-gray-200 text-gray-750 hover:bg-gray-50"
+              }`}
+            >
+              <Heart
+                size={18}
+                className={
+                  isWishlisted ? "fill-rose-500 text-rose-500" : "text-gray-500"
+                }
+              />
+              <span className="hidden md:inline">
+                {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
+              </span>
+            </button>
+            <button
               className={`flex-1 md:flex-none py-3.5 px-6 rounded-xl md:rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2 ${
                 isOutOfStock
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -355,30 +381,33 @@ const ProductDetails = () => {
             >
               {adding ? (
                 <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Adding...
                 </>
+              ) : isOutOfStock ? (
+                "Sold Out"
               ) : (
-                isOutOfStock ? "Sold Out" : "Add to Cart"
+                "Add to Cart"
               )}
-            </button>
-
-            <button
-              onClick={handleWishlistToggle}
-              className={`flex-1 md:flex-none py-3.5 px-6 rounded-xl md:rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2 border ${
-                isWishlisted
-                  ? "bg-rose-50 border-rose-100 text-rose-500 hover:bg-rose-100/70"
-                  : "bg-white border-gray-200 text-gray-750 hover:bg-gray-50"
-              }`}
-            >
-              <Heart
-                size={18}
-                className={isWishlisted ? "fill-rose-500 text-rose-500" : "text-gray-500"}
-              />
-              {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
             </button>
           </div>
         </div>
