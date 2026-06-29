@@ -197,7 +197,7 @@ const Navbar = () => {
               >
                 <Heart size={22} />
                 {wishlistCount > 0 && (
-                  <span className="absolute top-0 right-0 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
+                  <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[8px] min-w-[15px] h-[15px] rounded-full flex items-center justify-center font-black border border-white shadow-xs px-0.5">
                     {wishlistCount}
                   </span>
                 )}
@@ -209,7 +209,7 @@ const Navbar = () => {
               >
                 <ShoppingCart size={22} />
                 {cartCount > 0 && (
-                  <span className="absolute top-0 right-0 min-w-4.5 h-4.5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
+                  <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[8px] min-w-[15px] h-[15px] rounded-full flex items-center justify-center font-black border border-white shadow-xs px-0.5">
                     {cartCount}
                   </span>
                 )}
@@ -253,7 +253,7 @@ const Navbar = () => {
               >
                 <Heart size={22} />
                 {wishlistCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold">
+                  <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[8px] min-w-[15px] h-[15px] rounded-full flex items-center justify-center font-black border border-white shadow-xs px-0.5">
                     {wishlistCount}
                   </span>
                 )}
@@ -264,7 +264,7 @@ const Navbar = () => {
               >
                 <ShoppingCart size={22} />
                 {cartCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold">
+                  <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[8px] min-w-[15px] h-[15px] rounded-full flex items-center justify-center font-black border border-white shadow-xs px-0.5">
                     {cartCount}
                   </span>
                 )}
