@@ -203,8 +203,8 @@ const EachProduct = ({ data }) => {
       </div>
       
       {toast && (
-        <div className="fixed bottom-5 right-5 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn">
-          <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 md:top-auto md:left-auto md:bottom-5 md:right-5 md:translate-x-0 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn max-w-[90%] w-max">
+          <span className="w-2 h-2 rounded-full bg-accent animate-pulse flex-shrink-0"></span>
           {toast}
         </div>
       )}

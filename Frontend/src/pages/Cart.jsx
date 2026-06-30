@@ -145,7 +145,7 @@ const Cart = () => {
       
       {/* Toast Alert Widget */}
       {message && (
-        <div className="fixed bottom-5 right-5 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn">
+        <div className="fixed bottom-[90px] left-1/2 -translate-x-1/2 lg:bottom-5 lg:right-5 lg:left-auto lg:translate-x-0 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn max-w-[90vw] w-max">
           <div
             className={`w-5 h-5 rounded-full flex items-center justify-center ${
               toastType === "success"
