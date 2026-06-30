@@ -7,11 +7,11 @@ const {
   updateOrderStatus,
 } = require("../controllers/orderController");
 const verifyUser = require("../middleware/verifyUser");
-const verifyAdmin = require("../middleware/verifyAdmin");
+const verifyVendorOrAdmin = require("../middleware/verifyVendorOrAdmin");
 
 router.post("/orders", verifyUser, createOrder);
-router.get("/orders", verifyUser, verifyAdmin, getAllOrders);
+router.get("/orders", verifyUser, verifyVendorOrAdmin, getAllOrders);
 router.get("/orders/user", verifyUser, getUserOrders);
-router.put("/orders/:orderId", verifyUser, verifyAdmin, updateOrderStatus);
+router.put("/orders/:orderId", verifyUser, verifyVendorOrAdmin, updateOrderStatus);
 
 module.exports = router;

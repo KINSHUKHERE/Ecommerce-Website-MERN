@@ -285,6 +285,42 @@ const completeProfile = async (req, res) => {
   }
 };
 
+const becomeSeller = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { businessName, businessAddress, gstin } = req.body;
+
+    if (!businessName || !businessAddress || !gstin) {
+      return res.status(400).json({ msg: "Please fill in all seller details." });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    user.role = "vendor";
+    user.businessName = businessName;
+    user.businessAddress = businessAddress;
+    user.gstin = gstin;
+    user.isProfileComplete = true;
+    await user.save();
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    res.status(200).json({
+      msg: "Congratulations! You are now a registered seller.",
+      user: userObj,
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Failed to become a seller",
+      Error: err.message,
+    });
+  }
+};
+
 module.exports = {
   signup,
   login,
@@ -294,5 +330,6 @@ module.exports = {
   getUserProfile,
   updateProfile,
   completeProfile,
+  becomeSeller,
 };
 

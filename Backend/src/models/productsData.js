@@ -56,6 +56,13 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    vendorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+      default: null,
+    },
   },
   {
     timestamps: true,

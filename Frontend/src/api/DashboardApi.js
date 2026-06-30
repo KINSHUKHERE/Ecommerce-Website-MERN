@@ -3,7 +3,35 @@ import { getContact } from "./ContactApi";
 import { getAllOrders } from "./OrderApi";
 import { getProduct } from "./ProductApi";
 
-export const getDashboardData = async () => {
+export const getDashboardData = async (user) => {
+  const isVendor = user?.role === "vendor";
+
+  if (isVendor) {
+    const [products, orders] = await Promise.all([
+      getProduct(user._id),
+      getAllOrders(),
+    ]);
+
+    const ordersList = orders.data.orders || [];
+
+    return {
+      totalPro: products.data.data.length,
+      totalCon: 0,
+      totalUse: 0,
+      totalOrd: ordersList.length,
+      totalRev: ordersList.reduce(
+        (acc, order) => {
+          if (order.orderStatus === "Cancelled") {
+            return acc;
+          }
+          return acc + (order.totalAmount || 0);
+        },
+        0,
+      ),
+    };
+  }
+
+  // Super Admin view
   const [products, contacts, users, orders] = await Promise.all([
     getProduct(),
     getContact(),

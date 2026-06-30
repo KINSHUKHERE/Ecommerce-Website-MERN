@@ -38,6 +38,9 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
     return location.pathname === path;
   };
 
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const isVendor = user.role === "vendor";
+
   const menuItems = [
     {
       title: "Dashboard",
@@ -60,25 +63,29 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         },
       ],
     },
-    {
-      title: "Categories",
-      path: "/categories",
-      icon: <Tag size={16} />,
-    },
-    {
-      title: "Brands",
-      path: "/brands",
-      icon: <Layers size={16} />,
-    },
+    ...(!isVendor
+      ? [
+          {
+            title: "Categories",
+            path: "/categories",
+            icon: <Tag size={16} />,
+          },
+          {
+            title: "Brands",
+            path: "/brands",
+            icon: <Layers size={16} />,
+          },
+          {
+            title: "Contact Queries",
+            path: "/contact-details",
+            icon: <MessageSquare size={16} />,
+          },
+        ]
+      : []),
     {
       title: "Orders",
       path: "/order-details",
       icon: <FileText size={16} />,
-    },
-    {
-      title: "Contact Queries",
-      path: "/contact-details",
-      icon: <MessageSquare size={16} />,
     },
   ];
 

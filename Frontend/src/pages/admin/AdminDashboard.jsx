@@ -15,9 +15,16 @@ const AdminDashboard = () => {
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
 
+  const user = JSON.parse(localStorage.getItem("user")) || {
+    name: "Admin",
+    role: "admin",
+  };
+
+  const isVendor = user.role === "vendor";
+
   const fetchData = async () => {
     try {
-      const getInfo = await getDashboardData();
+      const getInfo = await getDashboardData(user);
       setTotalProducts(getInfo.totalPro);
       setTotalOrders(getInfo.totalOrd);
       setTotalUsers(getInfo.totalUse);
@@ -32,43 +39,45 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-  const cards = [
+  const rawCards = [
     {
       title: "Total Products",
       value: totalProducts,
       iconClass: Package,
       badge: "Catalog",
+      show: true,
     },
     {
       title: "Total Users",
       value: totalUsers > 0 ? totalUsers - 1 : 0,
       iconClass: Users,
       badge: "Accounts",
+      show: !isVendor,
     },
     {
       title: "Total Orders",
       value: totalOrders,
       iconClass: ShoppingCart,
       badge: "Sales",
+      show: true,
     },
     {
       title: "Revenue",
       value: `₹${totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
       iconClass: IndianRupee,
       badge: "Revenue",
+      show: true,
     },
     {
       title: "Contact Queries",
       value: totalContacts,
       iconClass: MessageSquare,
       badge: "Support",
+      show: !isVendor,
     },
   ];
 
-  const user = JSON.parse(localStorage.getItem("user")) || {
-    name: "Admin",
-    role: "admin",
-  };
+  const cards = rawCards.filter((card) => card.show);
   const firstName = user?.name ? user.name.split(" ")[0] : "Admin";
 
   return (
@@ -79,7 +88,9 @@ const AdminDashboard = () => {
           Welcome back, {firstName}! 👋
         </h1>
         <p className="text-xs sm:text-sm text-muted-gray mt-1.5 font-medium leading-relaxed">
-          Here's a comprehensive snapshot of your YoCart store's performance, catalog overview, and customer inquiries.
+          {isVendor 
+            ? "Here's a comprehensive snapshot of your seller shop's performance, catalog overview, and product orders."
+            : "Here's a comprehensive snapshot of your YoCart store's performance, catalog overview, and customer inquiries."}
         </p>
       </div>
 

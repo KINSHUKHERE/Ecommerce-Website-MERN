@@ -112,8 +112,12 @@ const AdminProducts = () => {
   // Fetch initial data
   const loadAllData = async () => {
     try {
+      const user = JSON.parse(localStorage.getItem("user")) || {};
+      const isVendor = user.role === "vendor";
+      const vendorId = isVendor ? user._id : null;
+
       const [productRes, categoryRes, brandRes] = await Promise.all([
-        getProduct(),
+        getProduct(vendorId),
         getCategories(),
         getBrands(),
       ]);

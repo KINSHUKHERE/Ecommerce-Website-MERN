@@ -1,7 +1,7 @@
 import api from "./api";
 
-export const getProduct = () => {
-  return api.get("/get-product-data");
+export const getProduct = (vendorId) => {
+  return api.get(vendorId ? `/get-product-data?vendorId=${vendorId}` : "/get-product-data");
 };
 
 export const postProduct = (data) => {

@@ -40,6 +40,11 @@ const addProduct = async (req, res) => {
   try {
     const { variants, ...productData } = req.body;
     
+    // Set vendorId to the current user's ID if vendor or admin
+    if (req.user && req.user.userId) {
+      productData.vendorId = req.user.userId;
+    }
+    
     const product = await Product.create(productData);
 
     if (Array.isArray(variants) && variants.length > 0) {
@@ -99,7 +104,12 @@ const addProduct = async (req, res) => {
 
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.find()
+    const filter = {};
+    if (req.query.vendorId) {
+      filter.vendorId = req.query.vendorId;
+    }
+
+    const products = await Product.find(filter)
       .populate("categoryId")
       .populate("brandId")
       .lean();
@@ -138,11 +148,18 @@ const getProducts = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedProduct = await Product.findByIdAndDelete(id);
 
-    if (!deletedProduct) {
+    const productToDelete = await Product.findById(id);
+    if (!productToDelete) {
       return res.status(404).json({ msg: "Product not found" });
     }
+
+    // Ownership check: must be admin OR the vendor who owns the product
+    if (req.user.role === "vendor" && productToDelete.vendorId && productToDelete.vendorId.toString() !== req.user.userId) {
+      return res.status(403).json({ msg: "Forbidden: You do not own this product" });
+    }
+
+    const deletedProduct = await Product.findByIdAndDelete(id);
 
     // Collect all image URLs from the product and its variants
     const imageUrls = new Set();
@@ -200,6 +217,16 @@ const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { variants, ...productData } = req.body;
+
+    const productToUpdate = await Product.findById(id);
+    if (!productToUpdate) {
+      return res.status(404).json({ msg: "Product not found" });
+    }
+
+    // Ownership check: must be admin OR the vendor who owns the product
+    if (req.user.role === "vendor" && productToUpdate.vendorId && productToUpdate.vendorId.toString() !== req.user.userId) {
+      return res.status(403).json({ msg: "Forbidden: You do not own this product" });
+    }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,

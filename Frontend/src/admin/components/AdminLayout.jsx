@@ -100,7 +100,7 @@ const AdminLayout = ({ children }) => {
                       className="flex items-center gap-2.5 px-4 py-2 text-xs text-muted-gray hover:bg-slate-50 hover:text-dark-navy font-bold uppercase tracking-wider transition-colors outline-none focus:outline-none"
                     >
                       <Shield size={14} className="text-primary" />
-                      Admin Panel
+                      {user?.role === "vendor" ? "Seller Portal" : "Admin Panel"}
                     </Link>
                     <Link
                       to="/admin/profile"

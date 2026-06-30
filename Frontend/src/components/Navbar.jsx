@@ -246,6 +246,22 @@ const Navbar = () => {
                 </span>
               </Link>
 
+              {currentUser.role === "vendor" ? (
+                <Link
+                  to="/admin"
+                  className="text-xs font-bold uppercase tracking-wider text-primary hover:text-primary-hover px-3 py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition"
+                >
+                  Seller Portal
+                </Link>
+              ) : (
+                <Link
+                  to="/become-seller"
+                  className="text-xs font-bold uppercase tracking-wider text-muted-gray hover:text-primary px-3 py-2 transition"
+                >
+                  Become a Seller
+                </Link>
+              )}
+
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1.5 bg-red-500 text-white px-3.5 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 text-sm font-medium cursor-pointer outline-none focus:outline-none"
@@ -368,30 +384,50 @@ const Navbar = () => {
               </Link>
             </div>
           ) : (
-            <div className="flex items-center justify-between pt-1">
-              <Link
-                to="/profile"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
-              >
-                {currentUser.avatar ? (
-                  <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full object-cover" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary text-white flex justify-center items-center font-bold text-xs uppercase">
-                    {currentUser.name.charAt(0)}
-                  </div>
-                )}
-                <span className="font-semibold text-dark-navy text-sm">
-                  {currentUser.name}
-                </span>
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1 bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors duration-300 text-sm font-semibold outline-none focus:outline-none"
-              >
-                <LogOut size={16} />
-                Logout
-              </button>
+            <div className="flex flex-col gap-3 pt-1 border-t border-light-border/40">
+              <div className="flex items-center justify-between">
+                <Link
+                  to="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
+                >
+                  {currentUser.avatar ? (
+                    <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary text-white flex justify-center items-center font-bold text-xs uppercase">
+                      {currentUser.name.charAt(0)}
+                    </div>
+                  )}
+                  <span className="font-semibold text-dark-navy text-sm">
+                    {currentUser.name}
+                  </span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors duration-300 text-sm font-semibold outline-none focus:outline-none"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </div>
+
+              {currentUser.role === "vendor" ? (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl font-bold text-xs uppercase tracking-wider transition"
+                >
+                  Seller Portal
+                </Link>
+              ) : (
+                <Link
+                  to="/become-seller"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center py-2 bg-slate-100 hover:bg-slate-200 text-muted-gray hover:text-dark-navy rounded-xl font-bold text-xs uppercase tracking-wider transition"
+                >
+                  Become a Seller
+                </Link>
+              )}
             </div>
           )}
         </ul>

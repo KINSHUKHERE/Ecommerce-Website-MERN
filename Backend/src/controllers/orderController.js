@@ -70,9 +70,36 @@ const createOrder = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
-      .populate("userId", "name email")
-      .sort({ createdAt: -1 });
+    let orders;
+    if (req.user.role === "vendor") {
+      // Find all products owned by this vendor
+      const vendorProducts = await Product.find({ vendorId: req.user.userId }).select("_id");
+      const vendorProductIds = vendorProducts.map((p) => p._id.toString());
+
+      // Find orders containing any of these products
+      const rawOrders = await Order.find({ "items.productId": { $in: vendorProductIds } })
+        .populate("userId", "name email")
+        .sort({ createdAt: -1 })
+        .lean();
+
+      // Filter items to show only vendor's products, and recalculate total
+      orders = rawOrders.map((order) => {
+        const filteredItems = order.items.filter(
+          (item) => item.productId && vendorProductIds.includes(item.productId.toString())
+        );
+        const vendorTotal = filteredItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        return {
+          ...order,
+          items: filteredItems,
+          totalAmount: vendorTotal,
+        };
+      });
+    } else {
+      // Super Admin sees all orders
+      orders = await Order.find()
+        .populate("userId", "name email")
+        .sort({ createdAt: -1 });
+    }
 
     res.status(200).json({
       msg: "Retrieved all orders",
@@ -109,6 +136,27 @@ const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { orderStatus } = req.body;
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        msg: "Order not found",
+      });
+    }
+
+    // Ownership check: if vendor, they must own at least one item in the order
+    if (req.user.role === "vendor") {
+      const vendorProducts = await Product.find({ vendorId: req.user.userId }).select("_id");
+      const vendorProductIds = vendorProducts.map((p) => p._id.toString());
+      const hasVendorItem = order.items.some(
+        (item) => item.productId && vendorProductIds.includes(item.productId.toString())
+      );
+      if (!hasVendorItem) {
+        return res.status(403).json({
+          msg: "Forbidden: You do not own any products in this order",
+        });
+      }
+    }
 
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,

@@ -35,4 +35,8 @@ export const uploadAvatarApi = async (file) => {
       "Content-Type": "multipart/form-data",
     },
   });
+};
+
+export const becomeSellerApi = async (data) => {
+  return await api.post("/become-seller", data);
 };

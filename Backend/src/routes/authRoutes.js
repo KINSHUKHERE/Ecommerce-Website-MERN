@@ -9,6 +9,7 @@ const {
   getUserProfile,
   updateProfile,
   completeProfile,
+  becomeSeller,
 } = require("../controllers/authController");
 const verifyUser = require("../middleware/verifyUser");
 
@@ -20,5 +21,6 @@ router.get("/all-users", getAllUsers);
 router.get("/user-profile", verifyUser, getUserProfile);
 router.put("/update-profile", verifyUser, updateProfile);
 router.put("/complete-profile", verifyUser, completeProfile);
+router.post("/become-seller", verifyUser, becomeSeller);
 
 module.exports = router;

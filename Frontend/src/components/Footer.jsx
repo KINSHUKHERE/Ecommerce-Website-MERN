@@ -118,6 +118,9 @@ const Footer = () => {
           <Link to="/contact" className="text-xs sm:text-sm text-muted-gray hover:text-primary transition-colors w-fit">
             Contact Support
           </Link>
+          <Link to="/become-seller" className="text-xs sm:text-sm text-primary hover:text-primary-hover font-bold transition-colors w-fit">
+            Become a Seller
+          </Link>
         </div>
 
         {/* Newsletter Column */}

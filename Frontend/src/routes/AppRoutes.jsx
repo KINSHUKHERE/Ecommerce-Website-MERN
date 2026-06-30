@@ -20,6 +20,7 @@ import Checkout from "../pages/Checkout";
 import TermsConditions from "../pages/TermsConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import CompleteProfile from "../pages/CompleteProfile";
+import BecomeSeller from "../pages/BecomeSeller";
 import { getUserProfile } from "../api/AuthApi";
 
 // Import Admin Layout & New Pages
@@ -33,7 +34,7 @@ import Navbar from "../components/Navbar";
 // Customer Layout Wrapper
 const UserLayout = () => {
   const user = JSON.parse(localStorage.getItem("user"));
-  if (user && user.role === "admin") {
+  if (user && (user.role === "admin" || user.role === "vendor")) {
     return <Navigate to="/admin" replace />;
   }
   return (
@@ -55,13 +56,13 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Route Guard for admin users only
+// Route Guard for dashboard access (admin or vendor)
 const AdminRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  if (user.role !== "admin") {
+  if (user.role !== "admin" && user.role !== "vendor") {
     return <Navigate to="/" replace />;
   }
   return children;
@@ -71,7 +72,7 @@ const AdminRoute = ({ children }) => {
 const GuestRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem("user"));
   if (user) {
-    return user.role === "admin" ? <Navigate to="/admin" replace /> : <Navigate to="/" replace />;
+    return (user.role === "admin" || user.role === "vendor") ? <Navigate to="/admin" replace /> : <Navigate to="/" replace />;
   }
   return children;
 };
@@ -204,6 +205,7 @@ const AppRoutes = () => {
         <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+        <Route path="/become-seller" element={<ProtectedRoute><BecomeSeller /></ProtectedRoute>} />
       </Route>
 
       {/* Complete Profile (no navbar) */}
