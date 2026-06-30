@@ -115,14 +115,8 @@ const updateBrand = async (req, res) => {
 
 const deleteBrand = async (req, res) => {
   try {
-    const deletedBrand = await Brand.findByIdAndUpdate(
-      req.params.id,
-      {
-        isDeleted: true,
-      },
-      {
-        new: true,
-      }
+    const deletedBrand = await Brand.findByIdAndDelete(
+      req.params.id
     );
 
     if (!deletedBrand) {

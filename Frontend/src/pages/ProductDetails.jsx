@@ -64,14 +64,35 @@ const ProductDetails = () => {
     fetchProducts();
   }, []);
 
+  const [vendorProductsCount, setVendorProductsCount] = useState(0);
+
   const fetchProducts = async () => {
     try {
       const res = await getProduct();
-      const selectedProduct = res.data.data.find(
+      const allFetchedProducts = res.data.data || [];
+      const selectedProduct = allFetchedProducts.find(
         (item) => item._id === productId,
       );
 
       setProduct(selectedProduct);
+
+      if (selectedProduct) {
+        const vId = selectedProduct.vendorId?._id || selectedProduct.vendorId;
+        if (vId) {
+          const count = allFetchedProducts.filter(
+            (p) => {
+              const pvId = p.vendorId?._id || p.vendorId;
+              return pvId && pvId.toString() === vId.toString();
+            }
+          ).length;
+          setVendorProductsCount(count);
+        } else {
+          const count = allFetchedProducts.filter(
+            (p) => !p.vendorId
+          ).length;
+          setVendorProductsCount(count);
+        }
+      }
     } catch (err) {
       console.log("Unable to fetch products: ", err);
     }
@@ -110,6 +131,63 @@ const ProductDetails = () => {
       (attr) => selectedOptions[attr.name] === attr.value,
     );
   });
+
+  const isOptionValueAvailable = (optName, val) => {
+    if (!product.variants || product.variants.length === 0) return true;
+    return product.variants.some((v) => {
+      const hasClickedValue = v.attributes.some(
+        (a) => a.name === optName && a.value === val
+      );
+      if (!hasClickedValue) return false;
+      return v.attributes.every((attr) => {
+        if (attr.name === optName) return true;
+        return selectedOptions[attr.name] === attr.value;
+      });
+    });
+  };
+
+  const handleSelectOption = (optName, val) => {
+    const targetOptions = { ...selectedOptions, [optName]: val };
+    const exactMatch = product.variants?.find((v) => {
+      return v.attributes.every((attr) => targetOptions[attr.name] === attr.value);
+    });
+
+    if (exactMatch) {
+      setSelectedOptions(targetOptions);
+      return;
+    }
+
+    const matchingVariants = product.variants?.filter((v) => {
+      const attr = v.attributes.find((a) => a.name === optName);
+      return attr && attr.value === val;
+    }) || [];
+
+    if (matchingVariants.length > 0) {
+      let bestVariant = matchingVariants[0];
+      let maxMatches = -1;
+
+      matchingVariants.forEach((v) => {
+        let matches = 0;
+        v.attributes.forEach((attr) => {
+          if (attr.name !== optName && selectedOptions[attr.name] === attr.value) {
+            matches++;
+          }
+        });
+        if (matches > maxMatches) {
+          maxMatches = matches;
+          bestVariant = v;
+        }
+      });
+
+      const newOptions = {};
+      bestVariant.attributes.forEach((attr) => {
+        newOptions[attr.name] = attr.value;
+      });
+      setSelectedOptions(newOptions);
+    } else {
+      setSelectedOptions(targetOptions);
+    }
+  };
 
   // Reset active image index when active variant changes
   useEffect(() => {
@@ -323,12 +401,14 @@ const ProductDetails = () => {
             ₹
             {(activeVariant
               ? activeVariant.price
-              : product.price || 0
+              : product.price || (product.variants && product.variants.length > 0 ? product.variants[0].price : 0)
             ).toLocaleString()}
           </p>
 
+
+
           {/* Option Selectors Swatches */}
-          {product.options && product.options.length > 0 && (
+          {product.options && product.options.length > 0 && product.variants && product.variants.length > 0 && (
             <div className="flex flex-col gap-4 border-y border-light-border/40 py-5 my-2">
               {product.options.map((opt) => (
                 <div key={opt.name} className="flex flex-col gap-2">
@@ -338,23 +418,27 @@ const ProductDetails = () => {
                   <div className="flex flex-wrap gap-2.5">
                     {opt.values.map((val) => {
                       const isSelected = selectedOptions[opt.name] === val;
+                      const isAvailable = isOptionValueAvailable(opt.name, val);
                       return (
                         <button
                           key={val}
                           type="button"
-                          onClick={() =>
-                            setSelectedOptions((prev) => ({
-                              ...prev,
-                              [opt.name]: val,
-                            }))
-                          }
-                          className={`px-4.5 py-2 text-xs font-bold rounded-xl border transition-all duration-300 cursor-pointer ${
+                          onClick={() => handleSelectOption(opt.name, val)}
+                          className={`px-4.5 py-2 text-xs font-bold rounded-xl border transition-all duration-350 cursor-pointer relative overflow-hidden ${
                             isSelected
                               ? "bg-primary border-primary text-white shadow-xs"
-                              : "border-light-border bg-white text-muted-gray hover:border-muted-gray"
+                              : isAvailable
+                              ? "border-light-border bg-white text-muted-gray hover:border-muted-gray"
+                              : "border-dashed border-light-border/40 bg-slate-50/50 text-slate-400 opacity-60 hover:border-light-border"
                           }`}
+                          title={!isAvailable ? "Not available in this combination" : undefined}
                         >
                           {val}
+                          {!isAvailable && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="w-[120%] h-[1.5px] bg-slate-400/50 rotate-12 transform"></div>
+                            </div>
+                          )}
                         </button>
                       );
                     })}
@@ -414,6 +498,46 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Seller / Vendor Info Card (Amazon & Flipkart Style at Bottom) */}
+      <div className="bg-slate-50/50 rounded-3xl p-5 border border-light-border/40 mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 max-w-full">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/5 text-primary border border-primary/10 flex items-center justify-center font-bold text-sm">
+            🏪
+          </div>
+          <div>
+            <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block leading-none mb-1 text-left">
+              Sold By
+            </span>
+            <span className="text-sm font-black text-dark-navy block text-left">
+              {product.vendorId?.businessName || "YoCart Official Store"}
+            </span>
+            {product.vendorId && (
+              <span className="text-[10px] text-muted-gray font-semibold block mt-0.5 text-left">
+                GSTIN: {product.vendorId.gstin || "N/A"}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="text-right sm:border-l sm:border-light-border/40 sm:pl-6 flex-shrink-0 flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 sm:gap-0 mt-3 sm:mt-0 pt-3 sm:pt-0 border-t border-light-border/30 sm:border-t-0">
+          <div>
+            <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block leading-none mb-1 text-left sm:text-right">
+              Seller Products
+            </span>
+            <span className="text-sm font-black text-primary block text-left sm:text-right">
+              {vendorProductsCount} Items
+            </span>
+          </div>
+          <Link
+            to={`/products?vendorId=${product.vendorId?._id || "admin"}`}
+            className="text-[9px] font-extrabold text-accent hover:underline block mt-1 uppercase tracking-wider text-right"
+          >
+            View Store
+          </Link>
+        </div>
+      </div>
+      
       
       {toast && (
         <div className="fixed bottom-5 right-5 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn">

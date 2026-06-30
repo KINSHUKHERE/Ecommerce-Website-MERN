@@ -98,15 +98,7 @@ const deleteCategoryObj = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deletedCategory = await Category.findByIdAndUpdate(
-      id,
-      {
-        isDeleted: true,
-      },
-      {
-        new: true,
-      }
-    );
+    const deletedCategory = await Category.findByIdAndDelete(id);
 
     if (!deletedCategory) {
       return res.status(404).json({

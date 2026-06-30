@@ -7,7 +7,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const signup = async (req, res) => {
   try {
-    const { name, role, phoneNumber, email, password, avatar } = req.body;
+    const { name, role, phoneNumber, email, password, avatar, businessName, businessAddress, gstin } = req.body;
     const existUser = await User.findOne({ email });
     console.log(existUser);
     if (existUser) {
@@ -18,6 +18,8 @@ const signup = async (req, res) => {
 
     const hashPassword = await bcrypt.hash(password, 10);
 
+    const isVendor = role === "vendor";
+
     const data = await User.create({
       name,
       role,
@@ -26,6 +28,10 @@ const signup = async (req, res) => {
       password: hashPassword,
       isProfileComplete: true,
       avatar: avatar || "",
+      businessName: isVendor ? businessName : "",
+      businessAddress: isVendor ? businessAddress : "",
+      gstin: isVendor ? gstin : "",
+      vendorStatus: isVendor ? "pending" : "active",
     });
     res.status(201).json({
       msg: "User Created",
@@ -48,6 +54,12 @@ const login = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         msg: "Email is not registered. Please sign up first!",
+      });
+    }
+
+    if (user.isSuspended) {
+      return res.status(403).json({
+        msg: "Your account has been suspended by the administrator.",
       });
     }
 
@@ -103,6 +115,12 @@ const googleLogin = async (req, res) => {
     const { name, email } = payload;
 
     let user = await User.findOne({ email });
+
+    if (user && user.isSuspended) {
+      return res.status(403).json({
+        msg: "Your account has been suspended by the administrator.",
+      });
+    }
 
     if (!user) {
       user = await User.create({
@@ -331,6 +349,134 @@ const becomeSeller = async (req, res) => {
   }
 };
 
+const getVendors = async (req, res) => {
+  try {
+    const vendors = await User.find({ role: "vendor" }).sort({ createdAt: -1 });
+    res.status(200).json({ vendors });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to retrieve vendors", Error: err.message });
+  }
+};
+
+const updateVendorStatus = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const { vendorStatus } = req.body;
+
+    if (!["active", "pending", "suspended"].includes(vendorStatus)) {
+      return res.status(400).json({ msg: "Invalid vendor status value." });
+    }
+
+    const vendor = await User.findById(vendorId);
+    if (!vendor || vendor.role !== "vendor") {
+      return res.status(404).json({ msg: "Vendor not found." });
+    }
+
+    vendor.vendorStatus = vendorStatus;
+    await vendor.save();
+
+    res.status(200).json({ msg: `Vendor status updated to ${vendorStatus}.`, vendor });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to update vendor status.", Error: err.message });
+  }
+};
+
+const createVendorManually = async (req, res) => {
+  try {
+    const { name, email, phoneNumber, password, businessName, businessAddress, gstin } = req.body;
+    const existUser = await User.findOne({ email });
+    if (existUser) {
+      return res.status(409).json({ msg: "User already exists with this email." });
+    }
+
+    const hashPassword = await bcrypt.hash(password || "Vendor@123", 10);
+    const data = await User.create({
+      name,
+      role: "vendor",
+      phoneNumber,
+      email,
+      password: hashPassword,
+      isProfileComplete: true,
+      businessName,
+      businessAddress,
+      gstin,
+      vendorStatus: "active",
+    });
+
+    res.status(201).json({ msg: "Vendor created successfully", data });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to create vendor", Error: err.message });
+  }
+};
+
+const deleteVendor = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const vendor = await User.findById(vendorId);
+    if (!vendor || vendor.role !== "vendor") {
+      return res.status(404).json({ msg: "Vendor not found." });
+    }
+
+    const Product = require("../models/productsData");
+    const Variant = require("../models/variantDetails");
+    const vendorProducts = await Product.find({ vendorId });
+    const productIds = vendorProducts.map(p => p._id);
+    
+    await Product.deleteMany({ vendorId });
+    await Variant.deleteMany({ productId: { $in: productIds } });
+
+    await User.findByIdAndDelete(vendorId);
+    res.status(200).json({ msg: "Vendor deleted successfully from database." });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to delete vendor", Error: err.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found." });
+    }
+
+    if (user.role === "vendor") {
+      const Product = require("../models/productsData");
+      const Variant = require("../models/variantDetails");
+      const vendorProducts = await Product.find({ vendorId: userId });
+      const productIds = vendorProducts.map(p => p._id);
+      
+      await Product.deleteMany({ vendorId: userId });
+      await Variant.deleteMany({ productId: { $in: productIds } });
+    }
+
+    await User.findByIdAndDelete(userId);
+    res.status(200).json({ msg: "User account deleted successfully from database." });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to delete user", Error: err.message });
+  }
+};
+
+const toggleUserSuspension = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found." });
+    }
+
+    user.isSuspended = !user.isSuspended;
+    await user.save();
+
+    res.status(200).json({
+      msg: `User account status updated to ${user.isSuspended ? "suspended" : "active"}.`,
+      user,
+    });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to update user suspension status", Error: err.message });
+  }
+};
+
 module.exports = {
   signup,
   login,
@@ -341,5 +487,11 @@ module.exports = {
   updateProfile,
   completeProfile,
   becomeSeller,
+  getVendors,
+  updateVendorStatus,
+  createVendorManually,
+  deleteVendor,
+  deleteUser,
+  toggleUserSuspension,
 };
 

@@ -98,6 +98,7 @@ const getAllOrders = async (req, res) => {
       // Super Admin sees all orders
       orders = await Order.find()
         .populate("userId", "name email")
+        .populate("items.productId")
         .sort({ createdAt: -1 });
     }
 

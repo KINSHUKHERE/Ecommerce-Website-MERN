@@ -14,6 +14,12 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
 
+    vendorStatus: {
+      type: String,
+      enum: ["pending", "active", "suspended"],
+      default: "active",
+    },
+
     phoneNumber: {
       type: String,
       default: "",
@@ -39,6 +45,11 @@ const userSchema = new mongoose.Schema(
     },
 
     isProfileComplete: {
+      type: Boolean,
+      default: false,
+    },
+
+    isSuspended: {
       type: Boolean,
       default: false,
     },

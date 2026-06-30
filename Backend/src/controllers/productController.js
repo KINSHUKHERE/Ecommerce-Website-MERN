@@ -104,14 +104,32 @@ const addProduct = async (req, res) => {
 
 const getProducts = async (req, res) => {
   try {
-    const filter = {};
+    const User = require("../models/authDetails");
+    let filter = { status: "active" };
+
     if (req.query.vendorId) {
-      filter.vendorId = req.query.vendorId;
+      filter = { vendorId: req.query.vendorId };
+      if (!req.query.isAdminPanel) {
+        filter.status = "active";
+      }
+    } else {
+      // Find all active vendors
+      const activeVendors = await User.find({ role: "vendor", vendorStatus: "active" }).select("_id");
+      const activeVendorIds = activeVendors.map((v) => v._id);
+
+      filter = {
+        status: "active",
+        $or: [
+          { vendorId: null },
+          { vendorId: { $in: activeVendorIds } }
+        ]
+      };
     }
 
     const products = await Product.find(filter)
       .populate("categoryId")
       .populate("brandId")
+      .populate("vendorId", "name email phoneNumber businessName businessAddress gstin")
       .lean();
 
     const productIds = products.map(p => p._id);
@@ -198,8 +216,8 @@ const deleteProduct = async (req, res) => {
       }
     }
 
-    // Soft delete all variants of this product
-    await Variant.updateMany({ productId: id }, { isDeleted: true });
+    // Permanently delete all variants of this product from database
+    await Variant.deleteMany({ productId: id });
 
     res.status(200).json({
       msg: "Product deleted successfully",

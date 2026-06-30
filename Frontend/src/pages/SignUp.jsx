@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signUpApi, googleLogin, uploadAvatarApi } from "../api/AuthApi";
 import { GoogleLogin } from "@react-oauth/google";
@@ -12,13 +12,25 @@ const SignUp = () => {
     email: "",
     password: "",
     avatar: "",
+    businessName: "",
+    businessAddress: "",
+    gstin: "",
   });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [vendorSuccess, setVendorSuccess] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get("role");
+    if (r === "user" || r === "vendor") {
+      setFormData((prev) => ({ ...prev, role: r }));
+    }
+  }, []);
 
   const handleChange = (e) => {
     setError("");
@@ -67,7 +79,11 @@ const SignUp = () => {
     try {
       await signUpApi(formData);
       setIsSubmitting(false);
-      navigate("/login");
+      if (formData.role === "vendor") {
+        setVendorSuccess(true);
+      } else {
+        navigate("/login");
+      }
     } catch (err) {
       setError(err.response?.data?.msg || "Unable to create user");
       setIsSubmitting(false);
@@ -105,6 +121,34 @@ const SignUp = () => {
     setError("Google Sign Up Failed");
     setIsSubmitting(false);
   };
+
+  if (vendorSuccess) {
+    return (
+      <div className="min-h-screen w-full bg-soft-bg/40 flex items-center justify-center px-6 py-12 text-dark-navy antialiased">
+        <div className="w-full max-w-md bg-white border border-light-border/60 shadow-lg rounded-3xl p-8 text-center relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-accent"></div>
+          
+          <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 border border-emerald-100 flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+
+          <h2 className="text-xl sm:text-2xl font-extrabold text-dark-navy tracking-tight mb-3">
+            Registration Successful!
+          </h2>
+          <p className="text-xs sm:text-sm text-muted-gray leading-relaxed font-semibold mb-6">
+            Your application is completed. Please wait until the administrator accepts your seller request.
+          </p>
+
+          <Link
+            to="/login"
+            className="w-full py-2.5 bg-gradient-to-r from-primary to-accent text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md hover:opacity-95 transition flex items-center justify-center"
+          >
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full bg-soft-bg/40 flex items-center justify-center px-6 py-12 text-dark-navy antialiased">
@@ -169,6 +213,52 @@ const SignUp = () => {
               <option value="vendor">Vendor</option>
             </select>
           </div>
+
+          {formData.role === "vendor" && (
+            <>
+              {/* Business Name */}
+              <div>
+                <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Business Name</label>
+                <input
+                  type="text"
+                  name="businessName"
+                  required
+                  value={formData.businessName}
+                  onChange={handleChange}
+                  placeholder="Enter business/store name"
+                  className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+                />
+              </div>
+
+              {/* GSTIN */}
+              <div>
+                <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">GSTIN / TAX ID</label>
+                <input
+                  type="text"
+                  name="gstin"
+                  required
+                  value={formData.gstin}
+                  onChange={handleChange}
+                  placeholder="Enter GSTIN ID number"
+                  className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+                />
+              </div>
+
+              {/* Business Address */}
+              <div>
+                <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Business Address</label>
+                <textarea
+                  name="businessAddress"
+                  required
+                  rows="3"
+                  value={formData.businessAddress}
+                  onChange={handleChange}
+                  placeholder="Enter business address"
+                  className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white resize-none"
+                />
+              </div>
+            </>
+          )}
 
           {/* Phone Number */}
           <div>

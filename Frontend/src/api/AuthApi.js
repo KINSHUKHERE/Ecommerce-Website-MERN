@@ -39,4 +39,28 @@ export const uploadAvatarApi = async (file) => {
 
 export const becomeSellerApi = async (data) => {
   return await api.post("/become-seller", data);
+};
+
+export const getVendorsApi = async () => {
+  return await api.get("/vendors");
+};
+
+export const createVendorApi = async (data) => {
+  return await api.post("/vendors", data);
+};
+
+export const updateVendorStatusApi = async (vendorId, status) => {
+  return await api.put(`/vendors/${vendorId}/status`, { vendorStatus: status });
+};
+
+export const deleteVendorApi = async (vendorId) => {
+  return await api.delete(`/vendors/${vendorId}`);
+};
+
+export const deleteUserApi = async (userId) => {
+  return await api.delete(`/users/${userId}`);
+};
+
+export const toggleUserSuspensionApi = async (userId) => {
+  return await api.put(`/users/${userId}/suspend`);
 };

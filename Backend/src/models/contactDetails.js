@@ -14,6 +14,11 @@ const contactSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    type: {
+      type: String,
+      enum: ["user", "vendor"],
+      default: "user",
+    },
   },
   {
     timestamps: true,

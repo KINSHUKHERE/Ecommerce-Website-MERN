@@ -14,6 +14,8 @@ import {
   PlusCircle,
   List,
   X,
+  Users,
+  BarChart3,
 } from "lucide-react";
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
@@ -40,6 +42,8 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
 
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const isVendor = user.role === "vendor";
+  const isAdmin = user.role === "admin";
+  const isLocked = isVendor && user.vendorStatus !== "active";
 
   const menuItems = [
     {
@@ -50,6 +54,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
     {
       title: "Products",
       icon: <ShoppingBag size={16} />,
+      isLocked,
       submenu: [
         {
           title: "All Products",
@@ -63,7 +68,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         },
       ],
     },
-    ...(!isVendor
+    ...(isAdmin
       ? [
           {
             title: "Categories",
@@ -75,6 +80,30 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
             path: "/brands",
             icon: <Layers size={16} />,
           },
+        ]
+      : []),
+    {
+      title: "Orders",
+      path: "/order-details",
+      icon: <FileText size={16} />,
+      isLocked,
+    },
+    ...(isAdmin
+      ? [
+          {
+            title: "Vendors",
+            path: "/admin/vendors",
+            icon: <Users size={16} />,
+          },
+          {
+            title: "Users",
+            path: "/admin/users",
+            icon: <Users size={16} />,
+          },
+        ]
+      : []),
+    ...(isAdmin
+      ? [
           {
             title: "Contact Queries",
             path: "/contact-details",
@@ -82,11 +111,15 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           },
         ]
       : []),
-    {
-      title: "Orders",
-      path: "/order-details",
-      icon: <FileText size={16} />,
-    },
+    ...(isVendor
+      ? [
+          {
+            title: "Store Profile",
+            path: "/admin/profile",
+            icon: <Users size={16} />,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -127,6 +160,20 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           {menuItems.map((item, idx) => {
             if (item.submenu) {
               const isSubmenuActive = isActive("/admin/products") || isActive("/create-product");
+              
+              if (item.isLocked) {
+                return (
+                  <div key={idx} className="space-y-1 opacity-60 cursor-not-allowed select-none">
+                    <div className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider text-muted-gray">
+                      <div className="flex items-center gap-3">
+                        {item.icon}
+                        <span>{item.title} 🔒</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <div key={idx} className="space-y-1">
                   <button
@@ -166,6 +213,18 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                       ))}
                     </div>
                   )}
+                </div>
+              );
+            }
+
+            if (item.isLocked) {
+              return (
+                <div
+                  key={idx}
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider text-muted-gray opacity-60 cursor-not-allowed select-none"
+                >
+                  {item.icon}
+                  <span>{item.title} 🔒</span>
                 </div>
               );
             }

@@ -5,6 +5,10 @@ import {
   ShoppingCart,
   IndianRupee,
   MessageSquare,
+  CheckCircle,
+  XCircle,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { getDashboardData } from "../../api/DashboardApi";
 
@@ -15,12 +19,20 @@ const AdminDashboard = () => {
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
 
+  // Vendor summary stats for Super Admin
+  const [totalVendors, setTotalVendors] = useState(0);
+  const [pendingVendors, setPendingVendors] = useState(0);
+  const [activeVendors, setActiveVendors] = useState(0);
+  const [suspendedVendors, setSuspendedVendors] = useState(0);
+
   const user = JSON.parse(localStorage.getItem("user")) || {
     name: "Admin",
     role: "admin",
   };
 
   const isVendor = user.role === "vendor";
+  const isAdmin = user.role === "admin";
+  const isVendorPendingOrSuspended = isVendor && user.vendorStatus !== "active";
 
   const fetchData = async () => {
     try {
@@ -30,6 +42,13 @@ const AdminDashboard = () => {
       setTotalUsers(getInfo.totalUse);
       setTotalContacts(getInfo.totalCon);
       setTotalRevenue(getInfo.totalRev);
+
+      if (user.role === "admin") {
+        setTotalVendors(getInfo.totalVendors || 0);
+        setPendingVendors(getInfo.pendingVendors || 0);
+        setActiveVendors(getInfo.activeVendors || 0);
+        setSuspendedVendors(getInfo.suspendedVendors || 0);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -39,7 +58,7 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-  const rawCards = [
+  const businessOverviewCards = [
     {
       title: "Total Products",
       value: totalProducts,
@@ -49,7 +68,7 @@ const AdminDashboard = () => {
     },
     {
       title: "Total Users",
-      value: totalUsers > 0 ? totalUsers - 1 : 0,
+      value: totalUsers,
       iconClass: Users,
       badge: "Accounts",
       show: !isVendor,
@@ -62,70 +81,194 @@ const AdminDashboard = () => {
       show: true,
     },
     {
-      title: "Revenue",
+      title: "Total Revenue",
       value: `₹${totalRevenue.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
       iconClass: IndianRupee,
       badge: "Revenue",
       show: true,
+    },
+  ].filter((c) => c.show);
+
+  const marketplaceOverviewCards = [
+    {
+      title: "Total Vendors",
+      value: totalVendors,
+      iconClass: Users,
+      badge: "Sellers",
+      show: user.role === "admin",
+    },
+    {
+      title: "Pending Vendor Requests",
+      value: pendingVendors,
+      iconClass: Clock,
+      badge: "Pending",
+      show: user.role === "admin",
     },
     {
       title: "Contact Queries",
       value: totalContacts,
       iconClass: MessageSquare,
       badge: "Support",
-      show: !isVendor,
+      show: user.role === "admin",
     },
-  ];
+    {
+      title: "Total Reviews",
+      value: 0,
+      iconClass: CheckCircle,
+      badge: "Ratings",
+      show: user.role === "admin",
+    },
+  ].filter((c) => c.show);
 
-  const cards = rawCards.filter((card) => card.show);
   const firstName = user?.name ? user.name.split(" ")[0] : "Admin";
 
+  if (isVendorPendingOrSuspended) {
+    return (
+      <div className="relative text-dark-navy antialiased text-left space-y-6">
+        <div className="mb-4 sm:mb-8 text-left">
+          <h1 className="text-xl sm:text-3xl font-extrabold text-dark-navy tracking-tight leading-tight">
+            Welcome back, {firstName}! 👋
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-gray mt-1.5 font-medium leading-relaxed">
+            Your seller workspace status is overviewed below.
+          </p>
+        </div>
+
+        <div className="bg-white border border-light-border/60 rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden max-w-xl">
+          <div className={`absolute top-0 left-0 right-0 h-1.5 ${user.vendorStatus === 'pending' ? 'bg-amber-500' : 'bg-red-500'}`}></div>
+          
+          <div className="flex items-center gap-4 mb-6">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${
+              user.vendorStatus === 'pending' 
+                ? 'bg-amber-50 text-amber-500 border-amber-100' 
+                : 'bg-red-50 text-red-655 border-red-100'
+            }`}>
+              {user.vendorStatus === 'pending' ? <Clock size={22} /> : <AlertTriangle size={22} />}
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-muted-gray uppercase tracking-widest leading-none">
+                Seller Account Status
+              </h3>
+              <span className={`inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest border border-current ${
+                user.vendorStatus === 'pending' 
+                  ? 'bg-amber-50 text-amber-600 border-amber-100' 
+                  : 'bg-red-50 text-red-655 border-red-100'
+              }`}>
+                {user.vendorStatus === 'pending' ? 'Pending Approval' : 'Suspended'}
+              </span>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-muted-gray leading-relaxed font-semibold mb-6">
+            {user.vendorStatus === 'pending'
+              ? "Your seller account is currently under review by our administrator team. Once approved, you will be unlocked to configure products, view complete metrics, and process customer orders."
+              : "Your seller account has been suspended by the marketplace administrator. Your current listings are hidden from search and checkout. Please contact the administrator team to appeal or reactivate your account."}
+          </p>
+
+          <div className="border-t border-light-border/40 pt-5">
+            <h4 className="text-xs font-extrabold text-dark-navy uppercase tracking-widest mb-3">
+              Locked Portal Features:
+            </h4>
+            <ul className="space-y-2">
+              <li className="flex items-center gap-2.5 text-xs text-muted-gray font-bold">
+                <span className="text-red-500 font-extrabold">✗</span> Add / Edit / Remove Products
+              </li>
+              <li className="flex items-center gap-2.5 text-xs text-muted-gray font-bold">
+                <span className="text-red-500 font-extrabold">✗</span> Process Checkout Orders
+              </li>
+              <li className="flex items-center gap-2.5 text-xs text-muted-gray font-bold">
+                <span className="text-red-500 font-extrabold">✗</span> View Advanced Shop Analytics
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 text-dark-navy antialiased">
+    <div className="space-y-8 text-dark-navy antialiased">
       {/* Header */}
-      <div className="mb-4 sm:mb-8 text-left">
+      <div className="mb-4 sm:mb-8 text-left border-b border-light-border/40 pb-4">
         <h1 className="text-xl sm:text-3xl font-extrabold text-dark-navy tracking-tight leading-tight">
           Welcome back, {firstName}! 👋
         </h1>
-        <p className="text-xs sm:text-sm text-muted-gray mt-1.5 font-medium leading-relaxed">
+        <p className="text-xs sm:text-sm text-muted-gray mt-1.5 font-semibold leading-relaxed">
           {isVendor 
             ? "Here's a comprehensive snapshot of your seller shop's performance, catalog overview, and product orders."
             : "Here's a comprehensive snapshot of your YoCart store's performance, catalog overview, and customer inquiries."}
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-3">
-        {cards.map((card, index) => {
-          const IconComponent = card.iconClass;
-          return (
-            <div
-              key={index}
-              className="bg-white border border-light-border/60 rounded-3xl p-4 sm:p-6 shadow-2xs hover:shadow-md transition-all duration-300 text-left relative overflow-hidden group"
-            >
-              {/* Corner Decorative Accent Bar */}
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-light-border/30 group-hover:bg-primary transition-colors duration-300"></div>
-              
-              <div className="flex items-center justify-between">
-                <div className="text-primary bg-primary/5 border border-primary/10 w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center">
-                  <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" />
+      {/* First Row (Business Overview) */}
+      <div className="text-left">
+        <h2 className="text-xs font-extrabold text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
+          <span>📦</span> Business Overview
+        </h2>
+        <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
+          {businessOverviewCards.map((card, index) => {
+            const IconComponent = card.iconClass;
+            return (
+              <div
+                key={index}
+                className="bg-white border border-light-border/60 rounded-3xl p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 relative overflow-hidden group"
+              >
+                <div className="absolute top-0 left-0 right-0 h-[3px] bg-light-border/30 group-hover:bg-primary transition-colors duration-300"></div>
+                <div className="flex items-center justify-between">
+                  <div className="text-primary bg-primary/5 border border-primary/10 w-8 h-8 rounded-xl flex items-center justify-center">
+                    <IconComponent className="w-4 h-4" />
+                  </div>
+                  <span className="text-[8px] sm:text-[9px] font-extrabold uppercase bg-primary/5 text-primary border border-primary/10 px-2.5 py-0.5 rounded-full">
+                    {card.badge}
+                  </span>
                 </div>
-                <span className="text-[8px] sm:text-[10px] font-extrabold uppercase bg-primary/5 text-primary border border-primary/10 px-2 sm:px-2.5 py-0.5 rounded-full">
-                  {card.badge}
-                </span>
+                <h3 className="mt-3 text-[9px] sm:text-xs font-extrabold text-muted-gray uppercase tracking-wider leading-none">
+                  {card.title}
+                </h3>
+                <p className="mt-2 text-base sm:text-2xl font-black text-dark-navy tracking-tight break-words">
+                  {card.value}
+                </p>
               </div>
-
-              <h3 className="mt-3 text-[9px] sm:text-xs font-extrabold text-muted-gray uppercase tracking-wider leading-none">
-                {card.title}
-              </h3>
-
-              <p className="mt-2 text-base sm:text-3xl font-black text-dark-navy tracking-tight break-words">
-                {card.value}
-              </p>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
+
+      {/* Second Row (Marketplace Overview) - Admin Only */}
+      {isAdmin && marketplaceOverviewCards.length > 0 && (
+        <div className="text-left pt-2">
+          <h2 className="text-xs font-extrabold text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
+            <span>🏪</span> Marketplace Overview
+          </h2>
+          <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
+            {marketplaceOverviewCards.map((card, index) => {
+              const IconComponent = card.iconClass;
+              return (
+                <div
+                  key={index}
+                  className="bg-white border border-light-border/60 rounded-3xl p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-300 relative overflow-hidden group"
+                >
+                  <div className="absolute top-0 left-0 right-0 h-[3px] bg-light-border/30 group-hover:bg-primary transition-colors duration-300"></div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-primary bg-primary/5 border border-primary/10 w-8 h-8 rounded-xl flex items-center justify-center">
+                      <IconComponent className="w-4 h-4" />
+                    </div>
+                    <span className="text-[8px] sm:text-[9px] font-extrabold uppercase bg-primary/5 text-primary border border-primary/10 px-2.5 py-0.5 rounded-full">
+                      {card.badge}
+                    </span>
+                  </div>
+                  <h3 className="mt-3 text-[9px] sm:text-xs font-extrabold text-muted-gray uppercase tracking-wider leading-none">
+                    {card.title}
+                  </h3>
+                  <p className="mt-2 text-base sm:text-2xl font-black text-dark-navy tracking-tight break-words">
+                    {card.value}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

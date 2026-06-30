@@ -2,8 +2,7 @@
 
 **Live Deployment Demo URL**: [yocart.onrender.com](https://yocart.onrender.com)
 
-
-YoCart is a premium, fully responsive e-commerce web application built using the MERN stack (MongoDB, Express, React, Node.js). The platform is architected with a strict separation between the client-facing store and a dedicated administrative dashboard, secured with modern JSON Web Token (JWT) authorization controls.
+YoCart is a premium, high-performance e-commerce platform built on the MERN stack (MongoDB, Express, React, Node.js). The application features a clean separation between the client store, the vendor panel, and a comprehensive admin management dashboard. Secured by JSON Web Token (JWT) identity authorization, it features rich, premium visual styles, micro-animations, and full mobile optimization.
 
 ---
 
@@ -13,34 +12,26 @@ YoCart is a premium, fully responsive e-commerce web application built using the
 ├── Backend/
 │   ├── src/
 │   │   ├── db/
-│   │   │   └── db.js            # MongoDB database connection logic (consolidated to MongoDB Atlas)
+│   │   │   └── db.js            # MongoDB database connection logic (MongoDB Atlas)
 │   │   ├── models/
-│   │   │   ├── productsData.js  # Mongoose Schema for Products (referenced Category & Variant)
-│   │   │   ├── authDetails.js   # Mongoose Schema for Users (roles, hashed passwords, provider, profile status)
+│   │   │   ├── productsData.js  # Mongoose Schema for Products (referenced Category, Brand, Vendor)
+│   │   │   ├── authDetails.js   # Mongoose Schema for Users & Vendors (roles, password hash, status)
 │   │   │   ├── contactDetails.js # Mongoose Schema for Customer Queries
 │   │   │   ├── cartDetails.js   # Mongoose Schema for Shopping Cart items
 │   │   │   ├── categoryDetails.js # Mongoose Schema for Product Categories
-│   │   │   ├── variantDetails.js # Mongoose Schema for Product Variants
+│   │   │   ├── brandDetails.js  # Mongoose Schema for Brand Variants
 │   │   │   └── orderDetails.js  # Mongoose Schema for Orders (items, shipping addresses, statuses)
 │   │   ├── controllers/
-│   │   │   ├── authController.js # Signup, Login, Google OAuth, Profile Completion & Settings handlers
-│   │   │   ├── productController.js # Product CRUD controllers
+│   │   │   ├── authController.js # Auth, Google OAuth, Profile Completion & Directory audits
+│   │   │   ├── productController.js # Product CRUD controllers (with populated vendor data)
 │   │   │   ├── categoryController.js # Category CRUD controllers
-│   │   │   ├── variantController.js # Variant/Brand CRUD controllers
+│   │   │   ├── brandController.js # Brand CRUD controllers
 │   │   │   ├── cartController.js # Cart CRUD controllers
 │   │   │   ├── contactController.js # Customer enquiries handlers
-│   │   │   └── orderController.js # Order placement, clearing cart, retrieving transaction histories
+│   │   │   └── orderController.js # Order checkout & status update workflows
 │   │   ├── middleware/
 │   │   │   ├── verifyUser.js     # Validates HTTP-Only cookie / Bearer JWT to authorize active users
-│   │   │   └── verifyAdmin.js    # Validates active user's payload has 'admin' privileges
-│   │   ├── routes/
-│   │   │   ├── authRoutes.js     # /signup, /login, /google, /complete-profile, /update-profile
-│   │   │   ├── productRoutes.js  # /get-product-data, /product-data-send endpoints
-│   │   │   ├── categoryRoutes.js # /add-category, /get-categories endpoints
-│   │   │   ├── variantRoutes.js  # /add-variant, /get-variants endpoints
-│   │   │   ├── cartRoutes.js     # /add-items-cart, /get-items-cart endpoints
-│   │   │   ├── contactRoutes.js  # /contact-send, /get-contact endpoints
-│   │   │   └── orderRoutes.js    # /orders endpoints (checkout, status transitions)
+│   │   │   └── verifyVendorOrAdmin.js # Validates active user's payload has 'vendor' or 'admin' role
 │   │   └── app.js               # Express API routes and application configuration
 │   ├── server.js                # Server entry point (configures Port and starts server)
 │   └── package.json             # Backend dependencies & scripts
@@ -53,7 +44,7 @@ YoCart is a premium, fully responsive e-commerce web application built using the
 │   │   │   ├── AuthApi.js       # Signup, Login, OAuth, & Profile settings Axios API helpers
 │   │   │   ├── ContactApi.js    # Contact Queries Axios API helpers
 │   │   │   ├── CartApi.js       # Shopping Cart CRUD Axios API helpers
-│   │   │   ├── CategoryAndVarientApi.js # Category & Variant Axios API helpers
+│   │   │   ├── CategoryAndVarientApi.js # Category & Brand Axios API helpers
 │   │   │   └── OrderApi.js      # Order checkout and status Axios API helpers
 │   │   ├── assets/              # App images & icons
 │   │   ├── admin/               # Dedicated Admin Dashboard pages & components
@@ -67,7 +58,7 @@ YoCart is a premium, fully responsive e-commerce web application built using the
 │   │   │       ├── ProductEdit.jsx # Product editor with real-time Image URL validation preview
 │   │   │       └── OrderDetails.jsx # Admin orders audit panel with status update selectors
 │   │   ├── components/          # Reusable UI layout elements
-│   │   │   ├── Navbar.jsx       # Header & Navigation (Customer cart badge & dynamic updating)
+│   │   │   ├── Navbar.jsx       # Header & Navigation (Become a Seller link, cart count badge)
 │   │   │   ├── Footer.jsx       # Footer layout
 │   │   │   ├── Hero.jsx         # Landing Hero Section
 │   │   │   ├── FeaturedProduct.jsx # Featured product grid with skeleton loader states
@@ -78,134 +69,73 @@ YoCart is a premium, fully responsive e-commerce web application built using the
 │   │   │   ├── Home.jsx         # Customer home page view
 │   │   │   ├── About.jsx        # About page view
 │   │   │   ├── Contact.jsx      # Contact page view
-│   │   │   ├── Cart.jsx         # Space-efficient responsive shopping cart dashboard page
-│   │   │   ├── Checkout.jsx     # Modern Apple/Stripe-style 2-page checkout wizard with security checks
+│   │   │   ├── Cart.jsx         # Responsive shopping cart dashboard page
+│   │   │   ├── Checkout.jsx     # Stripe-style checkout wizard with security checks
 │   │   │   ├── Products.jsx     # Customer products registry catalog search & filter page
-│   │   │   ├── ProductDetails.jsx # Customer product details page
-│   │   │   ├── Login.jsx        # User Login Interface with password toggles
-│   │   │   ├── SignUp.jsx       # User Registration Interface with password toggles
+│   │   │   ├── ProductDetails.jsx # Customer product details page (with Seller Card & swatch options)
+│   │   │   ├── Login.jsx        # User Login Interface
+│   │   │   ├── SignUp.jsx       # User Registration Interface (pre-selects Vendor role)
 │   │   │   ├── CompleteProfile.jsx # Google OAuth Profile completion wizard (no navbar)
-│   │   │   └── Profile.jsx      # Customer profile settings & dynamic orders tab list panel
-│   │   │   └── admin/           # Admin Category/Variant/Order panels
+│   │   │   ├── Profile.jsx      # Customer profile settings & dynamic orders tab list panel
+│   │   │   └── admin/           # Admin Category/Brand/Order panels
 │   │   │       ├── AdminDashboard.jsx  # Stats overview cards
 │   │   │       ├── ContactDetails.jsx  # Customer enquiries table
-│   │   │       ├── CreateProduct.jsx   # Add New Product Form (referencing categories & variants)
-│   │   │       ├── CategoryManagement.jsx # Category CRUD interface with loaders
-│   │   │       └── VariantManagement.jsx # Variant/Brand CRUD interface with loaders
+│   │   │       ├── CreateProduct.jsx   # Add New Product Form (referencing categories & brands)
+│   │   │       ├── CategoryManagement.jsx # Category CRUD interface
+│   │   │       ├── BrandManagement.jsx # Brand CRUD interface
+│   │   │       ├── VendorManagement.jsx # Vendor directory & approval panel
+│   │   │       ├── VendorDetails.jsx   # Routed vendor metrics view (Stats, Products, Orders)
+│   │   │       ├── UserManagement.jsx   # Customer directory & suspension controls
+│   │   │       └── UserDetails.jsx     # Routed user purchase history and profile view
 │   │   ├── routes/
 │   │   │   └── AppRoutes.jsx    # React Router definitions & session JWT validity checkers
 │   │   ├── App.jsx              # Main App entry layout
 │   │   ├── main.jsx             # React DOM root render
-│   │   └── index.css            # Global CSS styles with Tailwind v4 theme variables
-│   ├── package.json             # Frontend dependencies & scripts
-│   └── vite.config.js           # Vite server settings
+│   │   └── index.css            # Global CSS styles with Tailwind theme variables
 ```
 
 ---
 
 ## 🚀 Key Features
 
-### 🛍️ Client / Customer Panel
-*   **Home Landing Hub:** Welcoming landing page featuring visual Hero sections, promotional advertisement banners, featured products grid, and standard links.
-*   **Searchable Product Catalog:** Advanced product list (`Products.jsx`) with text search (matches title, category, brand) and category/brand filters. Incorporates clean skeleton loaders and infinite scrolling via `IntersectionObserver`.
-*   **Product Details Viewer:** Dedicated page to inspect product descriptions, stock levels, pricing details, and add items to the cart. Features native **image swiping gestures** on mobile views (`onTouchStart`/`onTouchEnd`) for seamless media navigation.
-*   **Space-Efficient Responsive Cart:** Clean, mobile-friendly cart layout (`Cart.jsx`) that aligns items horizontally on desktop to utilize full width, stacks cleanly on mobile, updates quantities in real-time, and integrates a mobile sticky bottom checkout bar.
-*   **Dynamic Cart Count Badge:** Updates cart counts instantly across the header using custom event-driven listeners (`cartUpdated`).
-*   **Interactive Add-to-Cart Feedback:** Renders a loader spinner inside the cart button during adding requests, coupled with a smooth-fadeIn bottom-right toast confirmation containing the specific product name.
-*   **Apple/Stripe-Style 2-Page Checkout Wizard:** A distraction-free checkout flow (`Checkout.jsx`) featuring:
-    *   *Page 1 (Delivery destination)*: Verified user credentials check and editable shipping recipient forms (Name, Mobile, Street, City, State, PIN).
-    *   *Page 2 (Secure Payment Options)*: Interactive method choices (Instant UPI app list or custom VPA, Credit/Debit card validation fields, and Cash on Delivery) with bank-grade security guarantees and secure transaction simulators.
-    *   *Success screen*: Check animations, generated transaction ID (`TXN_...`), order reference hashes, and direct navigation routes.
-*   **Tabbed Customer Profile Tracking:** A clean settings layout (`Profile.jsx`) refactored into tabs (Account Settings / My Orders / Address Book). Outer wrappers enforce a consistent, uniform width (`w-full max-w-2xl`) across tabs, while the My Orders cards dynamically stack information and bleed footer shaded boxes to the boundaries on mobile.
-*   **Autofilled & Secured Contact Support:** The user contact page automatically pre-fills Name and Email fields for logged-in sessions (allowing custom manipulation), while blocking guest form submissions and warning them to login or register first.
-*   **Mobile Navbar Enhancements:** Fixed viewport visibility with the bottom outline removed and replaced by a subtle, premium dark shadow.
+### 🛍️ Client & Customer Panel
+*   **Become a Seller Guest Link:** Guest-oriented "Become a Seller" link pointing to `/register?role=vendor` in the desktop and mobile navigation layouts. This link automatically disappears once the user logs in.
+*   **Flipkart/Amazon-Style Seller Widget:** Located at the bottom of the product details page, this widget displays the business name, GSTIN number, total active product catalog count, and a link to view other items from the same store.
+*   **Smart Option Swatch Selection:** The product details page dynamically evaluates selected swatches. If a clicked attribute creates an invalid combination, it automatically selects the first valid alternative to prevent `₹0` prices. Faded style and diagonal strike-through formatting are applied to unavailable variations.
+*   **Checkout Wizard:** A Stripe-style 2-page checkout flow verifying details and processing simulate-UPI or credit/debit card secure payments.
 
-### 📊 Admin Panel Dashboard
-*   **Layout Isolation (`AdminLayout`):** Strictly separated from the store interface. Hides the customer navigation header, rendering a glassmorphic top header and a fixed vertical navigation sidebar (Dashboard, Products, Categories, Variants, Orders, Contact Queries, Logout).
-*   **Dashboard Stats Grid:** Stats are displayed in a clean 2x2 grid on mobile view, and optimized as a 3-column layout on desktop view to provide maximum width and readability. Values like Revenue are formatted as rounded integers (e.g. `₹21,30,858` without `.00` decimals) to prevent line breaks.
-*   **Products Catalog Control (`/admin/products`):** Soft UI tabular grid displaying product summaries, categories, variants, pricing, stock levels, status tags, and action buttons. Renders as a spacious 1-column list on mobile screens.
-*   **Custom Select Dropdowns:** Custom React-based selectors (`SoftDropdown`) providing clean overlays, hover animations, and height alignment.
-*   **Dynamic Stats Counters:** Live stats computing Total Products, Active Products, Low Stock Products, and Out of Stock (Sold) Products from the database.
-*   **Load More Pagination:** Interactive scroll footer paging replacing native page numbers.
-*   **Timestamps & Description Viewer:** Detailed product view route (`/admin/products/:productId`) rendering creation/update timestamps. Includes **mobile touch gestures** to swipe between product photos.
-*   **Configurable Product Variants (Mobile Reordering):** The variants table in `/admin/products/:productId` dynamically reorders on mobile using flex ordering rules (`order-1` for variants table, `order-2` for description) to display variants above description.
-*   **Compact Stats Rows:** Categories, Brands, and Contact Query pages present dashboard stats in a single row on mobile views, with responsive font sizing (`text-[11px] sm:text-[13px]`) to maximize screen usage.
-*   **Image URL Validation Editor:** Form-editor route (`/admin/products/edit/:productId`) containing live image preview boxes to inspect URLs for broken links. Instantly clears file input cache values after upload to allow selecting duplicate or new photos cleanly.
-*   **Safe Deletion Dialog:** Confirmation overlay modal preventing accidental deletions.
-*   **Category & Variant CRUD Ports:** Dedicated interfaces to manage, update, and soft-delete store categories and variant brands.
-*   **Orders Lifecycle Audits (`OrderDetails.jsx`):** Database-backed audit panel listing all customer transactions, items, amounts, and dates, with inline status selectors (Processing, Shipped, Delivered, Cancelled) that update MongoDB.
+### 🏪 Vendor Panel
+*   **Become a Seller Application:** Guests can apply as a Vendor, inputting a business name, phone number, GSTIN number, and store address. Upon approval by the Admin, they gain access to dashboard upload controls.
+*   **Catalog Upload:** Vendors can configure products, add variant stock levels, set variant pricing details, upload photos, and track orders containing their products.
+
+### 🛡️ Super Admin Control Panel
+*   **Dashboard Stats Grid:** Visual statistics overview showcasing user metrics, pending vendor applications, product catalog status, and queries.
+*   **Routed Vendor Details View (`/admin/vendors/:vendorId`):**
+    *   Full credentials (GSTIN, Business Address, Owner Name, Registered Email, Phone, Status).
+    *   Calculated statistics: Total Uploaded Products, Seller Orders, and Store Revenue.
+    *   Lists of products owned by the vendor and historical order earnings.
+    *   **Direct action controls:** Status buttons to Approve Seller or Suspend Seller directly on their profile page.
+    *   **Delete control:** Safe confirmation modal to permanently purge the vendor.
+*   **Routed Customer Details View (`/admin/users/:userId`):**
+    *   Full credentials (Name, Email, Phone, Joined Date, Status).
+    *   Calculated statistics: Total Orders and Total Spent.
+    *   Detailed list of orders containing item breakdowns, quantities, and paid amounts.
+    *   **Direct action controls:** Status buttons to Suspend User or Reactivate User directly on their profile page.
+    *   **Delete control:** Safe confirmation modal to permanently purge the customer account.
+*   **Permanent Database Hard Deletions:** Deleting brands, categories, products, and variants permanently deletes them from MongoDB rather than soft-deleting them.
 
 ---
 
 ## 🔐 Security & Identity Infrastructure
-
-YoCart implements a strict, enterprise-ready identity architecture protecting user privacy and preventing unauthorized backend changes:
-
-### 1. Unified Google OAuth & Local Authentication
-- **Google OAuth Integration**: Users can authenticate seamlessly using Google Login on both `/login` and `/register` interfaces (button text customized dynamically for signup/signin context).
-- **Profile Completion Wizard (`/complete-profile`)**: Newly registered Google accounts (created with `provider: "google"` and `isProfileComplete: false` values) are forced into a dedicated, navbar-free setup wizard.
-  - Requires setting a **Phone Number**.
-  - Allows optionally setting a **Password** to establish local email/password credentials, giving the account hybrid authentication capabilities.
-  - Allows users to defer setup via a **Setup Later** button (uses `sessionStorage` session caching to temporarily bypass checks for the active tab session).
-  - Validation guards disable completion buttons unless input is sufficient (phone number >= 10 digits; password >= 6 characters and matching).
-
-### 2. JWT & Parameter Isolation
-- **Secure Token Verification**: Replaced insecure client-side parameter passing with a JWT authentication system. Tokens are set in HTTP-Only cookies (or Bearer Authorization Headers for cross-origin environments) and verified in the backend via a `verifyUser` middleware.
-- **Role-Based Access Control**: An additional `verifyAdmin` middleware acts as an administrative route guard, authorizing product modifications, orders updates, and category/variant settings only to users with the `"admin"` role.
-- **Profile Security Panel**: The user's settings profile (`Profile.jsx`) hides password configuration behind an **Account Security** card showing `Password: Not Set` for OAuth users. Clicking `[ Set Password ]` opens input fields to set local credentials. User phone numbers can also be updated directly in the profile settings.
-- **Secure Checkout Enforcements**: Customers are blocked from completing orders unless a phone number and local password are set. Missing details prompt the user and redirect them directly to `/profile` for setup.
-- **Automatic Stock Inventory Management**: On successful checkout, the backend database controller automatically decrements the quantities of the ordered products by the matching items quantity and sets the product's `sold` status to `true` if stock drops to 0.
-- **Dynamic Password Toggle Toggles**: Integrated `Eye` and `EyeOff` show/hide toggles on every password field in the application (Login, SignUp, Complete Profile, and Profile Settings).
-- **Real-Time Password Confirmation Feedback**: Form inputs render real-time verification status helper texts ("✓ Passwords match" or "❌ Passwords do not match") dynamically as the user types.
+*   **Unified Google OAuth & Local Login:** Integrates OAuth sign-ins. Newly registered Google accounts are routed to `/complete-profile` to finalize credentials.
+*   **JWT Cookie-Based Authorization:** Validates user payloads using HTTP-Only cookies. Administrative and vendor controls are guarded by strict role middlewares.
+*   **Stock Management:** Checkout automatically decrements quantities of ordered product variants and updates product statuses.
 
 ---
 
 ## 🛠️ Technology Stack
-
 *   **Frontend:** React 19, Vite, Tailwind CSS v4, Lucide React, Axios, React Router DOM v7, Google OAuth Library
 *   **Backend:** Node.js, Express.js, MongoDB (Atlas), Mongoose ODM, BcryptJS, JSONWebToken, Cookie-Parser, Cors
-*   **Database Cloud:** Consolidated connections to a single MongoDB Atlas instance for synchronized local/deployed servers.
-
----
-
-## 🔌 API Endpoints Summary
-
-### 🔑 Authentication & Profile settings
-*   `POST /signup` — Registers a new local user with a hashed password (sets `isProfileComplete: true`).
-*   `POST /login` — Authenticates credentials, sets cookie, and returns JWT.
-*   `POST /google` — Authenticates Google tokens, creates accounts with default incomplete flags if new, and sets JWT.
-*   `GET /user-profile` — Retrieves the current authenticated user's details (returns `hasPassword` and excludes password hashes).
-*   `PUT /update-profile` — Updates authenticated profile settings (supports changing `name`, `phoneNumber`, `password`).
-*   `PUT /complete-profile` — Completes profile wizard setup (updates phone number, hashes optional password, and sets `isProfileComplete: true`).
-*   `POST /logout` — Clears JWT tokens from cookies.
-*   `GET /all-users` — Audits registered accounts (Admin-only).
-
-### 🛍️ Products
-*   `GET /get-product-data` — Fetches all catalog products.
-*   `POST /product-data-send` — Adds a new product (Admin-only).
-*   `PATCH /product-update/:id` — Updates product fields (Admin-only).
-*   `DELETE /product-delete/:id` — Deletes a product (Admin-only).
-
-### 🏷️ Categories & Variants
-*   `POST /add-category` — Creates a category (Admin-only).
-*   `GET /get-categories` — Fetches categories list.
-*   `PUT /update-category/:id` — Modifies a category (Admin-only).
-*   `DELETE /delete-category/:id` — Soft-deletes a category (Admin-only).
-*   `POST /add-variant` — Creates a brand variant (Admin-only).
-*   `GET /get-variants` — Fetches all brand variants.
-
-### 🛒 Shopping Cart (Scoped to authenticated JWT user)
-*   `POST /add-items-cart` — Syncs item additions.
-*   `GET /get-items-cart` — Retrieves cart items for active user.
-*   `PUT /increase-cart/:cartId` — Increments quantity.
-*   `PUT /decrease-cart/:cartId` — Decrements quantity.
-*   `DELETE /delete-cart/:cartId` — Removes item from cart.
-
-### 💳 Orders & Checkout
-*   `POST /orders` — Places a new order (clears active cart items automatically).
-*   `GET /orders` — Retrieves all orders (Admin-only audit log).
-*   `GET /orders/user` — Retrieves order transaction history for the active customer profile.
-*   `PUT /orders/:orderId` — Updates order shipment status (Admin-only).
 
 ---
 
@@ -237,9 +167,9 @@ npm start
 The server will run on `http://localhost:3000`.
 
 ### 3. Configure the Frontend
-Open a new terminal window, navigate to the `Frontend` directory, and install dependencies:
+Navigate to the `Frontend` directory and install dependencies:
 ```bash
-cd Frontend
+cd ../Frontend
 npm install
 ```
 Create a `.env` file in the root of the `Frontend/` folder:
@@ -252,17 +182,3 @@ Start the Vite development server:
 npm run dev
 ```
 The application will start running on `http://localhost:5173`.
-
-### 4. Database Seeding & Local Fallback (Optional)
-If your network environment restricts access to the remote MongoDB Atlas instance (e.g. dynamic IP addresses blocked by Atlas firewall), you can configure the backend to use a local MongoDB instance:
-
-1. Ensure a local MongoDB instance is running on your machine (default port `27017`).
-2. Update the `MONGO_URI` variable in the `Backend/.env` file:
-   ```env
-   MONGO_URI=mongodb://localhost:27017/Ecommerce
-   ```
-3. Run the database migration and seeding script from the `Backend` directory to populate the collections:
-   ```bash
-   node seed.js
-   ```
-   *(Note: This script migrates collections, cleans existing items, and seeds a beautiful 12-item catalog with fully-resolved category and brand relationships).*

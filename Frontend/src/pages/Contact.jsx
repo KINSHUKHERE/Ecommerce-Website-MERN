@@ -46,7 +46,8 @@ const Contact = () => {
     }
 
     try {
-      await postContact(formData);
+      const type = user.role === "vendor" ? "vendor" : "user";
+      await postContact({ ...formData, type });
       setIsSubmitted(true);
       setFormData({
         Name: user.name || "",

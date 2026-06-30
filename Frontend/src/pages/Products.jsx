@@ -49,6 +49,7 @@ const Products = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedVendor, setSelectedVendor] = useState("");
 
   useEffect(() => {
     const loadAllData = async () => {
@@ -76,12 +77,18 @@ const Products = () => {
     if (br) {
       setSelectedBrand(br);
     }
+    const vId = searchParams.get("vendorId");
+    if (vId) {
+      setSelectedVendor(vId);
+    } else {
+      setSelectedVendor("");
+    }
   }, [searchParams]);
 
   // Reset visibleCount when any filter/search changes
   useEffect(() => {
     setVisibleCount(10);
-  }, [search, selectedCategory, selectedBrand]);
+  }, [search, selectedCategory, selectedBrand, selectedVendor]);
 
   const fetchProducts = async () => {
     try {
@@ -132,13 +139,21 @@ const Products = () => {
         selectedBrand === "" ||
         itemBrandId.toString() === selectedBrand.toString();
 
-      return matchesSearch && matchesCategory && matchesBrand;
+      const itemVendorId = item.vendorId?._id || item.vendorId || null;
+      const matchesVendor =
+        selectedVendor === "" ||
+        (selectedVendor === "admin"
+          ? !itemVendorId
+          : itemVendorId && itemVendorId.toString() === selectedVendor.toString());
+
+      return matchesSearch && matchesCategory && matchesBrand && matchesVendor;
     });
   }, [
     products,
     search,
     selectedCategory,
     selectedBrand,
+    selectedVendor,
   ]);
 
   const visibleProducts = useMemo(() => {

@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const verifyUser = (req, res, next) => {
+const verifyUser = async (req, res, next) => {
   try {
     console.log("verifyUser: Cookies received:", req.cookies);
     console.log("verifyUser: Authorization header:", req.headers.authorization);
@@ -29,8 +29,17 @@ const verifyUser = (req, res, next) => {
     );
 
     console.log("verifyUser: Token decoded successfully:", decoded);
-    req.user = decoded;
+    
+    const User = require("../models/authDetails");
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ msg: "User not found" });
+    }
+    if (user.isSuspended) {
+      return res.status(403).json({ msg: "Your account has been suspended by the administrator." });
+    }
 
+    req.user = decoded;
     next();
   } catch (error) {
     console.error("verifyUser: Error verifying token:", error.message);

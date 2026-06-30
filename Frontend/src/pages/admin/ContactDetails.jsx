@@ -10,7 +10,8 @@ import {
   Loader2,
   Inbox,
   Check,
-  X
+  X,
+  Users
 } from "lucide-react";
 
 const ContactDetails = () => {
@@ -19,10 +20,11 @@ const ContactDetails = () => {
   const [message, setMessage] = useState("");
   const [toastType, setToastType] = useState("success");
 
-  // Search & Filter State
+  // Search, Filter & Tab State
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("all"); // 'all', 'today', 'week'
   const [sortOrder, setSortOrder] = useState("newest"); // 'newest', 'oldest'
+  const [queryTypeFilter, setQueryTypeFilter] = useState("user"); // 'user', 'vendor'
 
   const fetchContact = async () => {
     try {
@@ -55,10 +57,16 @@ const ContactDetails = () => {
     showToast("Filters reset successfully", "success");
   };
 
+  // Unique tab counts
+  const tabCounts = useMemo(() => {
+    const userCount = contacts.filter((c) => c.type !== "vendor").length;
+    const vendorCount = contacts.filter((c) => c.type === "vendor").length;
+    return { userCount, vendorCount };
+  }, [contacts]);
+
   // Analytics Stats Section
   const stats = useMemo(() => {
     const total = contacts.length;
-    // Unique senders
     const uniqueEmails = new Set(contacts.map((c) => c.Email?.toLowerCase()).filter(Boolean)).size;
     return { total, uniqueEmails };
   }, [contacts]);
@@ -67,7 +75,13 @@ const ContactDetails = () => {
   const filteredContacts = useMemo(() => {
     let result = [...contacts];
 
-    // 1. Search Query (Name, Email, Message)
+    // 1. Filter by Query Type Tab (user vs vendor)
+    result = result.filter((c) => {
+      const isVendorQuery = c.type === "vendor";
+      return queryTypeFilter === "vendor" ? isVendorQuery : !isVendorQuery;
+    });
+
+    // 2. Search Query (Name, Email, Message)
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -78,7 +92,7 @@ const ContactDetails = () => {
       );
     }
 
-    // 2. Date Range Filter
+    // 3. Date Range Filter
     if (dateFilter === "today") {
       const oneDayAgo = new Date();
       oneDayAgo.setDate(oneDayAgo.getDate() - 1);
@@ -89,7 +103,7 @@ const ContactDetails = () => {
       result = result.filter((c) => new Date(c.createdAt) >= oneWeekAgo);
     }
 
-    // 3. Sorting
+    // 4. Sorting
     if (sortOrder === "newest") {
       result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (sortOrder === "oldest") {
@@ -97,10 +111,19 @@ const ContactDetails = () => {
     }
 
     return result;
-  }, [contacts, search, dateFilter, sortOrder]);
+  }, [contacts, search, dateFilter, sortOrder, queryTypeFilter]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] py-12">
+        <Loader2 className="animate-spin text-primary w-10 h-10 mb-4" />
+        <p className="text-xs font-semibold text-muted-gray animate-pulse">Loading queries list...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="relative text-dark-navy antialiased text-left">
+    <div className="relative text-dark-navy antialiased text-left pb-10">
       {/* Toast Alert Widget */}
       {message && (
         <div className="fixed bottom-5 right-5 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn">
@@ -123,7 +146,7 @@ const ContactDetails = () => {
           Contact Queries
         </h1>
         <p className="text-xs text-muted-gray font-semibold mt-1">
-          Review and search client inquiries submitted via the store contact form.
+          Review client and seller inquiries submitted via the store contact form.
         </p>
       </div>
 
@@ -155,163 +178,138 @@ const ContactDetails = () => {
         </div>
       </div>
 
+      {/* Type Tabs Selection (Users' / Vendors') */}
+      <div className="flex border-b border-light-border/50 mb-6 gap-2">
+        <button
+          onClick={() => setQueryTypeFilter("user")}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 tracking-wide transition cursor-pointer ${
+            queryTypeFilter === "user"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-gray hover:text-dark-navy"
+          }`}
+        >
+          <User size={14} />
+          Customer Queries
+          <span className="ml-1.5 px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-slate-100 text-slate-600">
+            {tabCounts.userCount}
+          </span>
+        </button>
+        <button
+          onClick={() => setQueryTypeFilter("vendor")}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 tracking-wide transition cursor-pointer ${
+            queryTypeFilter === "vendor"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-gray hover:text-dark-navy"
+          }`}
+        >
+          <Users size={14} />
+          Vendor Queries
+          <span className="ml-1.5 px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-slate-100 text-slate-600">
+            {tabCounts.vendorCount}
+          </span>
+        </button>
+      </div>
+
       {/* Search & Filters Block */}
       <div className="bg-white border border-light-border/60 rounded-2xl p-4 mb-6 shadow-2xs">
         <div className="flex flex-col sm:flex-row gap-3">
-          {/* Search Input */}
           <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
-              <Search size={15} />
-            </span>
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-gray w-4 h-4" />
             <input
               type="text"
-              placeholder="Search by sender name, email, message keyword..."
+              placeholder="Search sender name, email, query text..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy h-[36px]"
+              className="w-full pl-10 pr-4 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy bg-white transition-all h-[38px]"
             />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray hover:text-dark-navy cursor-pointer"
-              >
-                <X size={14} />
-              </button>
-            )}
           </div>
 
-          {/* Date Filter */}
-          <div className="relative min-w-[140px]">
+          <div className="flex gap-2">
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="w-full pl-3 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy appearance-none cursor-pointer h-[36px]"
+              className="border border-light-border rounded-xl px-3 py-2 text-xs font-semibold text-dark-navy bg-white focus:outline-none focus:ring-4 focus:ring-primary/5 h-[38px] cursor-pointer"
             >
               <option value="all">All Dates</option>
-              <option value="today">Last 24 Hours</option>
-              <option value="week">Last 7 Days</option>
+              <option value="today">Received Today</option>
+              <option value="week">Past 7 Days</option>
             </select>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </span>
-          </div>
 
-          {/* Sort Order */}
-          <div className="relative min-w-[140px]">
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="w-full pl-3 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy appearance-none cursor-pointer h-[36px]"
+              className="border border-light-border rounded-xl px-3 py-2 text-xs font-semibold text-dark-navy bg-white focus:outline-none focus:ring-4 focus:ring-primary/5 h-[38px] cursor-pointer"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
             </select>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </span>
-          </div>
 
-          {/* Reset Filters */}
-          {(search || dateFilter !== "all" || sortOrder !== "newest") && (
             <button
               onClick={handleResetFilters}
-              className="inline-flex items-center justify-center gap-1.5 border border-red-200 text-red-500 hover:bg-red-50 py-2 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer h-[36px]"
+              className="px-3 border border-light-border hover:bg-slate-50 text-muted-gray hover:text-dark-navy rounded-xl flex items-center justify-center cursor-pointer transition h-[38px]"
+              title="Reset Filters"
             >
-              <RotateCcw size={12} />
-              Reset
+              <RotateCcw size={14} />
             </button>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Content Table/Grid */}
-      <div className="bg-white border border-light-border/60 rounded-3xl overflow-hidden shadow-2xs">
-        <div className="px-5 py-4 border-b border-light-border/40 flex justify-between items-center bg-slate-50/20">
-          <h2 className="text-xs font-extrabold text-dark-navy uppercase tracking-widest">Messages Registry</h2>
-          <span className="text-xs font-bold text-muted-gray">
-            Showing {filteredContacts.length} of {contacts.length}
-          </span>
-        </div>
-
-        {loading ? (
-          <div className="p-16 flex flex-col items-center justify-center">
-            <Loader2 className="animate-spin text-primary w-8 h-8 mb-4" />
-            <p className="text-xs font-bold text-muted-gray animate-pulse">Loading message registry...</p>
-          </div>
-        ) : filteredContacts.length === 0 ? (
-          <div className="p-16 text-center">
-            <Inbox className="w-12 h-12 text-muted-gray/50 mx-auto mb-3" />
-            <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-widest">No Messages Found</h3>
-            <p className="text-xs font-semibold text-muted-gray mt-1">Try resetting filters or adjusting search queries.</p>
-            {(search || dateFilter !== "all") && (
-              <button
-                onClick={handleResetFilters}
-                className="mt-4 px-4 py-2 border border-light-border hover:bg-slate-50 text-dark-navy text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs"
-              >
-                Clear Filters
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            {/* Desktop Table View */}
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/65 text-muted-gray border-b border-light-border/40 text-[10px] font-extrabold uppercase tracking-widest">
-                  <th className="py-3.5 px-6 text-left w-1/4">Sender Details</th>
-                  <th className="py-3.5 px-6 w-[55%]">Message Body</th>
-                  <th className="py-3.5 px-6 text-center w-[20%]">Submitted At</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-light-border/40 text-sm font-semibold text-dark-navy">
-                {filteredContacts.map((contact) => (
-                  <tr
-                    key={contact._id}
-                    className="hover:bg-slate-50/30 transition-all duration-200"
-                  >
-                    {/* Sender column */}
-                    <td className="py-4 px-6">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-bold text-dark-navy text-sm flex items-center gap-1.5">
-                          <User size={13} className="text-muted-gray" />
-                          {contact.Name || "Anonymous"}
-                        </span>
-                        <span className="text-xs font-semibold text-muted-gray flex items-center gap-1.5 mt-0.5">
-                          <Mail size={12} className="text-muted-gray" />
-                          {contact.Email || "No Email"}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Message column */}
-                    <td className="py-4 px-6">
-                      <p className="text-dark-navy leading-relaxed max-w-2xl text-xs font-semibold whitespace-pre-wrap">
-                        {contact.Message}
-                      </p>
-                    </td>
-
-                    {/* Time column */}
-                    <td className="py-4 px-6 text-center text-xs font-semibold text-muted-gray whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 bg-slate-100 border border-light-border/45 px-2.5 py-1 rounded-xl text-dark-navy font-bold">
-                        <Clock size={11} className="text-muted-gray" />
-                        {new Date(contact.createdAt).toLocaleTimeString("en-US", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
+      {/* Grid queries card representation */}
+      {filteredContacts.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredContacts.map((contact) => (
+            <div
+              key={contact._id}
+              className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs hover:shadow-xs transition duration-300 relative group flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex justify-between items-start mb-3 gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center text-primary font-black text-xs uppercase">
+                      {contact.Name?.charAt(0) || "U"}
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-dark-navy leading-none">{contact.Name}</h4>
+                      <span className="text-[10px] text-muted-gray font-semibold mt-1 block">
+                        {contact.Email}
                       </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] text-muted-gray font-semibold">
+                    <Clock size={10} />
+                    {new Date(contact.createdAt).toLocaleDateString("en-IN", {
+                      month: "short",
+                      day: "numeric"
+                    })}
+                  </div>
+                </div>
+
+                <div className="text-xs text-slate-600 font-medium leading-relaxed bg-slate-50/50 rounded-xl p-3 border border-light-border/30 mb-4 whitespace-pre-line">
+                  {contact.Message}
+                </div>
+              </div>
+
+              <div className="border-t border-light-border/40 pt-3 flex justify-between items-center text-[10px] text-muted-gray font-semibold uppercase tracking-wider">
+                <span>Query ID: #{contact._id.slice(-6)}</span>
+                <a
+                  href={`mailto:${contact.Email}?subject=Reply to YoCart Inquiry`}
+                  className="px-2.5 py-1 bg-primary/5 hover:bg-primary/10 text-primary border border-primary/10 rounded-lg transition"
+                >
+                  Reply via Email
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white border border-light-border/60 rounded-3xl p-12 text-center shadow-2xs">
+          <Inbox className="mx-auto w-10 h-10 text-muted-gray mb-3 stroke-[1.5]" />
+          <p className="text-xs font-semibold text-muted-gray">
+            No query messages found matching criteria.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

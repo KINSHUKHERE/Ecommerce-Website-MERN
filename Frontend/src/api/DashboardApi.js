@@ -1,4 +1,4 @@
-import { allUsers } from "./AuthApi";
+import { allUsers, getVendorsApi } from "./AuthApi";
 import { getContact } from "./ContactApi";
 import { getAllOrders } from "./OrderApi";
 import { getProduct } from "./ProductApi";
@@ -32,19 +32,21 @@ export const getDashboardData = async (user) => {
   }
 
   // Super Admin view
-  const [products, contacts, users, orders] = await Promise.all([
+  const [products, contacts, users, orders, vendorsRes] = await Promise.all([
     getProduct(),
     getContact(),
     allUsers(),
     getAllOrders(),
+    getVendorsApi(),
   ]);
 
   const ordersList = orders.data.orders || [];
+  const vendorsList = vendorsRes.data.vendors || [];
 
   return {
     totalPro: products.data.data.length,
     totalCon: contacts.data.contacts.length,
-    totalUse: users.data.length,
+    totalUse: users.data.filter(u => u.role === "user").length,
     totalOrd: ordersList.length,
     totalRev: ordersList.reduce(
       (acc, order) => {
@@ -55,5 +57,9 @@ export const getDashboardData = async (user) => {
       },
       0,
     ),
+    totalVendors: vendorsList.length,
+    pendingVendors: vendorsList.filter(v => v.vendorStatus === "pending").length,
+    activeVendors: vendorsList.filter(v => v.vendorStatus === "active").length,
+    suspendedVendors: vendorsList.filter(v => v.vendorStatus === "suspended").length,
   };
 };

@@ -14,6 +14,10 @@ import ContactDetails from "../pages/admin/ContactDetails";
 import OrderDetails from "../pages/admin/OrderDetails";
 import CategoryManagement from "../pages/admin/CategoryManagement";
 import BrandManagement from "../pages/admin/BrandManagement";
+import VendorManagement from "../pages/admin/VendorManagement";
+import UserManagement from "../pages/admin/UserManagement";
+import VendorDetails from "../pages/admin/VendorDetails";
+import UserDetails from "../pages/admin/UserDetails";
 import Profile from "../pages/Profile";
 import Wishlist from "../pages/Wishlist";
 import Checkout from "../pages/Checkout";
@@ -64,6 +68,18 @@ const AdminRoute = ({ children }) => {
   }
   if (user.role !== "admin" && user.role !== "vendor") {
     return <Navigate to="/" replace />;
+  }
+  return children;
+};
+
+// Route Guard for active features (Super Admin or active vendors)
+const ActiveVendorOrAdminRoute = ({ children }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user.role === "vendor" && user.vendorStatus !== "active") {
+    return <Navigate to="/admin" replace />;
   }
   return children;
 };
@@ -214,14 +230,18 @@ const AppRoutes = () => {
       {/* Protected Admin-only Routes wrapped in AdminLayout */}
       <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/products" element={<AdminProducts />} />
-        <Route path="/admin/products/:productId" element={<ProductView />} />
-        <Route path="/admin/products/edit/:productId" element={<ProductEdit />} />
-        <Route path="/create-product" element={<AdminRoute><CreateProduct /></AdminRoute>} />
+        <Route path="/admin/products" element={<ActiveVendorOrAdminRoute><AdminProducts /></ActiveVendorOrAdminRoute>} />
+        <Route path="/admin/products/:productId" element={<ActiveVendorOrAdminRoute><ProductView /></ActiveVendorOrAdminRoute>} />
+        <Route path="/admin/products/edit/:productId" element={<ActiveVendorOrAdminRoute><ProductEdit /></ActiveVendorOrAdminRoute>} />
+        <Route path="/create-product" element={<ActiveVendorOrAdminRoute><CreateProduct /></ActiveVendorOrAdminRoute>} />
         <Route path="/contact-details" element={<AdminRoute><ContactDetails /></AdminRoute>} />
-        <Route path="/order-details" element={<AdminRoute><OrderDetails /></AdminRoute>} />
+        <Route path="/order-details" element={<ActiveVendorOrAdminRoute><OrderDetails /></ActiveVendorOrAdminRoute>} />
         <Route path="/categories" element={<AdminRoute><CategoryManagement /></AdminRoute>} />
         <Route path="/brands" element={<AdminRoute><BrandManagement /></AdminRoute>} />
+        <Route path="/admin/vendors" element={<AdminRoute><VendorManagement /></AdminRoute>} />
+        <Route path="/admin/vendors/:vendorId" element={<AdminRoute><VendorDetails /></AdminRoute>} />
+        <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+        <Route path="/admin/users/:userId" element={<AdminRoute><UserDetails /></AdminRoute>} />
         <Route path="/admin/profile" element={<Profile />} />
       </Route>
     </Routes>

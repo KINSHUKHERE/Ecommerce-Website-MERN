@@ -184,6 +184,13 @@ const Navbar = () => {
               Contact
             </Link>
           </li>
+          {!currentUser && (
+            <li>
+              <Link className={navLink("/register?role=vendor")} to="/register?role=vendor">
+                Become a Seller
+              </Link>
+            </li>
+          )}
         </ul>
 
         {/* Right Side */}
@@ -246,19 +253,21 @@ const Navbar = () => {
                 </span>
               </Link>
 
-              {currentUser.role === "vendor" ? (
+              {currentUser.role === "admin" && (
+                <Link
+                  to="/admin"
+                  className="text-xs font-bold uppercase tracking-wider text-primary hover:text-primary-hover px-3 py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition"
+                >
+                  Admin Panel
+                </Link>
+              )}
+
+              {currentUser.role === "vendor" && (
                 <Link
                   to="/admin"
                   className="text-xs font-bold uppercase tracking-wider text-primary hover:text-primary-hover px-3 py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition"
                 >
                   Seller Portal
-                </Link>
-              ) : (
-                <Link
-                  to="/become-seller"
-                  className="text-xs font-bold uppercase tracking-wider text-muted-gray hover:text-primary px-3 py-2 transition"
-                >
-                  Become a Seller
                 </Link>
               )}
 
@@ -363,6 +372,17 @@ const Navbar = () => {
               Contact
             </Link>
           </li>
+          {!currentUser && (
+            <li>
+              <Link
+                to="/register?role=vendor"
+                className={`block py-1 hover:text-[#15877F] ${isActive("/register?role=vendor") ? "text-[#15877F]" : ""}`}
+                onClick={() => setIsOpen(false)}
+              >
+                Become a Seller
+              </Link>
+            </li>
+          )}
 
           <hr className="border-gray-200 my-2" />
 
@@ -411,7 +431,17 @@ const Navbar = () => {
                 </button>
               </div>
 
-              {currentUser.role === "vendor" ? (
+              {currentUser.role === "admin" && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl font-bold text-xs uppercase tracking-wider transition"
+                >
+                  Admin Panel
+                </Link>
+              )}
+
+              {currentUser.role === "vendor" && (
                 <Link
                   to="/admin"
                   onClick={() => setIsOpen(false)}
@@ -419,15 +449,8 @@ const Navbar = () => {
                 >
                   Seller Portal
                 </Link>
-              ) : (
-                <Link
-                  to="/become-seller"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2 bg-slate-100 hover:bg-slate-200 text-muted-gray hover:text-dark-navy rounded-xl font-bold text-xs uppercase tracking-wider transition"
-                >
-                  Become a Seller
-                </Link>
               )}
+
             </div>
           )}
         </ul>
