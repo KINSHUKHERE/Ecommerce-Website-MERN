@@ -79,9 +79,11 @@ const VendorSupport = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold">
           <div>
-            <label className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Owner / Merchant Name</label>
+            <label htmlFor="vendorSupportName" className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Owner / Merchant Name</label>
             <input 
               type="text" 
+              id="vendorSupportName"
+              name="vendorSupportName"
               readOnly 
               value={formData.Name}
               className="w-full border border-light-border/60 bg-slate-50 text-muted-gray rounded-xl px-4 py-2.5 outline-none font-semibold cursor-not-allowed"
@@ -89,9 +91,11 @@ const VendorSupport = () => {
           </div>
 
           <div>
-            <label className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Registered Store Email</label>
+            <label htmlFor="vendorSupportEmail" className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Registered Store Email</label>
             <input 
               type="email" 
+              id="vendorSupportEmail"
+              name="vendorSupportEmail"
               readOnly 
               value={formData.Email}
               className="w-full border border-light-border/60 bg-slate-50 text-muted-gray rounded-xl px-4 py-2.5 outline-none font-semibold cursor-not-allowed"
@@ -99,10 +103,12 @@ const VendorSupport = () => {
           </div>
 
           <div>
-            <label className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Query Message</label>
+            <label htmlFor="vendorSupportMessage" className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Query Message</label>
             <textarea 
               required
               rows="5"
+              id="vendorSupportMessage"
+              name="vendorSupportMessage"
               value={formData.Message}
               onChange={(e) => setFormData(prev => ({ ...prev, Message: e.target.value }))}
               placeholder="Describe your query, technical support request, or concern in detail..."

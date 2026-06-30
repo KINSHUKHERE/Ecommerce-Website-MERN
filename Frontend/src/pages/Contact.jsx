@@ -120,7 +120,7 @@ const Contact = () => {
 
             <form className="space-y-4" onSubmit={(e) => handleForm(e)}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 mb-1">
                   Name
                 </label>
                 <input

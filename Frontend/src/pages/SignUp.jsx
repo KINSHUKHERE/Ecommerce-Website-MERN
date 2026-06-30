@@ -182,10 +182,11 @@ const SignUp = () => {
         <form onSubmit={handleSubmit} className="space-y-5 text-left">
           {/* Name */}
           <div>
-            <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Full Name</label>
+            <label htmlFor="signupName" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Full Name</label>
 
             <input
               type="text"
+              id="signupName"
               name="name"
               required
               value={formData.name}
@@ -197,11 +198,12 @@ const SignUp = () => {
 
           {/* Role */}
           <div>
-            <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">
+            <label htmlFor="signupRole" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">
               Account Type
             </label>
 
             <select
+              id="signupRole"
               name="role"
               required
               value={formData.role}
@@ -218,9 +220,10 @@ const SignUp = () => {
             <>
               {/* Business Name */}
               <div>
-                <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Business Name</label>
+                <label htmlFor="signupBusinessName" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Business Name</label>
                 <input
                   type="text"
+                  id="signupBusinessName"
                   name="businessName"
                   required
                   value={formData.businessName}
@@ -232,9 +235,10 @@ const SignUp = () => {
 
               {/* GSTIN */}
               <div>
-                <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">GSTIN / TAX ID</label>
+                <label htmlFor="signupGstin" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">GSTIN / TAX ID</label>
                 <input
                   type="text"
+                  id="signupGstin"
                   name="gstin"
                   required
                   value={formData.gstin}
@@ -246,8 +250,9 @@ const SignUp = () => {
 
               {/* Business Address */}
               <div>
-                <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Business Address</label>
+                <label htmlFor="signupBusinessAddress" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Business Address</label>
                 <textarea
+                  id="signupBusinessAddress"
                   name="businessAddress"
                   required
                   rows="3"
@@ -262,12 +267,13 @@ const SignUp = () => {
 
           {/* Phone Number */}
           <div>
-            <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">
+            <label htmlFor="signupPhoneNumber" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">
               Phone Number
             </label>
 
             <input
               type="tel"
+              id="signupPhoneNumber"
               name="phoneNumber"
               required
               value={formData.phoneNumber}
@@ -279,12 +285,13 @@ const SignUp = () => {
 
           {/* Email */}
           <div>
-            <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">
+            <label htmlFor="signupEmail" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">
               Email Address
             </label>
 
             <input
               type="email"
+              id="signupEmail"
               name="email"
               required
               value={formData.email}
@@ -297,11 +304,12 @@ const SignUp = () => {
 
           {/* Password */}
           <div>
-            <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Password</label>
+            <label htmlFor="signupPassword" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Password</label>
 
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
+                id="signupPassword"
                 name="password"
                 required
                 value={formData.password}

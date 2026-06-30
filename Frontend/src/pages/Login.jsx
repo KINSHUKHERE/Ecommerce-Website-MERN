@@ -117,12 +117,13 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5 text-left">
           <div>
-            <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">
+            <label htmlFor="loginEmail" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">
               Email Address
             </label>
 
             <input
               type="email"
+              id="loginEmail"
               name="email"
               required
               value={formData.email}
@@ -134,11 +135,12 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Password</label>
+            <label htmlFor="loginPassword" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Password</label>
 
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
+                id="loginPassword"
                 name="password"
                 required
                 value={formData.password}
