@@ -131,6 +131,9 @@ const Footer = () => {
           <form onSubmit={handleNewsletterSubmit} className="flex border border-light-border rounded-xl overflow-hidden focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/5 transition-all mt-1.5 bg-white p-1 shadow-2xs">
             <input
               type="email"
+              id="newsletter-email"
+              name="newsletter-email"
+              autoComplete="email"
               value={newsletterEmail}
               onChange={(e) => setNewsletterEmail(e.target.value)}
               placeholder="Your email address"

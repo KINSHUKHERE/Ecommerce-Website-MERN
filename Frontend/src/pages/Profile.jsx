@@ -501,6 +501,9 @@ const Profile = () => {
                 </span>
                 <input
                   type="text"
+                  id="profile-name"
+                  name="name"
+                  autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all h-[38px]"
@@ -513,7 +516,7 @@ const Profile = () => {
             {/* Email field (Read-Only) */}
             <div className="flex flex-col gap-1.5 text-left">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">
+                <label htmlFor="profile-email" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">
                   Email Address
                 </label>
                 <span className="text-[10px] text-muted-gray font-bold select-none uppercase tracking-wider">
@@ -526,6 +529,9 @@ const Profile = () => {
                 </span>
                 <input
                   type="email"
+                  id="profile-email"
+                  name="email"
+                  autoComplete="email"
                   value={email}
                   disabled
                   className="w-full pl-9 pr-4 py-2 border border-light-border rounded-xl bg-slate-50 text-slate-400 text-sm font-semibold cursor-not-allowed h-[38px] select-none"
@@ -538,7 +544,7 @@ const Profile = () => {
 
             {/* Phone Number field */}
             <div className="flex flex-col gap-1.5 text-left">
-              <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">
+              <label htmlFor="profile-phone" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">
                 Phone Number
               </label>
               <div className="relative">
@@ -547,6 +553,9 @@ const Profile = () => {
                 </span>
                 <input
                   type="tel"
+                  id="profile-phone"
+                  name="phone"
+                  autoComplete="tel"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all h-[38px]"
@@ -588,6 +597,9 @@ const Profile = () => {
                     </span>
                     <input
                       type={showPassword ? "text" : "password"}
+                      id="profile-new-password"
+                      name="new-password"
+                      autoComplete="new-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full pl-9 pr-10 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all h-[38px]"
@@ -616,6 +628,9 @@ const Profile = () => {
                       </span>
                       <input
                         type={showConfirmPassword ? "text" : "password"}
+                        id="profile-confirm-password"
+                        name="confirm-password"
+                        autoComplete="new-password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className="w-full pl-9 pr-10 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all h-[38px]"
@@ -891,6 +906,9 @@ const Profile = () => {
                   <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">Street Address (Flat/House No., Colony)</label>
                   <input
                     type="text"
+                    id="profile-street"
+                    name="street-address"
+                    autoComplete="street-address"
                     required
                     value={addressForm.streetAddress}
                     onChange={(e) => setAddressForm({ ...addressForm, streetAddress: e.target.value })}
@@ -901,9 +919,12 @@ const Profile = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">Town / City</label>
+                    <label htmlFor="profile-city" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">Town / City</label>
                     <input
                       type="text"
+                      id="profile-city"
+                      name="city"
+                      autoComplete="address-level2"
                       required
                       value={addressForm.city}
                       onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
@@ -912,9 +933,12 @@ const Profile = () => {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">State / Province</label>
+                    <label htmlFor="profile-state" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">State / Province</label>
                     <input
                       type="text"
+                      id="profile-state"
+                      name="state"
+                      autoComplete="address-level1"
                       required
                       value={addressForm.state}
                       onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
@@ -926,9 +950,12 @@ const Profile = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">PIN / Postal Code</label>
+                    <label htmlFor="profile-pincode" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">PIN / Postal Code</label>
                     <input
                       type="text"
+                      id="profile-pincode"
+                      name="pincode"
+                      autoComplete="postal-code"
                       required
                       maxLength="6"
                       value={addressForm.pinCode}
@@ -938,9 +965,12 @@ const Profile = () => {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">Country</label>
+                    <label htmlFor="profile-country" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">Country</label>
                     <input
                       type="text"
+                      id="profile-country"
+                      name="country"
+                      autoComplete="country-name"
                       required
                       value={addressForm.country}
                       onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}

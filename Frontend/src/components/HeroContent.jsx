@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const HeroContent = (props) => {
+  const navigate = useNavigate()
   return (
     <div 
       className="w-full h-full flex-shrink-0 bg-cover bg-center bg-no-repeat flex items-center relative select-none" 
@@ -24,7 +26,7 @@ const HeroContent = (props) => {
           {props.description}
         </p>
 
-        <button className="mt-6 sm:mt-7 bg-[#088178] hover:bg-[#06635c] text-white text-xs sm:text-sm font-extrabold py-3 px-8 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg active:scale-98 cursor-pointer w-fit">
+        <button className="mt-6 sm:mt-7 bg-[#088178] hover:bg-[#06635c] text-white text-xs sm:text-sm font-extrabold py-3 px-8 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg active:scale-98 cursor-pointer w-fit" onClick={() => navigate("/products")}>
           Shop Now
         </button>
       </div>

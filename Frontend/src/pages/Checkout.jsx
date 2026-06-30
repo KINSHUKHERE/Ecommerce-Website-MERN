@@ -405,6 +405,9 @@ const Checkout = () => {
                       <input
                         type="text"
                         required
+                        id="checkout-name"
+                        name="name"
+                        autoComplete="name"
                         placeholder="Prachi Dogi"
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
@@ -416,6 +419,9 @@ const Checkout = () => {
                       <input
                         type="text"
                         required
+                        id="checkout-phone"
+                        name="phone"
+                        autoComplete="tel"
                         placeholder="9876543210"
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
@@ -530,6 +536,9 @@ const Checkout = () => {
                         <input
                           type="text"
                           required
+                          id="checkout-address"
+                          name="address"
+                          autoComplete="street-address"
                           placeholder="Flat/House No., Colony, Street, Apartment"
                           value={shippingAddress.address}
                           onChange={(e) => setShippingAddress({ ...shippingAddress, address: e.target.value })}
@@ -543,6 +552,9 @@ const Checkout = () => {
                           <input
                             type="text"
                             required
+                            id="checkout-city"
+                            name="city"
+                            autoComplete="address-level2"
                             placeholder="New Delhi"
                             value={shippingAddress.city}
                             onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
@@ -554,6 +566,9 @@ const Checkout = () => {
                           <input
                             type="text"
                             required
+                            id="checkout-state"
+                            name="state"
+                            autoComplete="address-level1"
                             placeholder="Delhi"
                             value={shippingAddress.state}
                             onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
@@ -565,6 +580,9 @@ const Checkout = () => {
                           <input
                             type="text"
                             required
+                            id="checkout-pincode"
+                            name="pincode"
+                            autoComplete="postal-code"
                             placeholder="110001"
                             maxLength="6"
                             pattern="\d{6}"
@@ -665,6 +683,9 @@ const Checkout = () => {
                               <span className="text-xs font-extrabold text-muted-gray uppercase tracking-widest">Or Enter UPI ID</span>
                               <input
                                 type="text"
+                                id="checkout-upi"
+                                name="upi-id"
+                                autoComplete="off"
                                 placeholder="username@upi"
                                 value={upiId}
                                 onChange={(e) => {
@@ -705,6 +726,9 @@ const Checkout = () => {
                               <span className="text-xs font-extrabold text-muted-gray uppercase tracking-widest">Cardholder Name</span>
                               <input
                                 type="text"
+                                id="checkout-cardholder"
+                                name="ccname"
+                                autoComplete="cc-name"
                                 placeholder="Rahul Sharma"
                                 value={cardDetails.holder}
                                 onChange={(e) => setCardDetails({ ...cardDetails, holder: e.target.value })}
@@ -715,6 +739,9 @@ const Checkout = () => {
                               <span className="text-xs font-extrabold text-muted-gray uppercase tracking-widest">Card Number</span>
                               <input
                                 type="text"
+                                id="checkout-cardnumber"
+                                name="cardnumber"
+                                autoComplete="cc-number"
                                 placeholder="4532 7150 9324 8102"
                                 value={cardDetails.number}
                                 onChange={handleCardNumberChange}
@@ -726,6 +753,9 @@ const Checkout = () => {
                                 <span className="text-xs font-extrabold text-muted-gray uppercase tracking-widest">Expiry (MM/YY)</span>
                                 <input
                                   type="text"
+                                  id="checkout-cardexpiry"
+                                  name="cc-exp"
+                                  autoComplete="cc-exp"
                                   placeholder="MM/YY"
                                   value={cardDetails.expiry}
                                   onChange={handleExpiryChange}
@@ -736,6 +766,9 @@ const Checkout = () => {
                                 <span className="text-xs font-extrabold text-muted-gray uppercase tracking-widest">CVV</span>
                                 <input
                                   type="password"
+                                  id="checkout-cardcvv"
+                                  name="cvv"
+                                  autoComplete="cc-csc"
                                   placeholder="***"
                                   maxLength="3"
                                   value={cardDetails.cvv}

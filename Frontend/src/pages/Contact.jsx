@@ -124,31 +124,36 @@ const Contact = () => {
                 </label>
                 <input
                   type="text"
+                  id="contact-name"
                   onChange={(e) => formDetails(e)}
                   value={formData.Name}
                   name="Name"
+                  autoComplete="name"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#088178] focus:border-transparent outline-none"
                   placeholder="Your Name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
                 <input
                   type="email"
+                  id="contact-email"
                   name="Email"
                   onChange={formDetails}
                   value={formData.Email}
+                  autoComplete="email"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#088178] focus:border-transparent outline-none"
                   placeholder="your@email.com"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 mb-1">
                   Message
                 </label>
                 <textarea
+                  id="contact-message"
                   rows="4"
                   onChange={formDetails}
                   name="Message"

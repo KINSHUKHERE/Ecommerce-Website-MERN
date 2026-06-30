@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown } from "lucide-react";
 import logo from "../assets/logo.png";
@@ -14,6 +14,20 @@ const Navbar = () => {
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+  const navRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isOpen && navRef.current && !navRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   const fetchWishlistCount = async (userObj) => {
     try {
@@ -139,7 +153,7 @@ const Navbar = () => {
   if (isAuthPage) return null;
 
   return (
-    <nav className={`sticky top-0 z-50 w-full bg-white/50 backdrop-blur-lg border-b border-light-border/40 shadow-xs transition-transform duration-300 ${
+    <nav ref={navRef} className={`sticky top-0 z-50 w-full bg-white/50 backdrop-blur-lg border-b border-light-border/40 shadow-xs transition-transform duration-300 ${
       visible ? "translate-y-0" : "-translate-y-full"
     }`}>
       <div className="flex h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
@@ -283,7 +297,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Drawer */}
       <div
-        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-all duration-300 border-b border-light-border/40 bg-white/70 backdrop-blur-lg shadow-lg ${
+        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-all duration-300 border-b border-light-border/40 bg-white/95 backdrop-blur-md shadow-lg ${
           isOpen ? "max-h-125 border-t border-light-border/40" : "max-h-0"
         }`}
       >
