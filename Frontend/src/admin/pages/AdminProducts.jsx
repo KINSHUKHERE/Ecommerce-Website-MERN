@@ -611,9 +611,14 @@ const AdminProducts = () => {
 
                     {/* Right: Product Basic Details */}
                     <div className="flex-1 min-w-0 pr-20">
-                      <span className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest leading-none">
-                        {p.brandId?.name || "No Brand"}
-                      </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="inline-block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest leading-none">
+                          {p.brandId?.name || "No Brand"}
+                        </span>
+                        <span className="inline-block text-[9px] font-extrabold text-primary uppercase tracking-widest leading-none bg-primary/5 px-1.5 py-0.5 rounded-md">
+                          {p.categoryId?.name || "No Category"}
+                        </span>
+                      </div>
                       <h3 className="font-bold text-sm text-dark-navy mt-1.5 leading-snug truncate">
                         {p.heading}
                       </h3>
