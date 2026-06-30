@@ -38,6 +38,9 @@ const Profile = () => {
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   const [avatar, setAvatar] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [businessName, setBusinessName] = useState("");
+  const [businessAddress, setBusinessAddress] = useState("");
+  const [gstin, setGstin] = useState("");
 
   // Show/Hide password toggles
   const [showPassword, setShowPassword] = useState(false);
@@ -215,6 +218,9 @@ const Profile = () => {
         setRole(data.role || "user");
         setHasPassword(data.hasPassword !== false);
         setAvatar(data.avatar || "");
+        setBusinessName(data.businessName || "");
+        setBusinessAddress(data.businessAddress || "");
+        setGstin(data.gstin || "");
       } catch (err) {
         console.error("Failed to load user profile:", err);
         showToast("Failed to load profile details", "error");
@@ -283,11 +289,17 @@ const Profile = () => {
 
     setSubmitting(true);
     try {
+      const isVendor = role === "vendor";
       const res = await updateProfile({
         name: name.trim(),
         phoneNumber: phoneNumber.trim(),
         password: password ? password : undefined,
         avatar: avatar,
+        ...(isVendor ? {
+          businessName: businessName.trim(),
+          businessAddress: businessAddress.trim(),
+          gstin: gstin.trim(),
+        } : {}),
       });
 
       const updatedUser = res.data.user;
@@ -297,6 +309,11 @@ const Profile = () => {
         name: updatedUser.name,
         phoneNumber: updatedUser.phoneNumber,
         avatar: updatedUser.avatar,
+        ...(isVendor ? {
+          businessName: updatedUser.businessName,
+          businessAddress: updatedUser.businessAddress,
+          gstin: updatedUser.gstin,
+        } : {}),
       };
       localStorage.setItem("user", JSON.stringify(newLocalStorageUser));
 
@@ -330,6 +347,7 @@ const Profile = () => {
   }
 
   const isAdmin = role === "admin";
+  const isDashboardUser = role === "admin" || role === "vendor";
 
   const getOrderStatusClass = (status) => {
     switch (status) {
@@ -345,7 +363,7 @@ const Profile = () => {
   };
 
   return (
-    <div className={`w-full max-w-2xl mx-auto text-dark-navy antialiased ${isAdmin ? "mt-4" : "my-12 px-6"}`}>
+    <div className={`w-full max-w-2xl mx-auto text-dark-navy antialiased ${isDashboardUser ? "mt-4" : "my-12 px-6"}`}>
       
       {/* Toast Alert Widget */}
       {message && (
@@ -387,7 +405,7 @@ const Profile = () => {
         >
           Profile Settings
         </button>
-        {!isAdmin && (
+        {!isDashboardUser && (
           <button
             onClick={() => {
               setActiveTab("orders");
@@ -402,7 +420,7 @@ const Profile = () => {
             My Orders
           </button>
         )}
-        {!isAdmin && (
+        {!isDashboardUser && (
           <button
             onClick={() => {
               setActiveTab("addresses");
@@ -564,6 +582,61 @@ const Profile = () => {
                 />
               </div>
             </div>
+
+            {role === "vendor" && (
+              <>
+                {/* Business Name */}
+                <div className="flex flex-col gap-1.5 text-left">
+                  <label htmlFor="profile-biz-name" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">
+                    Business / Store Name
+                  </label>
+                  <input
+                    type="text"
+                    id="profile-biz-name"
+                    name="businessName"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    className="w-full px-3.5 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all h-[38px]"
+                    placeholder="Enter business name"
+                    required
+                  />
+                </div>
+
+                {/* GSTIN */}
+                <div className="flex flex-col gap-1.5 text-left">
+                  <label htmlFor="profile-gstin" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">
+                    GSTIN / Tax ID
+                  </label>
+                  <input
+                    type="text"
+                    id="profile-gstin"
+                    name="gstin"
+                    value={gstin}
+                    onChange={(e) => setGstin(e.target.value)}
+                    className="w-full px-3.5 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all h-[38px]"
+                    placeholder="Enter GSTIN"
+                    required
+                  />
+                </div>
+
+                {/* Business Address */}
+                <div className="flex flex-col gap-1.5 text-left">
+                  <label htmlFor="profile-biz-address" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">
+                    Business Address
+                  </label>
+                  <textarea
+                    id="profile-biz-address"
+                    name="businessAddress"
+                    rows="3"
+                    value={businessAddress}
+                    onChange={(e) => setBusinessAddress(e.target.value)}
+                    className="w-full px-3.5 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all resize-none"
+                    placeholder="Enter business address"
+                    required
+                  />
+                </div>
+              </>
+            )}
 
             {!hasPassword && !showPasswordFields ? (
               <div className="bg-soft-bg border border-light-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-left">

@@ -204,6 +204,13 @@ const updateProfile = async (req, res) => {
       user.avatar = avatar;
     }
 
+    if (user.role === "vendor") {
+      const { businessName, businessAddress, gstin } = req.body;
+      if (businessName) user.businessName = businessName;
+      if (businessAddress) user.businessAddress = businessAddress;
+      if (gstin) user.gstin = gstin;
+    }
+
     await user.save();
 
     res.status(200).json({
@@ -215,6 +222,9 @@ const updateProfile = async (req, res) => {
         role: user.role,
         phoneNumber: user.phoneNumber,
         avatar: user.avatar,
+        businessName: user.businessName,
+        businessAddress: user.businessAddress,
+        gstin: user.gstin,
       },
     });
   } catch (err) {
