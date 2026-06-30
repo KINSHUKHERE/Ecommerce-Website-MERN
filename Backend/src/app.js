@@ -67,7 +67,9 @@ app.use("/", wishlistRoutes);
 
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
-  res.send("User-agent: *\nAllow: /");
+  res.send(
+    `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /get-\nDisallow: /add-\nDisallow: /update-\nDisallow: /delete-\nDisallow: /toggle-\nDisallow: /product-\nDisallow: /cart\nDisallow: /order\nDisallow: /wishlist\nDisallow: /upload\nDisallow: /address\n\nSitemap: https://yocart.onrender.com/sitemap.xml`
+  );
 });
 
 module.exports = app;
