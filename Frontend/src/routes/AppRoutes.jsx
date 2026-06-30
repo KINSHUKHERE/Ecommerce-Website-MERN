@@ -8,6 +8,7 @@ import Contact from "../pages/Contact";
 import Cart from "../pages/Cart";
 import LogIn from "../pages/Login";
 import SignUp from "../pages/SignUp";
+import VendorStore from "../pages/VendorStore";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import CreateProduct from "../pages/admin/CreateProduct";
 import ContactDetails from "../pages/admin/ContactDetails";
@@ -207,6 +208,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:productId" element={<ProductDetails />} />
+        <Route path="/store/:vendorId" element={<VendorStore />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/terms-conditions" element={<TermsConditions />} />

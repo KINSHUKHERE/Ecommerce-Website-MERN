@@ -530,7 +530,7 @@ const ProductDetails = () => {
             </span>
           </div>
           <Link
-            to={`/products?vendorId=${product.vendorId?._id || "admin"}`}
+            to={product.vendorId?._id ? `/store/${product.vendorId._id}` : "/products"}
             className="text-[9px] font-extrabold text-accent hover:underline block mt-1 uppercase tracking-wider text-right"
           >
             View Store
