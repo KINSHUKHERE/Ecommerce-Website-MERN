@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signUpApi, googleLogin, uploadAvatarApi } from "../api/AuthApi";
 import { GoogleLogin } from "@react-oauth/google";
-import { Eye, EyeOff, Loader2, User } from "lucide-react";
+import { Eye, EyeOff, Loader2, User, ArrowLeft } from "lucide-react";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -166,6 +166,15 @@ const SignUp = () => {
       )}
 
       <div className="w-full max-w-md bg-white border border-light-border/60 shadow-2xs rounded-3xl p-8">
+        {/* Back to Home */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest hover:text-primary transition-colors duration-200 mb-6 group"
+        >
+          <ArrowLeft size={13} className="group-hover:-translate-x-0.5 transition-transform duration-200" />
+          Back to Home
+        </Link>
+
         <h1 className="text-2xl sm:text-3xl font-extrabold text-center text-dark-navy tracking-tight mb-1">
           Create Account
         </h1>
