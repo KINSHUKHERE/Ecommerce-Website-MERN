@@ -477,6 +477,22 @@ const toggleUserSuspension = async (req, res) => {
   }
 };
 
+const getPublicVendor = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const vendor = await User.findOne({ _id: vendorId, role: "vendor" })
+      .select("name email businessName gstin businessAddress phoneNumber createdAt vendorStatus");
+    
+    if (!vendor) {
+      return res.status(404).json({ msg: "Vendor profile not found" });
+    }
+    
+    res.status(200).json({ vendor });
+  } catch (err) {
+    res.status(500).json({ msg: "Server error", error: err.message });
+  }
+};
+
 module.exports = {
   signup,
   login,
@@ -493,5 +509,6 @@ module.exports = {
   deleteVendor,
   deleteUser,
   toggleUserSuspension,
+  getPublicVendor,
 };
 

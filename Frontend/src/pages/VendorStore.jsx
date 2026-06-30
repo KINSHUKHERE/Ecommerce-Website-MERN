@@ -11,7 +11,7 @@ import {
   Loader2,
   Package
 } from "lucide-react";
-import { getVendorsApi } from "../api/AuthApi";
+import { getPublicVendorApi } from "../api/AuthApi";
 import { getProduct } from "../api/ProductApi";
 import EachProduct from "../components/EachProduct";
 
@@ -23,12 +23,12 @@ const VendorStore = () => {
 
   const loadStoreData = async () => {
     try {
-      const [vendorsRes, productsRes] = await Promise.all([
-        getVendorsApi(),
+      const [vendorRes, productsRes] = await Promise.all([
+        getPublicVendorApi(vendorId),
         getProduct()
       ]);
 
-      const foundVendor = (vendorsRes.data.vendors || []).find(v => v._id === vendorId);
+      const foundVendor = vendorRes.data.vendor;
       setVendor(foundVendor);
 
       const allProducts = productsRes.data.data || [];

@@ -16,6 +16,7 @@ const {
   deleteVendor,
   deleteUser,
   toggleUserSuspension,
+  getPublicVendor,
 } = require("../controllers/authController");
 const verifyUser = require("../middleware/verifyUser");
 const verifyAdmin = require("../middleware/verifyAdmin");
@@ -39,5 +40,8 @@ router.delete("/vendors/:vendorId", verifyUser, verifyAdmin, deleteVendor);
 // Admin-only User Management
 router.delete("/users/:userId", verifyUser, verifyAdmin, deleteUser);
 router.put("/users/:userId/suspend", verifyUser, verifyAdmin, toggleUserSuspension);
+
+// Public Vendor Details storefront route
+router.get("/vendors/public/:vendorId", getPublicVendor);
 
 module.exports = router;

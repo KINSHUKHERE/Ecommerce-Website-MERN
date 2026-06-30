@@ -45,6 +45,10 @@ export const getVendorsApi = async () => {
   return await api.get("/vendors");
 };
 
+export const getPublicVendorApi = async (vendorId) => {
+  return await api.get(`/vendors/public/${vendorId}`);
+};
+
 export const createVendorApi = async (data) => {
   return await api.post("/vendors", data);
 };
