@@ -200,7 +200,7 @@ const VendorManagement = () => {
       </div>
 
       {/* Analytics Stats Section */}
-      <div className="grid grid-cols-4 gap-3 sm:gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <div
           onClick={() => setStatusFilter("")}
           className={`flex flex-col p-4 bg-white border rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-300 cursor-pointer ${
@@ -279,7 +279,7 @@ const VendorManagement = () => {
       {/* Vendors Data Table */}
       <div className="bg-white border border-light-border/60 rounded-3xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full min-w-[900px] border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-light-border/60 text-left">
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Store / Owner</th>

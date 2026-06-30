@@ -19,6 +19,7 @@ import VendorManagement from "../pages/admin/VendorManagement";
 import UserManagement from "../pages/admin/UserManagement";
 import VendorDetails from "../pages/admin/VendorDetails";
 import UserDetails from "../pages/admin/UserDetails";
+import VendorSupport from "../pages/admin/VendorSupport";
 import Profile from "../pages/Profile";
 import Wishlist from "../pages/Wishlist";
 import Checkout from "../pages/Checkout";
@@ -245,6 +246,7 @@ const AppRoutes = () => {
         <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
         <Route path="/admin/users/:userId" element={<AdminRoute><UserDetails /></AdminRoute>} />
         <Route path="/admin/profile" element={<Profile />} />
+        <Route path="/admin/support" element={<AdminRoute><VendorSupport /></AdminRoute>} />
       </Route>
     </Routes>
   );

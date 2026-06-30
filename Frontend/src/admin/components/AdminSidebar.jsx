@@ -118,6 +118,11 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
             path: "/admin/profile",
             icon: <Users size={16} />,
           },
+          {
+            title: "Support Query",
+            path: "/admin/support",
+            icon: <MessageSquare size={16} />,
+          },
         ]
       : []),
   ];

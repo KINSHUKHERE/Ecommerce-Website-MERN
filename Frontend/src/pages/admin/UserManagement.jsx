@@ -235,7 +235,7 @@ const UserManagement = () => {
       {/* User Accounts Table */}
       <div className="bg-white border border-light-border/60 rounded-3xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full min-w-[850px] border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-light-border/60 text-left">
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Name / Account</th>
