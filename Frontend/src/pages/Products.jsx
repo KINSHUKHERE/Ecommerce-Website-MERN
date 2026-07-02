@@ -125,11 +125,11 @@ const Products = () => {
   };
 
   const filteredBrands = useMemo(() => {
-    return brands.filter(
-      (brand) =>
-        selectedCategory === "" ||
-        (brand.categoryId?._id || brand.categoryId) === selectedCategory
-    );
+    return brands.filter((brand) => {
+      if (selectedCategory === "") return true;
+      const brandCatId = brand.categoryId?._id || brand.categoryId;
+      return brandCatId && brandCatId.toString() === selectedCategory.toString();
+    });
   }, [brands, selectedCategory]);
 
   const filteredProducts = useMemo(() => {
@@ -172,10 +172,21 @@ const Products = () => {
 
   const sortedAndFilteredProducts = useMemo(() => {
     let result = [...filteredProducts];
+    
+    const getMinPrice = (product) => {
+      if (product.variants && product.variants.length > 0) {
+        const prices = product.variants.map((v) => v.price).filter((p) => typeof p === "number");
+        if (prices.length > 0) {
+          return Math.min(...prices);
+        }
+      }
+      return product.price || 0;
+    };
+
     if (sortBy === "price-asc") {
-      result.sort((a, b) => (a.price || 0) - (b.price || 0));
+      result.sort((a, b) => getMinPrice(a) - getMinPrice(b));
     } else if (sortBy === "price-desc") {
-      result.sort((a, b) => (b.price || 0) - (a.price || 0));
+      result.sort((a, b) => getMinPrice(b) - getMinPrice(a));
     }
     return result;
   }, [filteredProducts, sortBy]);
