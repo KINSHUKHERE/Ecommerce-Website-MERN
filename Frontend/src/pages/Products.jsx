@@ -56,6 +56,8 @@ const Products = () => {
   const [showAllBrands, setShowAllBrands] = useState(false);
   const [sortBy, setSortBy] = useState("default");
   const [sortOpen, setSortOpen] = useState(false);
+  const [categoriesExpanded, setCategoriesExpanded] = useState(true);
+  const [brandsExpanded, setBrandsExpanded] = useState(true);
 
   useEffect(() => {
     const loadAllData = async () => {
@@ -236,6 +238,8 @@ const Products = () => {
     setShowAllCategories(false);
     setShowAllBrands(false);
     setSortBy("default");
+    setCategoriesExpanded(true);
+    setBrandsExpanded(true);
   };
 
   return (
@@ -317,100 +321,118 @@ const Products = () => {
           <div className="flex flex-col gap-5">
             {/* Categories Mobile */}
             <div>
-              <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-3">
-                Categories
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {loading ? (
-                  Array.from({ length: 4 }).map((_, idx) => (
-                    <div key={idx} className="h-7 w-16 bg-slate-100 rounded-xl animate-pulse"></div>
-                  ))
-                ) : (
-                  <>
-                    <button
-                      onClick={() => {
-                        setSelectedCategory("");
-                        setSelectedBrand("");
-                      }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                        selectedCategory === ""
-                          ? "bg-primary text-white border-primary shadow-xs"
-                          : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
-                      }`}
-                    >
-                      All
-                    </button>
-                    {(showAllCategories ? categories : categories.slice(0, 5)).map((category) => (
+              <div 
+                onClick={() => setCategoriesExpanded(!categoriesExpanded)}
+                className="flex justify-between items-center cursor-pointer mb-3 select-none group"
+              >
+                <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest group-hover:text-dark-navy transition-colors">
+                  Categories
+                </h3>
+                <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${categoriesExpanded ? "rotate-180" : ""}`} />
+              </div>
+              
+              <div className={`overflow-hidden transition-all duration-350 ${categoriesExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}>
+                <div className="flex flex-wrap gap-2 pt-1 pb-2">
+                  {loading ? (
+                    Array.from({ length: 4 }).map((_, idx) => (
+                      <div key={idx} className="h-7 w-16 bg-slate-100 rounded-xl animate-pulse"></div>
+                    ))
+                  ) : (
+                    <>
                       <button
-                        key={category._id}
                         onClick={() => {
-                          setSelectedCategory(category._id);
+                          setSelectedCategory("");
                           setSelectedBrand("");
                         }}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                          selectedCategory === category._id
+                          selectedCategory === ""
                             ? "bg-primary text-white border-primary shadow-xs"
                             : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
                         }`}
                       >
-                        {category.name}
+                        All
                       </button>
-                    ))}
-                  </>
+                      {(showAllCategories ? categories : categories.slice(0, 5)).map((category) => (
+                        <button
+                          key={category._id}
+                          onClick={() => {
+                            setSelectedCategory(category._id);
+                            setSelectedBrand("");
+                          }}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                            selectedCategory === category._id
+                              ? "bg-primary text-white border-primary shadow-xs"
+                              : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
+                          }`}
+                        >
+                          {category.name}
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </div>
+                {!loading && categories.length > 5 && (
+                  <button
+                    onClick={() => setShowAllCategories(!showAllCategories)}
+                    className="text-[10px] font-extrabold text-primary hover:text-accent mt-1 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {showAllCategories ? "Show Less" : `Show More (+${categories.length - 5})`}
+                  </button>
                 )}
               </div>
-              {!loading && categories.length > 5 && (
-                <button
-                  onClick={() => setShowAllCategories(!showAllCategories)}
-                  className="text-[10px] font-extrabold text-primary hover:text-accent mt-2.5 flex items-center gap-1 cursor-pointer transition-colors"
-                >
-                  {showAllCategories ? "Show Less" : `Show More (+${categories.length - 5})`}
-                </button>
-              )}
             </div>
 
             {/* Brands Mobile */}
             <div>
-              <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-3">
-                Brands
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, idx) => (
-                    <div key={idx} className="h-7 w-16 bg-slate-100 rounded-xl animate-pulse"></div>
-                  ))
-                ) : (
-                  <>
-                    <button
-                      onClick={() => setSelectedBrand("")}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                        selectedBrand === ""
-                          ? "bg-primary text-white border-primary shadow-xs"
-                          : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
-                      }`}
-                    >
-                      All Brands
-                    </button>
-                    {(showAllBrands ? filteredBrands : filteredBrands.slice(0, 6)).map((brand) => (
+              <div 
+                onClick={() => setBrandsExpanded(!brandsExpanded)}
+                className="flex justify-between items-center cursor-pointer mb-3 select-none group"
+              >
+                <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest group-hover:text-dark-navy transition-colors">
+                  Brands
+                </h3>
+                <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${brandsExpanded ? "rotate-180" : ""}`} />
+              </div>
+              
+              <div className={`overflow-hidden transition-all duration-350 ${brandsExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}>
+                <div className="flex flex-wrap gap-2 pt-1 pb-2">
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, idx) => (
+                      <div key={idx} className="h-7 w-16 bg-slate-100 rounded-xl animate-pulse"></div>
+                    ))
+                  ) : (
+                    <>
                       <button
-                        key={brand._id}
-                        onClick={() => setSelectedBrand(brand._id)}
+                        onClick={() => setSelectedBrand("")}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                          selectedBrand === brand._id
+                          selectedBrand === ""
                             ? "bg-primary text-white border-primary shadow-xs"
                             : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
                         }`}
                       >
-                        {brand.name}
+                        All Brands
                       </button>
-                    ))}
-                  </>
-                )}
+                      {(showAllBrands ? filteredBrands : filteredBrands.slice(0, 6)).map((brand) => (
+                        <button
+                          key={brand._id}
+                          onClick={() => setSelectedBrand(brand._id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                            selectedBrand === brand._id
+                              ? "bg-primary text-white border-primary shadow-xs"
+                              : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
+                          }`}
+                        >
+                          {brand.name}
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </div>
               </div>
               {!loading && filteredBrands.length > 6 && (
                 <button
                   onClick={() => setShowAllBrands(!showAllBrands)}
-                  className="text-[10px] font-extrabold text-primary hover:text-accent mt-2.5 flex items-center gap-1 cursor-pointer transition-colors"
+                  className="text-[10px] font-extrabold text-primary hover:text-accent mt-1 flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   {showAllBrands ? "Show Less" : `Show More (+${filteredBrands.length - 6})`}
                 </button>
@@ -446,105 +468,123 @@ const Products = () => {
               </div>
 
               {/* Categories Sidebar Section */}
-              <div className="mb-8">
-                <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-4">
-                  Categories
-                </h3>
-                <div className="flex flex-col gap-1.5">
-                  {loading ? (
-                    Array.from({ length: 4 }).map((_, idx) => (
-                      <div key={idx} className="h-9.5 bg-slate-150 rounded-xl animate-pulse"></div>
-                    ))
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => {
-                          setSelectedCategory("");
-                          setSelectedBrand("");
-                        }}
-                        className={`px-4 py-2.5 rounded-xl text-left text-xs font-bold transition-all border-l-2 cursor-pointer ${
-                          selectedCategory === ""
-                            ? "bg-primary/5 border-primary text-primary"
-                            : "border-transparent text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
-                        }`}
-                      >
-                        All Categories
-                      </button>
-                      {(showAllCategories ? categories : categories.slice(0, 5)).map((category) => (
+              <div className="mb-8 border-b border-light-border/40 pb-5">
+                <div 
+                  onClick={() => setCategoriesExpanded(!categoriesExpanded)}
+                  className="flex justify-between items-center cursor-pointer mb-4 select-none group"
+                >
+                  <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest group-hover:text-dark-navy transition-colors">
+                    Categories
+                  </h3>
+                  <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${categoriesExpanded ? "rotate-180" : ""}`} />
+                </div>
+                
+                <div className={`overflow-hidden transition-all duration-350 ${categoriesExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}>
+                  <div className="flex flex-col gap-1.5">
+                    {loading ? (
+                      Array.from({ length: 4 }).map((_, idx) => (
+                        <div key={idx} className="h-9.5 bg-slate-150 rounded-xl animate-pulse"></div>
+                      ))
+                    ) : (
+                      <>
                         <button
-                          key={category._id}
                           onClick={() => {
-                            setSelectedCategory(category._id);
+                            setSelectedCategory("");
                             setSelectedBrand("");
                           }}
                           className={`px-4 py-2.5 rounded-xl text-left text-xs font-bold transition-all border-l-2 cursor-pointer ${
-                            selectedCategory === category._id
+                            selectedCategory === ""
                               ? "bg-primary/5 border-primary text-primary"
                               : "border-transparent text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
                           }`}
                         >
-                          {category.name}
+                          All Categories
                         </button>
-                      ))}
-                    </>
+                        {(showAllCategories ? categories : categories.slice(0, 5)).map((category) => (
+                          <button
+                            key={category._id}
+                            onClick={() => {
+                              setSelectedCategory(category._id);
+                              setSelectedBrand("");
+                            }}
+                            className={`px-4 py-2.5 rounded-xl text-left text-xs font-bold transition-all border-l-2 cursor-pointer ${
+                              selectedCategory === category._id
+                                ? "bg-primary/5 border-primary text-primary"
+                                : "border-transparent text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                            }`}
+                          >
+                            {category.name}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                  {!loading && categories.length > 5 && (
+                    <button
+                      onClick={() => setShowAllCategories(!showAllCategories)}
+                      className="text-[10px] font-extrabold text-primary hover:text-accent mt-3 flex items-center gap-1 cursor-pointer transition-colors pl-4 w-full text-left"
+                    >
+                      {showAllCategories ? "Show Less" : `Show More (+${categories.length - 5})`}
+                    </button>
                   )}
                 </div>
-                {!loading && categories.length > 5 && (
-                  <button
-                    onClick={() => setShowAllCategories(!showAllCategories)}
-                    className="text-[10px] font-extrabold text-primary hover:text-accent mt-2.5 flex items-center gap-1 cursor-pointer transition-colors pl-4 w-full text-left"
-                  >
-                    {showAllCategories ? "Show Less" : `Show More (+${categories.length - 5})`}
-                  </button>
-                )}
               </div>
 
               {/* Brands Sidebar Section */}
-              <div>
-                <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-4">
-                  Brands
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {loading ? (
-                    Array.from({ length: 5 }).map((_, idx) => (
-                      <div key={idx} className="h-8 w-16 bg-slate-100 rounded-xl animate-pulse"></div>
-                    ))
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => setSelectedBrand("")}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                          selectedBrand === ""
-                            ? "bg-primary text-white border-primary shadow-xs"
-                            : "bg-white text-muted-gray border-light-border hover:bg-slate-50 hover:border-light-border"
-                        }`}
-                      >
-                        All Brands
-                      </button>
-                      {(showAllBrands ? filteredBrands : filteredBrands.slice(0, 6)).map((brand) => (
+              <div className="mb-2">
+                <div 
+                  onClick={() => setBrandsExpanded(!brandsExpanded)}
+                  className="flex justify-between items-center cursor-pointer mb-4 select-none group"
+                >
+                  <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest group-hover:text-dark-navy transition-colors">
+                    Brands
+                  </h3>
+                  <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${brandsExpanded ? "rotate-180" : ""}`} />
+                </div>
+                
+                <div className={`overflow-hidden transition-all duration-350 ${brandsExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}>
+                  <div className="flex flex-wrap gap-2">
+                    {loading ? (
+                      Array.from({ length: 5 }).map((_, idx) => (
+                        <div key={idx} className="h-8 w-16 bg-slate-100 rounded-xl animate-pulse"></div>
+                      ))
+                    ) : (
+                      <>
                         <button
-                          key={brand._id}
-                          onClick={() => setSelectedBrand(brand._id)}
+                          onClick={() => setSelectedBrand("")}
                           className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                            selectedBrand === brand._id
+                            selectedBrand === ""
                               ? "bg-primary text-white border-primary shadow-xs"
                               : "bg-white text-muted-gray border-light-border hover:bg-slate-50 hover:border-light-border"
                           }`}
                         >
-                          {brand.name}
+                          All Brands
                         </button>
-                      ))}
-                    </>
+                        {(showAllBrands ? filteredBrands : filteredBrands.slice(0, 6)).map((brand) => (
+                          <button
+                            key={brand._id}
+                            onClick={() => setSelectedBrand(brand._id)}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                              selectedBrand === brand._id
+                                ? "bg-primary text-white border-primary shadow-xs"
+                                : "bg-white text-muted-gray border-light-border hover:bg-slate-50 hover:border-light-border"
+                            }`}
+                          >
+                            {brand.name}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                  {!loading && filteredBrands.length > 6 && (
+                    <button
+                      onClick={() => setShowAllBrands(!showAllBrands)}
+                      className="text-[10px] font-extrabold text-primary hover:text-accent mt-3 flex items-center gap-1 cursor-pointer transition-colors pl-1 w-full text-left"
+                    >
+                      {showAllBrands ? "Show Less" : `Show More (+${filteredBrands.length - 6})`}
+                    </button>
                   )}
                 </div>
-                {!loading && filteredBrands.length > 6 && (
-                  <button
-                    onClick={() => setShowAllBrands(!showAllBrands)}
-                    className="text-[10px] font-extrabold text-primary hover:text-accent mt-3 flex items-center gap-1 cursor-pointer transition-colors pl-1 w-full text-left"
-                  >
-                    {showAllBrands ? "Show Less" : `Show More (+${filteredBrands.length - 6})`}
-                  </button>
-                )}
               </div>
 
             </div>
