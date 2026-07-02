@@ -369,7 +369,7 @@ const VendorManagement = () => {
                               handleUpdateStatus(vendor._id, "active");
                             }}
                             disabled={actionId === vendor._id}
-                            className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-100 flex items-center justify-center cursor-pointer disabled:opacity-50 transition"
+                            className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-100 flex items-center justify-center cursor-pointer disabled:opacity-50 transition"
                             title="Approve Seller"
                           >
                             <Check size={14} />
@@ -382,7 +382,7 @@ const VendorManagement = () => {
                               handleUpdateStatus(vendor._id, "suspended");
                             }}
                             disabled={actionId === vendor._id}
-                            className="p-1 text-amber-600 hover:bg-amber-50 rounded-lg border border-amber-100 flex items-center justify-center cursor-pointer disabled:opacity-50 transition"
+                            className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg border border-amber-100 flex items-center justify-center cursor-pointer disabled:opacity-50 transition"
                             title="Suspend Seller"
                           >
                             <X size={14} />
@@ -395,7 +395,7 @@ const VendorManagement = () => {
                             setShowDeleteModal(true);
                           }}
                           disabled={actionId === vendor._id}
-                          className="p-1 text-red-655 hover:bg-red-50 rounded-lg border border-red-100 flex items-center justify-center cursor-pointer disabled:opacity-50 transition"
+                          className="p-2 text-red-655 hover:bg-red-50 rounded-lg border border-red-100 flex items-center justify-center cursor-pointer disabled:opacity-50 transition"
                           title="Purge Vendor from DB"
                         >
                           <Trash2 size={14} />
@@ -438,7 +438,7 @@ const VendorManagement = () => {
             </div>
 
             <form onSubmit={handleCreateVendor} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-1">Owner Name</label>
                   <input
@@ -490,7 +490,7 @@ const VendorManagement = () => {
               <div className="border-t border-light-border/40 pt-4 mt-2">
                 <h4 className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-3">Business Information</h4>
                 
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-1">Store / Business Name</label>
                     <input

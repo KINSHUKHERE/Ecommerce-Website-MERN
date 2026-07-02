@@ -320,7 +320,7 @@ const Checkout = () => {
       <div className="max-w-2xl mx-auto px-6">
         
         {checkoutStep === 3 ? (
-          <div className="max-w-2xl mx-auto p-8 bg-white border border-light-border/60 rounded-3xl shadow-sm text-center relative overflow-hidden animate-fadeIn">
+          <div className="max-w-2xl mx-auto p-4 sm:p-8 bg-white border border-light-border/60 rounded-3xl shadow-sm text-center relative overflow-hidden animate-fadeIn">
             
             <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-5 shadow-xs">
               <Check size={28} strokeWidth={3} className="animate-pulse" />
@@ -374,7 +374,7 @@ const Checkout = () => {
           /* ========================================================================= */
           /* FORM DETAILS (STEP 1 & STEP 2 PAGES) */
           /* ========================================================================= */
-          <div className="max-w-2xl mx-auto p-8 bg-white border border-light-border/60 rounded-3xl shadow-2xs relative overflow-visible">
+          <div className="max-w-2xl mx-auto p-4 sm:p-8 bg-white border border-light-border/60 rounded-3xl shadow-2xs relative overflow-visible">
 
             {/* STEP 1: FORM DETAILS PAGE */}
             {checkoutStep === 1 && (
@@ -653,14 +653,14 @@ const Checkout = () => {
                               onChange={() => setPaymentMethod("UPI")}
                               className="w-4 h-4 text-primary focus:ring-primary cursor-pointer"
                             />
-                            <span className="ml-3 font-semibold text-dark-navy flex items-center gap-2 text-sm">
+                            <span className="ml-3 font-semibold text-dark-navy flex items-center flex-wrap gap-2 text-sm">
                               <Smartphone size={15} className="text-muted-gray" />
                               Instant UPI Transfer (Google Pay, PhonePe, Paytm, or BHIM ID)
                             </span>
                           </div>
                         </label>
                         {paymentMethod === "UPI" && (
-                          <div className="px-4 pb-4 space-y-3.5 animate-fadeIn pl-8">
+                          <div className="px-4 pb-4 space-y-3.5 animate-fadeIn pl-4 sm:pl-8">
                             <div className="flex items-center gap-2 flex-wrap">
                               {["Google Pay", "PhonePe", "Paytm"].map((app) => (
                                 <button
@@ -714,14 +714,14 @@ const Checkout = () => {
                               onChange={() => setPaymentMethod("Card")}
                               className="w-4 h-4 text-primary focus:ring-primary cursor-pointer"
                             />
-                            <span className="ml-3 font-semibold text-dark-navy flex items-center gap-2 text-sm">
+                            <span className="ml-3 font-semibold text-dark-navy flex items-center flex-wrap gap-2 text-sm">
                               <CreditCard size={15} className="text-muted-gray" />
                               Credit or Debit Card (Secure Checkout via Visa, Mastercard, RuPay)
                             </span>
                           </div>
                         </label>
                         {paymentMethod === "Card" && (
-                          <div className="px-4 pb-4 space-y-3.5 animate-fadeIn pl-8 max-w-sm">
+                          <div className="px-4 pb-4 space-y-3.5 animate-fadeIn pl-4 sm:pl-8 max-w-sm">
                             <div className="flex flex-col gap-1">
                               <span className="text-xs font-extrabold text-muted-gray uppercase tracking-widest">Cardholder Name</span>
                               <input
@@ -796,7 +796,7 @@ const Checkout = () => {
                               onChange={() => setPaymentMethod("COD")}
                               className="w-4 h-4 text-primary focus:ring-primary cursor-pointer"
                             />
-                            <span className="ml-3 font-semibold text-dark-navy flex items-center gap-2 text-sm">
+                            <span className="ml-3 font-semibold text-dark-navy flex items-center flex-wrap gap-2 text-sm">
                               <CheckSquare size={15} className="text-muted-gray" />
                               Cash on Delivery (COD / Pay on Delivery)
                             </span>

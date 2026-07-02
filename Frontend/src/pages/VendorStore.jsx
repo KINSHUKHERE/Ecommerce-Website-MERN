@@ -94,7 +94,7 @@ const VendorStore = () => {
               Authorized Marketplace Seller • GSTIN: <span className="font-mono">{vendor.gstin || "N/A"}</span>
             </p>
             <div className="flex flex-wrap gap-x-4 gap-y-1 pt-2 text-xs text-slate-600 font-semibold">
-              <span className="flex items-center gap-1"><Mail size={13} className="text-muted-gray" /> {vendor.email}</span>
+              <span className="flex items-center gap-1 break-all"><Mail size={13} className="text-muted-gray" /> {vendor.email}</span>
               {vendor.phoneNumber && (
                 <span className="flex items-center gap-1"><Phone size={13} className="text-muted-gray" /> {vendor.phoneNumber}</span>
               )}

@@ -428,15 +428,15 @@ const Products = () => {
                     </>
                   )}
                 </div>
+                {!loading && filteredBrands.length > 6 && (
+                  <button
+                    onClick={() => setShowAllBrands(!showAllBrands)}
+                    className="text-[10px] font-extrabold text-primary hover:text-accent mt-1 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {showAllBrands ? "Show Less" : `Show More (+${filteredBrands.length - 6})`}
+                  </button>
+                )}
               </div>
-              {!loading && filteredBrands.length > 6 && (
-                <button
-                  onClick={() => setShowAllBrands(!showAllBrands)}
-                  className="text-[10px] font-extrabold text-primary hover:text-accent mt-1 flex items-center gap-1 cursor-pointer transition-colors"
-                >
-                  {showAllBrands ? "Show Less" : `Show More (+${filteredBrands.length - 6})`}
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -615,7 +615,7 @@ const Products = () => {
                 {sortOpen && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setSortOpen(false)}></div>
-                    <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl bg-white border border-light-border/60 shadow-lg py-1.5 z-20 animate-scaleUp text-left">
+                    <div className="absolute left-0 lg:left-auto lg:right-0 top-full mt-2 w-48 rounded-2xl bg-white border border-light-border/60 shadow-lg py-1.5 z-20 animate-scaleUp text-left">
                       <button
                         onClick={() => {
                           setSortBy("default");

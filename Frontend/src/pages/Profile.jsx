@@ -18,7 +18,8 @@ import {
   Calendar,
   MapPin,
   Trash2,
-  Edit
+  Edit,
+  SlidersHorizontal
 } from "lucide-react";
 
 const Profile = () => {
@@ -363,7 +364,7 @@ const Profile = () => {
   };
 
   return (
-    <div className={`w-full max-w-2xl mx-auto text-dark-navy antialiased ${isDashboardUser ? "mt-4" : "my-12 px-6"}`}>
+    <div className={`w-full max-w-2xl mx-auto text-dark-navy antialiased ${isDashboardUser ? "mt-4 px-4 sm:px-0" : "my-12 px-6"}`}>
       
       {/* Toast Alert Widget */}
       {message && (
@@ -840,7 +841,7 @@ const Profile = () => {
                         <span className="text-[9px] text-muted-gray block font-bold uppercase tracking-widest flex-shrink-0">
                           Order Reference
                         </span>
-                        <span className="text-xs font-extrabold text-dark-navy">
+                        <span className="text-xs font-extrabold text-dark-navy truncate">
                           #{order._id}
                         </span>
                       </div>

@@ -196,7 +196,7 @@ const VendorDetails = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center flex-wrap gap-2">
           {vendor.vendorStatus !== "active" && (
             <button
               onClick={() => handleUpdateStatus("active")}
@@ -268,7 +268,7 @@ const VendorDetails = () => {
               <Mail className="text-muted-gray w-4 h-4 flex-shrink-0 mt-0.5" />
               <div>
                 <span className="text-[10px] text-muted-gray uppercase block tracking-wider">Email Address</span>
-                <span className="text-dark-navy mt-0.5 block">{vendor.email}</span>
+                <span className="text-dark-navy mt-0.5 block break-all">{vendor.email}</span>
               </div>
             </div>
 

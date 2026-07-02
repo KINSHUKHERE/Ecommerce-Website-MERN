@@ -329,14 +329,14 @@ const ProductDetails = () => {
                 {/* Left Arrow */}
                 <button
                   onClick={prevSlide}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-primary hover:text-white text-dark-navy p-2.5 rounded-full shadow-xs backdrop-blur-xs transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-primary hover:text-white text-dark-navy p-2.5 rounded-full shadow-xs backdrop-blur-xs transition-all duration-300 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
                 >
                   <ChevronLeft size={18} />
                 </button>
                 {/* Right Arrow */}
                 <button
                   onClick={nextSlide}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-primary hover:text-white text-dark-navy p-2.5 rounded-full shadow-xs backdrop-blur-xs transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-primary hover:text-white text-dark-navy p-2.5 rounded-full shadow-xs backdrop-blur-xs transition-all duration-300 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
                 >
                   <ChevronRight size={18} />
                 </button>
