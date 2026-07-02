@@ -47,7 +47,7 @@ export const CategoryGrid = () => {
 
   if (loading || categories.length === 0) return null;
 
-  const maxVisible = 14;
+  const maxVisible = 10;
   const hasMore = categories.length > maxVisible;
   const displayedCategories = hasMore ? categories.slice(0, maxVisible) : categories;
 
@@ -82,8 +82,8 @@ export const CategoryGrid = () => {
               </div>
             ))}
 
-            {/* Always show "Show All" or only if hasMore is true? The user says: "sliding with only 10 or 15 then show all option shoud be there" which implies when we have more than the limit we show the "Show All" card */}
-            {hasMore && (
+            {/* Always show "Show All" if there are more than 5 categories total */}
+            {(hasMore || categories.length > 5) && (
               <div
                 onClick={() => navigate("/products")}
                 className="flex-shrink-0 w-[110px] sm:w-[130px] group flex flex-col items-center justify-center p-4 bg-white border border-light-border/60 rounded-2xl sm:rounded-3xl hover:border-primary/25 shadow-[0_8px_30px_rgb(0,0,0,0.01)] hover:shadow-[0_16px_35px_rgba(15,157,138,0.04)] hover:-translate-y-1 transition-all duration-300 cursor-pointer snap-start"

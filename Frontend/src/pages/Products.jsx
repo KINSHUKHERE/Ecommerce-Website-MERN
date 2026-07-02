@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X, RotateCcw, Loader2 } from "lucide-react";
+import { Search, SlidersHorizontal, X, RotateCcw, Loader2, ArrowUpDown, ChevronDown } from "lucide-react";
 import EachProduct from "../components/EachProduct";
 import { getProduct } from "../api/ProductApi";
 import {
@@ -50,6 +50,12 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedVendor, setSelectedVendor] = useState("");
+
+  // Show more/less states for categories and brands
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showAllBrands, setShowAllBrands] = useState(false);
+  const [sortBy, setSortBy] = useState("default");
+  const [sortOpen, setSortOpen] = useState(false);
 
   useEffect(() => {
     const loadAllData = async () => {
@@ -118,6 +124,14 @@ const Products = () => {
     }
   };
 
+  const filteredBrands = useMemo(() => {
+    return brands.filter(
+      (brand) =>
+        selectedCategory === "" ||
+        (brand.categoryId?._id || brand.categoryId) === selectedCategory
+    );
+  }, [brands, selectedCategory]);
+
   const filteredProducts = useMemo(() => {
     return products.filter((item) => {
       const itemHeading = item.heading || "";
@@ -156,9 +170,19 @@ const Products = () => {
     selectedVendor,
   ]);
 
+  const sortedAndFilteredProducts = useMemo(() => {
+    let result = [...filteredProducts];
+    if (sortBy === "price-asc") {
+      result.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sortBy === "price-desc") {
+      result.sort((a, b) => (b.price || 0) - (a.price || 0));
+    }
+    return result;
+  }, [filteredProducts, sortBy]);
+
   const visibleProducts = useMemo(() => {
-    return filteredProducts.slice(0, visibleCount);
-  }, [filteredProducts, visibleCount]);
+    return sortedAndFilteredProducts.slice(0, visibleCount);
+  }, [sortedAndFilteredProducts, visibleCount]);
 
   // Observer to load more items when scrolling to the bottom
   useEffect(() => {
@@ -169,12 +193,12 @@ const Products = () => {
         const entry = entries[0];
         if (
           entry.isIntersecting &&
-          visibleCount < filteredProducts.length &&
+          visibleCount < sortedAndFilteredProducts.length &&
           !scrollingLoading
         ) {
           setScrollingLoading(true);
           setTimeout(() => {
-            setVisibleCount((prev) => Math.min(prev + 10, filteredProducts.length));
+            setVisibleCount((prev) => Math.min(prev + 10, sortedAndFilteredProducts.length));
             setScrollingLoading(false);
           }, 450);
         }
@@ -192,12 +216,15 @@ const Products = () => {
         observer.unobserve(currentSentinel);
       }
     };
-  }, [filteredProducts.length, visibleCount, scrollingLoading, loading]);
+  }, [sortedAndFilteredProducts.length, visibleCount, scrollingLoading, loading]);
 
   const clearFilters = () => {
     setSearch("");
     setSelectedCategory("");
     setSelectedBrand("");
+    setShowAllCategories(false);
+    setShowAllBrands(false);
+    setSortBy("default");
   };
 
   return (
@@ -242,7 +269,7 @@ const Products = () => {
       <div className="block lg:hidden px-6 mb-6">
         <div className="flex justify-between items-center bg-white p-4 border border-light-border/60 rounded-3xl shadow-2xs">
           <span className="text-xs font-extrabold text-dark-navy uppercase tracking-wider">
-            Products ({filteredProducts.length})
+            Products ({sortedAndFilteredProducts.length})
           </span>
           <div className="flex items-center gap-3">
             <button
@@ -272,7 +299,7 @@ const Products = () => {
         <div
           className={`overflow-hidden transition-all duration-300 ${
             mobileFiltersOpen
-              ? "max-h-[500px] mt-3 border border-light-border/60 p-5 rounded-3xl bg-white shadow-xs"
+              ? "max-h-[1200px] mt-3 border border-light-border/60 p-5 rounded-3xl bg-white shadow-xs"
               : "max-h-0"
           }`}
         >
@@ -302,7 +329,7 @@ const Products = () => {
                     >
                       All
                     </button>
-                    {categories.map((category) => (
+                    {(showAllCategories ? categories : categories.slice(0, 5)).map((category) => (
                       <button
                         key={category._id}
                         onClick={() => {
@@ -321,6 +348,14 @@ const Products = () => {
                   </>
                 )}
               </div>
+              {!loading && categories.length > 5 && (
+                <button
+                  onClick={() => setShowAllCategories(!showAllCategories)}
+                  className="text-[10px] font-extrabold text-primary hover:text-accent mt-2.5 flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  {showAllCategories ? "Show Less" : `Show More (+${categories.length - 5})`}
+                </button>
+              )}
             </div>
 
             {/* Brands Mobile */}
@@ -345,28 +380,30 @@ const Products = () => {
                     >
                       All Brands
                     </button>
-                    {brands
-                      .filter(
-                        (brand) =>
-                          selectedCategory === "" ||
-                          (brand.categoryId?._id || brand.categoryId) === selectedCategory
-                      )
-                      .map((brand) => (
-                        <button
-                          key={brand._id}
-                          onClick={() => setSelectedBrand(brand._id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                            selectedBrand === brand._id
-                              ? "bg-primary text-white border-primary shadow-xs"
-                              : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
-                          }`}
-                        >
-                          {brand.name}
-                        </button>
-                      ))}
+                    {(showAllBrands ? filteredBrands : filteredBrands.slice(0, 6)).map((brand) => (
+                      <button
+                        key={brand._id}
+                        onClick={() => setSelectedBrand(brand._id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                          selectedBrand === brand._id
+                            ? "bg-primary text-white border-primary shadow-xs"
+                            : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
+                        }`}
+                      >
+                        {brand.name}
+                      </button>
+                    ))}
                   </>
                 )}
               </div>
+              {!loading && filteredBrands.length > 6 && (
+                <button
+                  onClick={() => setShowAllBrands(!showAllBrands)}
+                  className="text-[10px] font-extrabold text-primary hover:text-accent mt-2.5 flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  {showAllBrands ? "Show Less" : `Show More (+${filteredBrands.length - 6})`}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -422,7 +459,7 @@ const Products = () => {
                       >
                         All Categories
                       </button>
-                      {categories.map((category) => (
+                      {(showAllCategories ? categories : categories.slice(0, 5)).map((category) => (
                         <button
                           key={category._id}
                           onClick={() => {
@@ -441,6 +478,14 @@ const Products = () => {
                     </>
                   )}
                 </div>
+                {!loading && categories.length > 5 && (
+                  <button
+                    onClick={() => setShowAllCategories(!showAllCategories)}
+                    className="text-[10px] font-extrabold text-primary hover:text-accent mt-2.5 flex items-center gap-1 cursor-pointer transition-colors pl-4 w-full text-left"
+                  >
+                    {showAllCategories ? "Show Less" : `Show More (+${categories.length - 5})`}
+                  </button>
+                )}
               </div>
 
               {/* Brands Sidebar Section */}
@@ -465,28 +510,30 @@ const Products = () => {
                       >
                         All Brands
                       </button>
-                      {brands
-                        .filter(
-                          (brand) =>
-                            selectedCategory === "" ||
-                            (brand.categoryId?._id || brand.categoryId) === selectedCategory
-                        )
-                        .map((brand) => (
-                          <button
-                            key={brand._id}
-                            onClick={() => setSelectedBrand(brand._id)}
-                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                              selectedBrand === brand._id
-                                ? "bg-primary text-white border-primary shadow-xs"
-                                : "bg-white text-muted-gray border-light-border hover:bg-slate-50 hover:border-light-border"
-                            }`}
-                          >
-                            {brand.name}
-                          </button>
-                        ))}
+                      {(showAllBrands ? filteredBrands : filteredBrands.slice(0, 6)).map((brand) => (
+                        <button
+                          key={brand._id}
+                          onClick={() => setSelectedBrand(brand._id)}
+                          className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                            selectedBrand === brand._id
+                              ? "bg-primary text-white border-primary shadow-xs"
+                              : "bg-white text-muted-gray border-light-border hover:bg-slate-50 hover:border-light-border"
+                          }`}
+                        >
+                          {brand.name}
+                        </button>
+                      ))}
                     </>
                   )}
                 </div>
+                {!loading && filteredBrands.length > 6 && (
+                  <button
+                    onClick={() => setShowAllBrands(!showAllBrands)}
+                    className="text-[10px] font-extrabold text-primary hover:text-accent mt-3 flex items-center gap-1 cursor-pointer transition-colors pl-1 w-full text-left"
+                  >
+                    {showAllBrands ? "Show Less" : `Show More (+${filteredBrands.length - 6})`}
+                  </button>
+                )}
               </div>
 
             </div>
@@ -496,8 +543,65 @@ const Products = () => {
           <div className="lg:col-span-3">
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-extrabold text-base text-dark-navy hidden lg:block uppercase tracking-wider">
-                Products found ({filteredProducts.length})
+                Products found ({sortedAndFilteredProducts.length})
               </h2>
+              
+              {/* Overlapping Sort Dropdown */}
+              <div className="relative z-25">
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className="flex items-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl border border-light-border bg-white text-xs font-bold text-dark-navy hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer outline-none"
+                >
+                  <ArrowUpDown size={14} className="text-muted-gray" />
+                  <span>
+                    Sort: {sortBy === "default" && "Default"}
+                    {sortBy === "price-asc" && "Price: Low to High"}
+                    {sortBy === "price-desc" && "Price: High to Low"}
+                  </span>
+                  <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${sortOpen ? "rotate-180" : ""}`} />
+                </button>
+                
+                {sortOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setSortOpen(false)}></div>
+                    <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl bg-white border border-light-border/60 shadow-lg py-1.5 z-20 animate-scaleUp text-left">
+                      <button
+                        onClick={() => {
+                          setSortBy("default");
+                          setSortOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-xs font-bold text-left transition-colors ${
+                          sortBy === "default" ? "bg-primary/5 text-primary" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                        }`}
+                      >
+                        Default / Newest
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSortBy("price-asc");
+                          setSortOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-xs font-bold text-left transition-colors ${
+                          sortBy === "price-asc" ? "bg-primary/5 text-primary" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                        }`}
+                      >
+                        Price: Low to High
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSortBy("price-desc");
+                          setSortOpen(false);
+                        }}
+                        className={`w-full px-4 py-2 text-xs font-bold text-left transition-colors ${
+                          sortBy === "price-desc" ? "bg-primary/5 text-primary" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                        }`}
+                      >
+                        Price: High to Low
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             {loading ? (
@@ -530,7 +634,7 @@ const Products = () => {
                 </div>
 
                 {/* Infinite Scroll Sentinel / Loading Indicator */}
-                {visibleCount < filteredProducts.length && (
+                {visibleCount < sortedAndFilteredProducts.length && (
                   <div
                     ref={sentinelRef}
                     className="w-full flex flex-col items-center justify-center py-10 mt-6"
