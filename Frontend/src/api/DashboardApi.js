@@ -28,6 +28,10 @@ export const getDashboardData = async (user) => {
         },
         0,
       ),
+      orders: ordersList,
+      products: products.data.data,
+      vendors: [],
+      users: []
     };
   }
 
@@ -42,11 +46,12 @@ export const getDashboardData = async (user) => {
 
   const ordersList = orders.data.orders || [];
   const vendorsList = vendorsRes.data.vendors || [];
+  const usersList = users.data || [];
 
   return {
     totalPro: products.data.data.length,
     totalCon: contacts.data.contacts.length,
-    totalUse: users.data.filter(u => u.role === "user").length,
+    totalUse: usersList.filter(u => u.role === "user").length,
     totalOrd: ordersList.length,
     totalRev: ordersList.reduce(
       (acc, order) => {
@@ -61,5 +66,9 @@ export const getDashboardData = async (user) => {
     pendingVendors: vendorsList.filter(v => v.vendorStatus === "pending").length,
     activeVendors: vendorsList.filter(v => v.vendorStatus === "active").length,
     suspendedVendors: vendorsList.filter(v => v.vendorStatus === "suspended").length,
+    orders: ordersList,
+    products: products.data.data,
+    vendors: vendorsList,
+    users: usersList
   };
 };

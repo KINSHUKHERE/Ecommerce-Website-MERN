@@ -180,7 +180,9 @@ const ProductEdit = () => {
 
   useEffect(() => {
     if (formData.heading) {
-      document.title = `YoCart | Admin - Edit ${formData.heading}`;
+      const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+      const isVendorUser = currentUser.role === "vendor";
+      document.title = `YoCart | ${isVendorUser ? "Seller" : "Admin"} - Edit ${formData.heading}`;
     }
   }, [formData.heading]);
 

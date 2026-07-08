@@ -102,7 +102,9 @@ const [touchStartX, setTouchStartX] = useState(null);
 
   useEffect(() => {
     if (product) {
-      document.title = `YoCart | Admin - View ${product.Title || "Product"}`;
+      const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+      const isVendorUser = currentUser.role === "vendor";
+      document.title = `YoCart | ${isVendorUser ? "Seller" : "Admin"} - View ${product.heading || "Product"}`;
     }
   }, [product]);
 

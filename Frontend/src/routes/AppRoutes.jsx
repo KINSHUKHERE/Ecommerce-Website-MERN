@@ -197,6 +197,24 @@ const AppRoutes = () => {
       title = "Create Account | YoCart";
     } else if (path.startsWith("/admin")) {
       title = "Admin Dashboard | YoCart Panel";
+    } else if (path.startsWith("/vendor")) {
+      if (path === "/vendor") {
+        title = "Seller Dashboard | YoCart Panel";
+      } else if (path === "/vendor/products") {
+        title = "Seller Products | YoCart Panel";
+      } else if (path === "/vendor/create-product") {
+        title = "Create Product | YoCart Seller";
+      } else if (path === "/vendor/order-details") {
+        title = "Orders Directory | YoCart Seller";
+      } else if (path === "/vendor/profile") {
+        title = "Seller Profile | YoCart Panel";
+      } else if (path === "/vendor/support") {
+        title = "Seller Support | YoCart Panel";
+      } else if (path === "/vendor/sale") {
+        title = "Festive Sale | YoCart Seller";
+      } else {
+        title = "Seller Dashboard | YoCart Panel";
+      }
     } else if (path === "/create-product") {
       title = "Create Product | YoCart Admin";
     } else if (path === "/contact-details") {
