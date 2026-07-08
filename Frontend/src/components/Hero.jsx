@@ -1,11 +1,50 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import HeroContent from "./HeroContent";
+import { getThemeConfig } from "../theme/ThemeEngine";
 
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const bannerData = [
+  const [globalSaleActive, setGlobalSaleActive] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("globalSaleConfig");
+      return cached ? JSON.parse(cached).isGlobalSaleActive : false;
+    } catch {
+      return false;
+    }
+  });
+
+  const [saleConfig, setSaleConfig] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("globalSaleConfig");
+      return cached ? JSON.parse(cached) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    const handleConfigEvent = () => {
+      try {
+        const cached = sessionStorage.getItem("globalSaleConfig");
+        if (cached) {
+          const config = JSON.parse(cached);
+          setGlobalSaleActive(config.isGlobalSaleActive);
+          setSaleConfig(config);
+        }
+      } catch {
+        setGlobalSaleActive(false);
+        setSaleConfig({});
+      }
+    };
+    window.addEventListener("saleConfigUpdated", handleConfigEvent);
+    return () => window.removeEventListener("saleConfigUpdated", handleConfigEvent);
+  }, []);
+
+  const activeTheme = getThemeConfig(globalSaleActive ? saleConfig.saleTheme : "normal");
+
+  const baseBanners = [
     {
       id: 1,
       bgImage:
@@ -45,23 +84,36 @@ const Hero = () => {
     },
   ];
 
+  const banners = globalSaleActive ? [
+    {
+      id: "festive",
+      isFestive: true,
+      themeKey: saleConfig.saleTheme,
+      topHeading: `✨ ${activeTheme.name.toUpperCase()} CELEBRATION SALE ✨`,
+      midHeading: saleConfig.saleName,
+      offerText: "UP TO 60% OFF - LIMITED TIME ONLY!",
+      description: activeTheme.description,
+    },
+    ...baseBanners
+  ] : baseBanners;
+
   const [touchStartX, setTouchStartX] = useState(0);
   const [touchEndX, setTouchEndX] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev === bannerData.length - 1 ? 0 : prev + 1));
-    }, 3000);
+      setCurrentIndex((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
+    }, 4000);
 
     return () => clearInterval(interval);
-  }, [currentIndex]);
+  }, [currentIndex, banners.length]);
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev === 0 ? bannerData.length - 1 : prev - 1));
+    setCurrentIndex((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
   };
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev === bannerData.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
   };
 
   const onTouchStart = (e) => {
@@ -98,9 +150,11 @@ const Hero = () => {
         className="flex w-full h-full transition-transform duration-500 ease-out"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
-        {bannerData.map((elem) => (
+        {banners.map((elem) => (
           <HeroContent
             key={elem.id}
+            isFestive={elem.isFestive}
+            themeKey={elem.themeKey}
             bgImage={elem.bgImage}
             topHeading={elem.topHeading}
             midHeading={elem.midHeading}
@@ -112,7 +166,7 @@ const Hero = () => {
 
       {/* Slider Indicators */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-25">
-        {bannerData.map((_, index) => (
+        {banners.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}

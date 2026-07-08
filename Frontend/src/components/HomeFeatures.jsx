@@ -21,6 +21,28 @@ export const CategoryGrid = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const [globalSaleActive, setGlobalSaleActive] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("globalSaleConfig");
+      return cached ? JSON.parse(cached).isGlobalSaleActive : false;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const handleConfigEvent = () => {
+      try {
+        const cached = sessionStorage.getItem("globalSaleConfig");
+        setGlobalSaleActive(cached ? JSON.parse(cached).isGlobalSaleActive : false);
+      } catch {
+        setGlobalSaleActive(false);
+      }
+    };
+    window.addEventListener("saleConfigUpdated", handleConfigEvent);
+    return () => window.removeEventListener("saleConfigUpdated", handleConfigEvent);
+  }, []);
+
   useEffect(() => {
     const fetchCats = async () => {
       try {
@@ -52,7 +74,7 @@ export const CategoryGrid = () => {
   const displayedCategories = hasMore ? categories.slice(0, maxVisible) : categories;
 
   return (
-    <div className="w-full bg-soft-bg/40 py-16 border-b border-light-border/60">
+    <div className={`w-full ${globalSaleActive ? "bg-transparent" : "bg-soft-bg/40"} py-16 border-b border-light-border/60 transition-colors duration-500`}>
       <div className="w-full px-6 sm:px-12 lg:px-16">
         <div className="text-center mb-10 flex flex-col items-center">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-dark-navy tracking-tight relative pb-3.5 w-fit">
@@ -105,6 +127,28 @@ export const CategoryGrid = () => {
 
 // Trust Badges Component
 export const TrustBadges = () => {
+  const [globalSaleActive, setGlobalSaleActive] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("globalSaleConfig");
+      return cached ? JSON.parse(cached).isGlobalSaleActive : false;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const handleConfigEvent = () => {
+      try {
+        const cached = sessionStorage.getItem("globalSaleConfig");
+        setGlobalSaleActive(cached ? JSON.parse(cached).isGlobalSaleActive : false);
+      } catch {
+        setGlobalSaleActive(false);
+      }
+    };
+    window.addEventListener("saleConfigUpdated", handleConfigEvent);
+    return () => window.removeEventListener("saleConfigUpdated", handleConfigEvent);
+  }, []);
+
   const badges = [
     {
       icon: <Truck size={22} />,
@@ -129,7 +173,7 @@ export const TrustBadges = () => {
   ];
 
   return (
-    <div className="w-full bg-white py-16 border-t border-light-border/50">
+    <div className={`w-full ${globalSaleActive ? "bg-transparent" : "bg-white"} py-16 border-t border-light-border/50 transition-colors duration-500`}>
       <div className="w-full px-6 sm:px-12 lg:px-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {badges.map((badge, idx) => (

@@ -106,6 +106,8 @@ const SignUp = () => {
 
       if (user.role === "admin") {
         navigate("/admin");
+      } else if (user.role === "vendor") {
+        navigate("/vendor");
       } else if (user.isProfileComplete === false) {
         navigate("/complete-profile");
       } else {

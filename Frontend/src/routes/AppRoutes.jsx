@@ -20,6 +20,7 @@ import UserManagement from "../pages/admin/UserManagement";
 import VendorDetails from "../pages/admin/VendorDetails";
 import UserDetails from "../pages/admin/UserDetails";
 import VendorSupport from "../pages/admin/VendorSupport";
+import SaleManagement from "../pages/admin/SaleManagement";
 import Profile from "../pages/Profile";
 import Wishlist from "../pages/Wishlist";
 import Checkout from "../pages/Checkout";
@@ -40,8 +41,9 @@ import Navbar from "../components/Navbar";
 // Customer Layout Wrapper
 const UserLayout = () => {
   const user = JSON.parse(localStorage.getItem("user"));
-  if (user && (user.role === "admin" || user.role === "vendor")) {
-    return <Navigate to="/admin" replace />;
+  if (user) {
+    if (user.role === "admin") return <Navigate to="/admin" replace />;
+    if (user.role === "vendor") return <Navigate to="/vendor" replace />;
   }
   return (
     <div className="flex flex-col min-h-screen w-full">
@@ -71,6 +73,25 @@ const AdminRoute = ({ children }) => {
   if (user.role !== "admin" && user.role !== "vendor") {
     return <Navigate to="/" replace />;
   }
+
+  const path = window.location.pathname;
+  if (user.role === "vendor") {
+    if (path.startsWith("/admin")) {
+      return <Navigate to={path.replace("/admin", "/vendor")} replace />;
+    }
+    if (path === "/create-product") {
+      return <Navigate to="/vendor/create-product" replace />;
+    }
+    if (path === "/order-details") {
+      return <Navigate to="/vendor/order-details" replace />;
+    }
+  }
+  if (user.role === "admin") {
+    if (path.startsWith("/vendor")) {
+      return <Navigate to={path.replace("/vendor", "/admin")} replace />;
+    }
+  }
+
   return children;
 };
 
@@ -81,7 +102,7 @@ const ActiveVendorOrAdminRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
   if (user.role === "vendor" && user.vendorStatus !== "active") {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/vendor" replace />;
   }
   return children;
 };
@@ -90,7 +111,9 @@ const ActiveVendorOrAdminRoute = ({ children }) => {
 const GuestRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem("user"));
   if (user) {
-    return (user.role === "admin" || user.role === "vendor") ? <Navigate to="/admin" replace /> : <Navigate to="/" replace />;
+    if (user.role === "admin") return <Navigate to="/admin" replace />;
+    if (user.role === "vendor") return <Navigate to="/vendor" replace />;
+    return <Navigate to="/" replace />;
   }
   return children;
 };
@@ -233,20 +256,40 @@ const AppRoutes = () => {
       {/* Protected Admin-only Routes wrapped in AdminLayout */}
       <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/vendor" element={<AdminDashboard />} />
+
+        <Route path="/admin/sale" element={<SaleManagement />} />
+        <Route path="/vendor/sale" element={<SaleManagement />} />
+        
         <Route path="/admin/products" element={<ActiveVendorOrAdminRoute><AdminProducts /></ActiveVendorOrAdminRoute>} />
+        <Route path="/vendor/products" element={<ActiveVendorOrAdminRoute><AdminProducts /></ActiveVendorOrAdminRoute>} />
+        
         <Route path="/admin/products/:productId" element={<ActiveVendorOrAdminRoute><ProductView /></ActiveVendorOrAdminRoute>} />
+        <Route path="/vendor/products/:productId" element={<ActiveVendorOrAdminRoute><ProductView /></ActiveVendorOrAdminRoute>} />
+        
         <Route path="/admin/products/edit/:productId" element={<ActiveVendorOrAdminRoute><ProductEdit /></ActiveVendorOrAdminRoute>} />
+        <Route path="/vendor/products/edit/:productId" element={<ActiveVendorOrAdminRoute><ProductEdit /></ActiveVendorOrAdminRoute>} />
+        
         <Route path="/create-product" element={<ActiveVendorOrAdminRoute><CreateProduct /></ActiveVendorOrAdminRoute>} />
-        <Route path="/contact-details" element={<AdminRoute><ContactDetails /></AdminRoute>} />
+        <Route path="/vendor/create-product" element={<ActiveVendorOrAdminRoute><CreateProduct /></ActiveVendorOrAdminRoute>} />
+        
         <Route path="/order-details" element={<ActiveVendorOrAdminRoute><OrderDetails /></ActiveVendorOrAdminRoute>} />
+        <Route path="/vendor/order-details" element={<ActiveVendorOrAdminRoute><OrderDetails /></ActiveVendorOrAdminRoute>} />
+        
+        <Route path="/admin/profile" element={<Profile />} />
+        <Route path="/vendor/profile" element={<Profile />} />
+        
+        <Route path="/admin/support" element={<AdminRoute><VendorSupport /></AdminRoute>} />
+        <Route path="/vendor/support" element={<AdminRoute><VendorSupport /></AdminRoute>} />
+
+        {/* Admin-only Routes */}
+        <Route path="/contact-details" element={<AdminRoute><ContactDetails /></AdminRoute>} />
         <Route path="/categories" element={<AdminRoute><CategoryManagement /></AdminRoute>} />
         <Route path="/brands" element={<AdminRoute><BrandManagement /></AdminRoute>} />
         <Route path="/admin/vendors" element={<AdminRoute><VendorManagement /></AdminRoute>} />
         <Route path="/admin/vendors/:vendorId" element={<AdminRoute><VendorDetails /></AdminRoute>} />
         <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
         <Route path="/admin/users/:userId" element={<AdminRoute><UserDetails /></AdminRoute>} />
-        <Route path="/admin/profile" element={<Profile />} />
-        <Route path="/admin/support" element={<AdminRoute><VendorSupport /></AdminRoute>} />
       </Route>
     </Routes>
   );

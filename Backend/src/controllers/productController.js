@@ -279,7 +279,9 @@ const updateProduct = async (req, res) => {
             quantity: variant.quantity,
             images: variant.images,
             attributes: variant.attributes,
-            isActive: variant.isActive
+            isActive: variant.isActive,
+            onSale: variant.onSale,
+            salePrice: variant.salePrice,
           });
         } else {
           // Create new variant

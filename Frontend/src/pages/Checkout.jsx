@@ -92,7 +92,24 @@ const Checkout = () => {
           const variant = item.variantId;
           const product = item.productId;
           
-          const price = variant ? variant.price : (product.price || 0);
+          const globalSaleConfig = (() => {
+            try {
+              const cached = sessionStorage.getItem("globalSaleConfig");
+              return cached ? JSON.parse(cached) : null;
+            } catch {
+              return null;
+            }
+          })();
+          const globalSaleActive = globalSaleConfig?.isGlobalSaleActive || false;
+
+          const isItemOnSale = variant 
+            ? (globalSaleActive && variant.onSale && variant.salePrice > 0)
+            : (globalSaleActive && product.onSale && product.salePrice > 0);
+
+          const price = variant 
+            ? (isItemOnSale ? variant.salePrice : variant.price)
+            : (isItemOnSale ? product.salePrice : (product.price || 0));
+
           const image = (variant && variant.images && variant.images.length > 0)
             ? variant.images[0]
             : product.imgUrl;

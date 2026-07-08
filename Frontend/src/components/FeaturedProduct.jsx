@@ -8,6 +8,28 @@ const FeaturedProduct = (props) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [globalSaleActive, setGlobalSaleActive] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("globalSaleConfig");
+      return cached ? JSON.parse(cached).isGlobalSaleActive : false;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const handleConfigEvent = () => {
+      try {
+        const cached = sessionStorage.getItem("globalSaleConfig");
+        setGlobalSaleActive(cached ? JSON.parse(cached).isGlobalSaleActive : false);
+      } catch {
+        setGlobalSaleActive(false);
+      }
+    };
+    window.addEventListener("saleConfigUpdated", handleConfigEvent);
+    return () => window.removeEventListener("saleConfigUpdated", handleConfigEvent);
+  }, []);
+
   useEffect(() => {
     fetchProduct();
   }, []);
@@ -25,7 +47,7 @@ const FeaturedProduct = (props) => {
 
   if (loading) {
     return (
-      <div className="w-full bg-white py-20 flex flex-col items-center justify-center min-h-[400px]">
+      <div className={`w-full ${globalSaleActive ? "bg-transparent" : "bg-white"} py-20 flex flex-col items-center justify-center min-h-[400px] transition-colors duration-500`}>
         <Loader2 className="animate-spin text-primary w-10 h-10 mb-4" />
         <p className="text-muted-gray text-sm font-medium animate-pulse">Loading products...</p>
       </div>
@@ -37,7 +59,7 @@ const FeaturedProduct = (props) => {
     : products;
 
   return (
-    <div className="w-full bg-white py-16 sm:py-20 border-b border-light-border/40">
+    <div className={`w-full ${globalSaleActive ? "bg-transparent" : "bg-white"} py-16 sm:py-20 border-b border-light-border/40 transition-colors duration-500`}>
       {!props.k && (
         <div className="px-6 sm:px-12 lg:px-16 mb-6">
           <Link

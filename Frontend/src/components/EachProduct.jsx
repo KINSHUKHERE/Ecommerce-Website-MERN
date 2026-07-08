@@ -56,6 +56,42 @@ const EachProduct = ({ data }) => {
     }
   };
 
+  const [globalSaleActive, setGlobalSaleActive] = React.useState(() => {
+    try {
+      const cached = sessionStorage.getItem("globalSaleConfig");
+      return cached ? JSON.parse(cached).isGlobalSaleActive : false;
+    } catch {
+      return false;
+    }
+  });
+
+  const [saleTheme, setSaleTheme] = React.useState(() => {
+    try {
+      const cached = sessionStorage.getItem("globalSaleConfig");
+      return cached ? JSON.parse(cached).saleTheme || "normal" : "normal";
+    } catch {
+      return "normal";
+    }
+  });
+
+  React.useEffect(() => {
+    const handleConfigEvent = () => {
+      try {
+        const cached = sessionStorage.getItem("globalSaleConfig");
+        if (cached) {
+          const config = JSON.parse(cached);
+          setGlobalSaleActive(config.isGlobalSaleActive);
+          setSaleTheme(config.saleTheme || "normal");
+        }
+      } catch {
+        setGlobalSaleActive(false);
+        setSaleTheme("normal");
+      }
+    };
+    window.addEventListener("saleConfigUpdated", handleConfigEvent);
+    return () => window.removeEventListener("saleConfigUpdated", handleConfigEvent);
+  }, []);
+
   const getStockCount = (product) => {
     if (product.variants && product.variants.length > 0) {
       return product.variants.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
@@ -63,11 +99,28 @@ const EachProduct = ({ data }) => {
     return product.quantity ?? 0;
   };
 
-  const getMinPrice = (product) => {
+  const getProductPricing = (product) => {
     if (product.variants && product.variants.length > 0) {
-      return Math.min(...product.variants.map(v => v.price));
+      const variantPrices = product.variants.map(v => {
+        const isVOnSale = globalSaleActive && v.onSale && v.salePrice > 0;
+        const currentPrice = isVOnSale ? v.salePrice : v.price;
+        return {
+          currentPrice,
+          originalPrice: v.price,
+          isOnSale: isVOnSale
+        };
+      });
+
+      variantPrices.sort((a, b) => a.currentPrice - b.currentPrice);
+      return variantPrices[0] || { currentPrice: 0, originalPrice: 0, isOnSale: false };
     }
-    return product.price || 0;
+
+    const isProdOnSale = globalSaleActive && product.onSale && product.salePrice > 0;
+    return {
+      currentPrice: isProdOnSale ? product.salePrice : (product.price || 0),
+      originalPrice: product.price || 0,
+      isOnSale: isProdOnSale
+    };
   };
 
   const stockCount = getStockCount(data);
@@ -118,9 +171,29 @@ const EachProduct = ({ data }) => {
     }
   };
 
+  const getCardThemeClasses = () => {
+    if (!globalSaleActive) return "border-light-border/60 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.04)] hover:border-light-border";
+    switch (saleTheme) {
+      case "diwali":
+        return "border-amber-200/50 bg-amber-50/15 shadow-[0_8px_25px_rgba(217,119,6,0.08)] hover:shadow-[0_12px_30px_rgba(217,119,6,0.15)] hover:border-amber-400";
+      case "summer":
+        return "border-orange-100 bg-amber-50/5 shadow-[0_8px_25px_rgba(251,146,60,0.05)] hover:shadow-[0_12px_30px_rgba(251,146,60,0.1)] hover:border-orange-350";
+      case "winter":
+        return "border-blue-100 bg-white/40 backdrop-blur-xs shadow-[0_8px_25px_rgba(59,130,246,0.05)] hover:shadow-[0_12px_30px_rgba(59,130,246,0.1)] hover:border-blue-300";
+      case "holi":
+        return "border-pink-100 bg-white/50 shadow-[0_8px_25px_rgba(236,72,153,0.05)] hover:shadow-[0_12px_30px_rgba(236,72,153,0.1)] hover:border-pink-300";
+      case "christmas":
+        return "border-red-100 bg-red-50/5 shadow-[0_8px_25px_rgba(220,38,38,0.05)] hover:shadow-[0_12px_30px_rgba(220,38,38,0.1)] hover:border-red-300";
+      case "yocart":
+        return "border-violet-100 bg-white/80 shadow-[0_8px_25px_rgba(124,58,237,0.06)] hover:shadow-[0_12px_30px_rgba(124,58,237,0.12)] hover:border-violet-300";
+      default:
+        return "border-light-border/60 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.04)] hover:border-light-border";
+    }
+  };
+
   return (
     <div
-      className="w-full max-w-sm mx-auto p-3 border border-light-border/60 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.015)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.04)] hover:border-light-border transition-all duration-300 group bg-white cursor-pointer flex flex-col justify-between h-full relative overflow-hidden"
+      className={`w-full max-w-sm mx-auto p-3 border rounded-3xl transition-all duration-300 group cursor-pointer flex flex-col justify-between h-full relative overflow-hidden ${getCardThemeClasses()}`}
       onClick={productClicked}
     >
       <div>
@@ -180,9 +253,30 @@ const EachProduct = ({ data }) => {
 
       <div>
         <div className="flex justify-between items-center mt-3 pt-3 border-t border-light-border/40 px-1">
-          <span className="font-extrabold text-sm sm:text-base text-dark-navy">
-            ₹{getMinPrice(data).toLocaleString()}
-          </span>
+          {(() => {
+            const pricing = getProductPricing(data);
+            if (pricing.isOnSale) {
+              const discountPercent = Math.round(((pricing.originalPrice - pricing.currentPrice) / pricing.originalPrice) * 100);
+              return (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-extrabold text-sm sm:text-base text-red-600">
+                    ₹{pricing.currentPrice.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] sm:text-xs line-through text-muted-gray font-semibold">
+                    ₹{pricing.originalPrice.toLocaleString()}
+                  </span>
+                  <span className="text-[8px] sm:text-[9px] font-black text-white bg-red-500 rounded-md px-1.5 py-0.5 uppercase tracking-wider animate-pulse">
+                    {discountPercent}% OFF
+                  </span>
+                </div>
+              );
+            }
+            return (
+              <span className="font-extrabold text-sm sm:text-base text-dark-navy">
+                ₹{pricing.currentPrice.toLocaleString()}
+              </span>
+            );
+          })()}
 
           <button
             className={`w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full flex justify-center items-center transition-all duration-300 flex-shrink-0 ${

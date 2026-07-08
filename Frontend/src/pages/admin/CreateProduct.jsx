@@ -35,6 +35,8 @@ const CreateProduct = () => {
     price: "",
     quantity: "",
     description: "",
+    onSale: false,
+    salePrice: "",
   });
   
   const [productImages, setProductImages] = useState([]); // Max 6 images
@@ -503,6 +505,8 @@ const CreateProduct = () => {
         quantity: Number(v.quantity),
         attributes: v.attributes,
         images: v.images && v.images.length > 0 ? v.images : [firstVariantWithImage.images[0]],
+        onSale: !!v.onSale,
+        salePrice: v.onSale ? Number(v.salePrice || 0) : 0,
       }));
 
       finalData.imgUrl = firstVariantWithImage.images[0];
@@ -530,6 +534,8 @@ const CreateProduct = () => {
       finalData.images = productImages.slice(1);
       finalData.price = Number(formData.price);
       finalData.quantity = Number(formData.quantity);
+      finalData.onSale = !!formData.onSale;
+      finalData.salePrice = formData.onSale ? Number(formData.salePrice || 0) : 0;
       finalData.variants = [];
     }
 
@@ -543,6 +549,8 @@ const CreateProduct = () => {
         price: "",
         quantity: "",
         description: "",
+        onSale: false,
+        salePrice: "",
       });
       setProductImages([]);
       setOptions([{ name: "", values: [] }]);
@@ -720,6 +728,30 @@ const CreateProduct = () => {
                   placeholder="10"
                   icon={Box}
                 />
+                <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-orange-50/50 border border-orange-100/50 md:col-span-2 select-none">
+                  <input
+                    type="checkbox"
+                    id="onSale"
+                    name="onSale"
+                    checked={formData.onSale || false}
+                    onChange={(e) => setFormData(prev => ({ ...prev, onSale: e.target.checked }))}
+                    className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                  />
+                  <label htmlFor="onSale" className="text-xs font-bold text-dark-navy cursor-pointer select-none">
+                    Include in Festive Sale
+                  </label>
+                </div>
+                {formData.onSale && (
+                  <InputField
+                    label="Special Sale Price (₹)"
+                    name="salePrice"
+                    type="number"
+                    value={formData.salePrice}
+                    onChange={dataEntered}
+                    placeholder="19990"
+                    icon={IndianRupee}
+                  />
+                )}
               </div>
             )}
 
@@ -978,6 +1010,8 @@ const CreateProduct = () => {
                             <th className="py-2.5 px-4 w-12 text-center">Image</th>
                             <th className="py-2.5 px-4">Variant Attributes</th>
                             <th className="py-2.5 px-4">Price (₹)</th>
+                            <th className="py-2.5 px-4 text-center">Sale?</th>
+                            <th className="py-2.5 px-4">Sale Price (₹)</th>
                             <th className="py-2.5 px-4">Stock</th>
                             <th className="py-2.5 px-4 w-12 text-center">Exclude</th>
                           </tr>
@@ -1017,6 +1051,24 @@ const CreateProduct = () => {
                                     className="px-2 py-1 text-xs border rounded w-[80px] bg-white font-medium"
                                   />
                                 </td>
+                                <td className="py-2.5 px-4 text-center">
+                                   <input
+                                     type="checkbox"
+                                     checked={v.onSale || false}
+                                     onChange={(e) => handleVariantChange(vIdx, "onSale", e.target.checked)}
+                                     className="h-3.5 w-3.5 rounded border-gray-300 text-orange-655 focus:ring-orange-500 cursor-pointer"
+                                   />
+                                 </td>
+                                 <td className="py-2.5 px-4">
+                                   <input
+                                     type="number"
+                                     value={v.salePrice || ""}
+                                     disabled={!v.onSale}
+                                     onChange={(e) => handleVariantChange(vIdx, "salePrice", e.target.value)}
+                                     placeholder="Sale Price"
+                                     className="px-2 py-1 text-xs border rounded w-[80px] bg-white font-medium disabled:bg-slate-50 disabled:text-gray-400"
+                                   />
+                                 </td>
                                 <td className="py-2.5 px-4">
                                   <input
                                     type="number"

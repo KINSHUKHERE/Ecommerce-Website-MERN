@@ -37,7 +37,7 @@ const BecomeSeller = () => {
       
       // Redirect to seller dashboard portal
       setTimeout(() => {
-        navigate("/admin");
+        navigate("/vendor");
         window.location.reload();
       }, 1000);
     } catch (err) {

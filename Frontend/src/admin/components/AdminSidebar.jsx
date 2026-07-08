@@ -16,6 +16,7 @@ import {
   X,
   Users,
   BarChart3,
+  Flame,
 } from "lucide-react";
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
@@ -33,23 +34,46 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
     window.location.reload();
   };
 
-  const isActive = (path) => {
-    if (path === "/admin/products") {
-      return location.pathname.startsWith("/admin/products");
-    }
-    return location.pathname === path;
-  };
-
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const isVendor = user.role === "vendor";
   const isAdmin = user.role === "admin";
   const isLocked = isVendor && user.vendorStatus !== "active";
+  const routePrefix = isVendor ? "/vendor" : "/admin";
+
+  const getRolePath = (path) => {
+    if (!path) return "";
+    if (isVendor) {
+      if (path.startsWith("/admin")) {
+        return path.replace("/admin", "/vendor");
+      }
+      if (path === "/create-product") {
+        return "/vendor/create-product";
+      }
+      if (path === "/order-details") {
+        return "/vendor/order-details";
+      }
+    }
+    return path;
+  };
+
+  const isActive = (path) => {
+    const targetPath = getRolePath(path);
+    if (targetPath.endsWith("/products")) {
+      return location.pathname.startsWith(targetPath);
+    }
+    return location.pathname === targetPath;
+  };
 
   const menuItems = [
     {
       title: "Dashboard",
       path: "/admin",
       icon: <LayoutDashboard size={16} />,
+    },
+    {
+      title: "Festive Sale",
+      path: "/admin/sale",
+      icon: <Flame size={16} />,
     },
     {
       title: "Products",
@@ -146,7 +170,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         {/* Header / Logo */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-light-border/40">
           <Link
-            to="/admin"
+            to={routePrefix}
             className="flex items-center"
             onClick={() => setIsOpen(false)}
           >
@@ -204,7 +228,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                       {item.submenu.map((sub, sIdx) => (
                         <Link
                           key={sIdx}
-                          to={sub.path}
+                          to={getRolePath(sub.path)}
                           onClick={() => setIsOpen(false)}
                           className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                             isActive(sub.path)
@@ -238,7 +262,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
             return (
               <Link
                 key={idx}
-                to={item.path}
+                to={getRolePath(item.path)}
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all ${
                   isCurrentActive

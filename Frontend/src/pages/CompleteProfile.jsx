@@ -32,6 +32,8 @@ const CompleteProfile = () => {
       navigate("/login", { replace: true });
     } else if (user.role === "admin") {
       navigate("/admin", { replace: true });
+    } else if (user.role === "vendor") {
+      navigate("/vendor", { replace: true });
     } else if (user.isProfileComplete) {
       navigate("/", { replace: true });
     }

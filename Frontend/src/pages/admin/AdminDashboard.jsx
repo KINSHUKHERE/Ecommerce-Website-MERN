@@ -189,15 +189,17 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-8 text-dark-navy antialiased">
       {/* Header */}
-      <div className="mb-4 sm:mb-8 text-left border-b border-light-border/40 pb-4">
-        <h1 className="text-xl sm:text-3xl font-extrabold text-dark-navy tracking-tight leading-tight">
-          Welcome back, {firstName}! 👋
-        </h1>
-        <p className="text-xs sm:text-sm text-muted-gray mt-1.5 font-semibold leading-relaxed">
-          {isVendor 
-            ? "Here's a comprehensive snapshot of your seller shop's performance, catalog overview, and product orders."
-            : "Here's a comprehensive snapshot of your YoCart store's performance, catalog overview, and customer inquiries."}
-        </p>
+      <div className="mb-4 sm:mb-8 border-b border-light-border/40 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="text-left">
+          <h1 className="text-xl sm:text-3xl font-extrabold text-dark-navy tracking-tight leading-tight">
+            Welcome back, {firstName}! 👋
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-gray mt-1.5 font-semibold leading-relaxed">
+            {isVendor 
+              ? "Here's a comprehensive snapshot of your seller shop's performance, catalog overview, and product orders."
+              : "Here's a comprehensive snapshot of your YoCart store's performance, catalog overview, and customer inquiries."}
+          </p>
+        </div>
       </div>
 
       {/* First Row (Business Overview) */}

@@ -4,6 +4,7 @@ import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown } from "lucide-react"
 import logo from "../assets/logo.png";
 import { getDataCart } from "../api/CartApi";
 import { getWishlist } from "../api/WishlistApi";
+import { getGlobalSaleConfig } from "../api/SaleApi";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -69,11 +70,27 @@ const Navbar = () => {
     }
   };
 
+  const [globalSale, setGlobalSale] = useState({ isGlobalSaleActive: false, saleName: "Festive Season Sale", saleTheme: "normal" });
+
+  const fetchGlobalSale = async () => {
+    try {
+      const response = await getGlobalSaleConfig();
+      if (response.data && response.data.config) {
+        setGlobalSale(response.data.config);
+        sessionStorage.setItem("globalSaleConfig", JSON.stringify(response.data.config));
+        window.dispatchEvent(new Event("saleConfigUpdated"));
+      }
+    } catch (err) {
+      console.log("Unable to fetch global sale config", err);
+    }
+  };
+
   useEffect(() => {
     const userObj = JSON.parse(localStorage.getItem("user"));
     setCurrentUser(userObj);
     fetchCartCount(userObj);
     fetchWishlistCount(userObj);
+    fetchGlobalSale();
 
     const updateCart = () => {
       const freshUser = JSON.parse(localStorage.getItem("user"));
@@ -94,12 +111,21 @@ const Navbar = () => {
       }
     };
 
+    const handleConfigEvent = () => {
+      const cached = sessionStorage.getItem("globalSaleConfig");
+      if (cached) {
+        setGlobalSale(JSON.parse(cached));
+      }
+    };
+
     window.addEventListener("cartUpdated", updateCart);
     window.addEventListener("wishlistUpdated", updateWishlist);
+    window.addEventListener("saleConfigUpdated", handleConfigEvent);
 
     return () => {
       window.removeEventListener("cartUpdated", updateCart);
       window.removeEventListener("wishlistUpdated", updateWishlist);
+      window.removeEventListener("saleConfigUpdated", handleConfigEvent);
     };
   }, [location.pathname]);
 
@@ -153,9 +179,38 @@ const Navbar = () => {
   if (isAuthPage) return null;
 
   return (
-    <nav ref={navRef} className={`sticky top-0 z-50 w-full bg-white/50 backdrop-blur-lg border-b border-light-border/40 shadow-xs transition-transform duration-300 ${
+    <div ref={navRef} className={`sticky top-0 z-50 w-full transition-all duration-300 ${
       visible ? "translate-y-0" : "-translate-y-full"
     }`}>
+      {(() => {
+        const getBannerGradient = (theme) => {
+          switch (theme) {
+            case "diwali":
+              return "from-orange-600 via-amber-500 to-yellow-500";
+            case "summer":
+              return "from-yellow-400 via-orange-400 to-amber-500";
+            case "winter":
+              return "from-blue-600 via-cyan-500 to-sky-400";
+            case "holi":
+              return "from-pink-500 via-purple-500 to-emerald-400";
+            case "christmas":
+              return "from-red-700 via-emerald-750 to-green-600";
+            case "yocart":
+              return "from-violet-600 via-fuchsia-600 to-indigo-650";
+            default:
+              return "from-red-600 via-orange-500 to-amber-500";
+          }
+        };
+
+        return globalSale.isGlobalSaleActive && (
+          <div className={`w-full bg-gradient-to-r ${getBannerGradient(globalSale.saleTheme)} text-white text-[10px] sm:text-[11px] font-black py-1.5 px-4 flex items-center justify-center gap-2 select-none shadow-xs overflow-hidden relative z-50`}>
+            <span className="animate-pulse">🎉</span>
+            <span className="uppercase tracking-wider">{globalSale.saleName} IS LIVE! UP TO 60% OFF - LIMITED TIME ONLY!</span>
+            <span className="animate-pulse">🎉</span>
+          </div>
+        );
+      })()}
+      <nav className="w-full bg-white/50 backdrop-blur-lg border-b border-light-border/40 shadow-xs">
       <div className="flex h-16 items-center justify-between px-4 sm:px-8 lg:px-12 w-full">
         <Link className="flex items-center gap-1 h-full" to="/">
           <img src={logo} alt="YoCart" className="h-9 sm:h-10 w-auto object-contain" />
@@ -264,7 +319,7 @@ const Navbar = () => {
 
               {currentUser.role === "vendor" && (
                 <Link
-                  to="/admin"
+                  to="/vendor"
                   className="text-xs font-bold uppercase tracking-wider text-primary hover:text-primary-hover px-3 py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition"
                 >
                   Seller Portal
@@ -443,7 +498,7 @@ const Navbar = () => {
 
               {currentUser.role === "vendor" && (
                 <Link
-                  to="/admin"
+                  to="/vendor"
                   onClick={() => setIsOpen(false)}
                   className="w-full text-center py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl font-bold text-xs uppercase tracking-wider transition"
                 >
@@ -456,6 +511,7 @@ const Navbar = () => {
         </ul>
       </div>
     </nav>
+  </div>
   );
 };
 

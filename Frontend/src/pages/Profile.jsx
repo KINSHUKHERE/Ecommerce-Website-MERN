@@ -737,6 +737,8 @@ const Profile = () => {
                 onClick={() => {
                   if (isAdmin) {
                     navigate("/admin");
+                  } else if (role === "vendor") {
+                    navigate("/vendor");
                   } else {
                     navigate("/");
                   }

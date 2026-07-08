@@ -33,6 +33,28 @@ const ProductDetails = () => {
     };
   }, [productId]);
 
+  const [globalSaleActive, setGlobalSaleActive] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("globalSaleConfig");
+      return cached ? JSON.parse(cached).isGlobalSaleActive : false;
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const handleConfigEvent = () => {
+      try {
+        const cached = sessionStorage.getItem("globalSaleConfig");
+        setGlobalSaleActive(cached ? JSON.parse(cached).isGlobalSaleActive : false);
+      } catch {
+        setGlobalSaleActive(false);
+      }
+    };
+    window.addEventListener("saleConfigUpdated", handleConfigEvent);
+    return () => window.removeEventListener("saleConfigUpdated", handleConfigEvent);
+  }, []);
+
   const handleWishlistToggle = async () => {
     const userObj = JSON.parse(localStorage.getItem("user"));
     if (!userObj) {
@@ -397,13 +419,46 @@ const ProductDetails = () => {
             {product.heading}
           </h1>
 
-          <p className="text-2xl font-extrabold text-primary mt-1">
-            ₹
-            {(activeVariant
-              ? activeVariant.price
-              : product.price || (product.variants && product.variants.length > 0 ? product.variants[0].price : 0)
-            ).toLocaleString()}
-          </p>
+          {(() => {
+            const hasActiveVariant = activeVariant;
+            const currentItem = hasActiveVariant ? activeVariant : product;
+            
+            const fallbackPrice = (!hasActiveVariant && product.variants && product.variants.length > 0) 
+              ? product.variants[0].price 
+              : 0;
+            const originalPrice = currentItem.price || fallbackPrice;
+
+            const isItemOnSale = globalSaleActive && currentItem.onSale && currentItem.salePrice > 0;
+            const salePrice = isItemOnSale ? currentItem.salePrice : originalPrice;
+
+            if (isItemOnSale) {
+              const discountPercent = Math.round(((originalPrice - salePrice) / originalPrice) * 100);
+              return (
+                <div className="flex flex-col gap-1.5 mt-2">
+                  <div className="flex items-center gap-3.5 flex-wrap">
+                    <span className="text-3xl font-black text-red-600">
+                      ₹{salePrice.toLocaleString()}
+                    </span>
+                    <span className="text-sm line-through text-muted-gray font-bold">
+                      ₹{originalPrice.toLocaleString()}
+                    </span>
+                    <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 uppercase tracking-wider">
+                      {discountPercent}% OFF
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-extrabold text-orange-655 tracking-widest uppercase flex items-center gap-1">
+                    🎉 Festive Sale Special Price
+                  </span>
+                </div>
+              );
+            }
+
+            return (
+              <p className="text-2xl font-extrabold text-primary mt-1">
+                ₹{originalPrice.toLocaleString()}
+              </p>
+            );
+          })()}
 
 
 

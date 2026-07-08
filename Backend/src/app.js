@@ -11,6 +11,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const addressRoutes = require("./routes/addressRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
+const saleRoutes = require("./routes/saleRoutes");
 
 const app = express();
 
@@ -64,6 +65,7 @@ app.use("/", orderRoutes);
 app.use("/", uploadRoutes);
 app.use("/", addressRoutes);
 app.use("/", wishlistRoutes);
+app.use("/", saleRoutes);
 
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");

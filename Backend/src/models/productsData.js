@@ -69,6 +69,16 @@ const productSchema = new mongoose.Schema(
       enum: ["active", "draft", "archived"],
       default: "active",
     },
+
+    onSale: {
+      type: Boolean,
+      default: false,
+    },
+
+    salePrice: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

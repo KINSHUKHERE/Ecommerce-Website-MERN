@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Trash2, Check, X, ShoppingCart, Loader2, ArrowRight } from "lucide-react";
+import {
+  Trash2,
+  Check,
+  X,
+  ShoppingCart,
+  Loader2,
+  ArrowRight,
+} from "lucide-react";
 import {
   getDataCart,
   increaseCart,
@@ -39,15 +46,36 @@ const Cart = () => {
       const formattedData = response.data.cartData.map((item) => {
         const variant = item.variantId;
         const product = item.productId;
-        
-        const price = variant ? variant.price : (product.price || 0);
-        const image = (variant && variant.images && variant.images.length > 0)
-          ? variant.images[0]
-          : product.imgUrl;
-          
-        const attributeString = (variant && variant.attributes && variant.attributes.length > 0)
-          ? variant.attributes.map(attr => `${attr.name}: ${attr.value}`).join(", ")
-          : "";
+
+        const globalSaleConfig = (() => {
+          try {
+            const cached = sessionStorage.getItem("globalSaleConfig");
+            return cached ? JSON.parse(cached) : null;
+          } catch {
+            return null;
+          }
+        })();
+        const globalSaleActive = globalSaleConfig?.isGlobalSaleActive || false;
+
+        const isItemOnSale = variant 
+          ? (globalSaleActive && variant.onSale && variant.salePrice > 0)
+          : (globalSaleActive && product.onSale && product.salePrice > 0);
+
+        const price = variant 
+          ? (isItemOnSale ? variant.salePrice : variant.price)
+          : (isItemOnSale ? product.salePrice : (product.price || 0));
+
+        const image =
+          variant && variant.images && variant.images.length > 0
+            ? variant.images[0]
+            : product.imgUrl;
+
+        const attributeString =
+          variant && variant.attributes && variant.attributes.length > 0
+            ? variant.attributes
+                .map((attr) => `${attr.name}: ${attr.value}`)
+                .join(", ")
+            : "";
 
         return {
           id: item._id,
@@ -142,7 +170,6 @@ const Cart = () => {
 
   return (
     <div className="flex-grow w-full bg-soft-bg/30 px-3 sm:px-6 py-8 pb-28 lg:pb-12 text-dark-navy antialiased relative">
-      
       {/* Toast Alert Widget */}
       {message && (
         <div className="fixed bottom-[90px] left-1/2 -translate-x-1/2 lg:bottom-5 lg:right-5 lg:left-auto lg:translate-x-0 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn max-w-[90vw] w-max">
@@ -179,14 +206,18 @@ const Cart = () => {
               Your Cart is Empty
             </h2>
             <p className="text-muted-gray text-xs sm:text-sm mt-3 max-w-xs mx-auto leading-relaxed font-semibold">
-              Looks like you haven't added anything to your cart yet. Explore our catalog to find items you love!
+              Looks like you haven't added anything to your cart yet. Explore
+              our catalog to find items you love!
             </p>
             <Link
               to="/products"
               className="inline-flex items-center justify-center gap-2 mt-8 px-8 py-3.5 bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 active:scale-95 cursor-pointer group"
             >
               Start Shopping
-              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform duration-300 text-white/95" />
+              <ArrowRight
+                size={14}
+                className="group-hover:translate-x-0.5 transition-transform duration-300 text-white/95"
+              />
             </Link>
           </div>
         ) : (
@@ -200,7 +231,6 @@ const Cart = () => {
                 >
                   {/* Single row layout on mobile too */}
                   <div className="flex items-start gap-3">
-
                     {/* Product Image */}
                     <img
                       src={item.image}
@@ -229,21 +259,25 @@ const Cart = () => {
 
                       {/* Bottom row: Qty counter + subtotal + delete */}
                       <div className="flex items-center justify-between mt-2.5 gap-2">
-
                         {/* Quantity Counter */}
                         <div className="flex items-center border border-light-border rounded-xl bg-white overflow-hidden shadow-2xs h-7">
                           <button
                             onClick={() => handleDecrease(item.id)}
                             disabled={item.quantity <= 1 || updatingId !== null}
                             className={`w-7 h-full flex items-center justify-center text-muted-gray font-bold hover:bg-slate-50 active:bg-slate-100 transition-colors text-sm ${
-                              item.quantity <= 1 || updatingId !== null ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                              item.quantity <= 1 || updatingId !== null
+                                ? "opacity-30 cursor-not-allowed"
+                                : "cursor-pointer"
                             }`}
                           >
                             −
                           </button>
                           <span className="px-2 font-bold text-xs text-dark-navy border-x border-light-border/40 min-w-[26px] h-full text-center flex items-center justify-center bg-white select-none">
                             {updatingId === item.id ? (
-                              <Loader2 size={11} className="animate-spin text-primary" />
+                              <Loader2
+                                size={11}
+                                className="animate-spin text-primary"
+                              />
                             ) : (
                               item.quantity
                             )}
@@ -252,7 +286,9 @@ const Cart = () => {
                             onClick={() => handleIncrease(item.id)}
                             disabled={updatingId !== null}
                             className={`w-7 h-full flex items-center justify-center text-muted-gray font-bold hover:bg-slate-50 active:bg-slate-100 transition-colors text-sm ${
-                              updatingId !== null ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                              updatingId !== null
+                                ? "opacity-30 cursor-not-allowed"
+                                : "cursor-pointer"
                             }`}
                           >
                             +
@@ -262,7 +298,9 @@ const Cart = () => {
                         {/* Subtotal + Delete */}
                         <div className="flex items-center gap-3 ml-auto">
                           <div className="text-right">
-                            <span className="text-[8px] text-muted-gray uppercase block font-bold tracking-widest leading-none">Subtotal</span>
+                            <span className="text-[8px] text-muted-gray uppercase block font-bold tracking-widest leading-none">
+                              Subtotal
+                            </span>
                             <span className="text-sm sm:text-base font-extrabold text-dark-navy leading-tight">
                               ₹{(item.price * item.quantity).toLocaleString()}
                             </span>
@@ -280,16 +318,17 @@ const Cart = () => {
                             title="Remove item"
                           >
                             {updatingId === item.id ? (
-                              <Loader2 size={15} className="animate-spin text-red-500" />
+                              <Loader2
+                                size={15}
+                                className="animate-spin text-red-500"
+                              />
                             ) : (
                               <Trash2 size={15} />
                             )}
                           </button>
                         </div>
-
                       </div>
                     </div>
-
                   </div>
                 </div>
               ))}
@@ -303,8 +342,14 @@ const Cart = () => {
 
               <div className="space-y-3 text-xs font-semibold">
                 <div className="flex justify-between text-muted-gray">
-                  <span>Price ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
-                  <span className="text-dark-navy">₹{totalPrice.toLocaleString()}</span>
+                  <span>
+                    Price (
+                    {cartItems.reduce((sum, item) => sum + item.quantity, 0)}{" "}
+                    items)
+                  </span>
+                  <span className="text-dark-navy">
+                    ₹{totalPrice.toLocaleString()}
+                  </span>
                 </div>
 
                 <div className="flex justify-between text-muted-gray">
@@ -357,4 +402,3 @@ const Cart = () => {
 };
 
 export default Cart;
-
