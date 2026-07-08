@@ -1,5 +1,5 @@
 import React from "react";
-import { Award, ShoppingCart, IndianRupee } from "lucide-react";
+import { Award, ShoppingCart } from "lucide-react";
 
 const TopProductsChart = ({ data }) => {
   return (
@@ -18,7 +18,7 @@ const TopProductsChart = ({ data }) => {
         </p>
       </div>
 
-      <div className="space-y-4 flex-1">
+      <div className="space-y-3 flex-1">
         {data.length === 0 ? (
           <div className="w-full h-48 flex flex-col items-center justify-center border border-dashed border-light-border/80 rounded-2xl p-6 bg-slate-50/50">
             <span className="text-3xl mb-2">🏆</span>
@@ -26,51 +26,55 @@ const TopProductsChart = ({ data }) => {
             <p className="text-[10px] text-muted-gray/80 mt-1 text-center font-medium">Rankings will update as checkout orders are processed.</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {data.map((prod, index) => (
-              <div key={index} className="space-y-1.5">
-                <div className="flex justify-between items-center text-xs font-bold">
-                  <div className="flex items-center gap-2.5 max-w-[70%]">
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold ${
+              <div
+                key={index}
+                className="p-3 bg-slate-50/65 border border-slate-100/50 rounded-2xl flex flex-col gap-2 hover:bg-slate-50/90 transition-colors shadow-2xs"
+              >
+                {/* Product details row */}
+                <div className="flex justify-between items-center gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0 ${
                       index === 0
-                        ? "bg-amber-100 text-amber-600"
+                        ? "bg-amber-100 text-amber-700 border border-amber-200"
                         : index === 1
-                        ? "bg-slate-100 text-slate-600"
+                        ? "bg-slate-200/80 text-slate-700 border border-slate-300"
                         : index === 2
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-slate-50 text-muted-gray"
+                        ? "bg-orange-100 text-orange-700 border border-orange-200"
+                        : "bg-slate-100 text-muted-gray border border-slate-200"
                     }`}>
                       {index + 1}
                     </span>
-                    <span className="truncate text-dark-navy hover:text-primary transition-colors cursor-default" title={prod.name}>
+                    <span className="truncate text-xs font-bold text-dark-navy" title={prod.name}>
                       {prod.name}
                     </span>
                   </div>
                   
-                  <div className="flex items-center gap-4 text-right">
-                    <span className="text-[10px] text-muted-gray font-bold uppercase flex items-center gap-0.5 bg-slate-50 px-2 py-0.5 rounded-md">
-                      <ShoppingCart size={8} /> {prod.quantity} sold
-                    </span>
-                    <span className="font-extrabold text-dark-navy flex items-center gap-0.5">
-                      ₹{prod.revenue.toLocaleString("en-IN")}
-                    </span>
-                  </div>
+                  <span className="font-extrabold text-xs text-dark-navy shrink-0">
+                    ₹{prod.revenue.toLocaleString("en-IN")}
+                  </span>
                 </div>
 
-                {/* Progress bar meter */}
-                <div className="w-full h-2 bg-slate-100/70 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full bg-gradient-to-r transition-all duration-500 ${
-                      index === 0
-                        ? "from-teal-400 to-emerald-500"
-                        : index === 1
-                        ? "from-blue-400 to-indigo-500"
-                        : index === 2
-                        ? "from-cyan-400 to-blue-500"
-                        : "from-slate-400 to-slate-500"
-                    }`}
-                    style={{ width: `${prod.percentage || 0}%` }}
-                  />
+                {/* Progress bar and quantity row */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-1.5 bg-slate-200/40 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full bg-gradient-to-r transition-all duration-500 ${
+                        index === 0
+                          ? "from-amber-400 to-orange-500"
+                          : index === 1
+                          ? "from-slate-400 to-slate-500"
+                          : index === 2
+                          ? "from-orange-400 to-red-500"
+                          : "from-primary to-primary-hover"
+                      }`}
+                      style={{ width: `${prod.percentage || 0}%` }}
+                    />
+                  </div>
+                  <span className="text-[9px] font-extrabold uppercase bg-white border border-slate-100 text-muted-gray px-2 py-0.5 rounded-md shrink-0 flex items-center gap-1">
+                    <ShoppingCart size={9} /> {prod.quantity} sold
+                  </span>
                 </div>
               </div>
             ))}

@@ -564,60 +564,78 @@ const AdminDashboard = () => {
         {isAdmin ? (
           <>
             {/* Top Sellers */}
-            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs">
-              <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
-                Top Performing Vendors
-              </h3>
-              {analytics.topVendors.length === 0 ? (
-                <p className="text-xs text-muted-gray font-bold py-6 text-center">No vendor statistics compiled</p>
-              ) : (
-                <div className="space-y-3">
-                  {analytics.topVendors.map((vendor, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-xs font-semibold py-2 border-b border-slate-50">
-                      <div className="flex items-center gap-3">
-                        <span className="w-5 h-5 rounded-full bg-primary/5 text-primary flex items-center justify-center font-bold text-[10px]">
-                          {idx + 1}
-                        </span>
-                        <span>{vendor.name}</span>
+            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs h-full flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
+                  Top Performing Vendors
+                </h3>
+                {analytics.topVendors.length === 0 ? (
+                  <p className="text-xs text-muted-gray font-bold py-6 text-center">No vendor statistics compiled</p>
+                ) : (
+                  <div className="space-y-3">
+                    {analytics.topVendors.map((vendor, idx) => (
+                      <div
+                        key={idx}
+                        className="p-3 bg-slate-50/65 border border-slate-100/50 rounded-2xl flex justify-between items-center hover:bg-slate-50/90 transition-colors shadow-2xs text-xs font-semibold"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="w-5 h-5 rounded-full bg-primary/5 text-primary flex items-center justify-center font-bold text-[10px] shrink-0 border border-primary/10">
+                            {idx + 1}
+                          </span>
+                          <span className="truncate text-dark-navy font-bold">{vendor.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-[9px] font-extrabold uppercase bg-white border border-slate-100 text-muted-gray px-2 py-0.5 rounded-md">
+                            {vendor.orders} Orders
+                          </span>
+                          <span className="font-extrabold text-dark-navy">
+                            ₹{vendor.revenue.toLocaleString("en-IN")}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-6">
-                        <span className="text-muted-gray">{vendor.orders} Orders</span>
-                        <span className="font-bold text-dark-navy">₹{vendor.revenue.toLocaleString("en-IN")}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Top Buyers */}
-            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs">
-              <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
-                Top Customer Buyers
-              </h3>
-              {analytics.topBuyers.length === 0 ? (
-                <p className="text-xs text-muted-gray font-bold py-6 text-center">No customer statistics compiled</p>
-              ) : (
-                <div className="space-y-3">
-                  {analytics.topBuyers.map((buyer, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-xs font-semibold py-2 border-b border-slate-50">
-                      <div className="flex items-center gap-3">
-                        <span className="w-5 h-5 rounded-full bg-accent-light text-primary flex items-center justify-center font-bold text-[10px]">
-                          {idx + 1}
-                        </span>
-                        <div>
-                          <p>{buyer.name}</p>
-                          <p className="text-[9px] text-muted-gray leading-none font-medium">{buyer.email}</p>
+            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs h-full flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
+                  Top Customer Buyers
+                </h3>
+                {analytics.topBuyers.length === 0 ? (
+                  <p className="text-xs text-muted-gray font-bold py-6 text-center">No customer statistics compiled</p>
+                ) : (
+                  <div className="space-y-3">
+                    {analytics.topBuyers.map((buyer, idx) => (
+                      <div
+                        key={idx}
+                        className="p-3 bg-slate-50/65 border border-slate-100/50 rounded-2xl flex justify-between items-center hover:bg-slate-50/90 transition-colors shadow-2xs text-xs font-semibold"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="w-5 h-5 rounded-full bg-accent-light text-primary flex items-center justify-center font-bold text-[10px] shrink-0 border border-primary/10">
+                            {idx + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="truncate text-dark-navy font-bold leading-normal">{buyer.name}</p>
+                            <p className="truncate text-[9px] text-muted-gray font-medium leading-none mt-0.5">{buyer.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-[9px] font-extrabold uppercase bg-white border border-slate-100 text-muted-gray px-2 py-0.5 rounded-md">
+                            {buyer.orders} Purchases
+                          </span>
+                          <span className="font-extrabold text-dark-navy">
+                            ₹{buyer.revenue.toLocaleString("en-IN")}
+                          </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-6">
-                        <span className="text-muted-gray">{buyer.orders} Purchases</span>
-                        <span className="font-bold text-dark-navy">₹{buyer.revenue.toLocaleString("en-IN")}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </>
         ) : (
