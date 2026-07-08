@@ -211,7 +211,13 @@ const AdminDashboard = () => {
     let lowCount = 0;
     let outCount = 0;
     vendorProducts.forEach(p => {
-      const stock = p.quantity || 0;
+      let stock = 0;
+      if (p.variants && p.variants.length > 0) {
+        stock = p.variants.reduce((sum, v) => sum + (v.quantity || 0), 0);
+      } else {
+        stock = p.quantity || 0;
+      }
+
       if (stock === 0) outCount++;
       else if (stock < 10) lowCount++;
       else healthyCount++;
