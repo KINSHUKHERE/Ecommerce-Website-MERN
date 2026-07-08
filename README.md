@@ -20,7 +20,8 @@ YoCart is a premium, high-performance e-commerce platform built on the MERN stac
 │   │   │   ├── cartDetails.js   # Mongoose Schema for Shopping Cart items
 │   │   │   ├── categoryDetails.js # Mongoose Schema for Product Categories
 │   │   │   ├── brandDetails.js  # Mongoose Schema for Brand Variants
-│   │   │   └── orderDetails.js  # Mongoose Schema for Orders (items, shipping addresses, statuses)
+│   │   │   ├── orderDetails.js  # Mongoose Schema for Orders (items, shipping addresses, statuses)
+│   │   │   └── saleConfig.js    # Mongoose Schema for global sales configuration (active sales, branding, themes)
 │   │   ├── controllers/
 │   │   │   ├── authController.js # Auth, Google OAuth, Profile Completion & Directory audits
 │   │   │   ├── productController.js # Product CRUD controllers (with populated vendor data)
@@ -28,7 +29,8 @@ YoCart is a premium, high-performance e-commerce platform built on the MERN stac
 │   │   │   ├── brandController.js # Brand CRUD controllers
 │   │   │   ├── cartController.js # Cart CRUD controllers
 │   │   │   ├── contactController.js # Customer enquiries handlers
-│   │   │   └── orderController.js # Order checkout & status update workflows
+│   │   │   ├── orderController.js # Order checkout & status update workflows
+│   │   │   └── saleController.js # Global sale switches and active themes configuration
 │   │   ├── middleware/
 │   │   │   ├── verifyUser.js     # Validates HTTP-Only cookie / Bearer JWT to authorize active users
 │   │   │   └── verifyVendorOrAdmin.js # Validates active user's payload has 'vendor' or 'admin' role
@@ -45,18 +47,16 @@ YoCart is a premium, high-performance e-commerce platform built on the MERN stac
 │   │   │   ├── ContactApi.js    # Contact Queries Axios API helpers
 │   │   │   ├── CartApi.js       # Shopping Cart CRUD Axios API helpers
 │   │   │   ├── CategoryAndVarientApi.js # Category & Brand Axios API helpers
-│   │   │   └── OrderApi.js      # Order checkout and status Axios API helpers
+│   │   │   ├── OrderApi.js      # Order checkout and status Axios API helpers
+│   │   │   ├── DashboardApi.js  # Stats & raw datasets Axios API helpers
+│   │   │   └── SaleApi.js       # Global sale config Axios API helpers
 │   │   ├── assets/              # App images & icons
 │   │   ├── admin/               # Dedicated Admin Dashboard pages & components
 │   │   │   ├── components/
 │   │   │   │   ├── AdminLayout.jsx # Glassmorphic Admin Header and main content layout wrapper
-│   │   │   │   ├── AdminSidebar.jsx # Vertical navigation sidebar with active routing states
-│   │   │   │   └── ProductStats.jsx # Stats cards computing Total, Active, Low Stock, Sold counts
-│   │   │   └── pages/
-│   │   │       ├── AdminProducts.jsx # Soft UI All Products registry with custom filters
-│   │   │       ├── ProductView.jsx # Detailed single product record viewer
-│   │   │       ├── ProductEdit.jsx # Product editor with real-time Image URL validation preview
-│   │   │       └── OrderDetails.jsx # Admin orders audit panel with status update selectors
+│   │   │   │   └── AdminSidebar.jsx # Vertical navigation sidebar with active routing states
+│   │   ├── theme/
+│   │   │   └── ThemeEngine.js   # Reusable React Theme Engine storing colors, gradients, and assets
 │   │   ├── components/          # Reusable UI layout elements
 │   │   │   ├── Navbar.jsx       # Header & Navigation (Become a Seller link, cart count badge)
 │   │   │   ├── Footer.jsx       # Footer layout
@@ -64,21 +64,30 @@ YoCart is a premium, high-performance e-commerce platform built on the MERN stac
 │   │   │   ├── FeaturedProduct.jsx # Featured product grid with skeleton loader states
 │   │   │   ├── EachProduct.jsx  # Individual product catalog card
 │   │   │   ├── ScrollToTop.jsx  # Window viewport routing scroll resetter
-│   │   │   └── DynamicTitle.jsx # Browser title route-change dynamic synchronizer
+│   │   │   ├── DynamicTitle.jsx # Browser title route-change dynamic synchronizer
+│   │   │   └── FloatingStickers.jsx # Animated floating background stickers (emojis) for sales
+│   │   ├── dashboard/           # Modular dashboard metrics & charts components
+│   │   │   ├── DashboardSkeleton.jsx # Pulse skeleton loading component
+│   │   │   ├── KpiCard.jsx      # Comparison percentage metrics card
+│   │   │   ├── SalesTrendChart.jsx # Area chart tracking revenue over selectable ranges
+│   │   │   ├── OrdersPieChart.jsx # Donut chart tracking order status divisions
+│   │   │   ├── CategoryChart.jsx # Bar chart tracking products count per category
+│   │   │   ├── InventoryChart.jsx # Donut chart tracking stock health (Out of Stock, Low Stock, Healthy)
+│   │   │   └── TopProductsChart.jsx # Top products leaderboard with visual progress meters
 │   │   ├── pages/               # Top-level Page layouts
 │   │   │   ├── Home.jsx         # Customer home page view
 │   │   │   ├── About.jsx        # About page view
 │   │   │   ├── Contact.jsx      # Contact page view
 │   │   │   ├── Cart.jsx         # Responsive shopping cart dashboard page
 │   │   │   ├── Checkout.jsx     # Stripe-style checkout wizard with security checks
-│   │   │   ├── Products.jsx     # Customer products registry catalog search & filter page
+│   │   │   ├── Products.jsx     # Customer products catalog search & filter page
 │   │   │   ├── ProductDetails.jsx # Customer product details page (with Seller Card & swatch options)
 │   │   │   ├── Login.jsx        # User Login Interface
-│   │   │   ├── SignUp.jsx       # User Registration Interface (pre-selects Vendor role)
+│   │   │   ├── SignUp.jsx       # User Registration Interface
 │   │   │   ├── CompleteProfile.jsx # Google OAuth Profile completion wizard (no navbar)
 │   │   │   ├── Profile.jsx      # Customer profile settings & dynamic orders tab list panel
 │   │   │   └── admin/           # Admin Category/Brand/Order panels
-│   │   │       ├── AdminDashboard.jsx  # Stats overview cards
+│   │   │       ├── AdminDashboard.jsx  # SaaS analytics dashboard controller
 │   │   │       ├── ContactDetails.jsx  # Customer enquiries table
 │   │   │       ├── CreateProduct.jsx   # Add New Product Form (referencing categories & brands)
 │   │   │       ├── CategoryManagement.jsx # Category CRUD interface
@@ -104,12 +113,12 @@ YoCart is a premium, high-performance e-commerce platform built on the MERN stac
 *   **Smart Option Swatch Selection:** The product details page dynamically evaluates selected swatches. If a clicked attribute creates an invalid combination, it automatically selects the first valid alternative to prevent `₹0` prices. Faded style and diagonal strike-through formatting are applied to unavailable variations.
 *   **Checkout Wizard:** A Stripe-style 2-page checkout flow verifying details and processing simulate-UPI or credit/debit card secure payments.
 
-### 🏪 Vendor Panel
-*   **Become a Seller Application:** Guests can apply as a Vendor, inputting a business name, phone number, GSTIN number, and store address. Upon approval by the Admin, they gain access to dashboard upload controls.
+### 🏪 Vendor Panel & Route Prefix `/vendor`
+*   **Prefix Path Namespace:** Isolated all vendor panel components under `/vendor/*` paths (e.g. `/vendor`, `/vendor/products`, `/vendor/order-details`, `/vendor/profile`, `/vendor/support`). Dynamic tab titles update page titles to show *Seller - Products*, *Seller - Profile* etc.
 *   **Catalog Upload:** Vendors can configure products, add variant stock levels, set variant pricing details, upload photos, and track orders containing their products.
 
 ### 🛡️ Super Admin Control Panel
-*   **Dashboard Stats Grid:** Visual statistics overview showcasing user metrics, pending vendor applications, product catalog status, and queries.
+*   **Dynamic Title Guard:** Tracks and updates browser document tab titles based on active route paths.
 *   **Routed Vendor Details View (`/admin/vendors/:vendorId`):**
     *   Full credentials (GSTIN, Business Address, Owner Name, Registered Email, Phone, Status).
     *   Calculated statistics: Total Uploaded Products, Seller Orders, and Store Revenue.
@@ -126,6 +135,34 @@ YoCart is a premium, high-performance e-commerce platform built on the MERN stac
 
 ---
 
+## 🎨 Interactive Festive Branding & Theme Engine
+YoCart incorporates a dynamic React Theme Engine allowing the Super Admin to turn on active sales and assign festive configurations manually from the Admin dashboard panel.
+
+*   **Supported Themes:** Diwali, Summer, Winter, Holi, Christmas, and YoCart Special Sale.
+*   **Theme ACCENTS & Accoutrements:**
+    *   **Diwali:** Warm golden-purple background washes, floating lamps/kandils, soft golden accents, card borders, and glowing button shadows.
+    *   **Holi:** Pink-emerald watercolor splashes, pichkaaris, and colorful sale ribbons.
+    *   **Christmas:** Snowy white-emerald-red gradients, snowflakes, gift-wraps, and hanging ornaments.
+    *   **Winter:** Frosted sky-blue and silver gradients, frosted cards, and ice crystals.
+    *   **Summer:** Creamy tropical leaf gradients and turquoise-coral buttons.
+    *   **YoCart Special:** Cyan-navy geometric brand patterns, luxury borders, and neon hover effects.
+*   **Floating Background Stickers (`FloatingStickers.jsx`):** Emits themed emojis scattered down both page margins with multi-directional CSS keyframes animations (`floatUpDown`, `floatLeftRight`, `floatDiagonalUp`, `floatDiagonalDown`) at low opacity (`0.14`) and `pointer-events-none` to prevent interference.
+
+---
+
+## 📊 SaaS Recharts Dashboard Analytics
+The admin and vendor panels feature a visual business intelligence dashboard built on top of Recharts, calculated on the fly inside optimized React hooks (`useMemo`).
+
+*   **KPI Cards:** Shows Total Revenue, Total Orders, Catalog counts, and Users. Displays comparative percentage changes vs the previous month (e.g. `↑ 18% vs last month`).
+*   **Sales Trend (Area Chart):** High-fidelity sales curve supporting dynamic dropdown range filters (`Today`, `Last 7 Days`, `Last 30 Days`, `Last 6 Months`, `This Year`, `All Time`).
+*   **Order fulfillment (Pie Chart):** Donut breakdown of order status distributions (Processing, Shipped, Delivered, Cancelled, Returned).
+*   **Stock Health (Donut Chart):** Computes product inventory levels (sums quantities across variants) classifying them into Out of Stock, Low Stock (`<10`), and Healthy.
+*   **Sellers Leaderboard (Products, Vendors, Buyers):** Boxed cells listing top products by units sold and generated revenue, top-billing vendors, and top-spent customer accounts.
+*   **Fulfillment Isolation:** Vendor dashboards filter metrics and orders specifically to their listings. Revenue calculations tally only order items belonging to the vendor.
+*   **One-Click Report Download:** Local CSV generator compiling orders data to spreadsheet-ready tables.
+
+---
+
 ## 🔐 Security & Identity Infrastructure
 *   **Unified Google OAuth & Local Login:** Integrates OAuth sign-ins. Newly registered Google accounts are routed to `/complete-profile` to finalize credentials.
 *   **JWT Cookie-Based Authorization:** Validates user payloads using HTTP-Only cookies. Administrative and vendor controls are guarded by strict role middlewares.
@@ -134,7 +171,7 @@ YoCart is a premium, high-performance e-commerce platform built on the MERN stac
 ---
 
 ## 🛠️ Technology Stack
-*   **Frontend:** React 19, Vite, Tailwind CSS v4, Lucide React, Axios, React Router DOM v7, Google OAuth Library
+*   **Frontend:** React 19, Vite, Tailwind CSS v4, Recharts, Lucide React, Axios, React Router DOM v7, Google OAuth Library
 *   **Backend:** Node.js, Express.js, MongoDB (Atlas), Mongoose ODM, BcryptJS, JSONWebToken, Cookie-Parser, Cors
 
 ---
