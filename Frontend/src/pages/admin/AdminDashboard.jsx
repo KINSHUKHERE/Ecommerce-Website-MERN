@@ -17,11 +17,8 @@ import KpiCard from "../../components/dashboard/KpiCard";
 import SalesTrendChart from "../../components/dashboard/SalesTrendChart";
 import OrdersPieChart from "../../components/dashboard/OrdersPieChart";
 import CategoryChart from "../../components/dashboard/CategoryChart";
-import RevenueDonut from "../../components/dashboard/RevenueDonut";
 import InventoryChart from "../../components/dashboard/InventoryChart";
 import TopProductsChart from "../../components/dashboard/TopProductsChart";
-import RecentOrdersTable from "../../components/dashboard/RecentOrdersTable";
-import ActivityFeed from "../../components/dashboard/ActivityFeed";
 
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -202,26 +199,7 @@ const AdminDashboard = () => {
       value: catCountMap[key]
     }));
 
-    // 7. Category share by Revenue
-    const catRevMap = {};
-    filteredOrders.forEach(o => {
-      if (o.orderStatus === "Cancelled") return;
-      o.items.forEach(item => {
-        const isTarget = isVendor ? vendorProductIds.has(item.productId) : true;
-        if (isTarget) {
-          // Cross ref category
-          const matchedProd = products.find(p => p._id === item.productId);
-          const catName = matchedProd?.categoryId?.name || "Uncategorized";
-          catRevMap[catName] = (catRevMap[catName] || 0) + (item.price * (item.quantity || 1));
-        }
-      });
-    });
-    const categoryRevenueData = Object.keys(catRevMap).map(key => ({
-      name: key,
-      value: catRevMap[key]
-    }));
-
-    // 8. Inventory Donut Chart
+    // 7. Inventory Donut Chart
     let healthyCount = 0;
     let lowCount = 0;
     let outCount = 0;
@@ -237,52 +215,37 @@ const AdminDashboard = () => {
       { name: "Out of Stock", value: outCount }
     ];
 
-    // 9. Top Selling Products
+    // 8. Top Selling Products with Quantity, Revenue, and Relative Progress Bar Percentage
     const soldQtyMap = {};
+    const soldRevMap = {};
     filteredOrders.forEach(o => {
       if (o.orderStatus === "Cancelled") return;
       o.items.forEach(item => {
         const isTarget = isVendor ? vendorProductIds.has(item.productId) : true;
         if (isTarget) {
           soldQtyMap[item.name] = (soldQtyMap[item.name] || 0) + (item.quantity || 1);
+          soldRevMap[item.name] = (soldRevMap[item.name] || 0) + (item.price * (item.quantity || 1));
         }
       });
     });
-    const topProductsData = Object.keys(soldQtyMap)
-      .map(key => ({ name: key, value: soldQtyMap[key] }))
-      .sort((a, b) => b.value - a.value)
+
+    const topProductsRaw = Object.keys(soldQtyMap).map(name => ({
+      name,
+      quantity: soldQtyMap[name],
+      revenue: soldRevMap[name] || 0
+    }));
+
+    const maxQty = topProductsRaw.reduce((max, p) => p.quantity > max ? p.quantity : max, 1);
+
+    const topProductsData = topProductsRaw
+      .map(p => ({
+        ...p,
+        percentage: (p.quantity / maxQty) * 100
+      }))
+      .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 5);
 
-    // 10. Live logs activity feed
-    const rawLogs = [];
-    filteredOrders.slice(0, 8).forEach(o => {
-      rawLogs.push({
-        type: "order",
-        message: `Order #${o._id.substring(o._id.length - 8)} status marked: ${o.orderStatus}`,
-        timestamp: o.createdAt
-      });
-    });
-    vendorProducts.slice(0, 4).forEach(p => {
-      rawLogs.push({
-        type: "product",
-        message: `Product added: ${p.heading}`,
-        timestamp: p.createdAt
-      });
-    });
-    if (isAdmin) {
-      vendors.slice(0, 4).forEach(v => {
-        rawLogs.push({
-          type: "vendor",
-          message: `Seller Registered: ${v.name || "Vendor Store"} (${v.vendorStatus})`,
-          timestamp: v.createdAt
-        });
-      });
-    }
-    const sortedActivities = rawLogs
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .slice(0, 5);
-
-    // 11. Top Customers
+    // 9. Top Customers
     const buyerMap = {};
     filteredOrders.forEach(o => {
       if (o.orderStatus === "Cancelled") return;
@@ -300,7 +263,7 @@ const AdminDashboard = () => {
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 5);
 
-    // 12. Top Vendors Leaderboard (Admin Only)
+    // 10. Top Vendors Leaderboard (Admin Only)
     const sellerLeaderboardMap = {};
     if (isAdmin) {
       filteredOrders.forEach(o => {
@@ -346,10 +309,8 @@ const AdminDashboard = () => {
       salesTrendData,
       ordersPieData,
       categoryCountData,
-      categoryRevenueData,
       inventoryData,
       topProductsData,
-      activities: sortedActivities,
       topBuyers,
       topVendors,
       recentOrders: filteredOrders.slice(0, 5)
@@ -583,12 +544,9 @@ const AdminDashboard = () => {
       </div>
 
       {/* Secondary Chart Row: Categories and Stock */}
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         <div>
           <CategoryChart data={analytics.categoryCountData} />
-        </div>
-        <div>
-          <RevenueDonut data={analytics.categoryRevenueData} />
         </div>
         <div>
           <InventoryChart data={analytics.inventoryData} />
@@ -597,81 +555,96 @@ const AdminDashboard = () => {
 
       {/* Detailed Analytics Leaderboards and Tables */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 text-left">
-        {/* Left Side: Top Products & Recent Orders */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
-            <TopProductsChart data={analytics.topProductsData} />
-            <RecentOrdersTable orders={analytics.recentOrders} />
-          </div>
+        {/* Top Products */}
+        <div className={isAdmin ? "lg:col-span-1" : "lg:col-span-1"}>
+          <TopProductsChart data={analytics.topProductsData} />
         </div>
 
-        {/* Right Side: Activity Feed */}
-        <div>
-          <ActivityFeed activities={analytics.activities} />
-        </div>
-      </div>
-
-      {/* Admin specific leaderboards */}
-      {isAdmin && (
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 text-left pt-2">
-          {/* Top Sellers */}
-          <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs">
-            <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
-              Top Performing Vendors
-            </h3>
-            {analytics.topVendors.length === 0 ? (
-              <p className="text-xs text-muted-gray font-bold py-6 text-center">No vendor statistics compiled</p>
-            ) : (
-              <div className="space-y-3">
-                {analytics.topVendors.map((vendor, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-xs font-semibold py-2 border-b border-slate-50">
-                    <div className="flex items-center gap-3">
-                      <span className="w-5 h-5 rounded-full bg-primary/5 text-primary flex items-center justify-center font-bold text-[10px]">
-                        {idx + 1}
-                      </span>
-                      <span>{vendor.name}</span>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <span className="text-muted-gray">{vendor.orders} Orders</span>
-                      <span className="font-bold text-dark-navy">₹{vendor.revenue.toLocaleString("en-IN")}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Top Buyers */}
-          <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs">
-            <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
-              Top Customer Buyers
-            </h3>
-            {analytics.topBuyers.length === 0 ? (
-              <p className="text-xs text-muted-gray font-bold py-6 text-center">No customer statistics compiled</p>
-            ) : (
-              <div className="space-y-3">
-                {analytics.topBuyers.map((buyer, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-xs font-semibold py-2 border-b border-slate-50">
-                    <div className="flex items-center gap-3">
-                      <span className="w-5 h-5 rounded-full bg-accent-light text-primary flex items-center justify-center font-bold text-[10px]">
-                        {idx + 1}
-                      </span>
-                      <div>
-                        <p>{buyer.name}</p>
-                        <p className="text-[9px] text-muted-gray leading-none font-medium">{buyer.email}</p>
+        {/* Quick Links / Admin Leaderboards Slot */}
+        {isAdmin ? (
+          <>
+            {/* Top Sellers */}
+            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs">
+              <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
+                Top Performing Vendors
+              </h3>
+              {analytics.topVendors.length === 0 ? (
+                <p className="text-xs text-muted-gray font-bold py-6 text-center">No vendor statistics compiled</p>
+              ) : (
+                <div className="space-y-3">
+                  {analytics.topVendors.map((vendor, idx) => (
+                    <div key={idx} className="flex justify-between items-center text-xs font-semibold py-2 border-b border-slate-50">
+                      <div className="flex items-center gap-3">
+                        <span className="w-5 h-5 rounded-full bg-primary/5 text-primary flex items-center justify-center font-bold text-[10px]">
+                          {idx + 1}
+                        </span>
+                        <span>{vendor.name}</span>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <span className="text-muted-gray">{vendor.orders} Orders</span>
+                        <span className="font-bold text-dark-navy">₹{vendor.revenue.toLocaleString("en-IN")}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-6">
-                      <span className="text-muted-gray">{buyer.orders} Purchases</span>
-                      <span className="font-bold text-dark-navy">₹{buyer.revenue.toLocaleString("en-IN")}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Top Buyers */}
+            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs">
+              <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
+                Top Customer Buyers
+              </h3>
+              {analytics.topBuyers.length === 0 ? (
+                <p className="text-xs text-muted-gray font-bold py-6 text-center">No customer statistics compiled</p>
+              ) : (
+                <div className="space-y-3">
+                  {analytics.topBuyers.map((buyer, idx) => (
+                    <div key={idx} className="flex justify-between items-center text-xs font-semibold py-2 border-b border-slate-50">
+                      <div className="flex items-center gap-3">
+                        <span className="w-5 h-5 rounded-full bg-accent-light text-primary flex items-center justify-center font-bold text-[10px]">
+                          {idx + 1}
+                        </span>
+                        <div>
+                          <p>{buyer.name}</p>
+                          <p className="text-[9px] text-muted-gray leading-none font-medium">{buyer.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <span className="text-muted-gray">{buyer.orders} Purchases</span>
+                        <span className="font-bold text-dark-navy">₹{buyer.revenue.toLocaleString("en-IN")}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="lg:col-span-2 bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex flex-col justify-between">
+            <div className="space-y-4">
+              <h3 className="text-sm font-extrabold text-dark-navy tracking-tight">
+                Seller Support & Resources
+              </h3>
+              <p className="text-xs text-muted-gray font-medium">
+                Quick access to help files, guidelines, and listing setup tools.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-light-border/40">
+                  <h4 className="text-xs font-bold text-dark-navy mb-1">Add New Product</h4>
+                  <p className="text-[11px] text-muted-gray leading-normal mb-3">List products, setup categories, and define variants.</p>
+                  <a href="/vendor/create-product" className="text-[10px] font-bold text-primary hover:underline">Go to Creator →</a>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-2xl border border-light-border/40">
+                  <h4 className="text-xs font-bold text-dark-navy mb-1">Support Desk</h4>
+                  <p className="text-[11px] text-muted-gray leading-normal mb-3">Submit inquiries or chat with helpdesk administrators.</p>
+                  <a href="/vendor/support" className="text-[10px] font-bold text-primary hover:underline">Get Help →</a>
+                </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
