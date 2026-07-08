@@ -72,7 +72,10 @@ const AdminDashboard = () => {
 
     // Filter products by vendor if isolated
     const vendorProducts = isVendor
-      ? products.filter(p => p.vendorId === currentUser._id)
+      ? products.filter(p => {
+          const pVendorId = p.vendorId?._id ? p.vendorId._id.toString() : p.vendorId?.toString();
+          return pVendorId === currentUser._id;
+        })
       : products;
 
     const vendorProductIds = new Set(vendorProducts.map(p => p._id));
@@ -80,7 +83,8 @@ const AdminDashboard = () => {
     // Resolve accurate vendor items list inside orders
     const getVendorOrderAmt = (order) => {
       return order.items.reduce((sum, item) => {
-        return vendorProductIds.has(item.productId)
+        const pid = item.productId?._id ? item.productId._id.toString() : item.productId?.toString();
+        return vendorProductIds.has(pid)
           ? sum + (item.price * (item.quantity || 1))
           : sum;
       }, 0);
@@ -88,7 +92,10 @@ const AdminDashboard = () => {
 
     // Filter orders belonging to vendor
     const relevantOrders = isVendor
-      ? orders.filter(o => o.items.some(item => vendorProductIds.has(item.productId)))
+      ? orders.filter(o => o.items.some(item => {
+          const pid = item.productId?._id ? item.productId._id.toString() : item.productId?.toString();
+          return vendorProductIds.has(pid);
+        }))
       : orders;
 
     // Time ranges cutoffs
@@ -221,7 +228,8 @@ const AdminDashboard = () => {
     filteredOrders.forEach(o => {
       if (o.orderStatus === "Cancelled") return;
       o.items.forEach(item => {
-        const isTarget = isVendor ? vendorProductIds.has(item.productId) : true;
+        const pid = item.productId?._id ? item.productId._id.toString() : item.productId?.toString();
+        const isTarget = isVendor ? vendorProductIds.has(pid) : true;
         if (isTarget) {
           soldQtyMap[item.name] = (soldQtyMap[item.name] || 0) + (item.quantity || 1);
           soldRevMap[item.name] = (soldRevMap[item.name] || 0) + (item.price * (item.quantity || 1));
@@ -269,8 +277,11 @@ const AdminDashboard = () => {
       filteredOrders.forEach(o => {
         if (o.orderStatus === "Cancelled") return;
         o.items.forEach(item => {
-          const matchedProd = products.find(p => p._id === item.productId);
-          const sellerId = matchedProd?.vendorId || "admin";
+          const pid = item.productId?._id ? item.productId._id.toString() : item.productId?.toString();
+          const matchedProd = products.find(p => p._id === pid);
+          const sellerId = matchedProd?.vendorId?._id 
+            ? matchedProd.vendorId._id.toString() 
+            : matchedProd?.vendorId?.toString() || "admin";
           const sellerUser = vendors.find(v => v._id === sellerId) || { name: "System Admin" };
           
           if (!sellerLeaderboardMap[sellerId]) {
