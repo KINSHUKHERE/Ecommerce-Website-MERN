@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bell, ShoppingBag, UserPlus, Store, Package, Trash2, CheckCheck, Clock, X, Info } from "lucide-react";
+import { Bell, ShoppingBag, UserPlus, Store, Package, Trash2, CheckCheck, Clock, RefreshCw, Info } from "lucide-react";
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from "../../api/NotificationApi";
 
 // Helper to format relative time
@@ -43,8 +43,12 @@ const NotificationBell = () => {
   useEffect(() => {
     fetchNotifications();
 
-    // Poll every 30 seconds for new notifications
-    const interval = setInterval(fetchNotifications, 30000);
+    // Poll every 10 seconds for new notifications
+    const interval = setInterval(fetchNotifications, 10000);
+
+    // Refresh when tab regains focus (e.g., user comes back from signup page)
+    const handleFocus = () => fetchNotifications();
+    window.addEventListener("focus", handleFocus);
 
     // Event listener for outside click to close dropdown
     const handleOutsideClick = (e) => {
@@ -56,6 +60,7 @@ const NotificationBell = () => {
 
     return () => {
       clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
       document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, []);
@@ -159,15 +164,24 @@ const NotificationBell = () => {
                 {unreadCount} unread message{unreadCount !== 1 ? "s" : ""}
               </p>
             </div>
-            {unreadCount > 0 && (
+            <div className="flex items-center gap-2">
               <button
-                onClick={handleMarkAllRead}
-                className="flex items-center gap-1 text-[10px] text-primary hover:text-primary-hover font-extrabold uppercase tracking-widest cursor-pointer outline-none"
+                onClick={fetchNotifications}
+                title="Refresh notifications"
+                className="p-1 text-muted-gray hover:text-primary rounded-lg hover:bg-slate-100 cursor-pointer outline-none transition-colors"
               >
-                <CheckCheck size={12} />
-                Mark all read
+                <RefreshCw size={12} />
               </button>
-            )}
+              {unreadCount > 0 && (
+                <button
+                  onClick={handleMarkAllRead}
+                  className="flex items-center gap-1 text-[10px] text-primary hover:text-primary-hover font-extrabold uppercase tracking-widest cursor-pointer outline-none"
+                >
+                  <CheckCheck size={12} />
+                  Mark all read
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Notifications List */}
