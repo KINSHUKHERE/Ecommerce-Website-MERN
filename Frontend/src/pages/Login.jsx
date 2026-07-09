@@ -9,14 +9,22 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    general: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setError("");
+    setErrors((prev) => ({
+      ...prev,
+      [e.target.name]: "",
+      general: "",
+    }));
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -26,7 +34,28 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoggingIn(true);
-    setError("");
+    setErrors({ email: "", password: "", general: "" });
+
+    // Client-side validations
+    let hasErrors = false;
+    const newErrors = { email: "", password: "", general: "" };
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address.";
+      hasErrors = true;
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required.";
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      setErrors(newErrors);
+      setIsLoggingIn(false);
+      return;
+    }
 
     try {
       const response = await login(formData);
@@ -46,9 +75,17 @@ const Login = () => {
         navigate("/");
       }
     } catch (err) {
-      setError(
-        err.response?.data?.msg || "Unable to Login. Please try again later.",
-      );
+      const errMsg = err.response?.data?.msg || "Unable to Login. Please try again later.";
+      
+      const updatedErrors = { email: "", password: "", general: "" };
+      if (errMsg.toLowerCase().includes("email") || errMsg.toLowerCase().includes("signup") || errMsg.toLowerCase().includes("register")) {
+        updatedErrors.email = errMsg;
+      } else if (errMsg.toLowerCase().includes("password") || errMsg.toLowerCase().includes("incorrect")) {
+        updatedErrors.password = errMsg;
+      } else {
+        updatedErrors.general = errMsg;
+      }
+      setErrors(updatedErrors);
       setIsLoggingIn(false);
     }
   };
@@ -56,7 +93,7 @@ const Login = () => {
   // Google OAuth integration
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsLoggingIn(true);
-    setError("");
+    setErrors({ email: "", password: "", general: "" });
     try {
       const response = await googleLogin({
         token: credentialResponse.credential,
@@ -78,13 +115,13 @@ const Login = () => {
         navigate("/");
       }
     } catch (err) {
-      setError("Google Login Failed");
+      setErrors({ email: "", password: "", general: "Google Login Failed" });
       setIsLoggingIn(false);
     }
   };
 
   const handleGoogleError = () => {
-    setError("Google Login Failed");
+    setErrors({ email: "", password: "", general: "Google Login Failed" });
     setIsLoggingIn(false);
   };
 
@@ -98,7 +135,7 @@ const Login = () => {
               <Loader2 className="animate-spin text-primary relative z-10 w-8 h-8" />
             </div>
             <h3 className="text-dark-navy font-extrabold text-base tracking-tight">Signing you in</h3>
-            <p className="text-muted-gray text-xs mt-1.5 font-semibold px-4">Welcome back! Preparing your premium dashboard experience...</p>
+            <p className="text-muted-gray text-xs mt-1.5 font-semibold px-4">Welcome back! Preparing your premium shopping experience...</p>
           </div>
         </div>
       )}
@@ -120,10 +157,10 @@ const Login = () => {
           Login to your YoCart account
         </p>
 
-        {error && (
+        {errors.general && (
           <div className="mb-4 rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 text-center">
             <p className="text-xs font-semibold text-red-600">
-              ❌ {error}
+              ❌ {errors.general}
             </p>
           </div>
         )}
@@ -143,8 +180,15 @@ const Login = () => {
               onChange={handleChange}
               placeholder="Enter your email"
               autoComplete="email"
-              className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+              className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                errors.email ? "border-red-500" : "border-light-border"
+              }`}
             />
+            {errors.email && (
+              <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                ⚠️ {errors.email}
+              </p>
+            )}
           </div>
 
           <div>
@@ -160,7 +204,9 @@ const Login = () => {
                 onChange={handleChange}
                 placeholder="Enter your password"
                 autoComplete="current-password"
-                className="w-full border border-light-border rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+                className={`w-full border rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                  errors.password ? "border-red-500" : "border-light-border"
+                }`}
               />
               <button
                 type="button"
@@ -170,6 +216,11 @@ const Login = () => {
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                ⚠️ {errors.password}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end">

@@ -17,8 +17,19 @@ const BecomeSeller = () => {
     businessAddress: "",
     gstin: "",
   });
+  const [errors, setErrors] = useState({
+    businessName: "",
+    businessAddress: "",
+    gstin: "",
+    general: "",
+  });
 
   const handleChange = (e) => {
+    setErrors({
+      ...errors,
+      [e.target.name]: "",
+      general: "",
+    });
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -28,6 +39,45 @@ const BecomeSeller = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrors({
+      businessName: "",
+      businessAddress: "",
+      gstin: "",
+      general: "",
+    });
+
+    let hasErrors = false;
+    const newErrors = {
+      businessName: "",
+      businessAddress: "",
+      gstin: "",
+      general: "",
+    };
+
+    if (!formData.businessName.trim()) {
+      newErrors.businessName = "Business name is required.";
+      hasErrors = true;
+    }
+
+    if (!formData.gstin.trim()) {
+      newErrors.gstin = "GSTIN is required.";
+      hasErrors = true;
+    } else if (formData.gstin.trim().length !== 15) {
+      newErrors.gstin = "GSTIN must be exactly 15 characters.";
+      hasErrors = true;
+    }
+
+    if (!formData.businessAddress.trim()) {
+      newErrors.businessAddress = "Business address is required.";
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      setErrors(newErrors);
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await becomeSellerApi(formData);
       showToast(response.data.msg || "Congratulations! You are now a seller.", "success");
@@ -41,7 +91,22 @@ const BecomeSeller = () => {
         window.location.reload();
       }, 1000);
     } catch (err) {
-      showToast(err.response?.data?.msg || "Failed to submit seller registration request", "error");
+      const errMsg = err.response?.data?.msg || "Failed to submit seller registration request";
+      const updatedErrors = {
+        businessName: "",
+        businessAddress: "",
+        gstin: "",
+        general: "",
+      };
+
+      if (errMsg.toLowerCase().includes("gstin")) {
+        updatedErrors.gstin = errMsg;
+      } else if (errMsg.toLowerCase().includes("name")) {
+        updatedErrors.businessName = errMsg;
+      } else {
+        updatedErrors.general = errMsg;
+      }
+      setErrors(updatedErrors);
       console.error(err);
     } finally {
       setLoading(false);
@@ -73,6 +138,14 @@ const BecomeSeller = () => {
           Fill out the details below to register your business and instantly gain access to the Seller Portal to manage products, view sales stats, and process customer orders.
         </p>
 
+        {errors.general && (
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 text-center">
+            <p className="text-xs font-semibold text-red-600">
+              ❌ {errors.general}
+            </p>
+          </div>
+        )}
+
         <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Business Name */}
           <div className="flex flex-col gap-1.5">
@@ -91,9 +164,16 @@ const BecomeSeller = () => {
                 value={formData.businessName}
                 onChange={handleChange}
                 placeholder="E.g., SuperTech Electronics"
-                className="w-full pl-9 pr-4 py-2.5 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all"
+                className={`w-full pl-9 pr-4 py-2.5 border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all ${
+                  errors.businessName ? "border-red-500" : "border-light-border"
+                }`}
               />
             </div>
+            {errors.businessName && (
+              <p className="text-red-500 text-[11px] font-bold mt-1 ml-1">
+                ⚠️ {errors.businessName}
+              </p>
+            )}
           </div>
 
           {/* GSTIN / Tax ID */}
@@ -113,9 +193,16 @@ const BecomeSeller = () => {
                 value={formData.gstin}
                 onChange={handleChange}
                 placeholder="E.g., 07AAAAA1111A1Z1"
-                className="w-full pl-9 pr-4 py-2.5 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all"
+                className={`w-full pl-9 pr-4 py-2.5 border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all ${
+                  errors.gstin ? "border-red-500" : "border-light-border"
+                }`}
               />
             </div>
+            {errors.gstin && (
+              <p className="text-red-500 text-[11px] font-bold mt-1 ml-1">
+                ⚠️ {errors.gstin}
+              </p>
+            )}
           </div>
 
           {/* Business Address */}
@@ -135,9 +222,16 @@ const BecomeSeller = () => {
                 value={formData.businessAddress}
                 onChange={handleChange}
                 placeholder="E.g., 405 Tech Park, Block 3, New Delhi, 110001"
-                className="w-full pl-9 pr-4 py-2.5 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all resize-none"
+                className={`w-full pl-9 pr-4 py-2.5 border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-sm font-semibold text-dark-navy bg-white transition-all resize-none ${
+                  errors.businessAddress ? "border-red-500" : "border-light-border"
+                }`}
               />
             </div>
+            {errors.businessAddress && (
+              <p className="text-red-500 text-[11px] font-bold mt-1 ml-1">
+                ⚠️ {errors.businessAddress}
+              </p>
+            )}
           </div>
 
           {/* Submit button */}

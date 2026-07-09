@@ -16,7 +16,17 @@ const SignUp = () => {
     businessAddress: "",
     gstin: "",
   });
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({
+    name: "",
+    role: "",
+    phoneNumber: "",
+    email: "",
+    password: "",
+    businessName: "",
+    businessAddress: "",
+    gstin: "",
+    general: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -33,7 +43,11 @@ const SignUp = () => {
   }, []);
 
   const handleChange = (e) => {
-    setError("");
+    setErrors((prev) => ({
+      ...prev,
+      [e.target.name]: "",
+      general: "",
+    }));
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -74,7 +88,88 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError("");
+    setErrors({
+      name: "",
+      role: "",
+      phoneNumber: "",
+      email: "",
+      password: "",
+      businessName: "",
+      businessAddress: "",
+      gstin: "",
+      general: "",
+    });
+
+    // Client-side validations
+    let hasErrors = false;
+    const newErrors = {
+      name: "",
+      role: "",
+      phoneNumber: "",
+      email: "",
+      password: "",
+      businessName: "",
+      businessAddress: "",
+      gstin: "",
+      general: "",
+    };
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Full name is required.";
+      hasErrors = true;
+    } else if (formData.name.trim().length < 3) {
+      newErrors.name = "Full name must be at least 3 characters.";
+      hasErrors = true;
+    }
+
+    if (!formData.role) {
+      newErrors.role = "Please select an account type.";
+      hasErrors = true;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address.";
+      hasErrors = true;
+    }
+
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = "Phone number must be exactly 10 digits.";
+      hasErrors = true;
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required.";
+      hasErrors = true;
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+      hasErrors = true;
+    }
+
+    if (formData.role === "vendor") {
+      if (!formData.businessName.trim()) {
+        newErrors.businessName = "Business name is required.";
+        hasErrors = true;
+      }
+      if (!formData.gstin.trim()) {
+        newErrors.gstin = "GSTIN is required.";
+        hasErrors = true;
+      } else if (formData.gstin.trim().length !== 15) {
+        newErrors.gstin = "GSTIN must be exactly 15 characters.";
+        hasErrors = true;
+      }
+      if (!formData.businessAddress.trim()) {
+        newErrors.businessAddress = "Business address is required.";
+        hasErrors = true;
+      }
+    }
+
+    if (hasErrors) {
+      setErrors(newErrors);
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       await signUpApi(formData);
@@ -85,14 +180,32 @@ const SignUp = () => {
         navigate("/login");
       }
     } catch (err) {
-      setError(err.response?.data?.msg || "Unable to create user");
+      const errMsg = err.response?.data?.msg || "Unable to create user";
+      const updatedErrors = {
+        name: "",
+        role: "",
+        phoneNumber: "",
+        email: "",
+        password: "",
+        businessName: "",
+        businessAddress: "",
+        gstin: "",
+        general: "",
+      };
+
+      if (errMsg.toLowerCase().includes("exist") || errMsg.toLowerCase().includes("registered")) {
+        updatedErrors.email = "This email is already registered.";
+      } else {
+        updatedErrors.general = errMsg;
+      }
+      setErrors(updatedErrors);
       setIsSubmitting(false);
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsSubmitting(true);
-    setError("");
+    setErrors((prev) => ({ ...prev, general: "" }));
     try {
       const response = await googleLogin({
         token: credentialResponse.credential,
@@ -114,13 +227,13 @@ const SignUp = () => {
         navigate("/");
       }
     } catch (err) {
-      setError("Google Sign Up Failed");
+      setErrors((prev) => ({ ...prev, general: "Google Sign Up Failed" }));
       setIsSubmitting(false);
     }
   };
 
   const handleGoogleError = () => {
-    setError("Google Sign Up Failed");
+    setErrors((prev) => ({ ...prev, general: "Google Sign Up Failed" }));
     setIsSubmitting(false);
   };
 
@@ -131,7 +244,7 @@ const SignUp = () => {
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-accent"></div>
           
           <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 border border-emerald-100 flex items-center justify-center mx-auto mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <svg xmlns="http://www.w3.org/2050/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           </div>
 
           <h2 className="text-xl sm:text-2xl font-extrabold text-dark-navy tracking-tight mb-3">
@@ -182,10 +295,10 @@ const SignUp = () => {
         </h1>
         <p className="text-center text-xs text-muted-gray mb-6 font-semibold">Join YoCart today</p>
 
-        {error && (
+        {errors.general && (
           <div className="mb-4 rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 text-center">
             <p className="text-xs font-semibold text-red-600">
-              ❌ {error}
+              ❌ {errors.general}
             </p>
           </div>
         )}
@@ -203,8 +316,15 @@ const SignUp = () => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter your name"
-              className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+              className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                errors.name ? "border-red-500" : "border-light-border"
+              }`}
             />
+            {errors.name && (
+              <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                ⚠️ {errors.name}
+              </p>
+            )}
           </div>
 
           {/* Role */}
@@ -219,12 +339,19 @@ const SignUp = () => {
               required
               value={formData.role}
               onChange={handleChange}
-              className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white cursor-pointer"
+              className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white cursor-pointer ${
+                errors.role ? "border-red-500" : "border-light-border"
+              }`}
             >
               <option value="">Select Account Type</option>
               <option value="user">User</option>
               <option value="vendor">Vendor</option>
             </select>
+            {errors.role && (
+              <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                ⚠️ {errors.role}
+              </p>
+            )}
           </div>
 
           {formData.role === "vendor" && (
@@ -240,8 +367,15 @@ const SignUp = () => {
                   value={formData.businessName}
                   onChange={handleChange}
                   placeholder="Enter business/store name"
-                  className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+                  className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                    errors.businessName ? "border-red-500" : "border-light-border"
+                  }`}
                 />
+                {errors.businessName && (
+                  <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                    ⚠️ {errors.businessName}
+                  </p>
+                )}
               </div>
 
               {/* GSTIN */}
@@ -255,8 +389,15 @@ const SignUp = () => {
                   value={formData.gstin}
                   onChange={handleChange}
                   placeholder="Enter GSTIN ID number"
-                  className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+                  className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                    errors.gstin ? "border-red-500" : "border-light-border"
+                  }`}
                 />
+                {errors.gstin && (
+                  <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                    ⚠️ {errors.gstin}
+                  </p>
+                )}
               </div>
 
               {/* Business Address */}
@@ -270,8 +411,15 @@ const SignUp = () => {
                   value={formData.businessAddress}
                   onChange={handleChange}
                   placeholder="Enter business address"
-                  className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white resize-none"
+                  className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white resize-none ${
+                    errors.businessAddress ? "border-red-500" : "border-light-border"
+                  }`}
                 />
+                {errors.businessAddress && (
+                  <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                    ⚠️ {errors.businessAddress}
+                  </p>
+                )}
               </div>
             </>
           )}
@@ -290,8 +438,15 @@ const SignUp = () => {
               value={formData.phoneNumber}
               onChange={handleChange}
               placeholder="Enter phone number"
-              className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+              className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                errors.phoneNumber ? "border-red-500" : "border-light-border"
+              }`}
             />
+            {errors.phoneNumber && (
+              <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                ⚠️ {errors.phoneNumber}
+              </p>
+            )}
           </div>
 
           {/* Email */}
@@ -309,8 +464,15 @@ const SignUp = () => {
               onChange={handleChange}
               placeholder="Enter your email"
               autoComplete="email"
-              className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+              className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                errors.email ? "border-red-500" : "border-light-border"
+              }`}
             />
+            {errors.email && (
+              <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                ⚠️ {errors.email}
+              </p>
+            )}
           </div>
 
           {/* Password */}
@@ -327,7 +489,9 @@ const SignUp = () => {
                 onChange={handleChange}
                 placeholder="Enter password"
                 autoComplete="new-password"
-                className="w-full border border-light-border rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+                className={`w-full border rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                  errors.password ? "border-red-500" : "border-light-border"
+                }`}
               />
               <button
                 type="button"
@@ -337,6 +501,11 @@ const SignUp = () => {
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                ⚠️ {errors.password}
+              </p>
+            )}
           </div>
 
           {/* Profile Picture (Optional) */}

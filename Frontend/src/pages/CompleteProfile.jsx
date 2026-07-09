@@ -21,7 +21,12 @@ const CompleteProfile = () => {
       avatar: user?.avatar || "",
     };
   });
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+    general: "",
+  });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -44,7 +49,7 @@ const CompleteProfile = () => {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      setError("Image size must be less than 2MB");
+      setErrors((prev) => ({ ...prev, general: "Image size must be less than 2MB" }));
       return;
     }
 
@@ -57,7 +62,10 @@ const CompleteProfile = () => {
       }));
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.msg || "Failed to upload profile image");
+      setErrors((prev) => ({
+        ...prev,
+        general: err.response?.data?.msg || "Failed to upload profile image",
+      }));
     } finally {
       setUploadingAvatar(false);
     }
@@ -71,7 +79,7 @@ const CompleteProfile = () => {
   };
 
   const isInputSufficient = () => {
-    const isPhoneValid = formData.phoneNumber.trim().length >= 10;
+    const isPhoneValid = /^[0-9]{10}$/.test(formData.phoneNumber.trim());
     if (!isPhoneValid) return false;
 
     if (formData.password) {
@@ -88,7 +96,11 @@ const CompleteProfile = () => {
   };
 
   const handleChange = (e) => {
-    setError("");
+    setErrors((prev) => ({
+      ...prev,
+      [e.target.name]: "",
+      general: "",
+    }));
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -97,26 +109,50 @@ const CompleteProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({
+      phoneNumber: "",
+      password: "",
+      confirmPassword: "",
+      general: "",
+    });
+
+    let hasErrors = false;
+    const newErrors = {
+      phoneNumber: "",
+      password: "",
+      confirmPassword: "",
+      general: "",
+    };
 
     if (!formData.phoneNumber.trim()) {
-      setError("Phone number is required");
-      return;
+      newErrors.phoneNumber = "Phone number is required.";
+      hasErrors = true;
+    } else {
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(formData.phoneNumber)) {
+        newErrors.phoneNumber = "Phone number must be exactly 10 digits.";
+        hasErrors = true;
+      }
     }
 
     if (formData.password) {
       if (formData.password.length < 6) {
-        setError("Password must be at least 6 characters long");
-        return;
+        newErrors.password = "Password must be at least 6 characters.";
+        hasErrors = true;
       }
       if (formData.password !== formData.confirmPassword) {
-        setError("Passwords do not match");
-        return;
+        newErrors.confirmPassword = "Passwords do not match.";
+        hasErrors = true;
       }
+    }
+
+    if (hasErrors) {
+      setErrors(newErrors);
+      return;
     }
 
     try {
       setLoading(true);
-      setError("");
 
       const payload = {
         phoneNumber: formData.phoneNumber,
@@ -136,9 +172,21 @@ const CompleteProfile = () => {
       navigate("/", { replace: true });
     } catch (err) {
       console.error(err);
-      setError(
-        err.response?.data?.msg || "Failed to complete profile. Please try again."
-      );
+      const errMsg = err.response?.data?.msg || "Failed to complete profile. Please try again.";
+      const updatedErrors = {
+        phoneNumber: "",
+        password: "",
+        confirmPassword: "",
+        general: "",
+      };
+      if (errMsg.toLowerCase().includes("phone")) {
+        updatedErrors.phoneNumber = errMsg;
+      } else if (errMsg.toLowerCase().includes("password")) {
+        updatedErrors.password = errMsg;
+      } else {
+        updatedErrors.general = errMsg;
+      }
+      setErrors(updatedErrors);
     } finally {
       setLoading(false);
     }
@@ -158,10 +206,10 @@ const CompleteProfile = () => {
           Welcome, {user.name}! Just one last step to complete your profile.
         </p>
 
-        {error && (
+        {errors.general && (
           <div className="mb-4 rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 text-center">
             <p className="text-xs font-semibold text-red-655">
-              ❌ {error}
+              ❌ {errors.general}
             </p>
           </div>
         )}
@@ -179,8 +227,15 @@ const CompleteProfile = () => {
               value={formData.phoneNumber}
               onChange={handleChange}
               placeholder="Enter your phone number"
-              className="w-full border border-light-border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+              className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                errors.phoneNumber ? "border-red-500" : "border-light-border"
+              }`}
             />
+            {errors.phoneNumber && (
+              <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                ⚠️ {errors.phoneNumber}
+              </p>
+            )}
           </div>
 
           {/* Profile Picture (Optional) */}
@@ -231,7 +286,7 @@ const CompleteProfile = () => {
                     <button 
                       type="button" 
                       onClick={handleRemoveAvatar} 
-                      className="text-xs font-bold text-red-500 hover:text-red-650 py-1 px-3 bg-red-50 rounded-lg cursor-pointer"
+                      className="text-xs font-bold text-red-500 hover:text-red-655 py-1 px-3 bg-red-50 rounded-lg cursor-pointer"
                     >
                       Remove
                     </button>
@@ -259,7 +314,9 @@ const CompleteProfile = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter password (optional)"
-                  className="w-full border border-light-border rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+                  className={`w-full border rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                    errors.password ? "border-red-500" : "border-light-border"
+                  }`}
                 />
                 <button
                   type="button"
@@ -269,6 +326,11 @@ const CompleteProfile = () => {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                  ⚠️ {errors.password}
+                </p>
+              )}
             </div>
 
             {/* Confirm Password */}
@@ -285,7 +347,9 @@ const CompleteProfile = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Confirm your password"
-                    className="w-full border border-light-border rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white"
+                    className={`w-full border rounded-xl pl-4 pr-10 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white ${
+                      errors.confirmPassword ? "border-red-500" : "border-light-border"
+                    }`}
                   />
                   <button
                     type="button"
@@ -295,11 +359,16 @@ const CompleteProfile = () => {
                     {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-                {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                {errors.confirmPassword && (
+                  <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
+                    ⚠️ {errors.confirmPassword}
+                  </p>
+                )}
+                {formData.confirmPassword && !errors.confirmPassword && formData.password !== formData.confirmPassword && (
                   <p className="text-xs text-red-500 mt-1.5 font-bold">❌ Passwords do not match</p>
                 )}
-                {formData.confirmPassword && formData.password === formData.confirmPassword && (
-                  <p className="text-xs text-emerald-600 mt-1.5 font-bold font-semibold">✓ Passwords match</p>
+                {formData.confirmPassword && !errors.confirmPassword && formData.password === formData.confirmPassword && (
+                  <p className="text-xs text-emerald-600 mt-1.5 font-bold">✓ Passwords match</p>
                 )}
               </div>
             )}
