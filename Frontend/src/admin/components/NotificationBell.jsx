@@ -81,7 +81,11 @@ const NotificationBell = () => {
     }
     setIsOpen(false);
     if (notif.link) {
-      navigate(notif.link);
+      let targetLink = notif.link;
+      if (targetLink === "/admin/order-details") {
+        targetLink = "/order-details";
+      }
+      navigate(targetLink);
     }
   };
 

@@ -19,7 +19,16 @@ const getNotifications = async (req, res) => {
 
     const notifications = await Notification.find(query)
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(10);
+
+    // Prune notifications: delete any older notifications that are not in the latest 10 list
+    if (notifications.length > 0) {
+      const latestIds = notifications.map(n => n._id);
+      await Notification.deleteMany({
+        ...query,
+        _id: { $nin: latestIds }
+      });
+    }
 
     res.status(200).json({
       msg: "Notifications fetched successfully",

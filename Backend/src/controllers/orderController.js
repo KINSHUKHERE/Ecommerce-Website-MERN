@@ -91,7 +91,7 @@ const createOrder = async (req, res) => {
         title: "New Order Placed",
         message: `Order #${newOrder._id.toString().slice(-8)} has been placed for a total of ₹${totalAmount}.`,
         type: "order",
-        link: "/admin/order-details"
+        link: "/order-details"
       });
     } catch (notifErr) {
       console.error("Failed to generate order notifications:", notifErr);
