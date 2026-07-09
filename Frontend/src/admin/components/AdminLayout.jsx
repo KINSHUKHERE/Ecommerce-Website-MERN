@@ -4,6 +4,7 @@ import { Menu, LogOut, ChevronDown, User, Shield } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 import logo from "../../assets/logo.png";
 import { getGlobalSaleConfig } from "../../api/SaleApi";
+import NotificationBell from "./NotificationBell";
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -116,6 +117,9 @@ const AdminLayout = ({ children }) => {
 
           {/* Right Side: Profile & Controls */}
           <div className="flex items-center gap-4">
+            {/* Notifications Bell */}
+            <NotificationBell />
+
             {/* User Profile Dropdown */}
             <div className="relative">
               <button

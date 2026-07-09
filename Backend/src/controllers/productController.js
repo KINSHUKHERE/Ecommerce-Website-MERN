@@ -86,6 +86,23 @@ const addProduct = async (req, res) => {
     // Fetch the inserted variants to return in response
     const finalVariants = await Variant.find({ productId: product._id, isDeleted: false });
 
+    // Create notification for product addition
+    try {
+      const Notification = require("../models/notificationDetails");
+      const User = require("../models/authDetails");
+      const creator = await User.findById(req.user.userId);
+      const creatorName = creator?.businessName || creator?.name || "Someone";
+      await Notification.create({
+        recipient: null,
+        title: "New Product Listed",
+        message: `"${creatorName}" listed a new product: "${product.heading}".`,
+        type: "product",
+        link: "/admin/products"
+      });
+    } catch (notifErr) {
+      console.error("Failed to generate product notification:", notifErr);
+    }
+
     res.status(201).json({
       msg: "Data sent successfully",
       product: {

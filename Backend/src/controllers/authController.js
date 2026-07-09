@@ -33,6 +33,30 @@ const signup = async (req, res) => {
       gstin: isVendor ? gstin : "",
       vendorStatus: isVendor ? "pending" : "active",
     });
+
+    // Create notifications for registrations
+    try {
+      const Notification = require("../models/notificationDetails");
+      if (isVendor) {
+        await Notification.create({
+          recipient: null,
+          title: "New Seller Application",
+          message: `Seller "${businessName || name}" has applied to register a vendor store.`,
+          type: "vendor",
+          link: "/admin/vendors"
+        });
+      } else {
+        await Notification.create({
+          recipient: null,
+          title: "New Customer Registered",
+          message: `Customer "${name}" (${email}) has registered an account.`,
+          type: "user",
+          link: "/admin/users"
+        });
+      }
+    } catch (notifErr) {
+      console.error("Failed to generate signup notification:", notifErr);
+    }
     res.status(201).json({
       msg: "User Created",
       data,
@@ -333,6 +357,20 @@ const becomeSeller = async (req, res) => {
     user.gstin = gstin;
     user.isProfileComplete = true;
     await user.save();
+
+    // Create notification for seller upgrade
+    try {
+      const Notification = require("../models/notificationDetails");
+      await Notification.create({
+        recipient: null,
+        title: "New Seller Upgrade",
+        message: `User "${user.name}" has upgraded their account to a Seller store: "${businessName}".`,
+        type: "vendor",
+        link: "/admin/vendors"
+      });
+    } catch (notifErr) {
+      console.error("Failed to generate seller upgrade notification:", notifErr);
+    }
 
     const userObj = user.toObject();
     delete userObj.password;

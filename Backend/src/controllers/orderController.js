@@ -56,6 +56,47 @@ const createOrder = async (req, res) => {
     // Clear user's cart
     await Cart.deleteMany({ userId });
 
+    // Create notifications for vendors & admin
+    try {
+      const Notification = require("../models/notificationDetails");
+      
+      // Group items by vendor
+      const vendorItemsMap = {};
+      for (const item of items) {
+        const prod = await Product.findById(item.productId);
+        if (prod && prod.vendorId) {
+          const vIdStr = prod.vendorId.toString();
+          if (!vendorItemsMap[vIdStr]) {
+            vendorItemsMap[vIdStr] = [];
+          }
+          vendorItemsMap[vIdStr].push(item);
+        }
+      }
+
+      // 1. Create vendor notifications
+      for (const [vendorId, vendorItems] of Object.entries(vendorItemsMap)) {
+        const itemNames = vendorItems.map(item => item.name).join(", ");
+        await Notification.create({
+          recipient: vendorId,
+          title: "New Order Received",
+          message: `You received a new order for: ${itemNames}.`,
+          type: "order",
+          link: "/vendor/order-details"
+        });
+      }
+
+      // 2. Create admin notification
+      await Notification.create({
+        recipient: null,
+        title: "New Order Placed",
+        message: `Order #${newOrder._id.toString().slice(-8)} has been placed for a total of ₹${totalAmount}.`,
+        type: "order",
+        link: "/admin/order-details"
+      });
+    } catch (notifErr) {
+      console.error("Failed to generate order notifications:", notifErr);
+    }
+
     res.status(201).json({
       msg: "Order created successfully and cart cleared",
       order: newOrder,
