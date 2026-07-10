@@ -21,6 +21,7 @@ YoCart is a premium, high-performance e-commerce platform built on the MERN stac
 │   │   │   ├── categoryDetails.js # Mongoose Schema for Product Categories
 │   │   │   ├── brandDetails.js  # Mongoose Schema for Brand Variants
 │   │   │   ├── orderDetails.js  # Mongoose Schema for Orders (items, shipping addresses, statuses)
+│   │   │   ├── notificationDetails.js # Mongoose Schema for Admin & Vendor real-time notifications
 │   │   │   └── saleConfig.js    # Mongoose Schema for global sales configuration (active sales, branding, themes)
 │   │   ├── controllers/
 │   │   │   ├── authController.js # Auth, Google OAuth, Profile Completion & Directory audits
@@ -30,11 +31,12 @@ YoCart is a premium, high-performance e-commerce platform built on the MERN stac
 │   │   │   ├── cartController.js # Cart CRUD controllers
 │   │   │   ├── contactController.js # Customer enquiries handlers
 │   │   │   ├── orderController.js # Order checkout & status update workflows
+│   │   │   ├── notificationController.js # Read/unread/delete notification handlers
 │   │   │   └── saleController.js # Global sale switches and active themes configuration
 │   │   ├── middleware/
 │   │   │   ├── verifyUser.js     # Validates HTTP-Only cookie / Bearer JWT to authorize active users
 │   │   │   └── verifyVendorOrAdmin.js # Validates active user's payload has 'vendor' or 'admin' role
-│   │   └── app.js               # Express API routes and application configuration
+│   │   └── app.js               # Express API routes, rate-limit configs, and application configuration
 │   ├── server.js                # Server entry point (configures Port and starts server)
 │   └── package.json             # Backend dependencies & scripts
 │
@@ -49,14 +51,18 @@ YoCart is a premium, high-performance e-commerce platform built on the MERN stac
 │   │   │   ├── CategoryAndVarientApi.js # Category & Brand Axios API helpers
 │   │   │   ├── OrderApi.js      # Order checkout and status Axios API helpers
 │   │   │   ├── DashboardApi.js  # Stats & raw datasets Axios API helpers
+│   │   │   ├── NotificationApi.js # Mongoose Notification Axios API helpers
 │   │   │   └── SaleApi.js       # Global sale config Axios API helpers
 │   │   ├── assets/              # App images & icons
 │   │   ├── admin/               # Dedicated Admin Dashboard pages & components
 │   │   │   ├── components/
-│   │   │   │   ├── AdminLayout.jsx # Glassmorphic Admin Header and main content layout wrapper
-│   │   │   │   └── AdminSidebar.jsx # Vertical navigation sidebar with active routing states
+│   │   │   │   ├── AdminLayout.jsx # Glassmorphic Admin Header (with real-time NotificationBell widget)
+│   │   │   │   ├── AdminSidebar.jsx # Vertical navigation sidebar with active routing states
+│   │   │   │   └── NotificationBell.jsx # Premium notification popover (10s auto-polling, tab-focus triggers)
 │   │   ├── theme/
 │   │   │   └── ThemeEngine.js   # Reusable React Theme Engine storing colors, gradients, and assets
+│   │   ├── utils/
+│   │   │   └── commissionHelper.js # Shared utility to calculate vendor sales commission metrics
 │   │   ├── components/          # Reusable UI layout elements
 │   │   │   ├── Navbar.jsx       # Header & Navigation (Become a Seller link, cart count badge)
 │   │   │   ├── Footer.jsx       # Footer layout
@@ -160,6 +166,21 @@ The admin and vendor panels feature a visual business intelligence dashboard bui
 *   **Sellers Leaderboard (Products, Vendors, Buyers):** Boxed cells listing top products by units sold and generated revenue, top-billing vendors, and top-spent customer accounts.
 *   **Fulfillment Isolation:** Vendor dashboards filter metrics and orders specifically to their listings. Revenue calculations tally only order items belonging to the vendor.
 *   **One-Click Report Download:** Local CSV generator compiling orders data to spreadsheet-ready tables.
+
+---
+
+## 💸 Admin Commission System & Rate Limiting
+YoCart includes a robust commission-tracking module on marketplace sales and protection limiters:
+
+*   **Dynamic Commission Engine:** Calculations are resolved month-by-month comparing a vendor's monthly sales to the specified tier targets:
+    *   **Tier 1:** 1% Commission for monthly sales $\le$ ₹2,00,000 (2 Lakhs).
+    *   **Tier 2:** 5% Commission for monthly sales $\le$ ₹10,00,000 (10 Lakhs).
+    *   **Tier 3:** 10% Commission for monthly sales $>$ ₹10,00,000.
+*   **Legal Compliance Checkboxes:** A required Terms & Conditions checkbox is present on the "Become a Seller" form and the signup page (if role is "vendor"), linking directly to Section 8 of the platform Terms & Conditions page.
+*   **Dashboard Insights:** Shows total commission earned on the Admin Dashboard, commission metrics in the Vendors list and details views, and vendor-specific commission paid widgets on the vendor panel.
+*   **API Protection (Rate Limiting):**
+    *   **Global Limiter:** Protects all endpoints by restricting connections to a maximum of 250 requests per minute.
+    *   **Sensitive Operations Limiter:** Strict limit of 20 requests per 15 minutes targeting `/login`, `/signup`, `/become-seller`, `/complete-profile`, `/post-contactdetails`, and checkout order creations to prevent transaction spam and credential brute-forcing.
 
 ---
 
