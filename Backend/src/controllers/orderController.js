@@ -224,9 +224,51 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+const cancelUserOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.user.userId;
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        msg: "Order not found",
+      });
+    }
+
+    // Check ownership
+    if (order.userId.toString() !== userId.toString()) {
+      return res.status(403).json({
+        msg: "Forbidden: You are not the owner of this order",
+      });
+    }
+
+    // Check if delivered
+    if (order.orderStatus === "Delivered") {
+      return res.status(400).json({
+        msg: "Delivered orders cannot be cancelled",
+      });
+    }
+
+    order.orderStatus = "Cancelled";
+    await order.save();
+
+    res.status(200).json({
+      msg: "Order cancelled successfully",
+      order,
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Unable to cancel order",
+      Error: err.message,
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   getAllOrders,
   getUserOrders,
   updateOrderStatus,
+  cancelUserOrder,
 };
