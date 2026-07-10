@@ -10,6 +10,7 @@ import {
   Download
 } from "lucide-react";
 import { getDashboardData } from "../../api/DashboardApi";
+import { calculateVendorCommission } from "../../utils/commissionHelper";
 
 // Import Reusable Dashboard Subcomponents
 import DashboardSkeleton from "../../components/dashboard/DashboardSkeleton";
@@ -303,14 +304,43 @@ const AdminDashboard = () => {
       });
     }
     const topVendors = Object.keys(sellerLeaderboardMap)
-      .map(k => ({
-        id: k,
-        name: sellerLeaderboardMap[k].name,
-        revenue: sellerLeaderboardMap[k].revenue,
-        orders: sellerLeaderboardMap[k].orders
-      }))
+      .map(k => {
+        const sellerProducts = products.filter(
+          p => p.vendorId && (p.vendorId._id === k || p.vendorId === k)
+        );
+        const commStats = calculateVendorCommission(orders, sellerProducts);
+        return {
+          id: k,
+          name: sellerLeaderboardMap[k].name,
+          revenue: sellerLeaderboardMap[k].revenue,
+          orders: sellerLeaderboardMap[k].orders,
+          commission: commStats.totalCommissionAllTime
+        };
+      })
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 5);
+
+    // Calculate total marketplace commission for admin
+    let totalCommissionEarned = 0;
+    if (isAdmin) {
+      vendors.forEach(vendor => {
+        const vendorProducts = products.filter(
+          p => p.vendorId && (p.vendorId._id === vendor._id || p.vendorId === vendor._id)
+        );
+        const commStats = calculateVendorCommission(orders, vendorProducts);
+        totalCommissionEarned += commStats.totalCommissionAllTime;
+      });
+    }
+
+    // Calculate specific vendor statistics
+    let vendorCommStats = null;
+    if (isVendor) {
+      const vendorProducts = products.filter(p => {
+        const pVendorId = p.vendorId?._id ? p.vendorId._id.toString() : p.vendorId?.toString();
+        return pVendorId === currentUser._id;
+      });
+      vendorCommStats = calculateVendorCommission(orders, vendorProducts);
+    }
 
     return {
       totalRev,
@@ -330,9 +360,11 @@ const AdminDashboard = () => {
       topProductsData,
       topBuyers,
       topVendors,
+      totalCommissionEarned,
+      vendorCommStats,
       recentOrders: filteredOrders.slice(0, 5)
     };
-  }, [rawData, selectedTimeFilter, isVendor, isAdmin]);
+  }, [rawData, selectedTimeFilter, isVendor, isAdmin, currentUser._id]);
 
   // Export CSV Report Handler
   const handleExportCSV = () => {
@@ -546,6 +578,57 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Commission Structure & Info Section */}
+      <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs text-left grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div className="md:col-span-2">
+          <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-wider mb-2">
+            Marketplace Commission Policy
+          </h3>
+          <p className="text-xs text-muted-gray font-semibold leading-relaxed">
+            YoCart runs a dynamic tier-based commission system based on a seller's gross monthly sales. 
+            Commission is calculated month-by-month and helps sustain the marketplace platform:
+          </p>
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="p-3 bg-slate-50 border border-light-border/40 rounded-2xl">
+              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 1 (≤ 2 Lakhs)</span>
+              <span className="text-sm sm:text-base font-black text-primary mt-1 block">1% Commission</span>
+            </div>
+            <div className="p-3 bg-slate-50 border border-light-border/40 rounded-2xl">
+              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 2 (≤ 10 Lakhs)</span>
+              <span className="text-sm sm:text-base font-black text-amber-500 mt-1 block">5% Commission</span>
+            </div>
+            <div className="p-3 bg-slate-50 border border-light-border/40 rounded-2xl">
+              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 3 (&gt; 10 Lakhs)</span>
+              <span className="text-sm sm:text-base font-black text-red-500 mt-1 block">10% Commission</span>
+            </div>
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10 rounded-2xl p-4 flex flex-col justify-center h-full">
+          {isAdmin ? (
+            <>
+              <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Total Commission Collected</span>
+              <span className="text-2xl font-black text-primary mt-1">₹{analytics.totalCommissionEarned.toLocaleString("en-IN")}</span>
+              <span className="text-[9px] text-muted-gray font-bold mt-1">Sum of all monthly vendor payouts</span>
+            </>
+          ) : (
+            <>
+              <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">My Active Monthly Sales</span>
+              <span className="text-lg font-bold text-dark-navy mt-1">₹{(analytics.vendorCommStats?.currentMonthSales || 0).toLocaleString("en-IN")}</span>
+              <div className="flex justify-between items-center mt-2 pt-2 border-t border-light-border/40">
+                <span className="text-[9px] text-muted-gray font-bold">Active Tier Commission</span>
+                <span className="text-[10px] font-extrabold text-primary bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                  {((analytics.vendorCommStats?.currentRate || 0.01) * 100).toFixed(0)}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-[9px] text-muted-gray font-bold">Total Paid Overall</span>
+                <span className="text-xs font-black text-dark-navy">₹{(analytics.vendorCommStats?.totalCommissionAllTime || 0).toLocaleString("en-IN")}</span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Analytics Charts Grid */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-2 min-h-[350px]">
@@ -601,12 +684,17 @@ const AdminDashboard = () => {
                           </span>
                           <span className="truncate text-dark-navy font-bold">{vendor.name}</span>
                         </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <span className="text-[9px] font-extrabold uppercase bg-white border border-slate-100 text-muted-gray px-2 py-0.5 rounded-md">
-                            {vendor.orders} Orders
-                          </span>
-                          <span className="font-extrabold text-dark-navy">
-                            ₹{vendor.revenue.toLocaleString("en-IN")}
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9px] font-extrabold uppercase bg-white border border-slate-100 text-muted-gray px-2 py-0.5 rounded-md">
+                              {vendor.orders} Orders
+                            </span>
+                            <span className="font-extrabold text-dark-navy">
+                              ₹{vendor.revenue.toLocaleString("en-IN")}
+                            </span>
+                          </div>
+                          <span className="text-[9px] text-primary font-bold">
+                            Commission: ₹{(vendor.commission || 0).toLocaleString("en-IN")}
                           </span>
                         </div>
                       </div>

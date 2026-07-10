@@ -19,10 +19,15 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getVendorsApi, updateVendorStatusApi, createVendorApi, deleteVendorApi } from "../../api/AuthApi";
+import { getProduct } from "../../api/ProductApi";
+import { getAllOrders } from "../../api/OrderApi";
+import { calculateVendorCommission } from "../../utils/commissionHelper";
 
 const VendorManagement = () => {
   const navigate = useNavigate();
   const [vendors, setVendors] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState(""); // "", "pending", "active", "suspended"
@@ -56,11 +61,17 @@ const VendorManagement = () => {
 
   const loadVendors = async () => {
     try {
-      const res = await getVendorsApi();
-      setVendors(res.data.vendors || []);
+      const [vendorsRes, productsRes, ordersRes] = await Promise.all([
+        getVendorsApi(),
+        getProduct(),
+        getAllOrders()
+      ]);
+      setVendors(vendorsRes.data.vendors || []);
+      setAllProducts(productsRes.data.data || []);
+      setAllOrders(ordersRes.data.orders || []);
     } catch (err) {
       console.error(err);
-      showToast("Failed to fetch vendors", "error");
+      showToast("Failed to fetch vendor statistics", "error");
     } finally {
       setLoading(false);
     }
@@ -285,66 +296,80 @@ const VendorManagement = () => {
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Store / Owner</th>
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Contact Info</th>
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Tax ID / GSTIN</th>
-                <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Joined Date</th>
+                <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-right">Current Month Sales</th>
+                <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-center">Active Tier</th>
+                <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-right">Commission Paid</th>
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-center">Status</th>
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredVendors.length > 0 ? (
-                filteredVendors.map((vendor) => (
-                  <tr 
-                    key={vendor._id} 
-                    onClick={() => {
-                      navigate(`/admin/vendors/${vendor._id}`);
-                    }}
-                    className="border-b border-light-border/40 hover:bg-slate-50/40 transition-colors cursor-pointer"
-                  >
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/5 text-primary border border-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                          {vendor.avatar ? (
-                            <img src={vendor.avatar} alt="Logo" className="w-full h-full object-cover rounded-xl" />
-                          ) : (
-                            <Store size={18} />
-                          )}
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-dark-navy leading-normal">
-                            {vendor.businessName || "Unnamed Store"}
+                filteredVendors.map((vendor) => {
+                  const vendorProducts = allProducts.filter(
+                    p => p.vendorId && (p.vendorId._id === vendor._id || p.vendorId === vendor._id)
+                  );
+                  const commStats = calculateVendorCommission(allOrders, vendorProducts);
+
+                  return (
+                    <tr 
+                      key={vendor._id} 
+                      onClick={() => {
+                        navigate(`/admin/vendors/${vendor._id}`);
+                      }}
+                      className="border-b border-light-border/40 hover:bg-slate-50/40 transition-colors cursor-pointer"
+                    >
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-primary/5 text-primary border border-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                            {vendor.avatar ? (
+                              <img src={vendor.avatar} alt="Logo" className="w-full h-full object-cover rounded-xl" />
+                            ) : (
+                              <Store size={18} />
+                            )}
                           </div>
-                          <div className="text-[10px] text-muted-gray font-semibold uppercase tracking-wider mt-0.5">
-                            {vendor.name}
+                          <div>
+                            <div className="text-xs font-bold text-dark-navy leading-normal">
+                              {vendor.businessName || "Unnamed Store"}
+                            </div>
+                            <div className="text-[10px] text-muted-gray font-semibold uppercase tracking-wider mt-0.5">
+                              {vendor.name}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="px-5 py-4">
-                      <div className="text-xs font-semibold text-dark-navy leading-normal">
-                        {vendor.email}
-                      </div>
-                      <div className="text-[10px] text-muted-gray font-semibold mt-0.5">
-                        {vendor.phoneNumber || "No phone added"}
-                      </div>
-                    </td>
+                      <td className="px-5 py-4">
+                        <div className="text-xs font-semibold text-dark-navy leading-normal">
+                          {vendor.email}
+                        </div>
+                        <div className="text-[10px] text-muted-gray font-semibold mt-0.5">
+                          {vendor.phoneNumber || "No phone added"}
+                        </div>
+                      </td>
 
-                    <td className="px-5 py-4">
-                      <span className="font-mono text-xs font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded border border-light-border/40">
-                        {vendor.gstin || "N/A"}
-                      </span>
-                    </td>
+                      <td className="px-5 py-4">
+                        <span className="font-mono text-xs font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded border border-light-border/40">
+                          {vendor.gstin || "N/A"}
+                        </span>
+                      </td>
 
-                    <td className="px-5 py-4 text-xs font-semibold text-muted-gray">
-                      {new Date(vendor.createdAt).toLocaleDateString("en-IN", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </td>
+                      <td className="px-5 py-4 text-right font-mono text-xs font-bold text-dark-navy">
+                        ₹{commStats.currentMonthSales.toLocaleString("en-IN")}
+                      </td>
 
-                    <td className="px-5 py-4 text-center">
-                      <span
+                      <td className="px-5 py-4 text-center">
+                        <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                          {(commStats.currentRate * 100).toFixed(0)}%
+                        </span>
+                      </td>
+
+                      <td className="px-5 py-4 text-right font-mono text-xs font-bold text-emerald-600">
+                        ₹{commStats.totalCommissionAllTime.toLocaleString("en-IN")}
+                      </td>
+
+                      <td className="px-5 py-4 text-center">
+                        <span
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest border border-current ${
                           vendor.vendorStatus === "active"
                             ? "bg-emerald-50/60 text-emerald-600 border-emerald-100/20"
@@ -403,10 +428,11 @@ const VendorManagement = () => {
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-muted-gray text-xs font-semibold">
+                  <td colSpan="8" className="px-6 py-12 text-center text-muted-gray text-xs font-semibold">
                     No vendors found matching criteria.
                   </td>
                 </tr>

@@ -566,6 +566,21 @@ const SignUp = () => {
             </div>
           </div>
 
+          {formData.role === "vendor" && (
+            <div className="flex items-start gap-2.5 bg-slate-50 p-3 rounded-xl border border-light-border/40">
+              <input
+                type="checkbox"
+                id="signupAgreeTerms"
+                name="agreeTerms"
+                required
+                className="mt-1 w-4 h-4 text-primary border-light-border rounded focus:ring-primary focus:ring-offset-0 cursor-pointer"
+              />
+              <label htmlFor="signupAgreeTerms" className="text-[11px] font-semibold text-muted-gray leading-tight">
+                I agree to the <Link to="/terms-conditions" target="_blank" className="text-primary hover:underline font-bold">Terms & Conditions</Link>, including the dynamic monthly sales admin commission (1% for sales &lt; 2L, 5% for &lt; 10L, 10% for &gt; 10L).
+              </label>
+            </div>
+          )}
+
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition duration-300 cursor-pointer active:scale-95"

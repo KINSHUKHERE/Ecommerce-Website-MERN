@@ -19,6 +19,7 @@ import {
 import { getVendorsApi, updateVendorStatusApi, deleteVendorApi } from "../../api/AuthApi";
 import { getProduct } from "../../api/ProductApi";
 import { getAllOrders } from "../../api/OrderApi";
+import { calculateVendorCommission } from "../../utils/commissionHelper";
 
 const VendorDetails = () => {
   const { vendorId } = useParams();
@@ -300,38 +301,99 @@ const VendorDetails = () => {
 
         {/* Right Side: stats and tables */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Stats metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block">Total Products</span>
-                <span className="text-xl sm:text-2xl font-black text-dark-navy mt-1 block">{stats.products.length}</span>
-              </div>
-              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0">
-                <Package size={20} />
-              </div>
-            </div>
+          {/* Calculate Commission stats */}
+          {(() => {
+            const commissionStats = calculateVendorCommission(stats.orders, stats.products);
+            return (
+              <>
+                {/* Stats metrics */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block">Total Products</span>
+                      <span className="text-xl sm:text-2xl font-black text-dark-navy mt-1 block">{stats.products.length}</span>
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0">
+                      <Package size={20} />
+                    </div>
+                  </div>
 
-            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block">Seller Orders</span>
-                <span className="text-xl sm:text-2xl font-black text-dark-navy mt-1 block">{stats.ordersCount}</span>
-              </div>
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center flex-shrink-0">
-                <ShoppingCart size={20} />
-              </div>
-            </div>
+                  <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block">Seller Orders</span>
+                      <span className="text-xl sm:text-2xl font-black text-dark-navy mt-1 block">{stats.ordersCount}</span>
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center flex-shrink-0">
+                      <ShoppingCart size={20} />
+                    </div>
+                  </div>
 
-            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block">Revenue</span>
-                <span className="text-xl sm:text-2xl font-black text-emerald-600 mt-1 block">₹{stats.revenue.toLocaleString()}</span>
-              </div>
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0">
-                <IndianRupee size={20} />
-              </div>
-            </div>
-          </div>
+                  <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block">Gross Revenue</span>
+                      <span className="text-xl sm:text-2xl font-black text-emerald-600 mt-1 block">₹{stats.revenue.toLocaleString()}</span>
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0">
+                      <IndianRupee size={20} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Commission Stats metrics */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block">Current Month Sales</span>
+                      <span className="text-xl sm:text-2xl font-black text-dark-navy mt-1 block">₹{commissionStats.currentMonthSales.toLocaleString()}</span>
+                      <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-widest border border-primary/20 bg-primary/5 text-primary">
+                        Active Tier: {((commissionStats.currentRate || 0.01) * 100).toFixed(0)}% Commission
+                      </span>
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl bg-primary/5 text-primary flex items-center justify-center flex-shrink-0 border border-primary/10">
+                      <IndianRupee size={20} />
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block">Total Commission Paid</span>
+                      <span className="text-xl sm:text-2xl font-black text-emerald-600 mt-1 block">₹{commissionStats.totalCommissionAllTime.toLocaleString()}</span>
+                      <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-widest border border-emerald-100 bg-emerald-50 text-emerald-600">
+                        Transferred to YoCart Admin
+                      </span>
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0">
+                      <IndianRupee size={20} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Commission helper guidelines */}
+                <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10 rounded-3xl p-5 shadow-2xs space-y-2">
+                  <h4 className="text-xs font-extrabold text-dark-navy uppercase tracking-widest">
+                    Commission Tiers Guidelines
+                  </h4>
+                  <p className="text-[11px] text-muted-gray leading-relaxed font-semibold">
+                    The admin commission rate is calculated monthly based on the vendor's total settled sales:
+                  </p>
+                  <div className="grid grid-cols-3 gap-2.5 pt-2 text-[10px] font-extrabold text-center uppercase tracking-wide">
+                    <div className="bg-white/60 p-2.5 rounded-xl border border-light-border/30">
+                      <span className="text-muted-gray block">Sales ≤ 2 Lakhs</span>
+                      <span className="text-primary text-xs block font-black mt-0.5">1% Commission</span>
+                    </div>
+                    <div className="bg-white/60 p-2.5 rounded-xl border border-light-border/30">
+                      <span className="text-muted-gray block">Sales ≤ 10 Lakhs</span>
+                      <span className="text-amber-500 text-xs block font-black mt-0.5">5% Commission</span>
+                    </div>
+                    <div className="bg-white/60 p-2.5 rounded-xl border border-light-border/30">
+                      <span className="text-muted-gray block">Sales &gt; 10 Lakhs</span>
+                      <span className="text-red-500 text-xs block font-black mt-0.5">10% Commission</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
 
           {/* Products List Table */}
           <div className="bg-white border border-light-border/60 rounded-3xl shadow-2xs p-5 space-y-4">

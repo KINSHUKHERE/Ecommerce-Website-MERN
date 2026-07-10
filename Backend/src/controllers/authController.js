@@ -32,6 +32,7 @@ const signup = async (req, res) => {
       businessAddress: isVendor ? businessAddress : "",
       gstin: isVendor ? gstin : "",
       vendorStatus: isVendor ? "pending" : "active",
+      agreedToCommissionTerms: isVendor ? true : false,
     });
 
     // Create notifications for registrations
@@ -356,6 +357,7 @@ const becomeSeller = async (req, res) => {
     user.businessAddress = businessAddress;
     user.gstin = gstin;
     user.isProfileComplete = true;
+    user.agreedToCommissionTerms = true;
     await user.save();
 
     // Create notification for seller upgrade
@@ -439,6 +441,7 @@ const createVendorManually = async (req, res) => {
       businessAddress,
       gstin,
       vendorStatus: "active",
+      agreedToCommissionTerms: true,
     });
 
     res.status(201).json({ msg: "Vendor created successfully", data });
