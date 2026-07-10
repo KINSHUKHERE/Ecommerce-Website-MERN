@@ -503,35 +503,25 @@ const ProductDetails = () => {
             </div>
           )}
 
-          <div className="pt-2">
-            <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-wider mb-2">Product Description</h3>
-            <p className="text-xs sm:text-sm text-muted-gray leading-relaxed text-justify whitespace-pre-wrap font-medium">
-              {activeVariant?.description || product.description}
-            </p>
-          </div>
-
-          <div className="fixed bottom-0 left-0 right-0 w-full bg-white border-t border-light-border/60 p-4 z-40 flex gap-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] md:static md:w-auto md:bg-transparent md:border-0 md:p-0 md:shadow-none md:mt-6 md:z-auto">
+          {/* Add to Wishlist + Add to Cart — right below variants */}
+          <div className="flex gap-3 mt-1">
             <button
               onClick={handleWishlistToggle}
-              className={`w-12 h-12 p-0 flex-shrink-0 md:w-auto md:h-auto md:flex-none md:py-3 md:px-5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 border cursor-pointer outline-none ${
+              className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold transition-all duration-300 border cursor-pointer outline-none text-xs flex-shrink-0 ${
                 isWishlisted
                   ? "bg-rose-50 border-rose-100 text-rose-500 hover:bg-rose-100/50"
                   : "bg-white border-light-border text-dark-navy hover:bg-slate-50"
               }`}
             >
               <Heart
-                size={22}
-                className={
-                  isWishlisted ? "fill-rose-500 text-rose-500" : "text-muted-gray"
-                }
+                size={16}
+                className={isWishlisted ? "fill-rose-500 text-rose-500" : "text-muted-gray"}
               />
-              <span className="hidden md:inline text-xs">
-                {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
-              </span>
+              <span>{isWishlisted ? "Wishlisted" : "Add to Wishlist"}</span>
             </button>
-            
+
             <button
-              className={`flex-1 md:flex-none py-3.5 px-8 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 text-xs uppercase tracking-wider ${
+              className={`flex-1 py-3 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 text-xs uppercase tracking-wider ${
                 isOutOfStock
                   ? "bg-slate-200 text-slate-400 cursor-not-allowed border border-light-border/30"
                   : "bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white cursor-pointer shadow-md hover:shadow-lg active:scale-95"
@@ -540,16 +530,20 @@ const ProductDetails = () => {
               disabled={isOutOfStock || adding}
             >
               {adding ? (
-                <>
-                  <Loader2 size={14} className="animate-spin text-current" />
-                  <span>Adding...</span>
-                </>
+                <><Loader2 size={14} className="animate-spin text-current" /><span>Adding...</span></>
               ) : isOutOfStock ? (
                 "Sold Out"
               ) : (
                 "Add to Cart"
               )}
             </button>
+          </div>
+
+          <div className="pt-2">
+            <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-wider mb-2">Product Description</h3>
+            <p className="text-xs sm:text-sm text-muted-gray leading-relaxed text-justify whitespace-pre-wrap font-medium">
+              {activeVariant?.description || product.description}
+            </p>
           </div>
         </div>
       </div>
@@ -595,7 +589,7 @@ const ProductDetails = () => {
       
       
       {toast && (
-        <div className="fixed bottom-[76px] left-1/2 -translate-x-1/2 md:bottom-5 md:right-5 md:left-auto md:translate-x-0 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn max-w-[90vw] w-max">
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 md:left-auto md:right-5 md:translate-x-0 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn max-w-[90vw] w-max">
           <span className="w-2 h-2 rounded-full bg-accent animate-pulse flex-shrink-0"></span>
           {toast}
         </div>

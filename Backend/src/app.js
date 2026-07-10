@@ -13,6 +13,7 @@ const addressRoutes = require("./routes/addressRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const saleRoutes = require("./routes/saleRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express();
 
@@ -101,6 +102,7 @@ app.use("/", addressRoutes);
 app.use("/", wishlistRoutes);
 app.use("/", saleRoutes);
 app.use("/", notificationRoutes);
+app.use("/", paymentRoutes);
 
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");

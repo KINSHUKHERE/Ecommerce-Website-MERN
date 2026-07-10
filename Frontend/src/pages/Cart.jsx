@@ -57,13 +57,17 @@ const Cart = () => {
         })();
         const globalSaleActive = globalSaleConfig?.isGlobalSaleActive || false;
 
-        const isItemOnSale = variant 
-          ? (globalSaleActive && variant.onSale && variant.salePrice > 0)
-          : (globalSaleActive && product.onSale && product.salePrice > 0);
+        const isItemOnSale = variant
+          ? globalSaleActive && variant.onSale && variant.salePrice > 0
+          : globalSaleActive && product.onSale && product.salePrice > 0;
 
-        const price = variant 
-          ? (isItemOnSale ? variant.salePrice : variant.price)
-          : (isItemOnSale ? product.salePrice : (product.price || 0));
+        const price = variant
+          ? isItemOnSale
+            ? variant.salePrice
+            : variant.price
+          : isItemOnSale
+            ? product.salePrice
+            : product.price || 0;
 
         const image =
           variant && variant.images && variant.images.length > 0
@@ -360,13 +364,16 @@ const Cart = () => {
                   {shippingFee === 0 ? (
                     <span className="text-emerald-600 font-bold">FREE</span>
                   ) : (
-                    <span className="text-dark-navy font-bold">₹{shippingFee}</span>
+                    <span className="text-dark-navy font-bold">
+                      ₹{shippingFee}
+                    </span>
                   )}
                 </div>
 
                 {totalPrice < 1000 && (
                   <div className="text-[10px] text-primary/90 bg-primary/5 p-2 rounded-lg text-left mt-1 font-semibold">
-                    Add ₹{(1000 - totalPrice).toLocaleString()} more for FREE Delivery!
+                    Add ₹{(1000 - totalPrice).toLocaleString()} more for FREE
+                    Delivery!
                   </div>
                 )}
 
