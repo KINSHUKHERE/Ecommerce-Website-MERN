@@ -138,6 +138,16 @@ const BecomeSeller = () => {
           Fill out the details below to register your business and instantly gain access to the Seller Portal to manage products, view sales stats, and process customer orders.
         </p>
 
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-left">
+          <div className="flex gap-2">
+            <span className="text-amber-600 font-extrabold text-sm shrink-0">⚠️</span>
+            <div className="text-[11px] font-semibold text-amber-800 leading-normal">
+              <span className="font-extrabold uppercase block tracking-wider mb-1">Account Conversion Notice</span>
+              By becoming a seller, your account role will be changed to <strong>Vendor</strong>. You will no longer be able to place orders, view a shopping cart, or use customer-facing checkout features with these credentials.
+            </div>
+          </div>
+        </div>
+
         {errors.general && (
           <div className="mb-4 rounded-xl border border-red-200 bg-red-50/50 px-4 py-3 text-center">
             <p className="text-xs font-semibold text-red-600">

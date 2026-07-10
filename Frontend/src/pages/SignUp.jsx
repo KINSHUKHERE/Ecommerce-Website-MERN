@@ -352,6 +352,18 @@ const SignUp = () => {
                 ⚠️ {errors.role}
               </p>
             )}
+
+            {formData.role === "vendor" && (
+              <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-left">
+                <div className="flex gap-2">
+                  <span className="text-amber-600 font-extrabold text-xs shrink-0">⚠️</span>
+                  <div className="text-[10px] font-semibold text-amber-800 leading-normal">
+                    <span className="font-extrabold uppercase block tracking-wider mb-0.5">Vendor Account Exclusivity</span>
+                    Registering as a Vendor means this account cannot be used as a Customer. You will not be able to purchase products, use a shopping cart, or access customer checkouts with these credentials.
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {formData.role === "vendor" && (
