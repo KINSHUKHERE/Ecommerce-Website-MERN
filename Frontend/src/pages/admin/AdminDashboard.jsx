@@ -593,30 +593,30 @@ const AdminDashboard = () => {
         </h2>
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
           {/* Hero Revenue Card */}
-          <div className="lg:col-span-2 bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-100 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group text-left flex flex-col justify-between min-h-[180px]">
-            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-              <IndianRupee size={80} className="text-[#0F9D8A]" />
+          <div className="lg:col-span-2 bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-100 rounded-2xl p-4 sm:p-5 shadow-2xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group text-left flex flex-col justify-between min-h-[150px]">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <IndianRupee size={60} className="text-[#0F9D8A]" />
             </div>
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-extrabold text-[#64748B] uppercase tracking-widest block">
+                <span className="text-[11px] sm:text-xs font-extrabold text-[#64748B] uppercase tracking-widest block">
                   Total Revenue
                 </span>
-                <span className="text-[10px] font-extrabold uppercase bg-teal-50 text-[#0F9D8A] border border-teal-100 px-2.5 py-0.5 rounded-full tracking-wider">
+                <span className="text-[9px] font-extrabold uppercase bg-teal-50 text-[#0F9D8A] border border-teal-100 px-2 py-0.5 rounded-full tracking-wider">
                   Marketplace Sales
                 </span>
               </div>
-              <p className="mt-4 text-[34px] font-black text-dark-navy tracking-tight leading-none">
+              <p className="mt-1.5 text-xl sm:text-2xl font-black text-dark-navy tracking-tight leading-none">
                 ₹{analytics.totalRev.toLocaleString("en-IN")}
               </p>
             </div>
-            <div className="mt-4 pt-4 border-t border-teal-100/40 flex items-center gap-2 text-[13px] font-semibold">
+            <div className="mt-3 pt-3 border-t border-teal-100/40 flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold">
               {analytics.revChange >= 0 ? (
-                <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-extrabold flex items-center gap-0.5">
+                <span className="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-extrabold flex items-center gap-0.5">
                   ↑ {analytics.revChange.toFixed(1)}%
                 </span>
               ) : (
-                <span className="text-red-500 bg-red-50 px-2 py-0.5 rounded-md font-extrabold flex items-center gap-0.5">
+                <span className="text-red-500 bg-red-50 px-1.5 py-0.5 rounded font-extrabold flex items-center gap-0.5">
                   ↓ {Math.abs(analytics.revChange).toFixed(1)}%
                 </span>
               )}
