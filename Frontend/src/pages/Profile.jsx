@@ -48,11 +48,20 @@ const Profile = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Tab controller state
-  const [activeTab, setActiveTab] = useState("settings");
+  const [activeTab, setActiveTab] = useState(() => {
+    return sessionStorage.getItem("profileActiveTab") || "settings";
+  });
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [userOrderStatusFilter, setUserOrderStatusFilter] = useState("All");
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(() => {
+    const saved = sessionStorage.getItem("profileSelectedOrder");
+    try {
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [cancellingOrderId, setCancellingOrderId] = useState(null);
   const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
   const [cancelConfirmInput, setCancelConfirmInput] = useState("");
@@ -124,6 +133,25 @@ const Profile = () => {
       setCancellingOrderId(null);
     }
   };
+
+  useEffect(() => {
+    sessionStorage.setItem("profileActiveTab", activeTab);
+    if (localUser && localUser._id) {
+      if (activeTab === "orders" || activeTab === "order-detail") {
+        fetchUserOrdersData();
+      } else if (activeTab === "addresses") {
+        fetchUserAddresses();
+      }
+    }
+  }, [activeTab, localUser]);
+
+  useEffect(() => {
+    if (selectedOrder) {
+      sessionStorage.setItem("profileSelectedOrder", JSON.stringify(selectedOrder));
+    } else {
+      sessionStorage.removeItem("profileSelectedOrder");
+    }
+  }, [selectedOrder]);
 
   const fetchUserAddresses = async () => {
     setLoadingAddresses(true);
@@ -266,11 +294,7 @@ const Profile = () => {
     // Check if redirect state indicates direct tab switch
     if (location.state?.activeTab) {
       setActiveTab(location.state.activeTab);
-      if (location.state.activeTab === "orders") {
-        fetchUserOrdersData();
-      } else if (location.state.activeTab === "addresses") {
-        fetchUserAddresses();
-      }
+      sessionStorage.setItem("profileActiveTab", location.state.activeTab);
     }
   }, [navigate, location.state]);
 
