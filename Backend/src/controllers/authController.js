@@ -527,8 +527,19 @@ const getPublicVendor = async (req, res) => {
     if (!vendor) {
       return res.status(404).json({ msg: "Vendor profile not found" });
     }
+
+    const Product = require("../models/productsData");
+    const Order = require("../models/orderDetails");
+
+    const vendorProducts = await Product.find({ vendorId }).select("_id");
+    const vendorProductIds = vendorProducts.map(p => p._id);
+
+    const ordersCount = await Order.countDocuments({
+      "items.productId": { $in: vendorProductIds },
+      orderStatus: { $ne: "Cancelled" }
+    });
     
-    res.status(200).json({ vendor });
+    res.status(200).json({ vendor, ordersCount });
   } catch (err) {
     res.status(500).json({ msg: "Server error", error: err.message });
   }
