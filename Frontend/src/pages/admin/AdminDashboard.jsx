@@ -25,6 +25,8 @@ import TopProductsChart from "../../components/dashboard/TopProductsChart";
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTimeFilter, setSelectedTimeFilter] = useState("all");
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [activityPage, setActivityPage] = useState(1);
 
   // Raw states returned by api
   const [rawData, setRawData] = useState({
@@ -344,11 +346,12 @@ const AdminDashboard = () => {
     }
 
     // Calculate Average Order Value
-    const avgOrderValue = totalOrdersCount > 0 ? (totalRev / totalOrdersCount) : 0;
+    const nonCancelledOrdersCount = filteredOrders.filter(o => o.orderStatus !== "Cancelled").length;
+    const avgOrderValue = nonCancelledOrdersCount > 0 ? (totalRev / nonCancelledOrdersCount) : 0;
 
     // Calculate Conversion Rate
-    const conversionRate = totalOrdersCount > 0 
-      ? ((deliveredOrdersCount / totalOrdersCount) * 100).toFixed(1)
+    const conversionRate = nonCancelledOrdersCount > 0 
+      ? ((deliveredOrdersCount / nonCancelledOrdersCount) * 100).toFixed(1)
       : "0.0";
 
     // Extract Top Category
@@ -417,7 +420,7 @@ const AdminDashboard = () => {
 
     const sortedActivities = activities
       .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 6);
+      .slice(0, 50);
 
     return {
       totalRev,
@@ -439,7 +442,7 @@ const AdminDashboard = () => {
       topVendors,
       totalCommissionEarned,
       vendorCommStats,
-      recentOrders: filteredOrders.slice(0, 5),
+      recentOrders: filteredOrders,
       avgOrderValue,
       conversionRate: parseFloat(conversionRate) > 0 ? conversionRate : "3.2",
       topCategory,
@@ -553,6 +556,21 @@ const AdminDashboard = () => {
       </div>
     );
   }
+
+  const ordersPerPage = 5;
+  const activityPerPage = 5;
+
+  const totalOrdersPages = Math.ceil(analytics.recentOrders.length / ordersPerPage) || 1;
+  const paginatedOrders = analytics.recentOrders.slice(
+    (ordersPage - 1) * ordersPerPage,
+    ordersPage * ordersPerPage
+  );
+
+  const totalActivityPages = Math.ceil(analytics.sortedActivities.length / activityPerPage) || 1;
+  const paginatedActivities = analytics.sortedActivities.slice(
+    (activityPage - 1) * activityPerPage,
+    activityPage * activityPerPage
+  );
 
   return (
     <div className="space-y-10 text-dark-navy antialiased bg-[#F8FAFC]/30 p-1 sm:p-6 rounded-[24px]">
@@ -1045,84 +1063,132 @@ const AdminDashboard = () => {
             {analytics.recentOrders.length === 0 ? (
               <p className="text-xs text-muted-gray font-bold py-12 text-center">No recent orders found</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-100 text-[#64748B] font-extrabold uppercase tracking-wider">
-                      <th className="pb-3 pr-2">Order ID</th>
-                      <th className="pb-3 px-2">Customer</th>
-                      <th className="pb-3 px-2 text-center">Status</th>
-                      <th className="pb-3 pl-2 text-right">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analytics.recentOrders.map((order) => (
-                      <tr 
-                        key={order._id}
-                        className="hover:bg-slate-50/50 transition-colors border-b border-slate-100/50"
-                      >
-                        <td className="py-3.5 pr-2 font-mono text-[#64748B] font-bold">
-                          #{order._id.slice(-8).toUpperCase()}
-                        </td>
-                        <td className="py-3.5 px-2">
-                          <div className="font-bold text-[#0F172A]">{order.userId?.name || "Customer"}</div>
-                          <div className="text-[10px] text-muted-gray/80 mt-0.5">{order.userId?.email || "N/A"}</div>
-                        </td>
-                        <td className="py-3.5 px-2 text-center">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border border-current ${
-                            order.orderStatus === "Delivered"
-                              ? "bg-emerald-50 text-emerald-600 border-emerald-100/20"
-                              : order.orderStatus === "Processing" || order.orderStatus === "Pending"
-                              ? "bg-amber-50 text-amber-600 border-amber-100/20"
-                              : order.orderStatus === "Cancelled"
-                              ? "bg-red-50 text-red-655 border-red-100/20"
-                              : "bg-blue-50 text-blue-600 border-blue-100/20"
-                          }`}>
-                            {order.orderStatus}
-                          </span>
-                        </td>
-                        <td className="py-3.5 pl-2 text-right font-bold text-dark-navy font-mono">
-                          ₹{order.totalAmount.toLocaleString("en-IN")}
-                        </td>
+              <div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-[#64748B] font-extrabold uppercase tracking-wider">
+                        <th className="pb-3 pr-2">Order ID</th>
+                        <th className="pb-3 px-2">Customer</th>
+                        <th className="pb-3 px-2 text-center">Status</th>
+                        <th className="pb-3 pl-2 text-right">Amount</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {paginatedOrders.map((order) => (
+                        <tr 
+                          key={order._id}
+                          className="hover:bg-slate-50/50 transition-colors border-b border-slate-100/50"
+                        >
+                          <td className="py-3.5 pr-2 font-mono text-[#64748B] font-bold">
+                            #{order._id.slice(-8).toUpperCase()}
+                          </td>
+                          <td className="py-3.5 px-2">
+                            <div className="font-bold text-[#0F172A]">{order.userId?.name || "Customer"}</div>
+                            <div className="text-[10px] text-muted-gray/80 mt-0.5">{order.userId?.email || "N/A"}</div>
+                          </td>
+                          <td className="py-3.5 px-2 text-center">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border border-current ${
+                              order.orderStatus === "Delivered"
+                                ? "bg-emerald-50 text-emerald-600 border-emerald-100/20"
+                                : order.orderStatus === "Processing" || order.orderStatus === "Pending"
+                                ? "bg-amber-50 text-amber-600 border-amber-100/20"
+                                : order.orderStatus === "Cancelled"
+                                ? "bg-red-50 text-red-655 border-red-100/20"
+                                : "bg-blue-50 text-blue-600 border-blue-100/20"
+                            }`}>
+                              {order.orderStatus}
+                            </span>
+                          </td>
+                          <td className="py-3.5 pl-2 text-right font-bold text-dark-navy font-mono">
+                            ₹{order.totalAmount.toLocaleString("en-IN")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Pagination Controls */}
+                {totalOrdersPages > 1 && (
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+                    <button
+                      disabled={ordersPage === 1}
+                      onClick={() => setOrdersPage(p => Math.max(p - 1, 1))}
+                      className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-[#64748B] hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-xs font-bold text-[#64748B]">
+                      Page {ordersPage} of {totalOrdersPages}
+                    </span>
+                    <button
+                      disabled={ordersPage === totalOrdersPages}
+                      onClick={() => setOrdersPage(p => Math.min(p + 1, totalOrdersPages))}
+                      className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-[#64748B] hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
 
         {/* Recent Activity feed logs */}
-        <div className="bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left">
-          <h3 className="text-[20px] font-black text-dark-navy tracking-tight mb-5">
-            Recent Activity Feed
-          </h3>
-          <div className="relative border-l border-slate-100 ml-3.5 pl-6 space-y-6">
-            {analytics.sortedActivities.map((act, idx) => (
-              <div key={idx} className="relative">
-                {/* Icon wrapper badge */}
-                <span className="absolute -left-[37px] top-0.5 w-6 h-6 rounded-full bg-white border border-slate-200/80 shadow-xs flex items-center justify-center text-xs">
-                  {act.icon}
-                </span>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[13px] font-bold text-dark-navy leading-none">{act.text}</span>
-                    <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${act.badgeColor}`}>
-                      {act.type}
+        <div className="bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left flex flex-col justify-between">
+          <div>
+            <h3 className="text-[20px] font-black text-dark-navy tracking-tight mb-5">
+              Recent Activity Feed
+            </h3>
+            <div className="relative border-l border-slate-100 ml-3.5 pl-6 space-y-6">
+              {paginatedActivities.map((act, idx) => (
+                <div key={idx} className="relative">
+                  {/* Icon wrapper badge */}
+                  <span className="absolute -left-[37px] top-0.5 w-6 h-6 rounded-full bg-white border border-slate-200/80 shadow-xs flex items-center justify-center text-xs">
+                    {act.icon}
+                  </span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[13px] font-bold text-dark-navy leading-none">{act.text}</span>
+                      <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${act.badgeColor}`}>
+                        {act.type}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-gray font-semibold mt-1">{act.meta}</p>
+                    <span className="text-[10px] text-slate-400 font-bold block mt-1.5">
+                      {new Date(act.timestamp).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })} • {new Date(act.timestamp).toLocaleDateString("en-IN", { day: 'numeric', month: 'short' })}
                     </span>
                   </div>
-                  <p className="text-[11px] text-muted-gray font-semibold mt-1">{act.meta}</p>
-                  <span className="text-[10px] text-slate-400 font-bold block mt-1.5">
-                    {new Date(act.timestamp).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })} • {new Date(act.timestamp).toLocaleDateString("en-IN", { day: 'numeric', month: 'short' })}
-                  </span>
                 </div>
-              </div>
-            ))}
-            {analytics.sortedActivities.length === 0 && (
-              <p className="text-xs text-muted-gray text-center py-6">No recent platform activities recorded.</p>
-            )}
+              ))}
+              {analytics.sortedActivities.length === 0 && (
+                <p className="text-xs text-muted-gray text-center py-6">No recent platform activities recorded.</p>
+              )}
+            </div>
           </div>
+          {/* Pagination Controls */}
+          {totalActivityPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+              <button
+                disabled={activityPage === 1}
+                onClick={() => setActivityPage(p => Math.max(p - 1, 1))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-[#64748B] hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+              >
+                Previous
+              </button>
+              <span className="text-xs font-bold text-[#64748B]">
+                Page {activityPage} of {totalActivityPages}
+              </span>
+              <button
+                disabled={activityPage === totalActivityPages}
+                onClick={() => setActivityPage(p => Math.min(p + 1, totalActivityPages))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-[#64748B] hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
