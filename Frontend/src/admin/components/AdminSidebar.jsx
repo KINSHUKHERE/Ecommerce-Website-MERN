@@ -30,7 +30,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
     window.location.reload();
   };
 

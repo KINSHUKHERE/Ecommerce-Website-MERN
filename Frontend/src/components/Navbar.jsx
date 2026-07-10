@@ -173,7 +173,7 @@ const Navbar = () => {
     setCartCount(0);
     setWishlistCount(0);
     setIsOpen(false);
-    navigate("/login");
+    navigate("/");
   };
 
   if (isAuthPage) return null;
