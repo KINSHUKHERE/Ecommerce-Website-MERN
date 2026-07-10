@@ -12,7 +12,7 @@ import {
 
 const CategoryChart = ({ data }) => {
   return (
-    <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs text-left w-full h-full flex flex-col justify-between">
+    <div className="bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left w-full h-full flex flex-col justify-between">
       <div>
         <h3 className="text-sm font-extrabold text-dark-navy tracking-tight">
           Products by Category

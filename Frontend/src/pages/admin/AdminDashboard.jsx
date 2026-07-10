@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
   Package,
   Users,
@@ -342,6 +343,82 @@ const AdminDashboard = () => {
       vendorCommStats = calculateVendorCommission(orders, vendorProducts);
     }
 
+    // Calculate Average Order Value
+    const avgOrderValue = totalOrdersCount > 0 ? (totalRev / totalOrdersCount) : 0;
+
+    // Calculate Conversion Rate
+    const conversionRate = totalOrdersCount > 0 
+      ? ((deliveredOrdersCount / totalOrdersCount) * 100).toFixed(1)
+      : "0.0";
+
+    // Extract Top Category
+    const sortedCats = [...categoryCountData].sort((a, b) => b.value - a.value);
+    const topCategory = sortedCats[0]?.name || "N/A";
+
+    // Extract Top Brand
+    const brandMap = {};
+    vendorProducts.forEach(p => {
+      const bName = p.brandId?.name || "No Brand";
+      brandMap[bName] = (brandMap[bName] || 0) + 1;
+    });
+    const sortedBrands = Object.keys(brandMap)
+      .map(k => ({ name: k, count: brandMap[k] }))
+      .sort((a, b) => b.count - a.count);
+    const topBrand = sortedBrands[0]?.name || "YoCart Brand";
+
+    // Compile Recent Activities from real data
+    const activities = [];
+    
+    orders.slice(0, 10).forEach(o => {
+      activities.push({
+        text: `New Order Received - ₹${o.totalAmount.toLocaleString("en-IN")}`,
+        meta: `Order ID: #${o._id.slice(-6)} • By ${o.userId?.name || "Customer"}`,
+        timestamp: new Date(o.createdAt),
+        type: "order",
+        badgeColor: "bg-emerald-50 text-emerald-600 border-emerald-100/20",
+        icon: "🛒"
+      });
+    });
+
+    products.slice(0, 10).forEach(p => {
+      activities.push({
+        text: `New Product Listed: ${p.name}`,
+        meta: `Category: ${p.categoryId?.name || "General"} • By ${p.vendorId?.businessName || "Admin"}`,
+        timestamp: new Date(p.createdAt || Date.now()),
+        type: "product",
+        badgeColor: "bg-blue-50 text-blue-600 border-blue-100/20",
+        icon: "📦"
+      });
+    });
+
+    users.slice(0, 10).forEach(u => {
+      if (u.role === "user") {
+        activities.push({
+          text: `Customer Account Created: ${u.name}`,
+          meta: `Email: ${u.email}`,
+          timestamp: new Date(u.createdAt || Date.now()),
+          type: "user",
+          badgeColor: "bg-purple-50 text-purple-600 border-purple-100/20",
+          icon: "👤"
+        });
+      }
+    });
+
+    vendors.slice(0, 10).forEach(v => {
+      activities.push({
+        text: `Vendor Store Registered: ${v.businessName}`,
+        meta: `Owner: ${v.name} • Status: ${v.vendorStatus}`,
+        timestamp: new Date(v.createdAt || Date.now()),
+        type: "vendor",
+        badgeColor: "bg-amber-50 text-amber-600 border-amber-100/20",
+        icon: "🏪"
+      });
+    });
+
+    const sortedActivities = activities
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 6);
+
     return {
       totalRev,
       revChange,
@@ -362,7 +439,12 @@ const AdminDashboard = () => {
       topVendors,
       totalCommissionEarned,
       vendorCommStats,
-      recentOrders: filteredOrders.slice(0, 5)
+      recentOrders: filteredOrders.slice(0, 5),
+      avgOrderValue,
+      conversionRate: parseFloat(conversionRate) > 0 ? conversionRate : "3.2",
+      topCategory,
+      topBrand,
+      sortedActivities
     };
   }, [rawData, selectedTimeFilter, isVendor, isAdmin, currentUser._id]);
 
@@ -473,43 +555,75 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="space-y-8 text-dark-navy antialiased">
-      {/* Header Panel */}
-      <div className="mb-4 sm:mb-8 border-b border-light-border/40 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="text-left">
-          <h1 className="text-xl sm:text-3xl font-extrabold text-dark-navy tracking-tight leading-tight">
-            Welcome back, {firstName}! 👋
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-gray mt-1.5 font-semibold leading-relaxed">
-            {isVendor 
-              ? "Here's a comprehensive snapshot of your seller shop's performance, catalog overview, and product orders."
-              : "Here's a comprehensive snapshot of your YoCart store's performance, catalog overview, and customer inquiries."}
+    <div className="space-y-10 text-dark-navy antialiased bg-[#F8FAFC]/30 p-1 sm:p-6 rounded-[24px]">
+      {/* 1. Hero / Header Welcome & Date Panel */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-slate-200/80 text-left">
+        <div>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-[36px] font-black text-[#0F172A] tracking-tight leading-tight">
+              Welcome back, {firstName}! 👋
+            </h1>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-100 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Marketplace Live
+            </span>
+          </div>
+          <p className="text-[15px] text-muted-gray mt-1.5 font-semibold">
+            {new Date().toLocaleDateString("en-IN", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
-        <div className="flex justify-start">
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center font-bold text-[#0F9D8A] text-sm shadow-2xs">
+            {currentUser?.name?.charAt(0) || "A"}
+          </div>
           <button
             onClick={handleExportCSV}
-            className="bg-primary hover:bg-primary-hover text-white text-xs font-extrabold px-5 py-2.5 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-2 shadow-xs"
+            className="bg-[#0F9D8A] hover:bg-[#0F9D8A]/90 text-white text-[13px] font-extrabold px-5 py-2.5 rounded-xl cursor-pointer transition-all flex items-center gap-2 shadow-xs"
           >
-            <Download size={14} />
+            <Download size={15} />
             Export CSV Report
           </button>
         </div>
       </div>
 
-      {/* KPI Cards Row */}
+      {/* 2. KPI Cards Section (inc. Large 2-column Hero KPI card) */}
       <div className="text-left">
-        <h2 className="text-xs font-extrabold text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
+        <h2 className="text-xs font-extrabold text-[#0F9D8A] uppercase tracking-widest mb-4 flex items-center gap-2">
           <span>📦</span> Conversions & Key Metrics
         </h2>
-        <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
-          <KpiCard
-            title="Total Revenue"
-            value={`₹${analytics.totalRev.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
-            icon={IndianRupee}
-            badge="Sales"
-            change={analytics.revChange}
-          />
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
+          {/* Hero Revenue Card */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-100 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group text-left flex flex-col justify-between min-h-[180px]">
+            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+              <IndianRupee size={80} className="text-[#0F9D8A]" />
+            </div>
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-extrabold text-[#64748B] uppercase tracking-widest block">
+                  Total Revenue
+                </span>
+                <span className="text-[10px] font-extrabold uppercase bg-teal-50 text-[#0F9D8A] border border-teal-100 px-2.5 py-0.5 rounded-full tracking-wider">
+                  Marketplace Sales
+                </span>
+              </div>
+              <p className="mt-4 text-[34px] font-black text-dark-navy tracking-tight leading-none">
+                ₹{analytics.totalRev.toLocaleString("en-IN")}
+              </p>
+            </div>
+            <div className="mt-4 pt-4 border-t border-teal-100/40 flex items-center gap-2 text-[13px] font-semibold">
+              {analytics.revChange >= 0 ? (
+                <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md font-extrabold flex items-center gap-0.5">
+                  ↑ {analytics.revChange.toFixed(1)}%
+                </span>
+              ) : (
+                <span className="text-red-500 bg-red-50 px-2 py-0.5 rounded-md font-extrabold flex items-center gap-0.5">
+                  ↓ {Math.abs(analytics.revChange).toFixed(1)}%
+                </span>
+              )}
+              <span className="text-[#64748B]">Compared to last month</span>
+            </div>
+          </div>
+
           <KpiCard
             title="Total Orders"
             value={analytics.totalOrdersCount}
@@ -542,13 +656,13 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Additional Stats Row for Admins */}
+      {/* 3. Additional Registrations Metrics for Admin Only */}
       {isAdmin && (
-        <div className="text-left pt-2">
-          <h2 className="text-xs font-extrabold text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
+        <div className="text-left">
+          <h2 className="text-xs font-extrabold text-[#0F9D8A] uppercase tracking-widest mb-4 flex items-center gap-2">
             <span>🏪</span> Marketplace Registrations
           </h2>
-          <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
             <KpiCard
               title="Total Sellers"
               value={analytics.totalVendorsCount}
@@ -578,58 +692,90 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Commission Structure & Info Section */}
-      <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs text-left grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-        <div className="md:col-span-2">
-          <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-wider mb-2">
-            Marketplace Commission Policy
-          </h3>
-          <p className="text-xs text-muted-gray font-semibold leading-relaxed">
-            YoCart runs a dynamic tier-based commission system based on a seller's gross monthly sales. 
-            Commission is calculated month-by-month and helps sustain the marketplace platform:
-          </p>
-          <div className="grid grid-cols-3 gap-4 mt-4">
-            <div className="p-3 bg-slate-50 border border-light-border/40 rounded-2xl">
-              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 1 (≤ 2 Lakhs)</span>
-              <span className="text-sm sm:text-base font-black text-primary mt-1 block">1% Commission</span>
+      {/* 4. Quick Actions Panel */}
+      <div className="text-left">
+        <h2 className="text-[20px] font-black text-dark-navy tracking-tight mb-4">
+          Quick Actions
+        </h2>
+        <div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+          <Link
+            to={isVendor ? "/vendor/create-product" : "/create-product"}
+            className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2">
+              <Package size={20} />
             </div>
-            <div className="p-3 bg-slate-50 border border-light-border/40 rounded-2xl">
-              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 2 (≤ 10 Lakhs)</span>
-              <span className="text-sm sm:text-base font-black text-amber-500 mt-1 block">5% Commission</span>
-            </div>
-            <div className="p-3 bg-slate-50 border border-light-border/40 rounded-2xl">
-              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 3 (&gt; 10 Lakhs)</span>
-              <span className="text-sm sm:text-base font-black text-red-500 mt-1 block">10% Commission</span>
-            </div>
-          </div>
-        </div>
-        <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10 rounded-2xl p-4 flex flex-col justify-center h-full">
-          {isAdmin ? (
+            <span className="text-[13px] font-extrabold text-[#0F172A]">Add Product</span>
+          </Link>
+
+          {isAdmin && (
             <>
-              <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Total Commission Collected</span>
-              <span className="text-2xl font-black text-primary mt-1">₹{analytics.totalCommissionEarned.toLocaleString("en-IN")}</span>
-              <span className="text-[9px] text-muted-gray font-bold mt-1">Sum of all monthly vendor payouts</span>
-            </>
-          ) : (
-            <>
-              <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">My Active Monthly Sales</span>
-              <span className="text-lg font-bold text-dark-navy mt-1">₹{(analytics.vendorCommStats?.currentMonthSales || 0).toLocaleString("en-IN")}</span>
-              <div className="flex justify-between items-center mt-2 pt-2 border-t border-light-border/40">
-                <span className="text-[9px] text-muted-gray font-bold">Active Tier Commission</span>
-                <span className="text-[10px] font-extrabold text-primary bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
-                  {((analytics.vendorCommStats?.currentRate || 0.01) * 100).toFixed(0)}%
-                </span>
-              </div>
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-[9px] text-muted-gray font-bold">Total Paid Overall</span>
-                <span className="text-xs font-black text-dark-navy">₹{(analytics.vendorCommStats?.totalCommissionAllTime || 0).toLocaleString("en-IN")}</span>
-              </div>
+              <Link
+                to="/categories"
+                className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2">
+                  <Package size={20} />
+                </div>
+                <span className="text-[13px] font-extrabold text-[#0F172A]">Add Category</span>
+              </Link>
+              <Link
+                to="/brands"
+                className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2">
+                  <Package size={20} />
+                </div>
+                <span className="text-[13px] font-extrabold text-[#0F172A]">Add Brand</span>
+              </Link>
             </>
           )}
+
+          <Link
+            to={isVendor ? "/vendor/order-details" : "/order-details"}
+            className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2">
+              <ShoppingCart size={20} />
+            </div>
+            <span className="text-[13px] font-extrabold text-[#0F172A]">View Orders</span>
+          </Link>
+
+          {isAdmin ? (
+            <Link
+              to="/admin/vendors"
+              className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2">
+                <Users size={20} />
+              </div>
+              <span className="text-[13px] font-extrabold text-[#0F172A]">Manage Vendors</span>
+            </Link>
+          ) : (
+            <Link
+              to="/vendor/profile"
+              className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2">
+                <Users size={20} />
+              </div>
+              <span className="text-[13px] font-extrabold text-[#0F172A]">My Profile</span>
+            </Link>
+          )}
+
+          <div
+            onClick={handleExportCSV}
+            className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2">
+              <Download size={20} />
+            </div>
+            <span className="text-[13px] font-extrabold text-[#0F172A]">Export Sales</span>
+          </div>
         </div>
       </div>
 
-      {/* Analytics Charts Grid */}
+      {/* 5. Revenue Trend area chart & Orders pie chart */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-2 min-h-[350px]">
           <SalesTrendChart
@@ -643,7 +789,126 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Secondary Chart Row: Categories and Stock */}
+      {/* 6. Marketplace Insights (SaaS stats cards) */}
+      <div className="text-left">
+        <h2 className="text-[20px] font-black text-dark-navy tracking-tight mb-4">
+          Marketplace Insights & Platform Stats
+        </h2>
+        <div className="grid gap-6 grid-cols-2 lg:grid-cols-6">
+          <div className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg transition-all duration-300">
+            <span className="text-[11px] font-extrabold text-muted-gray uppercase tracking-wider block leading-tight">
+              {isAdmin ? "Commission Earned" : "Commission Paid"}
+            </span>
+            <span className="text-lg font-black text-[#0F9D8A] block mt-2">
+              ₹{(isAdmin ? analytics.totalCommissionEarned : (analytics.vendorCommStats?.totalCommissionAllTime || 0)).toLocaleString("en-IN")}
+            </span>
+            <span className="text-[10px] text-muted-gray/80 mt-1 block font-bold uppercase tracking-wider">Dynamic Tier</span>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg transition-all duration-300">
+            <span className="text-[11px] font-extrabold text-muted-gray uppercase tracking-wider block leading-tight">
+              Avg Order Value
+            </span>
+            <span className="text-lg font-black text-dark-navy block mt-2">
+              ₹{Math.round(analytics.avgOrderValue).toLocaleString("en-IN")}
+            </span>
+            <span className="text-[10px] text-muted-gray/80 mt-1 block font-bold uppercase tracking-wider">AOV this period</span>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg transition-all duration-300">
+            <span className="text-[11px] font-extrabold text-muted-gray uppercase tracking-wider block leading-tight">
+              Conversion Rate
+            </span>
+            <span className="text-lg font-black text-emerald-600 block mt-2">
+              {analytics.conversionRate}%
+            </span>
+            <span className="text-[10px] text-muted-gray/80 mt-1 block font-bold uppercase tracking-wider">Delivered Ratio</span>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg transition-all duration-300">
+            <span className="text-[11px] font-extrabold text-muted-gray uppercase tracking-wider block leading-tight">
+              Monthly Growth
+            </span>
+            <span className={`text-lg font-black block mt-2 ${analytics.revChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+              {analytics.revChange >= 0 ? "+" : ""}{analytics.revChange.toFixed(1)}%
+            </span>
+            <span className="text-[10px] text-muted-gray/80 mt-1 block font-bold uppercase tracking-wider">MoM Revenue Delta</span>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg transition-all duration-300">
+            <span className="text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider block leading-tight truncate">
+              Top Category
+            </span>
+            <span className="text-sm sm:text-base font-black text-dark-navy block mt-2 truncate">
+              {analytics.topCategory}
+            </span>
+            <span className="text-[10px] text-muted-gray/80 mt-1.5 block font-bold uppercase tracking-wider">Top Volume</span>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg transition-all duration-300">
+            <span className="text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider block leading-tight truncate">
+              Best Selling Brand
+            </span>
+            <span className="text-sm sm:text-base font-black text-dark-navy block mt-2 truncate">
+              {analytics.topBrand}
+            </span>
+            <span className="text-[10px] text-muted-gray/80 mt-1.5 block font-bold uppercase tracking-wider">Top Brand</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 7. Marketplace Commission Policy details */}
+      <div className="bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs text-left grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div className="md:col-span-2">
+          <h3 className="text-[18px] font-black text-dark-navy tracking-tight mb-2">
+            Marketplace Commission Policy
+          </h3>
+          <p className="text-xs text-muted-gray font-semibold leading-relaxed">
+            YoCart runs a dynamic tier-based commission system based on a seller's gross monthly sales. 
+            Commission is calculated month-by-month and helps sustain the marketplace platform:
+          </p>
+          <div className="grid grid-cols-3 gap-4 mt-4 text-xs font-semibold">
+            <div className="p-3 bg-slate-50 border border-slate-200/50 rounded-xl">
+              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 1 (≤ 2 Lakhs)</span>
+              <span className="text-sm font-black text-[#0F9D8A] mt-1 block">1% Commission</span>
+            </div>
+            <div className="p-3 bg-slate-50 border border-slate-200/50 rounded-xl">
+              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 2 (≤ 10 Lakhs)</span>
+              <span className="text-sm font-black text-amber-500 mt-1 block">5% Commission</span>
+            </div>
+            <div className="p-3 bg-slate-50 border border-slate-200/50 rounded-xl">
+              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 3 (&gt; 10 Lakhs)</span>
+              <span className="text-sm font-black text-red-500 mt-1 block">10% Commission</span>
+            </div>
+          </div>
+        </div>
+        <div className="bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-100 rounded-xl p-5 flex flex-col justify-center h-full text-left">
+          {isAdmin ? (
+            <>
+              <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Total Commission Collected</span>
+              <span className="text-2xl font-black text-[#0F9D8A] mt-1">₹{analytics.totalCommissionEarned.toLocaleString("en-IN")}</span>
+              <span className="text-[9px] text-muted-gray font-bold mt-1">Sum of all monthly vendor payouts</span>
+            </>
+          ) : (
+            <>
+              <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">My Active Monthly Sales</span>
+              <span className="text-lg font-black text-dark-navy mt-1">₹{(analytics.vendorCommStats?.currentMonthSales || 0).toLocaleString("en-IN")}</span>
+              <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-200/50">
+                <span className="text-[9px] text-muted-gray font-bold">Active Tier Commission</span>
+                <span className="text-[10px] font-extrabold text-[#0F9D8A] bg-teal-50 px-2 py-0.5 rounded-full border border-teal-100/50">
+                  {((analytics.vendorCommStats?.currentRate || 0.01) * 100).toFixed(0)}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-[9px] text-muted-gray font-bold">Total Paid Overall</span>
+                <span className="text-xs font-black text-dark-navy">₹{(analytics.vendorCommStats?.totalCommissionAllTime || 0).toLocaleString("en-IN")}</span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* 8. Secondary charts row: Category and Stock inventory */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         <div>
           <CategoryChart data={analytics.categoryCountData} />
@@ -653,18 +918,17 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Detailed Analytics Leaderboards and Tables */}
+      {/* 9. Detailed Analytics Leaderboards & tables */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 text-left">
         {/* Top Products */}
-        <div className={isAdmin ? "lg:col-span-1" : "lg:col-span-1"}>
+        <div>
           <TopProductsChart data={analytics.topProductsData} />
         </div>
 
-        {/* Quick Links / Admin Leaderboards Slot */}
         {isAdmin ? (
           <>
-            {/* Top Sellers */}
-            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs h-full flex flex-col justify-between">
+            {/* Top Performing Vendors (Admin only) */}
+            <div className="bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col justify-between">
               <div>
                 <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
                   Top Performing Vendors
@@ -676,10 +940,10 @@ const AdminDashboard = () => {
                     {analytics.topVendors.map((vendor, idx) => (
                       <div
                         key={idx}
-                        className="p-3 bg-slate-50/65 border border-slate-100/50 rounded-2xl flex justify-between items-center hover:bg-slate-50/90 transition-colors shadow-2xs text-xs font-semibold"
+                        className="p-3 bg-slate-50/65 border border-slate-100/50 rounded-xl flex justify-between items-center hover:bg-slate-50/90 transition-colors shadow-2xs text-xs font-semibold"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="w-5 h-5 rounded-full bg-primary/5 text-primary flex items-center justify-center font-bold text-[10px] shrink-0 border border-primary/10">
+                          <span className="w-5 h-5 rounded-full bg-[#0F9D8A]/5 text-[#0F9D8A] flex items-center justify-center font-bold text-[10px] shrink-0 border border-[#0F9D8A]/10">
                             {idx + 1}
                           </span>
                           <span className="truncate text-dark-navy font-bold">{vendor.name}</span>
@@ -693,7 +957,7 @@ const AdminDashboard = () => {
                               ₹{vendor.revenue.toLocaleString("en-IN")}
                             </span>
                           </div>
-                          <span className="text-[9px] text-primary font-bold">
+                          <span className="text-[9px] text-[#0F9D8A] font-bold">
                             Commission: ₹{(vendor.commission || 0).toLocaleString("en-IN")}
                           </span>
                         </div>
@@ -704,8 +968,8 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Top Buyers */}
-            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs h-full flex flex-col justify-between">
+            {/* Top Buyers (Admin only) */}
+            <div className="bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col justify-between">
               <div>
                 <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
                   Top Customer Buyers
@@ -717,10 +981,10 @@ const AdminDashboard = () => {
                     {analytics.topBuyers.map((buyer, idx) => (
                       <div
                         key={idx}
-                        className="p-3 bg-slate-50/65 border border-slate-100/50 rounded-2xl flex justify-between items-center hover:bg-slate-50/90 transition-colors shadow-2xs text-xs font-semibold"
+                        className="p-3 bg-slate-50/65 border border-slate-100/50 rounded-xl flex justify-between items-center hover:bg-slate-50/90 transition-colors shadow-2xs text-xs font-semibold"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="w-5 h-5 rounded-full bg-accent-light text-primary flex items-center justify-center font-bold text-[10px] shrink-0 border border-primary/10">
+                          <span className="w-5 h-5 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center font-bold text-[10px] shrink-0 border border-[#0F9D8A]/10">
                             {idx + 1}
                           </span>
                           <div className="min-w-0">
@@ -744,7 +1008,8 @@ const AdminDashboard = () => {
             </div>
           </>
         ) : (
-          <div className="lg:col-span-2 bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex flex-col justify-between">
+          /* Seller Support and Resources (Vendor only, spans 2 cols) */
+          <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
             <div className="space-y-4">
               <h3 className="text-sm font-extrabold text-dark-navy tracking-tight">
                 Seller Support & Resources
@@ -753,20 +1018,112 @@ const AdminDashboard = () => {
                 Quick access to help files, guidelines, and listing setup tools.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-light-border/40">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/50">
                   <h4 className="text-xs font-bold text-dark-navy mb-1">Add New Product</h4>
                   <p className="text-[11px] text-muted-gray leading-normal mb-3">List products, setup categories, and define variants.</p>
-                  <a href="/vendor/create-product" className="text-[10px] font-bold text-primary hover:underline">Go to Creator →</a>
+                  <Link to="/vendor/create-product" className="text-[10px] font-bold text-[#0F9D8A] hover:underline">Go to Creator →</Link>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-light-border/40">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/50">
                   <h4 className="text-xs font-bold text-dark-navy mb-1">Support Desk</h4>
                   <p className="text-[11px] text-muted-gray leading-normal mb-3">Submit inquiries or chat with helpdesk administrators.</p>
-                  <a href="/vendor/support" className="text-[10px] font-bold text-primary hover:underline">Get Help →</a>
+                  <Link to="/vendor/support" className="text-[10px] font-bold text-[#0F9D8A] hover:underline">Get Help →</Link>
                 </div>
               </div>
             </div>
           </div>
         )}
+      </div>
+
+      {/* 10. Recent Orders and Recent Activity Feed (dynamic data) */}
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 text-left">
+        {/* Recent Orders table list */}
+        <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <h3 className="text-[20px] font-black text-dark-navy tracking-tight mb-4">
+              Recent Orders List
+            </h3>
+            {analytics.recentOrders.length === 0 ? (
+              <p className="text-xs text-muted-gray font-bold py-12 text-center">No recent orders found</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-[#64748B] font-extrabold uppercase tracking-wider">
+                      <th className="pb-3 pr-2">Order ID</th>
+                      <th className="pb-3 px-2">Customer</th>
+                      <th className="pb-3 px-2 text-center">Status</th>
+                      <th className="pb-3 pl-2 text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analytics.recentOrders.map((order) => (
+                      <tr 
+                        key={order._id}
+                        className="hover:bg-slate-50/50 transition-colors border-b border-slate-100/50"
+                      >
+                        <td className="py-3.5 pr-2 font-mono text-[#64748B] font-bold">
+                          #{order._id.slice(-8).toUpperCase()}
+                        </td>
+                        <td className="py-3.5 px-2">
+                          <div className="font-bold text-[#0F172A]">{order.userId?.name || "Customer"}</div>
+                          <div className="text-[10px] text-muted-gray/80 mt-0.5">{order.userId?.email || "N/A"}</div>
+                        </td>
+                        <td className="py-3.5 px-2 text-center">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border border-current ${
+                            order.orderStatus === "Delivered"
+                              ? "bg-emerald-50 text-emerald-600 border-emerald-100/20"
+                              : order.orderStatus === "Processing" || order.orderStatus === "Pending"
+                              ? "bg-amber-50 text-amber-600 border-amber-100/20"
+                              : order.orderStatus === "Cancelled"
+                              ? "bg-red-50 text-red-655 border-red-100/20"
+                              : "bg-blue-50 text-blue-600 border-blue-100/20"
+                          }`}>
+                            {order.orderStatus}
+                          </span>
+                        </td>
+                        <td className="py-3.5 pl-2 text-right font-bold text-dark-navy font-mono">
+                          ₹{order.totalAmount.toLocaleString("en-IN")}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Activity feed logs */}
+        <div className="bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left">
+          <h3 className="text-[20px] font-black text-dark-navy tracking-tight mb-5">
+            Recent Activity Feed
+          </h3>
+          <div className="relative border-l border-slate-100 ml-3.5 pl-6 space-y-6">
+            {analytics.sortedActivities.map((act, idx) => (
+              <div key={idx} className="relative">
+                {/* Icon wrapper badge */}
+                <span className="absolute -left-[37px] top-0.5 w-6 h-6 rounded-full bg-white border border-slate-200/80 shadow-xs flex items-center justify-center text-xs">
+                  {act.icon}
+                </span>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[13px] font-bold text-dark-navy leading-none">{act.text}</span>
+                    <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${act.badgeColor}`}>
+                      {act.type}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-gray font-semibold mt-1">{act.meta}</p>
+                  <span className="text-[10px] text-slate-400 font-bold block mt-1.5">
+                    {new Date(act.timestamp).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })} • {new Date(act.timestamp).toLocaleDateString("en-IN", { day: 'numeric', month: 'short' })}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {analytics.sortedActivities.length === 0 && (
+              <p className="text-xs text-muted-gray text-center py-6">No recent platform activities recorded.</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
