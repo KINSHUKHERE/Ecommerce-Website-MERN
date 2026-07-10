@@ -169,6 +169,9 @@ const Checkout = () => {
     0,
   );
 
+  const shippingFee = totalPrice > 0 && totalPrice < 1000 ? 20 : 0;
+  const finalTotalAmount = totalPrice + shippingFee;
+
   const handleAddressSelect = (id) => {
     setSelectedAddressId(id);
     if (id === "manual") {
@@ -299,7 +302,7 @@ const Checkout = () => {
             quantity: item.quantity,
             image: item.image,
           })),
-          totalAmount: totalPrice,
+          totalAmount: finalTotalAmount,
           shippingAddress: {
             address: shippingAddress.address,
             city: shippingAddress.city,
@@ -365,7 +368,7 @@ const Checkout = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-gray">Total Amount Paid</span>
-                <span className="text-dark-navy font-bold text-sm">₹{totalPrice.toLocaleString()}</span>
+                <span className="text-dark-navy font-bold text-sm">₹{finalTotalAmount.toLocaleString()}</span>
               </div>
             </div>
 
@@ -632,8 +635,26 @@ const Checkout = () => {
                 <div className="flex flex-col gap-1.5 pb-5 border-b border-light-border/60">
                   <span className="text-xs text-muted-gray font-bold uppercase tracking-wider">Order Summary</span>
                   <span className="text-sm font-semibold text-muted-gray leading-relaxed">
-                    Delivering to <span className="font-extrabold text-dark-navy">{customerName}</span> (Total Amount: <span className="font-extrabold text-dark-navy">₹{totalPrice.toLocaleString()}</span>)
+                    Delivering to <span className="font-extrabold text-dark-navy">{customerName}</span>
                   </span>
+                  <div className="mt-2 text-xs font-semibold text-muted-gray space-y-1 max-w-sm">
+                    <div className="flex justify-between">
+                      <span>Items Subtotal:</span>
+                      <span className="text-dark-navy font-bold">₹{totalPrice.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Delivery Charges:</span>
+                      {shippingFee === 0 ? (
+                        <span className="text-emerald-600 font-extrabold">FREE</span>
+                      ) : (
+                        <span className="text-dark-navy font-bold">₹{shippingFee}</span>
+                      )}
+                    </div>
+                    <div className="flex justify-between pt-1 border-t border-slate-100 text-sm font-extrabold text-dark-navy">
+                      <span>Total Amount:</span>
+                      <span className="text-primary">₹{finalTotalAmount.toLocaleString()}</span>
+                    </div>
+                  </div>
                 </div>
 
                 {processing ? (

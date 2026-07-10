@@ -149,6 +149,9 @@ const Cart = () => {
     0,
   );
 
+  const shippingFee = totalPrice > 0 && totalPrice < 1000 ? 20 : 0;
+  const finalTotalAmount = totalPrice + shippingFee;
+
   const handlePlaceOrderClick = () => {
     if (!localUser) {
       navigate("/login");
@@ -354,14 +357,24 @@ const Cart = () => {
 
                 <div className="flex justify-between text-muted-gray">
                   <span>Delivery Charges</span>
-                  <span className="text-emerald-600 font-bold">FREE</span>
+                  {shippingFee === 0 ? (
+                    <span className="text-emerald-600 font-bold">FREE</span>
+                  ) : (
+                    <span className="text-dark-navy font-bold">₹{shippingFee}</span>
+                  )}
                 </div>
+
+                {totalPrice < 1000 && (
+                  <div className="text-[10px] text-primary/90 bg-primary/5 p-2 rounded-lg text-left mt-1 font-semibold">
+                    Add ₹{(1000 - totalPrice).toLocaleString()} more for FREE Delivery!
+                  </div>
+                )}
 
                 <hr className="border-light-border/60 my-1" />
 
                 <div className="flex justify-between text-sm sm:text-base font-extrabold text-dark-navy">
                   <span>Total Amount</span>
-                  <span>₹{totalPrice.toLocaleString()}</span>
+                  <span>₹{finalTotalAmount.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -385,7 +398,7 @@ const Cart = () => {
               Total Amount
             </span>
             <span className="text-base sm:text-lg font-extrabold text-dark-navy mt-1.5 leading-none">
-              ₹{totalPrice.toLocaleString()}
+              ₹{finalTotalAmount.toLocaleString()}
             </span>
           </div>
 
