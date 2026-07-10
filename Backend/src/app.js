@@ -56,6 +56,39 @@ app.use(
 );
 app.use(express.json());
 
+// Rate Limiting Configuration
+const rateLimit = require("express-rate-limit");
+
+const generalLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  limit: 250,
+  message: {
+    msg: "Too many requests from this IP, please try again after a minute."
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const sensitiveLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 20,
+  message: {
+    msg: "Too many attempts from this IP, please try again after 15 minutes."
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiters
+app.use(generalLimiter);
+app.use("/login", sensitiveLimiter);
+app.use("/signup", sensitiveLimiter);
+app.use("/become-seller", sensitiveLimiter);
+app.use("/google", sensitiveLimiter);
+app.use("/complete-profile", sensitiveLimiter);
+app.use("/post-contactdetails", sensitiveLimiter);
+app.post("/orders", sensitiveLimiter);
+
 app.use("/", authRoutes);
 app.use("/", productRoutes);
 app.use("/", categoryRoutes);

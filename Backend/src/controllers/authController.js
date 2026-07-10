@@ -534,12 +534,12 @@ const getPublicVendor = async (req, res) => {
     const vendorProducts = await Product.find({ vendorId }).select("_id");
     const vendorProductIds = vendorProducts.map(p => p._id);
 
-    const ordersCount = await Order.countDocuments({
+    const orderCount = await Order.countDocuments({
       "items.productId": { $in: vendorProductIds },
       orderStatus: { $ne: "Cancelled" }
     });
     
-    res.status(200).json({ vendor, ordersCount });
+    res.status(200).json({ vendor, orderCount });
   } catch (err) {
     res.status(500).json({ msg: "Server error", error: err.message });
   }

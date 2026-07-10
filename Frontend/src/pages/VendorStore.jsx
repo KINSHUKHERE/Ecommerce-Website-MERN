@@ -19,7 +19,7 @@ const VendorStore = () => {
   const { vendorId } = useParams();
   const [vendor, setVendor] = useState(null);
   const [products, setProducts] = useState([]);
-  const [ordersCount, setOrdersCount] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const loadStoreData = async () => {
@@ -31,7 +31,7 @@ const VendorStore = () => {
 
       const foundVendor = vendorRes.data.vendor;
       setVendor(foundVendor);
-      setOrdersCount(vendorRes.data.ordersCount || 0);
+      setOrderCount(vendorRes.data.orderCount || 0);
 
       const allProducts = productsRes.data.data || [];
       const vendorProducts = allProducts.filter(
@@ -107,15 +107,15 @@ const VendorStore = () => {
           </div>
         </div>
 
-        <div className="bg-white/80 border border-light-border/40 rounded-2xl p-4 flex gap-4 md:gap-6 items-center text-center self-stretch md:self-auto justify-around shadow-2xs">
+        <div className="bg-white/80 border border-light-border/40 rounded-2xl p-4 flex gap-4 sm:gap-6 items-center text-center self-stretch md:self-auto justify-around shadow-2xs">
           <div>
             <span className="text-[9px] font-extrabold text-muted-gray uppercase block tracking-wider mb-0.5">Total Products</span>
-            <span className="text-lg font-black text-dark-navy flex items-center gap-1.5 justify-center"><Package size={16} className="text-primary" /> {products.length} Items</span>
+            <span className="text-sm sm:text-base font-black text-dark-navy flex items-center gap-1 sm:gap-1.5 justify-center"><Package size={14} className="text-primary" /> {products.length} Items</span>
           </div>
           <div className="border-l border-light-border/40 h-8"></div>
           <div>
             <span className="text-[9px] font-extrabold text-muted-gray uppercase block tracking-wider mb-0.5">Orders Placed</span>
-            <span className="text-lg font-black text-emerald-600 flex items-center gap-1.5 justify-center">🛍️ {ordersCount} Orders</span>
+            <span className="text-sm sm:text-base font-black text-dark-navy flex items-center gap-1 sm:gap-1.5 justify-center">🛍️ {orderCount} Orders</span>
           </div>
           <div className="border-l border-light-border/40 h-8"></div>
           <div>
