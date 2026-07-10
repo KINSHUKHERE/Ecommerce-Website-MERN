@@ -134,6 +134,8 @@ const Profile = () => {
     }
   };
 
+  const localUserId = localUser?._id;
+
   useEffect(() => {
     sessionStorage.setItem("profileActiveTab", activeTab);
     if (localUser && localUser._id) {
@@ -143,7 +145,7 @@ const Profile = () => {
         fetchUserAddresses();
       }
     }
-  }, [activeTab, localUser]);
+  }, [activeTab, localUserId]);
 
   useEffect(() => {
     if (selectedOrder) {
