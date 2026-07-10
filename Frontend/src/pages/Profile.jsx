@@ -1029,52 +1029,75 @@ const Profile = () => {
                   </div>
                 ) : (
                   /* Visual Stepper Steps */
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-4 relative">
-                    {/* Stepper Line */}
-                    <div className="absolute left-[15px] sm:left-1/2 sm:-translate-x-1/2 top-0 bottom-0 sm:top-[15px] sm:bottom-auto w-[2px] sm:w-[80%] h-full sm:h-[2px] bg-slate-100 -z-10"></div>
-                    
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 sm:gap-2 py-4 relative w-full">
                     {/* Step 1: Processing */}
-                    <div className="flex sm:flex-col items-center gap-3 sm:gap-2 flex-1 z-10 w-full sm:w-auto">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 ${
+                    <div className="flex sm:flex-col items-center gap-3 sm:gap-2 z-10 sm:flex-1 text-left sm:text-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 transition-all ${
                         selectedOrder.orderStatus === "Processing" || selectedOrder.orderStatus === "Shipped" || selectedOrder.orderStatus === "Delivered"
-                          ? "bg-primary text-white border-primary"
+                          ? "bg-primary text-white border-primary shadow-xs"
                           : "bg-white text-muted-gray border-slate-200"
                       }`}>
                         1
                       </div>
-                      <div className="text-left sm:text-center">
+                      <div>
                         <p className="text-xs font-extrabold text-dark-navy">Processing</p>
-                        <p className="text-[10px] text-muted-gray mt-0.5 font-medium">Order confirmed & packing</p>
+                        <p className="text-[10px] text-muted-gray mt-0.5 font-semibold">Order confirmed & packing</p>
                       </div>
                     </div>
 
+                    {/* Chain Line Segment 1 (Processing to Shipped) */}
+                    <div className="hidden sm:block flex-1 h-[2px] bg-slate-100 relative mx-4">
+                      <div className="absolute top-0 left-0 h-full bg-primary transition-all duration-500" style={{
+                        width: selectedOrder.orderStatus === "Shipped" || selectedOrder.orderStatus === "Delivered" ? "100%" : "0%"
+                      }}></div>
+                    </div>
+                    {/* Mobile chain connector */}
+                    <div className="sm:hidden w-[2px] h-6 bg-slate-100 ml-4 -my-4 relative">
+                      <div className="absolute top-0 left-0 w-full bg-primary transition-all duration-500" style={{
+                        height: selectedOrder.orderStatus === "Shipped" || selectedOrder.orderStatus === "Delivered" ? "100%" : "0%"
+                      }}></div>
+                    </div>
+
                     {/* Step 2: Shipped */}
-                    <div className="flex sm:flex-col items-center gap-3 sm:gap-2 flex-1 z-10 w-full sm:w-auto">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 ${
+                    <div className="flex sm:flex-col items-center gap-3 sm:gap-2 z-10 sm:flex-1 text-left sm:text-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 transition-all ${
                         selectedOrder.orderStatus === "Shipped" || selectedOrder.orderStatus === "Delivered"
-                          ? "bg-primary text-white border-primary"
+                          ? "bg-primary text-white border-primary shadow-xs"
                           : "bg-white text-muted-gray border-slate-200"
                       }`}>
                         2
                       </div>
-                      <div className="text-left sm:text-center">
+                      <div>
                         <p className="text-xs font-extrabold text-dark-navy">Shipped</p>
-                        <p className="text-[10px] text-muted-gray mt-0.5 font-medium">In transit to destination</p>
+                        <p className="text-[10px] text-muted-gray mt-0.5 font-semibold">In transit to destination</p>
                       </div>
                     </div>
 
+                    {/* Chain Line Segment 2 (Shipped to Delivered) */}
+                    <div className="hidden sm:block flex-1 h-[2px] bg-slate-100 relative mx-4">
+                      <div className="absolute top-0 left-0 h-full bg-emerald-500 transition-all duration-500" style={{
+                        width: selectedOrder.orderStatus === "Delivered" ? "100%" : "0%"
+                      }}></div>
+                    </div>
+                    {/* Mobile chain connector */}
+                    <div className="sm:hidden w-[2px] h-6 bg-slate-100 ml-4 -my-4 relative">
+                      <div className="absolute top-0 left-0 w-full bg-emerald-500 transition-all duration-500" style={{
+                        height: selectedOrder.orderStatus === "Delivered" ? "100%" : "0%"
+                      }}></div>
+                    </div>
+
                     {/* Step 3: Delivered */}
-                    <div className="flex sm:flex-col items-center gap-3 sm:gap-2 flex-1 z-10 w-full sm:w-auto">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 ${
+                    <div className="flex sm:flex-col items-center gap-3 sm:gap-2 z-10 sm:flex-1 text-left sm:text-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 transition-all ${
                         selectedOrder.orderStatus === "Delivered"
-                          ? "bg-emerald-600 text-white border-emerald-600"
+                          ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
                           : "bg-white text-muted-gray border-slate-200"
                       }`}>
                         3
                       </div>
-                      <div className="text-left sm:text-center">
+                      <div>
                         <p className="text-xs font-extrabold text-dark-navy">Delivered</p>
-                        <p className="text-[10px] text-muted-gray mt-0.5 font-medium">Delivered & verified</p>
+                        <p className="text-[10px] text-muted-gray mt-0.5 font-semibold">Delivered & verified</p>
                       </div>
                     </div>
                   </div>
