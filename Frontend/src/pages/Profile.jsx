@@ -54,6 +54,9 @@ const Profile = () => {
   const [userOrderStatusFilter, setUserOrderStatusFilter] = useState("All");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [cancellingOrderId, setCancellingOrderId] = useState(null);
+  const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
+  const [cancelConfirmInput, setCancelConfirmInput] = useState("");
+  const [orderToCancel, setOrderToCancel] = useState(null);
 
   // Toast notifications
   const [message, setMessage] = useState("");
@@ -96,8 +99,13 @@ const Profile = () => {
     }
   };
 
-  const handleCancelOrder = async (orderId) => {
-    if (!window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
+  const handleCancelOrder = (orderId) => {
+    setOrderToCancel(orderId);
+    setCancelConfirmInput("");
+    setShowCancelConfirmModal(true);
+  };
+
+  const executeCancelOrder = async (orderId) => {
     setCancellingOrderId(orderId);
     try {
       const res = await cancelOrderApi(orderId);
@@ -106,6 +114,9 @@ const Profile = () => {
         setSelectedOrder(res.data.order);
       }
       fetchUserOrdersData();
+      setShowCancelConfirmModal(false);
+      setOrderToCancel(null);
+      setCancelConfirmInput("");
     } catch (err) {
       console.error("Failed to cancel order", err);
       showToast(err.response?.data?.msg || "Failed to cancel order", "error");
@@ -1381,6 +1392,67 @@ const Profile = () => {
               ))}
             </div>
           )}
+        </div>
+      )}
+      {/* Cancellation Confirmation Modal */}
+      {showCancelConfirmModal && (
+        <div className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white border border-light-border/60 rounded-3xl p-6 max-w-sm w-full shadow-2xl text-left space-y-4 relative animate-scaleUp">
+            <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 border border-red-100 flex items-center justify-center text-xl">
+              ⚠️
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold text-dark-navy uppercase tracking-wider">
+                Confirm Cancellation
+              </h3>
+              <p className="text-xs text-muted-gray mt-2 leading-relaxed font-semibold">
+                Are you absolutely sure you want to cancel your order? This action is permanent and cannot be undone.
+              </p>
+            </div>
+            
+            <div className="flex flex-col gap-1.5 pt-2">
+              <label className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+                Type <span className="text-red-500 font-black">CANCEL</span> to confirm:
+              </label>
+              <input
+                type="text"
+                placeholder="CANCEL"
+                value={cancelConfirmInput}
+                onChange={(e) => setCancelConfirmInput(e.target.value)}
+                className="w-full px-3 py-2 border border-red-200 rounded-xl focus:ring-4 focus:ring-red-500/5 focus:border-red-500 outline-none text-sm font-bold text-red-650 transition-all bg-white"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCancelConfirmModal(false);
+                  setCancelConfirmInput("");
+                  setOrderToCancel(null);
+                }}
+                className="px-4 py-2 border border-light-border hover:bg-slate-50 text-muted-gray text-xs font-bold rounded-xl transition cursor-pointer"
+              >
+                No, Keep
+              </button>
+              <button
+                type="button"
+                disabled={cancelConfirmInput !== "CANCEL" || cancellingOrderId !== null}
+                onClick={async () => {
+                  if (orderToCancel) {
+                    await executeCancelOrder(orderToCancel);
+                  }
+                }}
+                className={`px-4 py-2 text-xs font-bold rounded-xl shadow-md transition cursor-pointer ${
+                  cancelConfirmInput === "CANCEL" && cancellingOrderId === null
+                    ? "bg-red-500 hover:bg-red-600 text-white active:scale-95"
+                    : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+                }`}
+              >
+                {cancellingOrderId !== null ? "Cancelling..." : "Yes, Cancel"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
