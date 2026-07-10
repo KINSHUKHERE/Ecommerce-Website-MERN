@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { getPublicVendorApi } from "../api/AuthApi";
 import { getProduct } from "../api/ProductApi";
+import { getUserOrders } from "../api/OrderApi";
 import EachProduct from "../components/EachProduct";
 
 const VendorStore = () => {
@@ -20,6 +21,8 @@ const VendorStore = () => {
   const [vendor, setVendor] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [myOrdersCount, setMyOrdersCount] = useState(0);
+  const [myTotalSpent, setMyTotalSpent] = useState(0);
 
   const loadStoreData = async () => {
     try {
@@ -36,6 +39,37 @@ const VendorStore = () => {
         p => p.vendorId && (p.vendorId._id === vendorId || p.vendorId === vendorId)
       );
       setProducts(vendorProducts);
+
+      // Calculate logged-in user's orders at this vendor
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const ordersRes = await getUserOrders();
+          const userOrdersList = ordersRes.data.orders || [];
+          
+          let ordersCount = 0;
+          let totalSpent = 0;
+          
+          userOrdersList.forEach(order => {
+            if (order.orderStatus === "Cancelled") return;
+            
+            const vendorItems = order.items.filter(item => {
+              const pid = item.productId?._id || item.productId;
+              return pid && vendorProducts.some(p => p._id.toString() === pid.toString());
+            });
+            
+            if (vendorItems.length > 0) {
+              ordersCount += 1;
+              totalSpent += vendorItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            }
+          });
+          
+          setMyOrdersCount(ordersCount);
+          setMyTotalSpent(totalSpent);
+        } catch (orderErr) {
+          console.error("Failed to load user orders for storefront", orderErr);
+        }
+      }
     } catch (err) {
       console.error("Error loading vendor public store data", err);
     } finally {
@@ -105,13 +139,29 @@ const VendorStore = () => {
           </div>
         </div>
 
-        <div className="bg-white/80 border border-light-border/40 rounded-2xl p-4 flex gap-6 items-center text-center self-stretch md:self-auto justify-around shadow-2xs">
-          <div>
+        <div className="bg-white/80 border border-light-border/40 rounded-2xl p-4 flex gap-4 sm:gap-6 items-center text-center self-stretch md:self-auto justify-around shadow-2xs flex-wrap md:flex-nowrap">
+          <div className="min-w-20">
             <span className="text-[9px] font-extrabold text-muted-gray uppercase block tracking-wider mb-0.5">Total Products</span>
-            <span className="text-lg font-black text-dark-navy flex items-center gap-1.5 justify-center"><Package size={16} className="text-primary" /> {products.length} Items</span>
+            <span className="text-sm sm:text-base font-black text-dark-navy flex items-center gap-1 justify-center"><Package size={14} className="text-primary" /> {products.length} Items</span>
           </div>
+          
+          {localStorage.getItem("token") && (
+            <>
+              <div className="border-l border-light-border/40 h-8 hidden sm:block"></div>
+              <div className="min-w-20">
+                <span className="text-[9px] font-extrabold text-muted-gray uppercase block tracking-wider mb-0.5">My Orders Here</span>
+                <span className="text-sm sm:text-base font-black text-[#15877F] block">{myOrdersCount} Order{myOrdersCount !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="border-l border-light-border/40 h-8 hidden sm:block"></div>
+              <div className="min-w-20">
+                <span className="text-[9px] font-extrabold text-muted-gray uppercase block tracking-wider mb-0.5">My Total Spent</span>
+                <span className="text-sm sm:text-base font-black text-emerald-600 block">₹{myTotalSpent.toLocaleString()}</span>
+              </div>
+            </>
+          )}
+
           <div className="border-l border-light-border/40 h-8"></div>
-          <div>
+          <div className="min-w-20">
             <span className="text-[9px] font-extrabold text-muted-gray block uppercase tracking-wider mb-0.5">Merchant Since</span>
             <span className="text-xs font-bold text-dark-navy block pt-0.5">
               {new Date(vendor.createdAt).toLocaleDateString("en-IN", {
