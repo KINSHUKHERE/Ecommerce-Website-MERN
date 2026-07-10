@@ -1406,21 +1406,8 @@ const Profile = () => {
                 Confirm Cancellation
               </h3>
               <p className="text-xs text-muted-gray mt-2 leading-relaxed font-semibold">
-                Are you absolutely sure you want to cancel your order? This action is permanent and cannot be undone.
+                Do you really want to cancel?
               </p>
-            </div>
-            
-            <div className="flex flex-col gap-1.5 pt-2">
-              <label className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
-                Type <span className="text-red-500 font-black">CANCEL</span> to confirm:
-              </label>
-              <input
-                type="text"
-                placeholder="CANCEL"
-                value={cancelConfirmInput}
-                onChange={(e) => setCancelConfirmInput(e.target.value)}
-                className="w-full px-3 py-2 border border-red-200 rounded-xl focus:ring-4 focus:ring-red-500/5 focus:border-red-500 outline-none text-sm font-bold text-red-650 transition-all bg-white"
-              />
             </div>
 
             <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
@@ -1428,7 +1415,6 @@ const Profile = () => {
                 type="button"
                 onClick={() => {
                   setShowCancelConfirmModal(false);
-                  setCancelConfirmInput("");
                   setOrderToCancel(null);
                 }}
                 className="px-4 py-2 border border-light-border hover:bg-slate-50 text-muted-gray text-xs font-bold rounded-xl transition cursor-pointer"
@@ -1437,14 +1423,14 @@ const Profile = () => {
               </button>
               <button
                 type="button"
-                disabled={cancelConfirmInput !== "CANCEL" || cancellingOrderId !== null}
+                disabled={cancellingOrderId !== null}
                 onClick={async () => {
                   if (orderToCancel) {
                     await executeCancelOrder(orderToCancel);
                   }
                 }}
                 className={`px-4 py-2 text-xs font-bold rounded-xl shadow-md transition cursor-pointer ${
-                  cancelConfirmInput === "CANCEL" && cancellingOrderId === null
+                  cancellingOrderId === null
                     ? "bg-red-500 hover:bg-red-600 text-white active:scale-95"
                     : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
                 }`}
