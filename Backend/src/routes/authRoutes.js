@@ -12,6 +12,7 @@ const {
   becomeSeller,
   getVendors,
   updateVendorStatus,
+  updateVendorSettings,
   createVendorManually,
   deleteVendor,
   deleteUser,
@@ -35,6 +36,7 @@ router.post("/become-seller", verifyUser, becomeSeller);
 router.get("/vendors", verifyUser, verifyAdmin, getVendors);
 router.post("/vendors", verifyUser, verifyAdmin, createVendorManually);
 router.put("/vendors/:vendorId/status", verifyUser, verifyAdmin, updateVendorStatus);
+router.put("/vendors/:vendorId/settings", verifyUser, verifyAdmin, updateVendorSettings);
 router.delete("/vendors/:vendorId", verifyUser, verifyAdmin, deleteVendor);
 
 // Admin-only User Management

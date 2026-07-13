@@ -421,6 +421,33 @@ const updateVendorStatus = async (req, res) => {
   }
 };
 
+const updateVendorSettings = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const { minWalletBalance } = req.body;
+
+    const vendor = await User.findById(vendorId);
+    if (!vendor || vendor.role !== "vendor") {
+      return res.status(404).json({ msg: "Vendor not found." });
+    }
+
+    if (minWalletBalance === null || minWalletBalance === "") {
+      vendor.minWalletBalance = null; // Inherit global
+    } else {
+      const parsedValue = Number(minWalletBalance);
+      if (isNaN(parsedValue) || parsedValue < 0) {
+        return res.status(400).json({ msg: "Invalid minimum wallet balance value." });
+      }
+      vendor.minWalletBalance = parsedValue;
+    }
+
+    await vendor.save();
+    res.status(200).json({ msg: "Vendor settings updated successfully.", vendor });
+  } catch (err) {
+    res.status(500).json({ msg: "Failed to update vendor settings.", Error: err.message });
+  }
+};
+
 const createVendorManually = async (req, res) => {
   try {
     const { name, email, phoneNumber, password, businessName, businessAddress, gstin } = req.body;
@@ -557,6 +584,7 @@ module.exports = {
   becomeSeller,
   getVendors,
   updateVendorStatus,
+  updateVendorSettings,
   createVendorManually,
   deleteVendor,
   deleteUser,

@@ -206,7 +206,7 @@ const getVendorWalletStatus = async (req, res) => {
     }
 
     const lifetimeSales = await getVendorLifetimeSales(vendorId);
-    const requiredMinBalance = await getRequiredMinimumBalance(lifetimeSales);
+    const requiredMinBalance = await getRequiredMinimumBalance(lifetimeSales, vendor);
     const transactions = await WalletTransaction.find({ vendorId }).sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -231,7 +231,7 @@ const getAdminVendorWalletStatus = async (req, res) => {
     }
 
     const lifetimeSales = await getVendorLifetimeSales(vendorId);
-    const requiredMinBalance = await getRequiredMinimumBalance(lifetimeSales);
+    const requiredMinBalance = await getRequiredMinimumBalance(lifetimeSales, vendor);
     const transactions = await WalletTransaction.find({ vendorId }).sort({ createdAt: -1 });
 
     return res.status(200).json({

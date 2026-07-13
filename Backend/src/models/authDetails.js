@@ -83,6 +83,11 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+
+    minWalletBalance: {
+      type: Number,
+      default: null,
+    },
   },
   {
     timestamps: true,

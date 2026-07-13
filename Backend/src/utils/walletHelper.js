@@ -33,12 +33,17 @@ const getVendorLifetimeSales = async (vendorId) => {
 
 const SystemConfig = require("../models/systemConfig");
 
-const getRequiredMinimumBalance = async (lifetimeSales) => {
+const getRequiredMinimumBalance = async (lifetimeSales, vendor) => {
   try {
+    // 1. Check if vendor-specific balance is configured
+    if (vendor && vendor.minWalletBalance !== undefined && vendor.minWalletBalance !== null) {
+      return Number(vendor.minWalletBalance);
+    }
+    // 2. Fall back to universal config settings
     const minWalletConfig = await SystemConfig.findOne({ key: "minimumWalletBalance" });
     return minWalletConfig ? Number(minWalletConfig.value) : 200;
   } catch (err) {
-    console.error("Error fetching minimum wallet balance from config:", err);
+    console.error("Error fetching minimum wallet balance:", err);
     return 200;
   }
 };

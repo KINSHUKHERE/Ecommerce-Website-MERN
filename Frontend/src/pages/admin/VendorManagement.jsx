@@ -15,10 +15,11 @@ import {
   Mail,
   Lock,
   Phone,
-  FileText
+  FileText,
+  Settings
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getVendorsApi, updateVendorStatusApi, createVendorApi, deleteVendorApi } from "../../api/AuthApi";
+import { getVendorsApi, updateVendorStatusApi, createVendorApi, deleteVendorApi, updateVendorSettingsApi } from "../../api/AuthApi";
 import { getProduct } from "../../api/ProductApi";
 import { getAllOrders } from "../../api/OrderApi";
 import { calculateVendorCommission } from "../../utils/commissionHelper";
@@ -43,6 +44,11 @@ const VendorManagement = () => {
   
   const [minBalanceInput, setMinBalanceInput] = useState("200");
   const [savingMinBalance, setSavingMinBalance] = useState(false);
+
+  // Vendor-specific settings states
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [customMinBalanceInput, setCustomMinBalanceInput] = useState("");
+  const [savingSettings, setSavingSettings] = useState(false);
   
   // Modals state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -131,6 +137,36 @@ const VendorManagement = () => {
       showToast(err.response?.data?.msg || "Failed to update settings", "error");
     } finally {
       setSavingMinBalance(false);
+    }
+  };
+
+  const handleSaveVendorSettings = async (e) => {
+    e.preventDefault();
+    if (!selectedVendor) return;
+
+    setSavingSettings(true);
+    try {
+      const balanceVal = customMinBalanceInput === "" ? null : Number(customMinBalanceInput);
+      if (balanceVal !== null && (isNaN(balanceVal) || balanceVal < 0)) {
+        showToast("Please enter a valid balance limit", "error");
+        setSavingSettings(false);
+        return;
+      }
+
+      await updateVendorSettingsApi(selectedVendor._id, balanceVal);
+      showToast("Vendor wallet limit updated successfully", "success");
+      setVendors((prev) =>
+        prev.map((v) =>
+          v._id === selectedVendor._id ? { ...v, minWalletBalance: balanceVal } : v
+        )
+      );
+      setShowSettingsModal(false);
+      setSelectedVendor(null);
+    } catch (err) {
+      console.error(err);
+      showToast(err.response?.data?.msg || "Failed to update vendor settings", "error");
+    } finally {
+      setSavingSettings(false);
     }
   };
 
@@ -432,13 +468,29 @@ const VendorManagement = () => {
                       </td>
 
                       <td className="px-5 py-4 text-center">
-                        <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${
-                          (vendor.walletBalance || 0) < 200
-                            ? "bg-red-50 text-red-655 border-red-100/50"
-                            : "bg-indigo-50 text-indigo-650 border-indigo-100/50"
-                        }`}>
-                          ₹{(vendor.walletBalance || 0).toLocaleString("en-IN")}
-                        </span>
+                        {(() => {
+                          const limit = vendor.minWalletBalance !== undefined && vendor.minWalletBalance !== null
+                            ? vendor.minWalletBalance
+                            : (commissionSettings.minimumWalletBalance || 200);
+                          const isLow = (vendor.walletBalance || 0) < limit;
+                          return (
+                            <div className="flex flex-col items-center gap-1">
+                              <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${
+                                isLow
+                                  ? "bg-red-50 text-red-655 border-red-100/50"
+                                  : "bg-indigo-50 text-indigo-650 border-indigo-100/50"
+                              }`}>
+                                ₹{(vendor.walletBalance || 0).toLocaleString("en-IN")}
+                              </span>
+                              <span className="text-[9px] text-muted-gray font-semibold mt-0.5 whitespace-nowrap">
+                                Min Req: ₹{limit.toLocaleString("en-IN")}
+                                {vendor.minWalletBalance !== undefined && vendor.minWalletBalance !== null && (
+                                  <span className="text-[8px] bg-indigo-50 text-indigo-650 px-1 rounded-sm ml-1 font-extrabold uppercase tracking-wide border border-indigo-100/30">Custom</span>
+                                )}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </td>
 
                       <td className="px-5 py-4 text-right font-mono text-xs font-bold text-emerald-600">
@@ -490,6 +542,22 @@ const VendorManagement = () => {
                             <X size={14} />
                           </button>
                         )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedVendor(vendor);
+                            setCustomMinBalanceInput(
+                              vendor.minWalletBalance !== undefined && vendor.minWalletBalance !== null
+                                ? String(vendor.minWalletBalance)
+                                : ""
+                            );
+                            setShowSettingsModal(true);
+                          }}
+                          className="p-2 text-indigo-650 hover:bg-indigo-50 rounded-lg border border-indigo-100 flex items-center justify-center cursor-pointer transition"
+                          title="Configure Seller Limit"
+                        >
+                          <Settings size={14} />
+                        </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -689,7 +757,76 @@ const VendorManagement = () => {
           </div>
         </div>
       )}
+      {/* Settings Modal */}
+      {showSettingsModal && selectedVendor && (
+        <div className="fixed inset-0 bg-black/45 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white border border-light-border/60 rounded-3xl p-6 shadow-2xl max-w-sm w-full animate-scaleUp text-left relative">
+            <button
+              onClick={() => {
+                setShowSettingsModal(false);
+                setSelectedVendor(null);
+              }}
+              className="absolute top-4 right-4 p-1.5 rounded-xl hover:bg-slate-100 text-muted-gray transition cursor-pointer"
+            >
+              <X size={18} />
+            </button>
 
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-indigo-50 text-indigo-650 rounded-xl border border-indigo-100 flex items-center justify-center">
+                <Settings size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-dark-navy tracking-tight">Configure Vendor Wallet</h3>
+                <p className="text-xs text-muted-gray font-semibold">{selectedVendor.businessName}</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveVendorSettings} className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+                  Custom Minimum Balance (₹)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-gray">₹</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={customMinBalanceInput}
+                    onChange={(e) => setCustomMinBalanceInput(e.target.value)}
+                    placeholder={`Inherit Universal: ${commissionSettings.minimumWalletBalance || 200}`}
+                    className="w-full pl-7 pr-3 py-2.5 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy bg-white transition-all h-[38px]"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-gray leading-normal font-semibold">
+                  Leave empty to inherit the universal minimum limit (currently ₹{commissionSettings.minimumWalletBalance || 200}).
+                </p>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-2 border-t border-light-border/40">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSettingsModal(false);
+                    setSelectedVendor(null);
+                  }}
+                  disabled={savingSettings}
+                  className="px-4 py-2 border border-light-border rounded-xl text-xs font-extrabold uppercase tracking-wider text-muted-gray hover:bg-slate-50 transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingSettings}
+                  className="px-4 py-2 bg-indigo-650 hover:bg-indigo-700 text-white text-xs font-extrabold uppercase tracking-wider rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                >
+                  {savingSettings && <Loader2 size={12} className="animate-spin" />}
+                  Save Settings
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

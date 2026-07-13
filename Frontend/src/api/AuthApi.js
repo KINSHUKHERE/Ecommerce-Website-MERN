@@ -57,6 +57,10 @@ export const updateVendorStatusApi = async (vendorId, status) => {
   return await api.put(`/vendors/${vendorId}/status`, { vendorStatus: status });
 };
 
+export const updateVendorSettingsApi = async (vendorId, minWalletBalance) => {
+  return await api.put(`/vendors/${vendorId}/settings`, { minWalletBalance });
+};
+
 export const deleteVendorApi = async (vendorId) => {
   return await api.delete(`/vendors/${vendorId}`);
 };

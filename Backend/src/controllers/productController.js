@@ -55,7 +55,7 @@ const addProduct = async (req, res) => {
     }
 
     const lifetimeSales = await getVendorLifetimeSales(vendorId);
-    const requiredMinBalance = await getRequiredMinimumBalance(lifetimeSales);
+    const requiredMinBalance = await getRequiredMinimumBalance(lifetimeSales, vendor);
 
     if ((vendor.walletBalance || 0) < requiredMinBalance) {
       return res.status(403).json({
