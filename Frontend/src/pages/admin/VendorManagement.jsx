@@ -802,7 +802,7 @@ const VendorManagement = () => {
                 </p>
               </div>
 
-              <div className="flex gap-3 justify-end pt-2 border-t border-light-border/40">
+              <div className="flex gap-3 pt-4 border-t border-light-border/40">
                 <button
                   type="button"
                   onClick={() => {
@@ -810,17 +810,17 @@ const VendorManagement = () => {
                     setSelectedVendor(null);
                   }}
                   disabled={savingSettings}
-                  className="px-4 py-2 border border-light-border rounded-xl text-xs font-extrabold uppercase tracking-wider text-muted-gray hover:bg-slate-50 transition cursor-pointer"
+                  className="flex-1 py-2.5 border border-light-border text-muted-gray hover:bg-slate-50 font-bold text-xs rounded-xl transition cursor-pointer text-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingSettings}
-                  className="px-4 py-2 bg-indigo-650 hover:bg-indigo-700 text-white text-xs font-extrabold uppercase tracking-wider rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition cursor-pointer text-center flex items-center justify-center gap-1.5"
                 >
                   {savingSettings && <Loader2 size={12} className="animate-spin" />}
-                  Save Settings
+                  <span>Save Settings</span>
                 </button>
               </div>
             </form>
