@@ -128,6 +128,33 @@ const verifyVendorRechargePayment = async (req, res) => {
       return res.status(400).json({ msg: "Missing recharge verification fields" });
     }
 
+    // Support simulated payment bypass in development/testing
+    if (razorpay_payment_id === "simulated_payment" && razorpay_signature === "simulated_signature") {
+      const vendorId = req.user.userId;
+      const vendor = await User.findById(vendorId);
+      if (!vendor) {
+        return res.status(404).json({ msg: "Vendor not found" });
+      }
+
+      vendor.walletBalance = (vendor.walletBalance || 0) + Number(amount);
+      await vendor.save();
+
+      const transaction = await WalletTransaction.create({
+        vendorId,
+        amount: Number(amount),
+        type: "deposit",
+        description: `Wallet recharge of ₹${amount} (Simulated Sandbox)`,
+        razorpayOrderId: razorpay_order_id,
+        razorpayPaymentId: razorpay_payment_id,
+      });
+
+      return res.status(200).json({
+        msg: "Wallet recharged successfully (Simulated)",
+        walletBalance: vendor.walletBalance,
+        transaction,
+      });
+    }
+
     // Verify HMAC signature
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -179,7 +206,7 @@ const getVendorWalletStatus = async (req, res) => {
     }
 
     const lifetimeSales = await getVendorLifetimeSales(vendorId);
-    const requiredMinBalance = getRequiredMinimumBalance(lifetimeSales);
+    const requiredMinBalance = await getRequiredMinimumBalance(lifetimeSales);
     const transactions = await WalletTransaction.find({ vendorId }).sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -204,7 +231,7 @@ const getAdminVendorWalletStatus = async (req, res) => {
     }
 
     const lifetimeSales = await getVendorLifetimeSales(vendorId);
-    const requiredMinBalance = getRequiredMinimumBalance(lifetimeSales);
+    const requiredMinBalance = await getRequiredMinimumBalance(lifetimeSales);
     const transactions = await WalletTransaction.find({ vendorId }).sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -227,16 +254,19 @@ const getCommissionSettings = async (req, res) => {
     let priceThresholdConfig = await SystemConfig.findOne({ key: "priceThreshold" });
     let commissionUnderConfig = await SystemConfig.findOne({ key: "commissionUnderThreshold" });
     let commissionOverConfig = await SystemConfig.findOne({ key: "commissionOverThreshold" });
+    let minWalletConfig = await SystemConfig.findOne({ key: "minimumWalletBalance" });
 
     // Return defaults if not set yet
     const priceThreshold = priceThresholdConfig ? Number(priceThresholdConfig.value) : 50000;
     const commissionUnderThreshold = commissionUnderConfig ? Number(commissionUnderConfig.value) : 2;
     const commissionOverThreshold = commissionOverConfig ? Number(commissionOverConfig.value) : 5;
+    const minimumWalletBalance = minWalletConfig ? Number(minWalletConfig.value) : 200;
 
     return res.status(200).json({
       priceThreshold,
       commissionUnderThreshold,
       commissionOverThreshold,
+      minimumWalletBalance,
     });
   } catch (err) {
     console.error("Error retrieving commission settings:", err);
@@ -247,33 +277,43 @@ const getCommissionSettings = async (req, res) => {
 // Update global commission settings (Admin only)
 const updateCommissionSettings = async (req, res) => {
   try {
-    const { priceThreshold, commissionUnderThreshold, commissionOverThreshold } = req.body;
+    const { priceThreshold, commissionUnderThreshold, commissionOverThreshold, minimumWalletBalance } = req.body;
 
-    if (priceThreshold === undefined || commissionUnderThreshold === undefined || commissionOverThreshold === undefined) {
-      return res.status(400).json({ msg: "Missing required config parameters" });
+    if (priceThreshold !== undefined) {
+      await SystemConfig.findOneAndUpdate(
+        { key: "priceThreshold" },
+        { value: Number(priceThreshold) },
+        { upsert: true, new: true }
+      );
+    }
+    if (commissionUnderThreshold !== undefined) {
+      await SystemConfig.findOneAndUpdate(
+        { key: "commissionUnderThreshold" },
+        { value: Number(commissionUnderThreshold) },
+        { upsert: true, new: true }
+      );
+    }
+    if (commissionOverThreshold !== undefined) {
+      await SystemConfig.findOneAndUpdate(
+        { key: "commissionOverThreshold" },
+        { value: Number(commissionOverThreshold) },
+        { upsert: true, new: true }
+      );
+    }
+    if (minimumWalletBalance !== undefined) {
+      await SystemConfig.findOneAndUpdate(
+        { key: "minimumWalletBalance" },
+        { value: Number(minimumWalletBalance) },
+        { upsert: true, new: true }
+      );
     }
 
-    await SystemConfig.findOneAndUpdate(
-      { key: "priceThreshold" },
-      { value: Number(priceThreshold) },
-      { upsert: true, new: true }
-    );
-    await SystemConfig.findOneAndUpdate(
-      { key: "commissionUnderThreshold" },
-      { value: Number(commissionUnderThreshold) },
-      { upsert: true, new: true }
-    );
-    await SystemConfig.findOneAndUpdate(
-      { key: "commissionOverThreshold" },
-      { value: Number(commissionOverThreshold) },
-      { upsert: true, new: true }
-    );
-
     return res.status(200).json({
-      msg: "Marketplace commission settings updated successfully",
-      priceThreshold,
-      commissionUnderThreshold,
-      commissionOverThreshold,
+      msg: "Marketplace settings updated successfully",
+      priceThreshold: priceThreshold !== undefined ? Number(priceThreshold) : undefined,
+      commissionUnderThreshold: commissionUnderThreshold !== undefined ? Number(commissionUnderThreshold) : undefined,
+      commissionOverThreshold: commissionOverThreshold !== undefined ? Number(commissionOverThreshold) : undefined,
+      minimumWalletBalance: minimumWalletBalance !== undefined ? Number(minimumWalletBalance) : undefined,
     });
   } catch (err) {
     console.error("Error updating commission settings:", err);

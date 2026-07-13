@@ -31,8 +31,16 @@ const getVendorLifetimeSales = async (vendorId) => {
   }
 };
 
-const getRequiredMinimumBalance = (lifetimeSales) => {
-  return 200; // Flat minimum required balance of ₹200 for all vendors
+const SystemConfig = require("../models/systemConfig");
+
+const getRequiredMinimumBalance = async (lifetimeSales) => {
+  try {
+    const minWalletConfig = await SystemConfig.findOne({ key: "minimumWalletBalance" });
+    return minWalletConfig ? Number(minWalletConfig.value) : 200;
+  } catch (err) {
+    console.error("Error fetching minimum wallet balance from config:", err);
+    return 200;
+  }
 };
 
 module.exports = {

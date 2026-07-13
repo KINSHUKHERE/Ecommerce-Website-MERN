@@ -22,7 +22,7 @@ import { getVendorsApi, updateVendorStatusApi, createVendorApi, deleteVendorApi 
 import { getProduct } from "../../api/ProductApi";
 import { getAllOrders } from "../../api/OrderApi";
 import { calculateVendorCommission } from "../../utils/commissionHelper";
-import { getCommissionSettingsApi } from "../../api/PaymentApi";
+import { getCommissionSettingsApi, updateCommissionSettingsApi } from "../../api/PaymentApi";
 
 const VendorManagement = () => {
   const navigate = useNavigate();
@@ -38,7 +38,11 @@ const VendorManagement = () => {
     priceThreshold: 50000,
     commissionUnderThreshold: 2,
     commissionOverThreshold: 5,
+    minimumWalletBalance: 200,
   });
+  
+  const [minBalanceInput, setMinBalanceInput] = useState("200");
+  const [savingMinBalance, setSavingMinBalance] = useState(false);
   
   // Modals state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -77,6 +81,7 @@ const VendorManagement = () => {
       setAllProducts(productsRes.data.data || []);
       setAllOrders(ordersRes.data.orders || []);
       setCommissionSettings(commissionRes.data);
+      setMinBalanceInput(String(commissionRes.data?.minimumWalletBalance ?? 200));
     } catch (err) {
       console.error(err);
       showToast("Failed to fetch vendor statistics", "error");
@@ -102,6 +107,30 @@ const VendorManagement = () => {
       showToast(err.response?.data?.msg || "Failed to update status", "error");
     } finally {
       setActionId(null);
+    }
+  };
+
+  const handleSaveMinBalance = async (e) => {
+    e.preventDefault();
+    if (!minBalanceInput || Number(minBalanceInput) < 0) {
+      showToast("Please enter a valid minimum balance", "error");
+      return;
+    }
+    setSavingMinBalance(true);
+    try {
+      await updateCommissionSettingsApi({
+        minimumWalletBalance: Number(minBalanceInput),
+      });
+      setCommissionSettings(prev => ({
+        ...prev,
+        minimumWalletBalance: Number(minBalanceInput)
+      }));
+      showToast("Prepaid wallet minimum balance updated successfully", "success");
+    } catch (err) {
+      console.error("Failed to update minimum wallet balance:", err);
+      showToast(err.response?.data?.msg || "Failed to update settings", "error");
+    } finally {
+      setSavingMinBalance(false);
     }
   };
 
@@ -281,17 +310,53 @@ const VendorManagement = () => {
         </div>
       </div>
 
-      {/* Search Filter Controls */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-between items-center mb-6">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-gray w-4 h-4" />
-          <input
-            type="text"
-            placeholder="Search stores, owners, GSTIN..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy bg-white transition-all h-[38px]"
-          />
+      {/* Global Vendor Settings & Search Filter Panel */}
+      <div className="flex flex-col lg:flex-row gap-6 justify-between items-stretch mb-6">
+        {/* Left Side: Search & Filter */}
+        <div className="flex-1 bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center">
+          <div className="relative w-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-gray w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search stores, owners, GSTIN..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy bg-white transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Right Side: Global Prepaid Wallet Minimum Balance Setting */}
+        <div className="w-full lg:w-96 bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-primary">🛡️</span>
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-dark-navy">
+              Prepaid Wallet Configuration
+            </h3>
+          </div>
+          <form onSubmit={handleSaveMinBalance} className="flex gap-2 items-center">
+            <div className="flex-1 relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-gray">₹</span>
+              <input
+                type="number"
+                min="0"
+                value={minBalanceInput}
+                onChange={(e) => setMinBalanceInput(e.target.value)}
+                placeholder="200"
+                className="w-full pl-7 pr-3 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy bg-white transition-all h-[38px]"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={savingMinBalance}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-xs font-bold rounded-xl shadow-xs transition duration-200 cursor-pointer h-[38px] shrink-0"
+            >
+              {savingMinBalance ? "Saving..." : "Save Min"}
+            </button>
+          </form>
+          <p className="text-[10px] text-muted-gray font-semibold leading-relaxed">
+            Minimum prepaid balance required for vendors to create and sell products. Changes apply instantly.
+          </p>
         </div>
       </div>
 

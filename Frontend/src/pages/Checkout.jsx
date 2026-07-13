@@ -20,9 +20,9 @@ const Checkout = () => {
   const [customerPhone, setCustomerPhone] = useState("");
   const [shippingAddress, setShippingAddress] = useState({
     address: "",
-    city: "New Delhi",
-    state: "Delhi",
-    postalCode: "110001",
+    city: "",
+    state: "",
+    postalCode: "",
   });
 
   // Saved Addresses State
@@ -32,7 +32,7 @@ const Checkout = () => {
   const [showAddressDropdown, setShowAddressDropdown] = useState(false);
 
   // Page 2 Payment Options state
-  const [paymentMethod, setPaymentMethod] = useState("Razorpay");
+  const [paymentMethod, setPaymentMethod] = useState("COD");
 
   // Processing & Success State
   const [processing, setProcessing] = useState(false);
@@ -143,8 +143,8 @@ const Checkout = () => {
           console.error("Failed to load saved addresses during checkout:", addrErr);
         }
 
-        // If cart is empty, redirect back (unless completed)
-        if (formattedData.length === 0 && checkoutStep !== 3) {
+        // If cart is empty, redirect back (only when starting checkout)
+        if (formattedData.length === 0 && checkoutStep === 1) {
           navigate("/cart");
         }
       } catch (err) {

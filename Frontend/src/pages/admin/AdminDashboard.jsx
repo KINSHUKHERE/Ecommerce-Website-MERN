@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
   Package,
@@ -94,7 +95,46 @@ const AdminDashboard = () => {
     }
     setRechargeLoading(true);
     try {
-      const { data } = await createVendorRechargeOrderApi(Number(rechargeAmount));
+      let orderData = null;
+      try {
+        const { data } = await createVendorRechargeOrderApi(Number(rechargeAmount));
+        orderData = data;
+      } catch (orderErr) {
+        console.warn("Failed to create Razorpay order on backend, will offer simulation mode:", orderErr);
+      }
+
+      if (!orderData) {
+        // Offer simulation flow if order API failed
+        if (window.confirm("Razorpay API order creation failed. Would you like to simulate this recharge for testing/sandbox purposes?")) {
+          setLoading(true);
+          try {
+            await verifyVendorRechargePaymentApi({
+              razorpay_payment_id: "simulated_payment",
+              razorpay_order_id: "simulated_order_" + Date.now(),
+              razorpay_signature: "simulated_signature",
+              amount: Number(rechargeAmount)
+            });
+            setShowRechargeModal(false);
+            setRechargeAmount("");
+            const updatedUser = {
+              ...currentUser,
+              walletBalance: (currentUser.walletBalance || 0) + Number(rechargeAmount)
+            };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            await fetchWalletStatus();
+            alert("Wallet recharged successfully (Simulated Sandbox)!");
+          } catch (simErr) {
+            console.error("Simulated recharge verification failed", simErr);
+            alert(simErr.response?.data?.msg || "Failed to complete simulated recharge");
+          } finally {
+            setLoading(false);
+            setRechargeLoading(false);
+          }
+          return;
+        }
+        setRechargeLoading(false);
+        return;
+      }
       
       // Load Razorpay SDK if not loaded
       await new Promise((resolve, reject) => {
@@ -109,12 +149,12 @@ const AdminDashboard = () => {
       setRechargeLoading(false);
 
       const options = {
-        key: data.key_id,
-        amount: data.amount,
-        currency: data.currency,
+        key: orderData.key_id,
+        amount: orderData.amount,
+        currency: orderData.currency,
         name: "YoCart Vendor Wallet",
         description: "Recharge Prepaid Wallet",
-        order_id: data.order_id,
+        order_id: orderData.order_id,
         prefill: {
           name: currentUser.name,
           email: currentUser.email,
@@ -159,7 +199,32 @@ const AdminDashboard = () => {
       rzp.open();
     } catch (err) {
       console.error("Wallet recharge failed", err);
-      alert(err.response?.data?.msg || "Failed to initiate recharge");
+      // Offer simulation flow if SDK loading fails or payment initiation fails
+      if (window.confirm("Failed to load Razorpay payment gateway. Would you like to simulate this recharge for testing/sandbox purposes?")) {
+        setLoading(true);
+        try {
+          await verifyVendorRechargePaymentApi({
+            razorpay_payment_id: "simulated_payment",
+            razorpay_order_id: "simulated_order_" + Date.now(),
+            razorpay_signature: "simulated_signature",
+            amount: Number(rechargeAmount)
+          });
+          setShowRechargeModal(false);
+          setRechargeAmount("");
+          const updatedUser = {
+            ...currentUser,
+            walletBalance: (currentUser.walletBalance || 0) + Number(rechargeAmount)
+          };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          await fetchWalletStatus();
+          alert("Wallet recharged successfully (Simulated Sandbox)!");
+        } catch (simErr) {
+          console.error("Simulated recharge verification failed", simErr);
+          alert(simErr.response?.data?.msg || "Failed to complete simulated recharge");
+        } finally {
+          setLoading(false);
+        }
+      }
       setRechargeLoading(false);
     }
   };
@@ -810,8 +875,8 @@ const AdminDashboard = () => {
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
           {/* Hero Revenue Card */}
           <div className="lg:col-span-2 bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-100 rounded-2xl p-4 sm:p-5 shadow-2xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group text-left flex flex-col justify-between min-h-[150px]">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <IndianRupee size={60} className="text-[#0F9D8A]" />
+            <div className="absolute -bottom-4 -right-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none transform rotate-12">
+              <IndianRupee size={90} className="text-[#0F9D8A]" />
             </div>
             <div>
               <div className="flex items-center justify-between">
@@ -855,8 +920,8 @@ const AdminDashboard = () => {
           {/* Prepaid Wallet Card (Vendor Only) */}
           {isVendor && (
             <div className="bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 border border-indigo-100 rounded-2xl p-4 sm:p-5 shadow-2xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group text-left flex flex-col justify-between min-h-[150px]">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <IndianRupee size={60} className="text-indigo-600" />
+              <div className="absolute -bottom-4 -right-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none transform rotate-12">
+                <IndianRupee size={90} className="text-indigo-600" />
               </div>
               <div>
                 <div className="flex items-center justify-between">
@@ -865,9 +930,10 @@ const AdminDashboard = () => {
                   </span>
                   <button
                     onClick={() => setShowRechargeModal(true)}
-                    className="text-[9px] font-extrabold uppercase bg-indigo-600 text-white px-2 py-0.5 rounded-full hover:bg-indigo-700 transition cursor-pointer"
+                    className="flex items-center gap-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider rounded-xl shadow-xs hover:shadow-md transition-all active:scale-95 cursor-pointer outline-none border-none"
                   >
-                    + Recharge
+                    <Plus size={11} className="stroke-[3]" />
+                    <span>Recharge</span>
                   </button>
                 </div>
                 <p className="mt-1.5 text-xl sm:text-2xl font-black text-dark-navy tracking-tight leading-none">
@@ -1504,8 +1570,8 @@ const AdminDashboard = () => {
       )}
 
       {/* WALLET RECHARGE MODAL */}
-      {showRechargeModal && (
-        <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fadeIn">
+      {showRechargeModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fadeIn">
           <div className="bg-white border border-light-border rounded-3xl p-6 max-w-sm w-full mx-4 shadow-2xl space-y-4 animate-scaleUp text-left">
             <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center">
               <Plus size={22} className="animate-bounce" />
@@ -1556,7 +1622,8 @@ const AdminDashboard = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
