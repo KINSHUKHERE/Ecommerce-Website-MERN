@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { getDashboardData } from "../../api/DashboardApi";
 import { calculateVendorCommission } from "../../utils/commissionHelper";
+import { getVendorWalletStatusApi, createVendorRechargeOrderApi, verifyVendorRechargePaymentApi, getCommissionSettingsApi, updateCommissionSettingsApi } from "../../api/PaymentApi";
+import { Plus, Loader2, Settings, ShieldCheck } from "lucide-react";
 
 // Import Reusable Dashboard Subcomponents
 import DashboardSkeleton from "../../components/dashboard/DashboardSkeleton";
@@ -43,6 +45,28 @@ const AdminDashboard = () => {
     users: []
   });
 
+  const [walletData, setWalletData] = useState({
+    walletBalance: 0,
+    lifetimeSales: 0,
+    requiredMinBalance: 0,
+    transactions: []
+  });
+  const [rechargeAmount, setRechargeAmount] = useState("");
+  const [showRechargeModal, setShowRechargeModal] = useState(false);
+  const [rechargeLoading, setRechargeLoading] = useState(false);
+
+  const [commissionSettings, setCommissionSettings] = useState({
+    priceThreshold: 50000,
+    commissionUnderThreshold: 2,
+    commissionOverThreshold: 5,
+  });
+
+  const [settingsFormData, setSettingsFormData] = useState({
+    priceThreshold: "50000",
+    commissionUnderThreshold: "2",
+    commissionOverThreshold: "5",
+  });
+
   const currentUser = JSON.parse(localStorage.getItem("user")) || {
     name: "Admin",
     role: "admin"
@@ -52,15 +76,144 @@ const AdminDashboard = () => {
   const isAdmin = currentUser.role === "admin";
   const isVendorPendingOrSuspended = isVendor && currentUser.vendorStatus !== "active";
 
+  const fetchWalletStatus = async () => {
+    if (isVendor) {
+      try {
+        const res = await getVendorWalletStatusApi();
+        setWalletData(res.data);
+      } catch (err) {
+        console.error("Failed to load wallet status", err);
+      }
+    }
+  };
+
+  const handleRechargeWallet = async () => {
+    if (!rechargeAmount || rechargeAmount <= 0) {
+      alert("Please enter a valid recharge amount");
+      return;
+    }
+    setRechargeLoading(true);
+    try {
+      const { data } = await createVendorRechargeOrderApi(Number(rechargeAmount));
+      
+      // Load Razorpay SDK if not loaded
+      await new Promise((resolve, reject) => {
+        if (window.Razorpay) return resolve();
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.onload = resolve;
+        script.onerror = () => reject(new Error("Razorpay SDK failed to load"));
+        document.body.appendChild(script);
+      });
+
+      setRechargeLoading(false);
+
+      const options = {
+        key: data.key_id,
+        amount: data.amount,
+        currency: data.currency,
+        name: "YoCart Vendor Wallet",
+        description: "Recharge Prepaid Wallet",
+        order_id: data.order_id,
+        prefill: {
+          name: currentUser.name,
+          email: currentUser.email,
+          contact: currentUser.phoneNumber || ""
+        },
+        theme: { color: "#088178" },
+        handler: async (response) => {
+          setLoading(true);
+          try {
+            await verifyVendorRechargePaymentApi({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              amount: Number(rechargeAmount)
+            });
+            setShowRechargeModal(false);
+            setRechargeAmount("");
+            // Update local storage user just in case
+            const updatedUser = {
+              ...currentUser,
+              walletBalance: (currentUser.walletBalance || 0) + Number(rechargeAmount)
+            };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            
+            // Refresh
+            await fetchWalletStatus();
+            alert("Wallet recharged successfully!");
+          } catch (err) {
+            console.error("Wallet recharge verification failed", err);
+            alert(err.response?.data?.msg || "Wallet recharge verification failed");
+          } finally {
+            setLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setRechargeLoading(false);
+          }
+        }
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error("Wallet recharge failed", err);
+      alert(err.response?.data?.msg || "Failed to initiate recharge");
+      setRechargeLoading(false);
+    }
+  };
+
+  const fetchCommissionSettings = async () => {
+    try {
+      const res = await getCommissionSettingsApi();
+      if (res.data) {
+        setCommissionSettings(res.data);
+        setSettingsFormData({
+          priceThreshold: String(res.data.priceThreshold),
+          commissionUnderThreshold: String(res.data.commissionUnderThreshold),
+          commissionOverThreshold: String(res.data.commissionOverThreshold),
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch commission settings:", err);
+    }
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
       const data = await getDashboardData(currentUser);
       setRawData(data);
+      await fetchWalletStatus();
+      await fetchCommissionSettings();
     } catch (error) {
       console.error("Dashboard data load failed:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveCommissionSettings = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        priceThreshold: Number(settingsFormData.priceThreshold),
+        commissionUnderThreshold: Number(settingsFormData.commissionUnderThreshold),
+        commissionOverThreshold: Number(settingsFormData.commissionOverThreshold),
+      };
+      const res = await updateCommissionSettingsApi(payload);
+      if (res.data) {
+        setCommissionSettings({
+          priceThreshold: payload.priceThreshold,
+          commissionUnderThreshold: payload.commissionUnderThreshold,
+          commissionOverThreshold: payload.commissionOverThreshold,
+        });
+        alert("Marketplace commission settings updated successfully!");
+      }
+    } catch (err) {
+      console.error("Failed to update commission settings:", err);
+      alert(err.response?.data?.msg || "Failed to update commission settings");
     }
   };
 
@@ -125,12 +278,28 @@ const AdminDashboard = () => {
     // 1. KPI - Revenue
     const calculateRev = (list) => {
       return list.reduce((sum, o) => {
-        if (o.orderStatus === "Cancelled") return sum;
+        if (o.orderStatus !== "Delivered") return sum;
+        return sum + (isVendor ? getVendorOrderAmt(o) : o.totalAmount);
+      }, 0);
+    };
+
+    const calculatePrepaidRev = (list) => {
+      return list.reduce((sum, o) => {
+        if (o.orderStatus !== "Delivered" || o.paymentMethod === "COD") return sum;
+        return sum + (isVendor ? getVendorOrderAmt(o) : o.totalAmount);
+      }, 0);
+    };
+
+    const calculateCashRev = (list) => {
+      return list.reduce((sum, o) => {
+        if (o.orderStatus !== "Delivered" || o.paymentMethod !== "COD") return sum;
         return sum + (isVendor ? getVendorOrderAmt(o) : o.totalAmount);
       }, 0);
     };
 
     const totalRev = calculateRev(filteredOrders);
+    const prepaidRev = calculatePrepaidRev(filteredOrders);
+    const cashRev = calculateCashRev(filteredOrders);
     const currMonthRev = calculateRev(relevantOrders.filter(o => new Date(o.createdAt) >= currentMonthStart));
     const prevMonthRev = calculateRev(relevantOrders.filter(o => {
       const d = new Date(o.createdAt);
@@ -309,7 +478,7 @@ const AdminDashboard = () => {
         const sellerProducts = products.filter(
           p => p.vendorId && (p.vendorId._id === k || p.vendorId === k)
         );
-        const commStats = calculateVendorCommission(orders, sellerProducts);
+        const commStats = calculateVendorCommission(orders, sellerProducts, commissionSettings);
         return {
           id: k,
           name: sellerLeaderboardMap[k].name,
@@ -328,7 +497,7 @@ const AdminDashboard = () => {
         const vendorProducts = products.filter(
           p => p.vendorId && (p.vendorId._id === vendor._id || p.vendorId === vendor._id)
         );
-        const commStats = calculateVendorCommission(orders, vendorProducts);
+        const commStats = calculateVendorCommission(orders, vendorProducts, commissionSettings);
         totalCommissionEarned += commStats.totalCommissionAllTime;
       });
     }
@@ -340,7 +509,7 @@ const AdminDashboard = () => {
         const pVendorId = p.vendorId?._id ? p.vendorId._id.toString() : p.vendorId?.toString();
         return pVendorId === currentUser._id;
       });
-      vendorCommStats = calculateVendorCommission(orders, vendorProducts);
+      vendorCommStats = calculateVendorCommission(orders, vendorProducts, commissionSettings);
     }
 
     // Calculate Average Order Value
@@ -422,6 +591,8 @@ const AdminDashboard = () => {
 
     return {
       totalRev,
+      prepaidRev,
+      cashRev,
       revChange,
       totalOrdersCount,
       ordChange,
@@ -448,6 +619,8 @@ const AdminDashboard = () => {
       sortedActivities
     };
   }, [rawData, selectedTimeFilter, isVendor, isAdmin, currentUser._id]);
+
+  const isVendorInsufficientBalance = isVendor && walletData.walletBalance < walletData.requiredMinBalance;
 
   // Export CSV Report Handler
   const handleExportCSV = () => {
@@ -557,6 +730,31 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-10 text-dark-navy antialiased bg-[#F8FAFC]/30 p-1 sm:p-6 rounded-[24px]">
+      {/* Insufficient Wallet Warning Banner */}
+      {isVendorInsufficientBalance && (
+        <div className="bg-red-50 border border-red-100 rounded-3xl p-5 sm:p-6 text-left flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fadeIn">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0 border border-red-100">
+              <AlertTriangle size={24} />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-red-655 uppercase tracking-widest leading-none mb-1.5">
+                Listing & Selling Locked: Insufficient Balance
+              </h3>
+              <p className="text-xs text-muted-gray leading-relaxed font-semibold">
+                Your prepaid wallet balance of <strong className="text-dark-navy">₹{(walletData.walletBalance || 0).toLocaleString("en-IN")}</strong> is below the minimum required balance of <strong className="text-dark-navy">₹{(walletData.requiredMinBalance || 0).toLocaleString("en-IN")}</strong>. Recharge to unlock product creation.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowRechargeModal(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-5 py-3 rounded-xl cursor-pointer transition shrink-0 flex items-center justify-center gap-1.5 shadow-md"
+          >
+            + Recharge Wallet
+          </button>
+        </div>
+      )}
+
       {/* 1. Hero / Header Welcome & Date Panel */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-slate-200/80 text-left">
         <div>
@@ -587,6 +785,23 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* Commission Information Tagline (Vendor Only) */}
+      {isVendor && (
+        <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 text-left shadow-2xs">
+          <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-650 flex items-center justify-center flex-shrink-0">
+            <ShieldCheck size={18} />
+          </div>
+          <div>
+            <h4 className="text-xs font-extrabold text-indigo-900 uppercase tracking-widest mb-1">
+              Marketplace Commission Policy
+            </h4>
+            <p className="text-[12px] text-indigo-950 font-semibold leading-relaxed">
+              If the product price is less than <strong className="text-indigo-900">₹{(commissionSettings.priceThreshold || 50000).toLocaleString("en-IN")}</strong>, the admin will take a <strong className="text-indigo-900">{commissionSettings.commissionUnderThreshold || 2}%</strong> commission at the time of sale. If a customer pays via prepaid methods (Card/UPI/Razorpay), the {commissionSettings.commissionUnderThreshold || 2}% commission is auto-split directly to the admin and you receive the rest. For Cash on Delivery (COD) transactions, you collect the cash upon delivery, and the admin commission is auto-deducted directly from your prepaid wallet balance. For products priced at or above ₹{(commissionSettings.priceThreshold || 50000).toLocaleString("en-IN")}, the admin commission rate is <strong className="text-indigo-900">{commissionSettings.commissionOverThreshold || 5}%</strong>.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* 2. KPI Cards Section (inc. Large 2-column Hero KPI card) */}
       <div className="text-left">
         <h2 className="text-xs font-extrabold text-[#0F9D8A] uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -610,6 +825,18 @@ const AdminDashboard = () => {
               <p className="mt-1.5 text-xl sm:text-2xl font-black text-dark-navy tracking-tight leading-none">
                 ₹{analytics.totalRev.toLocaleString("en-IN")}
               </p>
+
+              {/* Cash vs Prepaid Breakdown */}
+              <div className="mt-3 grid grid-cols-2 gap-4 border-t border-teal-100/40 pt-2 text-[10px] sm:text-[11px] font-semibold text-muted-gray">
+                <div>
+                  <span className="block text-[8px] uppercase tracking-widest text-[#64748B]">Prepaid Sales</span>
+                  <span className="text-dark-navy font-bold text-xs">₹{analytics.prepaidRev.toLocaleString("en-IN")}</span>
+                </div>
+                <div>
+                  <span className="block text-[8px] uppercase tracking-widest text-[#64748B]">Cash Sales (COD)</span>
+                  <span className="text-dark-navy font-bold text-xs">₹{analytics.cashRev.toLocaleString("en-IN")}</span>
+                </div>
+              </div>
             </div>
             <div className="mt-3 pt-3 border-t border-teal-100/40 flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold">
               {analytics.revChange >= 0 ? (
@@ -624,6 +851,41 @@ const AdminDashboard = () => {
               <span className="text-[#64748B]">Compared to last month</span>
             </div>
           </div>
+
+          {/* Prepaid Wallet Card (Vendor Only) */}
+          {isVendor && (
+            <div className="bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 border border-indigo-100 rounded-2xl p-4 sm:p-5 shadow-2xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group text-left flex flex-col justify-between min-h-[150px]">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <IndianRupee size={60} className="text-indigo-600" />
+              </div>
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] sm:text-xs font-extrabold text-[#64748B] uppercase tracking-widest block">
+                    Prepaid Wallet
+                  </span>
+                  <button
+                    onClick={() => setShowRechargeModal(true)}
+                    className="text-[9px] font-extrabold uppercase bg-indigo-600 text-white px-2 py-0.5 rounded-full hover:bg-indigo-700 transition cursor-pointer"
+                  >
+                    + Recharge
+                  </button>
+                </div>
+                <p className="mt-1.5 text-xl sm:text-2xl font-black text-dark-navy tracking-tight leading-none">
+                  ₹{(walletData.walletBalance || 0).toLocaleString("en-IN")}
+                </p>
+                <div className="mt-2 text-[10px] text-muted-gray font-semibold">
+                  Required Minimum: <span className="font-extrabold text-dark-navy">₹{(walletData.requiredMinBalance || 0).toLocaleString("en-IN")}</span>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-indigo-100/40 text-[10px] sm:text-[11px] font-semibold text-[#64748B]">
+                {walletData.walletBalance < walletData.requiredMinBalance ? (
+                  <span className="text-red-500 font-bold">⚠️ Insufficient Wallet Balance</span>
+                ) : (
+                  <span className="text-emerald-600 font-bold">✓ Wallet Status Healthy</span>
+                )}
+              </div>
+            </div>
+          )}
 
           <KpiCard
             title="Total Orders"
@@ -693,21 +955,99 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Marketplace Commission Settings (Admin Only) */}
+      {isAdmin && (
+        <div className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs text-left mb-6">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-[#0F9D8A]">
+              <Settings size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-widest">
+                Marketplace Commission Rules Config
+              </h3>
+              <p className="text-xs text-muted-gray font-semibold mt-0.5">
+                Configure global price-range threshold and commission percentage parameters.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSaveCommissionSettings} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div>
+              <label className="block mb-1.5 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+                Price Threshold (₹)
+              </label>
+              <input
+                type="number"
+                value={settingsFormData.priceThreshold}
+                onChange={(e) => setSettingsFormData(prev => ({ ...prev, priceThreshold: e.target.value }))}
+                className="w-full px-3.5 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-bold text-dark-navy bg-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-1.5 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+                Under Threshold Rate (%)
+              </label>
+              <input
+                type="number"
+                value={settingsFormData.commissionUnderThreshold}
+                onChange={(e) => setSettingsFormData(prev => ({ ...prev, commissionUnderThreshold: e.target.value }))}
+                className="w-full px-3.5 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-bold text-dark-navy bg-white"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-1.5 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+                At/Over Threshold Rate (%)
+              </label>
+              <input
+                type="number"
+                value={settingsFormData.commissionOverThreshold}
+                onChange={(e) => setSettingsFormData(prev => ({ ...prev, commissionOverThreshold: e.target.value }))}
+                className="w-full px-3.5 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-bold text-dark-navy bg-white"
+                required
+              />
+            </div>
+            <div>
+              <button
+                type="submit"
+                className="w-full bg-[#0F9D8A] hover:bg-[#0F9D8A]/90 text-white text-xs font-bold py-2.5 rounded-xl cursor-pointer transition shadow-xs uppercase tracking-wider h-[38px] active:scale-95 flex items-center justify-center"
+              >
+                Save Settings
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* 4. Quick Actions Panel */}
       <div className="text-left">
         <h2 className="text-[20px] font-black text-dark-navy tracking-tight mb-4">
           Quick Actions
         </h2>
         <div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-          <Link
-            to={isVendor ? "/vendor/create-product" : "/create-product"}
-            className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer"
-          >
-            <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2">
-              <Package size={20} />
-            </div>
-            <span className="text-[13px] font-extrabold text-[#0F172A]">Add Product</span>
-          </Link>
+          {isVendorInsufficientBalance ? (
+            <button
+              onClick={() => alert(`Insufficient wallet balance. You need to maintain a flat minimum balance of ₹200. Your current balance is ₹${walletData.walletBalance.toLocaleString("en-IN")}. Please recharge your wallet first.`)}
+              className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer w-full text-left"
+            >
+              <div className="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform mb-2 mx-auto">
+                <Package size={20} />
+              </div>
+              <span className="text-[13px] font-extrabold text-red-500 mx-auto">Add Product</span>
+            </button>
+          ) : (
+            <Link
+              to={isVendor ? "/vendor/create-product" : "/create-product"}
+              className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2">
+                <Package size={20} />
+              </div>
+              <span className="text-[13px] font-extrabold text-[#0F172A]">Add Product</span>
+            </Link>
+          )}
 
           {isAdmin && (
             <>
@@ -865,44 +1205,26 @@ const AdminDashboard = () => {
             Marketplace Commission Policy
           </h3>
           <p className="text-xs text-muted-gray font-semibold leading-relaxed">
-            YoCart runs a dynamic tier-based commission system based on a seller's gross monthly sales. 
-            Commission is calculated month-by-month and helps sustain the marketplace platform:
+            YoCart runs a category-based commission system. Commission percentage is specified for each product category (e.g. Electronics, Clothing) and is auto-deducted directly from the vendor's Prepaid Wallet balance upon order delivery of COD orders.
           </p>
-          <div className="grid grid-cols-3 gap-4 mt-4 text-xs font-semibold">
-            <div className="p-3 bg-slate-50 border border-slate-200/50 rounded-xl">
-              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 1 (≤ 2 Lakhs)</span>
-              <span className="text-sm font-black text-[#0F9D8A] mt-1 block">1% Commission</span>
-            </div>
-            <div className="p-3 bg-slate-50 border border-slate-200/50 rounded-xl">
-              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 2 (≤ 10 Lakhs)</span>
-              <span className="text-sm font-black text-amber-500 mt-1 block">5% Commission</span>
-            </div>
-            <div className="p-3 bg-slate-50 border border-slate-200/50 rounded-xl">
-              <span className="text-[10px] text-muted-gray uppercase block tracking-wider font-extrabold">Tier 3 (&gt; 10 Lakhs)</span>
-              <span className="text-sm font-black text-red-500 mt-1 block">10% Commission</span>
-            </div>
-          </div>
+          <p className="text-xs text-muted-gray font-semibold leading-relaxed mt-2">
+            Please make sure that vendors maintain their required minimum balance based on lifetime sales to keep their product listing active.
+          </p>
         </div>
         <div className="bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-100 rounded-xl p-5 flex flex-col justify-center h-full text-left">
           {isAdmin ? (
             <>
               <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Total Commission Collected</span>
               <span className="text-2xl font-black text-[#0F9D8A] mt-1">₹{analytics.totalCommissionEarned.toLocaleString("en-IN")}</span>
-              <span className="text-[9px] text-muted-gray font-bold mt-1">Sum of all monthly vendor payouts</span>
+              <span className="text-[9px] text-muted-gray font-bold mt-1">Sum of all vendor category-based payouts</span>
             </>
           ) : (
             <>
-              <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">My Active Monthly Sales</span>
-              <span className="text-lg font-black text-dark-navy mt-1">₹{(analytics.vendorCommStats?.currentMonthSales || 0).toLocaleString("en-IN")}</span>
+              <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">My Total Wallet Commission Paid</span>
+              <span className="text-2xl font-black text-indigo-600 mt-1">₹{(analytics.vendorCommStats?.totalCommissionAllTime || 0).toLocaleString("en-IN")}</span>
               <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-200/50">
-                <span className="text-[9px] text-muted-gray font-bold">Active Tier Commission</span>
-                <span className="text-[10px] font-extrabold text-[#0F9D8A] bg-teal-50 px-2 py-0.5 rounded-full border border-teal-100/50">
-                  {((analytics.vendorCommStats?.currentRate || 0.01) * 100).toFixed(0)}%
-                </span>
-              </div>
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-[9px] text-muted-gray font-bold">Total Paid Overall</span>
-                <span className="text-xs font-black text-dark-navy">₹{(analytics.vendorCommStats?.totalCommissionAllTime || 0).toLocaleString("en-IN")}</span>
+                <span className="text-[9px] text-muted-gray font-bold">Total Sales Volume</span>
+                <span className="text-xs font-black text-dark-navy">₹{(analytics.vendorCommStats?.totalSalesAllTime || 0).toLocaleString("en-IN")}</span>
               </div>
             </>
           )}
@@ -1126,6 +1448,116 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* 11. Vendor Wallet Transactions Section */}
+      {isVendor && (
+        <div className="bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left mt-6">
+          <h3 className="text-[20px] font-black text-dark-navy tracking-tight mb-4">
+            Prepaid Wallet Transaction History
+          </h3>
+          {walletData.transactions.length === 0 ? (
+            <p className="text-xs text-muted-gray py-6 text-center font-bold">No transaction records found</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[#64748B] font-extrabold uppercase tracking-wider">
+                    <th className="pb-3 pr-2">Date</th>
+                    <th className="pb-3 px-2">Type</th>
+                    <th className="pb-3 px-2">Description</th>
+                    <th className="pb-3 pl-2 text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {walletData.transactions.map((txn) => (
+                    <tr 
+                      key={txn._id}
+                      className="hover:bg-slate-50/50 transition-colors border-b border-slate-100/50"
+                    >
+                      <td className="py-3.5 pr-2 text-muted-gray font-bold">
+                        {new Date(txn.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="py-3.5 px-2">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border border-current ${
+                          txn.type === "deposit"
+                            ? "bg-emerald-50 text-emerald-600 border-emerald-100/20"
+                            : "bg-red-50 text-red-655 border-red-100/20"
+                        }`}>
+                          {txn.type}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-2 font-bold text-dark-navy">
+                        {txn.description}
+                      </td>
+                      <td className={`py-3.5 pl-2 text-right font-black font-mono ${
+                        txn.type === "deposit" ? "text-emerald-600" : "text-red-500"
+                      }`}>
+                        {txn.type === "deposit" ? "+" : "-"}₹{txn.amount.toLocaleString("en-IN")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* WALLET RECHARGE MODAL */}
+      {showRechargeModal && (
+        <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white border border-light-border rounded-3xl p-6 max-w-sm w-full mx-4 shadow-2xl space-y-4 animate-scaleUp text-left">
+            <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center">
+              <Plus size={22} className="animate-bounce" />
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold text-dark-navy">Recharge Prepaid Wallet</h3>
+              <p className="text-xs text-muted-gray mt-2 leading-relaxed font-semibold">
+                Enter the amount you wish to recharge. Once complete, your store balance will be updated instantly.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest block">Recharge Amount (₹)</label>
+              <input
+                type="number"
+                placeholder="Enter amount (e.g. 500)"
+                value={rechargeAmount}
+                onChange={(e) => setRechargeAmount(e.target.value)}
+                disabled={rechargeLoading}
+                className="w-full p-3 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-sm font-semibold text-dark-navy bg-white"
+              />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowRechargeModal(false);
+                  setRechargeAmount("");
+                }}
+                disabled={rechargeLoading}
+                className="flex-1 py-2.5 border border-light-border text-muted-gray hover:bg-slate-50 font-bold text-xs rounded-xl transition cursor-pointer text-center"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleRechargeWallet}
+                disabled={rechargeLoading || !rechargeAmount}
+                className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl transition cursor-pointer text-center flex items-center justify-center gap-1.5"
+              >
+                {rechargeLoading ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <span>Pay & Recharge</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

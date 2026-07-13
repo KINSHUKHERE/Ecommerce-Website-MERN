@@ -18,6 +18,11 @@ const categorySchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    commissionPercentage: {
+      type: Number,
+      default: 5,
+    },
   },
   {
     timestamps: true,

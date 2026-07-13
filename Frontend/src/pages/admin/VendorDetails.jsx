@@ -20,6 +20,7 @@ import { getVendorsApi, updateVendorStatusApi, deleteVendorApi } from "../../api
 import { getProduct } from "../../api/ProductApi";
 import { getAllOrders } from "../../api/OrderApi";
 import { calculateVendorCommission } from "../../utils/commissionHelper";
+import { getAdminVendorWalletStatusApi, getCommissionSettingsApi } from "../../api/PaymentApi";
 
 const VendorDetails = () => {
   const { vendorId } = useParams();
@@ -31,6 +32,19 @@ const VendorDetails = () => {
     ordersCount: 0,
     revenue: 0,
     orders: []
+  });
+
+  const [walletData, setWalletData] = useState({
+    walletBalance: 0,
+    lifetimeSales: 0,
+    requiredMinBalance: 0,
+    transactions: []
+  });
+
+  const [commissionSettings, setCommissionSettings] = useState({
+    priceThreshold: 50000,
+    commissionUnderThreshold: 2,
+    commissionOverThreshold: 5,
   });
 
   const [message, setMessage] = useState("");
@@ -46,12 +60,17 @@ const VendorDetails = () => {
 
   const loadData = async () => {
     try {
-      // Fetch vendors, products, and orders
-      const [vendorsRes, productsRes, ordersRes] = await Promise.all([
+      // Fetch vendors, products, orders, wallet, and commission settings
+      const [vendorsRes, productsRes, ordersRes, walletRes, commissionRes] = await Promise.all([
         getVendorsApi(),
         getProduct(),
-        getAllOrders()
+        getAllOrders(),
+        getAdminVendorWalletStatusApi(vendorId).catch(() => ({ data: { walletBalance: 0, lifetimeSales: 0, requiredMinBalance: 0, transactions: [] } })),
+        getCommissionSettingsApi().catch(() => ({ data: { priceThreshold: 50000, commissionUnderThreshold: 2, commissionOverThreshold: 5 } }))
       ]);
+
+      setWalletData(walletRes.data);
+      setCommissionSettings(commissionRes.data);
 
       const foundVendor = (vendorsRes.data.vendors || []).find(v => v._id === vendorId);
       setVendor(foundVendor);
@@ -303,7 +322,7 @@ const VendorDetails = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Calculate Commission stats */}
           {(() => {
-            const commissionStats = calculateVendorCommission(stats.orders, stats.products);
+            const commissionStats = calculateVendorCommission(stats.orders, stats.products, commissionSettings);
             return (
               <>
                 {/* Stats metrics */}
@@ -340,7 +359,7 @@ const VendorDetails = () => {
                 </div>
 
                 {/* Commission Stats metrics */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center justify-between">
                     <div>
                       <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block">Current Month Sales</span>
@@ -366,30 +385,36 @@ const VendorDetails = () => {
                       <IndianRupee size={20} />
                     </div>
                   </div>
+
+                  <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block">Prepaid Wallet Balance</span>
+                      <span className="text-xl sm:text-2xl font-black text-indigo-600 mt-1 block">₹{walletData.walletBalance.toLocaleString()}</span>
+                      <span className={`inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-widest border ${
+                        walletData.walletBalance < walletData.requiredMinBalance
+                          ? "border-red-100 bg-red-50 text-red-655"
+                          : "border-emerald-100 bg-emerald-50 text-emerald-600"
+                      }`}>
+                        {walletData.walletBalance < walletData.requiredMinBalance ? "Low Balance" : "Healthy"} (Min Req: ₹{walletData.requiredMinBalance.toLocaleString()})
+                      </span>
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center flex-shrink-0 border border-indigo-100">
+                      <IndianRupee size={20} />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Commission helper guidelines */}
                 <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10 rounded-3xl p-5 shadow-2xs space-y-2">
                   <h4 className="text-xs font-extrabold text-dark-navy uppercase tracking-widest">
-                    Commission Tiers Guidelines
+                    Category-Based Commissions & Prepaid Wallet
                   </h4>
                   <p className="text-[11px] text-muted-gray leading-relaxed font-semibold">
-                    The admin commission rate is calculated monthly based on the vendor's total settled sales:
+                    Marketplace admin commissions are calculated based on the specific category of each product sold (configured under Category Management).
                   </p>
-                  <div className="grid grid-cols-3 gap-2.5 pt-2 text-[10px] font-extrabold text-center uppercase tracking-wide">
-                    <div className="bg-white/60 p-2.5 rounded-xl border border-light-border/30">
-                      <span className="text-muted-gray block">Sales ≤ 2 Lakhs</span>
-                      <span className="text-primary text-xs block font-black mt-0.5">1% Commission</span>
-                    </div>
-                    <div className="bg-white/60 p-2.5 rounded-xl border border-light-border/30">
-                      <span className="text-muted-gray block">Sales ≤ 10 Lakhs</span>
-                      <span className="text-amber-500 text-xs block font-black mt-0.5">5% Commission</span>
-                    </div>
-                    <div className="bg-white/60 p-2.5 rounded-xl border border-light-border/30">
-                      <span className="text-muted-gray block">Sales &gt; 10 Lakhs</span>
-                      <span className="text-red-500 text-xs block font-black mt-0.5">10% Commission</span>
-                    </div>
-                  </div>
+                  <p className="text-[11px] text-muted-gray leading-relaxed font-semibold">
+                    For Cash on Delivery (COD) orders, commissions are auto-deducted directly from the vendor's Prepaid Wallet balance upon order delivery. Vendors must maintain their required minimum balance based on lifetime sales to keep upload privileges active.
+                  </p>
                 </div>
               </>
             );
@@ -507,6 +532,58 @@ const VendorDetails = () => {
               </div>
             ) : (
               <p className="text-center text-xs font-semibold text-muted-gray py-6">No orders received yet.</p>
+            )}
+          </div>
+
+          {/* Prepaid Wallet Transactions card */}
+          <div className="bg-white border border-light-border/60 rounded-3xl shadow-2xs p-5 space-y-4">
+            <h3 className="text-sm font-extrabold tracking-wider uppercase border-b border-light-border/30 pb-2">
+              Prepaid Wallet Transactions ({walletData.transactions.length})
+            </h3>
+            
+            {walletData.transactions.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-light-border/60 text-left">
+                      <th className="px-4 py-3 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Date</th>
+                      <th className="px-4 py-3 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-center">Type</th>
+                      <th className="px-4 py-3 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Description</th>
+                      <th className="px-4 py-3 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {walletData.transactions.map(txn => (
+                      <tr key={txn._id} className="border-b border-light-border/40 hover:bg-slate-50/20">
+                        <td className="px-4 py-3 text-xs font-semibold text-slate-600">
+                          {new Date(txn.createdAt).toLocaleDateString("en-IN", {
+                            month: "short", day: "numeric", year: "numeric"
+                          })}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={`inline-flex px-2.5 py-0.5 rounded text-[9px] font-extrabold uppercase border ${
+                            txn.type === "deposit"
+                              ? "bg-emerald-50 text-emerald-600 border-emerald-100/20"
+                              : "bg-red-50 text-red-655 border-red-100/20"
+                          }`}>
+                            {txn.type}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-xs font-bold text-dark-navy">
+                          {txn.description}
+                        </td>
+                        <td className={`px-4 py-3 text-xs font-black text-right ${
+                          txn.type === "deposit" ? "text-emerald-600" : "text-red-500"
+                        }`}>
+                          {txn.type === "deposit" ? "+" : "-"}₹{txn.amount.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-center text-xs font-semibold text-muted-gray py-6">No wallet transactions recorded yet.</p>
             )}
           </div>
         </div>

@@ -24,10 +24,12 @@ import {
 
 const CategoryManagement = () => {
   const [categoryName, setCategoryName] = useState("");
+  const [categoryCommission, setCategoryCommission] = useState("5");
   const [categories, setCategories] = useState([]);
   
   const [editingId, setEditingId] = useState(null);
   const [editCategoryName, setEditCategoryName] = useState("");
+  const [editCategoryCommission, setEditCategoryCommission] = useState("5");
 
   const [message, setMessage] = useState("");
   const [toastType, setToastType] = useState("success");
@@ -77,10 +79,12 @@ const CategoryManagement = () => {
     try {
       await addCategory({
         name: categoryName,
+        commissionPercentage: Number(categoryCommission || 5),
       });
 
       showToast("Category added successfully", "success");
       setCategoryName("");
+      setCategoryCommission("5");
       fetchCategories();
     } catch (err) {
       showToast(err.response?.data?.msg || "Failed to add category", "error");
@@ -91,6 +95,7 @@ const CategoryManagement = () => {
   const handleEdit = (category) => {
     setEditingId(category._id);
     setEditCategoryName(category.name);
+    setEditCategoryCommission(category.commissionPercentage || "5");
   };
 
   const handleUpdateInline = async (id) => {
@@ -102,11 +107,13 @@ const CategoryManagement = () => {
     try {
       await updateCategory(id, {
         name: editCategoryName,
+        commissionPercentage: Number(editCategoryCommission || 5),
       });
 
       showToast("Category updated successfully", "success");
       setEditingId(null);
       setEditCategoryName("");
+      setEditCategoryCommission("5");
       fetchCategories();
     } catch (err) {
       showToast("Failed to update category", "error");
@@ -261,23 +268,39 @@ const CategoryManagement = () => {
           Add New Category
         </h2>
 
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
-              <Tag size={15} />
-            </span>
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 items-end">
+          <div className="relative flex-2 w-full">
+            <label className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block mb-1">Category Name</label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
+                <Tag size={15} />
+              </span>
+              <input
+                type="text"
+                placeholder="Enter category name (e.g. Electronics, Clothing)"
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy h-[38px]"
+              />
+            </div>
+          </div>
+
+          <div className="relative flex-1 w-full sm:max-w-[180px]">
+            <label className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block mb-1">Commission Rate (%)</label>
             <input
-              type="text"
-              placeholder="Enter category name (e.g. Electronics, Clothing)"
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy h-[38px]"
+              type="number"
+              placeholder="e.g. 5"
+              value={categoryCommission}
+              onChange={(e) => setCategoryCommission(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy h-[38px]"
+              min="0"
+              max="100"
             />
           </div>
 
           <button
             type="submit"
-            className="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer h-[38px] active:scale-95"
+            className="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer h-[38px] active:scale-95 shrink-0"
           >
             <Plus size={15} />
             Add Category
@@ -373,6 +396,7 @@ const CategoryManagement = () => {
               <thead>
                 <tr className="bg-slate-50/65 text-muted-gray border-b border-light-border/40 text-[10px] font-extrabold uppercase tracking-widest">
                   <th className="py-3.5 px-6 text-left">Category Name</th>
+                  <th className="py-3.5 px-6 text-center">Commission Rate (%)</th>
                   <th className="py-3.5 px-6 text-center">Status</th>
                   <th className="py-3.5 px-6 text-center w-[180px]">Actions</th>
                 </tr>
@@ -388,25 +412,40 @@ const CategoryManagement = () => {
                         key={category._id}
                         className="bg-slate-50/40 border-y border-light-border/60 transition-all duration-300 animate-fadeIn"
                       >
-                        <td colSpan={3} className="py-5 px-6">
+                        <td colSpan={4} className="py-5 px-6">
                           <div className="flex flex-col gap-4">
                             <div className="flex items-center gap-1.5 text-xs font-extrabold text-primary uppercase tracking-widest">
                               <Edit3 size={14} />
                               <span>Editing Category: <span className="text-dark-navy underline decoration-primary/45">{category.name}</span></span>
                             </div>
 
-                            <div className="flex flex-col gap-1.5">
-                              <label className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Category Name</label>
-                              <div className="relative">
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
-                                  <Tag size={14} />
-                                </span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div className="flex flex-col gap-1.5">
+                                <label className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Category Name</label>
+                                <div className="relative">
+                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
+                                    <Tag size={14} />
+                                  </span>
+                                  <input
+                                    type="text"
+                                    value={editCategoryName}
+                                    onChange={(e) => setEditCategoryName(e.target.value)}
+                                    className="w-full pl-9 pr-4 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy transition-all duration-300 bg-white"
+                                    placeholder="Enter category name"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col gap-1.5">
+                                <label className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Commission Rate (%)</label>
                                 <input
-                                  type="text"
-                                  value={editCategoryName}
-                                  onChange={(e) => setEditCategoryName(e.target.value)}
-                                  className="w-full pl-9 pr-4 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy transition-all duration-300 bg-white"
-                                  placeholder="Enter category name"
+                                  type="number"
+                                  value={editCategoryCommission}
+                                  onChange={(e) => setEditCategoryCommission(e.target.value)}
+                                  className="w-full px-4 py-2 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy transition-all duration-300 bg-white"
+                                  placeholder="Enter commission rate"
+                                  min="0"
+                                  max="100"
                                 />
                               </div>
                             </div>
@@ -440,6 +479,10 @@ const CategoryManagement = () => {
                     <tr key={category._id} className="hover:bg-slate-50/30 transition-all duration-200">
                       <td className="py-3.5 px-6">
                         <span className="font-semibold text-dark-navy text-sm">{category.name}</span>
+                      </td>
+
+                      <td className="py-3.5 px-6 text-center">
+                        <span className="font-mono text-[#0F9D8A] text-xs font-extrabold">{category.commissionPercentage ?? 5}%</span>
                       </td>
 
                       <td className="py-3.5 px-6">

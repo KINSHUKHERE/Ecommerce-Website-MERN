@@ -2,6 +2,10 @@ const Order = require("../models/orderDetails");
 const Cart = require("../models/cartDetails");
 const Product = require("../models/productsData");
 const Variant = require("../models/variantDetails");
+const User = require("../models/authDetails");
+const WalletTransaction = require("../models/walletTransaction");
+const Category = require("../models/categoryDetails");
+const { getVendorLifetimeSales, getRequiredMinimumBalance } = require("../utils/walletHelper");
 
 const createOrder = async (req, res) => {
   try {
@@ -197,6 +201,92 @@ const updateOrderStatus = async (req, res) => {
         return res.status(403).json({
           msg: "Forbidden: You do not own any products in this order",
         });
+      }
+    }
+
+    // Deduct commission or release earnings if status transitions to "Delivered"
+    if (orderStatus === "Delivered" && order.orderStatus !== "Delivered") {
+      // Group items by vendor
+      const vendorItemsMap = {};
+      for (const item of order.items) {
+        const prod = await Product.findById(item.productId);
+        if (prod && prod.vendorId) {
+          const vIdStr = prod.vendorId.toString();
+          if (!vendorItemsMap[vIdStr]) {
+            vendorItemsMap[vIdStr] = [];
+          }
+          vendorItemsMap[vIdStr].push(item);
+        }
+      }
+
+      const SystemConfig = require("../models/systemConfig");
+      let priceThresholdConfig = await SystemConfig.findOne({ key: "priceThreshold" });
+      let commissionUnderConfig = await SystemConfig.findOne({ key: "commissionUnderThreshold" });
+      let commissionOverConfig = await SystemConfig.findOne({ key: "commissionOverThreshold" });
+
+      const priceThreshold = priceThresholdConfig ? Number(priceThresholdConfig.value) : 50000;
+      const commPctUnder = commissionUnderConfig ? Number(commissionUnderConfig.value) : 2;
+      const commPctOver = commissionOverConfig ? Number(commissionOverConfig.value) : 5;
+
+      const isCOD = order.paymentMethod === "COD";
+
+      // Process commission deduction or earnings release for each vendor
+      for (const [vendorId, vendorItems] of Object.entries(vendorItemsMap)) {
+        const vendor = await User.findById(vendorId);
+        if (vendor) {
+          if (isCOD) {
+            // COD: Deduct commission from vendor's wallet balance
+            let totalCommissionForVendor = 0;
+            const itemDetails = [];
+
+            for (const item of vendorItems) {
+              const itemPrice = item.price;
+              const commPct = itemPrice < priceThreshold ? commPctUnder : commPctOver;
+              const itemTotal = itemPrice * item.quantity;
+              const itemCommission = Math.round(itemTotal * (commPct / 100));
+              totalCommissionForVendor += itemCommission;
+              itemDetails.push(`${item.name || "Product"} (${commPct}%)`);
+            }
+
+            if (totalCommissionForVendor > 0) {
+              vendor.walletBalance = (vendor.walletBalance || 0) - totalCommissionForVendor;
+              await vendor.save();
+
+              await WalletTransaction.create({
+                vendorId,
+                amount: totalCommissionForVendor,
+                type: "deduction",
+                description: `Commission auto-deduction for COD order #${order._id.toString().slice(-8)} items: ${itemDetails.join(", ")}`,
+              });
+            }
+          } else {
+            // Prepaid: Release vendor's earnings (total minus commission) to their wallet balance
+            let totalEarningsForVendor = 0;
+            const itemDetails = [];
+
+            for (const item of vendorItems) {
+              const itemPrice = item.price;
+              const commPct = itemPrice < priceThreshold ? commPctUnder : commPctOver;
+              const itemTotal = itemPrice * item.quantity;
+              const itemCommission = Math.round(itemTotal * (commPct / 100));
+              const itemEarnings = itemTotal - itemCommission;
+              totalEarningsForVendor += itemEarnings;
+              itemDetails.push(`${item.name || "Product"} (Earnings: ₹${itemEarnings.toLocaleString("en-IN")}, minus ${commPct}% comm)`);
+            }
+
+            if (totalEarningsForVendor > 0) {
+              vendor.walletBalance = (vendor.walletBalance || 0) + totalEarningsForVendor;
+              await vendor.save();
+
+              await WalletTransaction.create({
+                vendorId,
+                amount: totalEarningsForVendor,
+                type: "deposit",
+                description: `Earnings release for prepaid order #${order._id.toString().slice(-8)} items: ${itemDetails.join("; ")}`,
+              });
+            }
+          }
+        }
       }
     }
 

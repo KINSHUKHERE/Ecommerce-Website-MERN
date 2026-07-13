@@ -1,6 +1,8 @@
 const Product = require("../models/productsData");
 const Variant = require("../models/variantDetails");
 const cloudinary = require("../config/cloudinary");
+const User = require("../models/authDetails");
+const { getVendorLifetimeSales, getRequiredMinimumBalance } = require("../utils/walletHelper");
 
 const getPublicIdFromUrl = (url) => {
   if (!url || !url.includes("cloudinary.com")) return null;
@@ -43,6 +45,24 @@ const addProduct = async (req, res) => {
     // Set vendorId to the current user's ID if vendor or admin
     if (req.user && req.user.userId) {
       productData.vendorId = req.user.userId;
+    }
+
+    // Wallet Balance Check
+    const vendorId = req.user.userId;
+    const vendor = await User.findById(vendorId);
+    if (!vendor) {
+      return res.status(404).json({ msg: "Vendor not found" });
+    }
+
+    const lifetimeSales = await getVendorLifetimeSales(vendorId);
+    const requiredMinBalance = getRequiredMinimumBalance(lifetimeSales);
+
+    if ((vendor.walletBalance || 0) < requiredMinBalance) {
+      return res.status(403).json({
+        msg: `Insufficient wallet balance. You must maintain a minimum balance of ₹${requiredMinBalance} based on your lifetime sales of ₹${lifetimeSales}. Your current balance is ₹${vendor.walletBalance || 0}. Please recharge your wallet before listing new products.`,
+        requiredMinBalance,
+        currentBalance: vendor.walletBalance || 0
+      });
     }
     
     const product = await Product.create(productData);

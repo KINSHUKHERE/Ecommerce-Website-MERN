@@ -2,7 +2,7 @@ const Category = require("../models/categoryDetails");
 
 const addCategoryObj = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, commissionPercentage } = req.body;
 
     const existingCategory = await Category.findOne({
       name: { $regex: new RegExp("^" + name.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "$", "i") },
@@ -17,6 +17,7 @@ const addCategoryObj = async (req, res) => {
 
     const category = await Category.create({
       name: name.trim(),
+      commissionPercentage: commissionPercentage !== undefined ? Number(commissionPercentage) : 5,
     });
 
     res.status(201).json({
@@ -52,7 +53,7 @@ const getCategoriesList = async (req, res) => {
 const updateCategoryObj = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, commissionPercentage } = req.body;
 
     const existingCategory = await Category.findOne({
       name: { $regex: new RegExp("^" + name.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "$", "i") },
@@ -70,6 +71,7 @@ const updateCategoryObj = async (req, res) => {
       id,
       {
         name: name.trim(),
+        commissionPercentage: commissionPercentage !== undefined ? Number(commissionPercentage) : 5,
       },
       {
         new: true,

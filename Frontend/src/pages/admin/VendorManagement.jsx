@@ -22,6 +22,7 @@ import { getVendorsApi, updateVendorStatusApi, createVendorApi, deleteVendorApi 
 import { getProduct } from "../../api/ProductApi";
 import { getAllOrders } from "../../api/OrderApi";
 import { calculateVendorCommission } from "../../utils/commissionHelper";
+import { getCommissionSettingsApi } from "../../api/PaymentApi";
 
 const VendorManagement = () => {
   const navigate = useNavigate();
@@ -33,6 +34,11 @@ const VendorManagement = () => {
   const [statusFilter, setStatusFilter] = useState(""); // "", "pending", "active", "suspended"
   const [message, setMessage] = useState("");
   const [toastType, setToastType] = useState("success");
+  const [commissionSettings, setCommissionSettings] = useState({
+    priceThreshold: 50000,
+    commissionUnderThreshold: 2,
+    commissionOverThreshold: 5,
+  });
   
   // Modals state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -61,14 +67,16 @@ const VendorManagement = () => {
 
   const loadVendors = async () => {
     try {
-      const [vendorsRes, productsRes, ordersRes] = await Promise.all([
+      const [vendorsRes, productsRes, ordersRes, commissionRes] = await Promise.all([
         getVendorsApi(),
         getProduct(),
-        getAllOrders()
+        getAllOrders(),
+        getCommissionSettingsApi().catch(() => ({ data: { priceThreshold: 50000, commissionUnderThreshold: 2, commissionOverThreshold: 5 } }))
       ]);
       setVendors(vendorsRes.data.vendors || []);
       setAllProducts(productsRes.data.data || []);
       setAllOrders(ordersRes.data.orders || []);
+      setCommissionSettings(commissionRes.data);
     } catch (err) {
       console.error(err);
       showToast("Failed to fetch vendor statistics", "error");
@@ -297,7 +305,7 @@ const VendorManagement = () => {
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Contact Info</th>
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Tax ID / GSTIN</th>
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-right">Current Month Sales</th>
-                <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-center">Active Tier</th>
+                <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-center">Wallet Balance</th>
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-right">Commission Paid</th>
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-center">Status</th>
                 <th className="px-5 py-4 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest text-center">Actions</th>
@@ -309,7 +317,7 @@ const VendorManagement = () => {
                   const vendorProducts = allProducts.filter(
                     p => p.vendorId && (p.vendorId._id === vendor._id || p.vendorId === vendor._id)
                   );
-                  const commStats = calculateVendorCommission(allOrders, vendorProducts);
+                  const commStats = calculateVendorCommission(allOrders, vendorProducts, commissionSettings);
 
                   return (
                     <tr 
@@ -359,8 +367,12 @@ const VendorManagement = () => {
                       </td>
 
                       <td className="px-5 py-4 text-center">
-                        <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
-                          {(commStats.currentRate * 100).toFixed(0)}%
+                        <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${
+                          (vendor.walletBalance || 0) < 200
+                            ? "bg-red-50 text-red-655 border-red-100/50"
+                            : "bg-indigo-50 text-indigo-650 border-indigo-100/50"
+                        }`}>
+                          ₹{(vendor.walletBalance || 0).toLocaleString("en-IN")}
                         </span>
                       </td>
 

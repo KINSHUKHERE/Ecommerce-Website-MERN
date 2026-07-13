@@ -86,17 +86,15 @@ const TermsConditions = () => {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-bold text-gray-900">8. Vendor Commission Structure</h2>
+            <h2 className="text-lg font-bold text-gray-900">8. Vendor Commission Structure & Prepaid Wallet</h2>
             <p>
-              By registering as a vendor or upgrading your account to a seller store on YoCart, you agree to the marketplace administrator's commission fees calculated dynamically on your gross monthly sales:
+              By registering as a vendor or upgrading your account to a seller store on YoCart, you agree to the marketplace commission fees set globally by the marketplace administrator. Commission rates are determined dynamically based on the product's selling price (e.g., a default rate of <strong>2%</strong> for products priced under ₹50,000, and <strong>5%</strong> for products priced at or above ₹50,000, or as configured system-wide by the administrator).
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-sm font-semibold text-gray-600">
-              <li>Monthly sales up to <strong>₹2,00,000 (2 Lakhs)</strong>: <strong>1%</strong> admin commission.</li>
-              <li>Monthly sales above ₹2,00,000 and up to <strong>₹10,00,000 (10 Lakhs)</strong>: <strong>5%</strong> admin commission.</li>
-              <li>Monthly sales above <strong>₹10,00,000 (10 Lakhs)</strong>: <strong>10%</strong> admin commission (maximum tier).</li>
-            </ul>
             <p>
-              Commissions are automatically tracked and overviewed inside the seller performance workspace metrics.
+              Commissions for Cash on Delivery (COD) orders are auto-deducted directly from the vendor's <strong>Prepaid Wallet Balance</strong> upon successful order delivery. Vendors are required to maintain a flat minimum wallet balance of <strong>₹200</strong> at all times to remain active on the platform and list new products.
+            </p>
+            <p>
+              If a vendor's prepaid wallet balance falls below ₹200, product listing and selling privileges will be locked automatically until the wallet is recharged.
             </p>
           </section>
 

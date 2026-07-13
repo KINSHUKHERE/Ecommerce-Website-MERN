@@ -27,6 +27,8 @@ import {
 const ProductEdit = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+  const isAdmin = currentUser.role === "admin";
 
   const [formData, setFormData] = useState({
     categoryId: "",
@@ -1250,7 +1252,9 @@ const ProductEdit = () => {
             </div>
           )}
 
-          {/* Action Row */}
+
+
+            {/* Action Row */}
           <div className="flex justify-end gap-3 pt-4 border-t border-light-border/40">
             <Link
               to={`/admin/products/${productId}`}
@@ -1552,6 +1556,7 @@ const InputField = ({
   placeholder,
   type = "text",
   icon: Icon,
+  disabled = false,
 }) => (
   <div>
     <label className="block mb-1.5 text-xs font-extrabold text-muted-gray uppercase tracking-widest text-left">
@@ -1569,10 +1574,11 @@ const InputField = ({
         value={value}
         onChange={onChange}
         required
+        disabled={disabled}
         placeholder={placeholder}
         className={`w-full ${
           Icon ? "pl-9" : "px-4"
-        } pr-4 py-2 rounded-xl border border-light-border focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-dark-navy text-sm bg-white placeholder-muted-gray/50 font-semibold h-[38px]`}
+        } pr-4 py-2 rounded-xl border border-light-border focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-dark-navy text-sm bg-white placeholder-muted-gray/50 font-semibold h-[38px] disabled:bg-slate-50 disabled:text-muted-gray disabled:cursor-not-allowed`}
       />
     </div>
   </div>
