@@ -4,7 +4,7 @@ import { getProduct } from "../api/ProductApi";
 import { sentToCart } from "../api/CartApi";
 import { toggleWishlist } from "../api/WishlistApi";
 import { getProductReviewsApi } from "../api/ReviewApi";
-import { ChevronLeft, ChevronRight, Heart, Loader2, ArrowLeft, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Loader2, ArrowLeft, Star, X } from "lucide-react";
 
 const ExpandableReviewText = ({ text }) => {
   const [expanded, setExpanded] = useState(false);
