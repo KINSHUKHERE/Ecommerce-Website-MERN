@@ -53,6 +53,7 @@ const ProductDetails = () => {
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [showAllReviewsModal, setShowAllReviewsModal] = useState(false);
   const [starFilter, setStarFilter] = useState("All");
+  const [descExpanded, setDescExpanded] = useState(false);
 
   useEffect(() => {
     const checkWishlist = () => {
@@ -615,9 +616,33 @@ const ProductDetails = () => {
 
           <div className="pt-2">
             <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-wider mb-2">Product Description</h3>
-            <p className="text-xs sm:text-sm text-muted-gray leading-relaxed text-justify whitespace-pre-wrap font-medium">
-              {activeVariant?.description || product.description}
-            </p>
+            {(() => {
+              const fullDesc = activeVariant?.description || product.description || "";
+              const charLimit = 350; // Dynamic limit for product description
+              
+              if (fullDesc.length <= charLimit) {
+                return (
+                  <p className="text-xs sm:text-sm text-muted-gray leading-relaxed text-justify whitespace-pre-wrap font-medium">
+                    {fullDesc}
+                  </p>
+                );
+              }
+              
+              return (
+                <div className="space-y-1.5 text-justify">
+                  <p className="text-xs sm:text-sm text-muted-gray leading-relaxed whitespace-pre-wrap font-medium inline">
+                    {descExpanded ? fullDesc : `${fullDesc.substring(0, charLimit)}... `}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setDescExpanded(!descExpanded)}
+                    className="text-[10px] font-black text-primary hover:underline ml-1 uppercase tracking-wider inline-block cursor-pointer bg-transparent border-none p-0 outline-none"
+                  >
+                    {descExpanded ? "See Less" : "See More"}
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
