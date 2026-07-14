@@ -14,6 +14,7 @@ const wishlistRoutes = require("./routes/wishlistRoutes");
 const saleRoutes = require("./routes/saleRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 
 const app = express();
 
@@ -103,6 +104,7 @@ app.use("/", wishlistRoutes);
 app.use("/", saleRoutes);
 app.use("/", notificationRoutes);
 app.use("/", paymentRoutes);
+app.use("/", reviewRoutes);
 
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");

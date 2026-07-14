@@ -6,7 +6,6 @@ const User = require("../models/authDetails");
 const WalletTransaction = require("../models/walletTransaction");
 const Category = require("../models/categoryDetails");
 const { getVendorLifetimeSales, getRequiredMinimumBalance } = require("../utils/walletHelper");
-const { createShiprocketOrder, getShiprocketTracking } = require("../utils/shiprocketHelper");
 
 const createOrder = async (req, res) => {
   try {
@@ -102,19 +101,6 @@ const createOrder = async (req, res) => {
       console.error("Failed to generate order notifications:", notifErr);
     }
 
-    // Push order to Shiprocket in background
-    try {
-      const user = await User.findById(userId);
-      const shiprocketResult = await createShiprocketOrder(newOrder, user);
-      if (shiprocketResult) {
-        newOrder.shiprocketOrderId = shiprocketResult.shiprocketOrderId;
-        newOrder.shiprocketShipmentId = shiprocketResult.shiprocketShipmentId;
-        await newOrder.save();
-      }
-    } catch (shiprocketErr) {
-      console.error("Failed to sync order to Shiprocket:", shiprocketErr);
-    }
-
     res.status(201).json({
       msg: "Order created successfully and cart cleared",
       order: newOrder,
@@ -195,7 +181,7 @@ const getUserOrders = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { orderStatus, awbCode, courierName } = req.body;
+    const { orderStatus } = req.body;
 
     const order = await Order.findById(orderId);
     if (!order) {
@@ -304,13 +290,9 @@ const updateOrderStatus = async (req, res) => {
       }
     }
 
-    const updateFields = { orderStatus };
-    if (awbCode !== undefined) updateFields.awbCode = awbCode;
-    if (courierName !== undefined) updateFields.courierName = courierName;
-
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
-      updateFields,
+      { orderStatus },
       { new: true }
     ).populate("userId", "name email");
 
@@ -373,69 +355,10 @@ const cancelUserOrder = async (req, res) => {
   }
 };
 
-const trackOrder = async (req, res) => {
-  try {
-    const { trackingId } = req.params;
-    if (!trackingId) {
-      return res.status(400).json({ msg: "Tracking Reference ID is required." });
-    }
-
-    let order = null;
-
-    // 1. Try finding by ObjectId
-    const mongoose = require("mongoose");
-    if (mongoose.Types.ObjectId.isValid(trackingId)) {
-      order = await Order.findById(trackingId);
-    }
-
-    // 2. Try finding by transactionId if not found
-    if (!order) {
-      order = await Order.findOne({ transactionId: trackingId });
-    }
-
-    if (!order) {
-      return res.status(404).json({ msg: "No active order found for the provided reference ID." });
-    }
-
-    let trackingData = null;
-
-    // 3. Fetch tracking details from Shiprocket if AWB code is set
-    if (order.awbCode) {
-      trackingData = await getShiprocketTracking(order.awbCode);
-    }
-
-    // Return the status and metadata
-    return res.status(200).json({
-      orderId: order._id,
-      orderStatus: order.orderStatus,
-      paymentMethod: order.paymentMethod,
-      totalAmount: order.totalAmount,
-      createdAt: order.createdAt,
-      awbCode: order.awbCode,
-      courierName: order.courierName,
-      items: order.items.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        image: item.image
-      })),
-      shippingAddress: {
-        city: order.shippingAddress?.city,
-        state: order.shippingAddress?.state
-      },
-      trackingData, // Live updates from Shiprocket
-    });
-  } catch (err) {
-    console.error("Error in public order tracking:", err);
-    return res.status(500).json({ msg: "Server error during tracking retrieval.", Error: err.message });
-  }
-};
-
 module.exports = {
   createOrder,
   getAllOrders,
   getUserOrders,
   updateOrderStatus,
   cancelUserOrder,
-  trackOrder,
 };

@@ -248,6 +248,17 @@ const EachProduct = ({ data }) => {
           <span className="text-[10px] sm:text-[11px] text-muted-gray font-semibold block">
             {data.brandId?.name}
           </span>
+          {data.rating?.count > 0 && (
+            <div className="flex items-center gap-1 mt-1 text-amber-500">
+              <span className="text-[10px] sm:text-[11px]">★</span>
+              <span className="font-extrabold text-dark-navy text-[10px] sm:text-[11px] leading-none">
+                {data.rating.avgRating}
+              </span>
+              <span className="text-muted-gray font-semibold text-[9px] sm:text-[10px] leading-none">
+                ({data.rating.count})
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

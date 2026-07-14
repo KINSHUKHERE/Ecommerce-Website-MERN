@@ -17,6 +17,7 @@ import {
   Users,
   BarChart3,
   Flame,
+  Star,
 } from "lucide-react";
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
@@ -141,6 +142,11 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
             title: "Store Profile",
             path: "/admin/profile",
             icon: <Users size={16} />,
+          },
+          {
+            title: "Customer Reviews",
+            path: "/admin/reviews",
+            icon: <Star size={16} />,
           },
           {
             title: "Support Query",

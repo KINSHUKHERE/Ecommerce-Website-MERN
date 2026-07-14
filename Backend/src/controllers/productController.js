@@ -182,10 +182,31 @@ const getProducts = async (req, res) => {
       variantsMap[pidStr].push(v);
     });
 
-    // Map variants back to products
+    // Fetch review ratings summary
+    const Review = require("../models/reviewDetails");
+    const reviewsAggregate = await Review.aggregate([
+      {
+        $group: {
+          _id: "$productId",
+          avgRating: { $avg: "$rating" },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const reviewsMap = {};
+    reviewsAggregate.forEach(r => {
+      reviewsMap[r._id.toString()] = {
+        avgRating: Math.round(r.avgRating * 10) / 10,
+        count: r.count
+      };
+    });
+
+    // Map variants and reviews back to products
     const data = products.map(p => ({
       ...p,
-      variants: variantsMap[p._id.toString()] || []
+      variants: variantsMap[p._id.toString()] || [],
+      rating: reviewsMap[p._id.toString()] || { avgRating: 0, count: 0 }
     }));
 
     res.status(200).json({

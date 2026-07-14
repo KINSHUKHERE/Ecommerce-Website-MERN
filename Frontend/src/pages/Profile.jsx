@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getUserProfile, updateProfile, uploadAvatarApi } from "../api/AuthApi";
 import { getUserOrders, cancelOrderApi } from "../api/OrderApi";
 import { getAddresses, addAddress, updateAddress, deleteAddress } from "../api/AddressApi";
+import { addReviewApi } from "../api/ReviewApi";
 import {
   User,
   Mail,
@@ -62,6 +64,15 @@ const Profile = () => {
       return null;
     }
   });
+
+  // Review states
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewProductId, setReviewProductId] = useState("");
+  const [reviewProductName, setReviewProductName] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   const [cancellingOrderId, setCancellingOrderId] = useState(null);
   const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
   const [cancelConfirmInput, setCancelConfirmInput] = useState("");
@@ -131,6 +142,33 @@ const Profile = () => {
       showToast(err.response?.data?.msg || "Failed to cancel order", "error");
     } finally {
       setCancellingOrderId(null);
+    }
+  };
+
+  const handleOpenReviewModal = (productId, productName) => {
+    setReviewProductId(productId);
+    setReviewProductName(productName);
+    setReviewRating(5);
+    setReviewComment("");
+    setShowReviewModal(true);
+  };
+
+  const handleSaveReview = async (e) => {
+    e.preventDefault();
+    if (!reviewComment.trim()) {
+      showToast("Please enter a review comment", "error");
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      await addReviewApi(reviewProductId, Number(reviewRating), reviewComment);
+      showToast("Review submitted successfully!", "success");
+      setShowReviewModal(false);
+    } catch (err) {
+      console.error("Error submitting review", err);
+      showToast(err.response?.data?.msg || "Failed to submit review", "error");
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -1158,6 +1196,20 @@ const Profile = () => {
                             Subtotal: ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                           </span>
                         </div>
+                        {selectedOrder.orderStatus !== "Cancelled" && (
+                          <div className="flex justify-end mt-2 pt-2 border-t border-slate-50">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenReviewModal(item.productId, item.name);
+                              }}
+                              className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-650 text-[10px] font-black uppercase tracking-wider rounded-lg border border-indigo-100/50 cursor-pointer transition active:scale-95 flex items-center gap-1"
+                            >
+                              <span>✍️ Review Product</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1489,6 +1541,96 @@ const Profile = () => {
             </div>
           </div>
         </div>
+      )}
+      {/* Review Submission Modal */}
+      {showReviewModal && createPortal(
+        <div className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center z-[9999] p-4 animate-fadeIn">
+          <div className="bg-white border border-light-border/60 rounded-3xl p-6 max-w-sm w-full shadow-2xl text-left space-y-4 relative animate-scaleUp">
+            <button
+              onClick={() => {
+                setShowReviewModal(false);
+                setReviewProductId("");
+                setReviewProductName("");
+              }}
+              className="absolute top-4 right-4 p-1.5 rounded-xl hover:bg-slate-100 text-muted-gray transition cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <div>
+              <span className="text-[9px] bg-indigo-50 text-indigo-650 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-indigo-100/20">
+                Write Product Review
+              </span>
+              <h3 className="text-sm font-extrabold text-dark-navy mt-2 leading-snug">
+                {reviewProductName}
+              </h3>
+            </div>
+
+            <form onSubmit={handleSaveReview} className="space-y-4">
+              {/* Rating Star Selection */}
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+                  Your Rating
+                </label>
+                <div className="flex gap-1.5 items-center">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      className={`text-xl font-bold cursor-pointer transition active:scale-90 outline-none border-none bg-transparent ${
+                        star <= reviewRating ? "text-amber-500" : "text-slate-200"
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                  <span className="text-[10px] font-bold text-muted-gray ml-1">
+                    ({reviewRating} / 5 stars)
+                  </span>
+                </div>
+              </div>
+
+              {/* Comment Textarea */}
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+                  Review Details
+                </label>
+                <textarea
+                  required
+                  rows="3"
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Share your experience with this product..."
+                  className="w-full border border-light-border rounded-xl px-3 py-2 text-xs font-semibold text-dark-navy resize-none outline-none focus:border-primary focus:ring-2 focus:ring-primary/5 transition-all bg-white"
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowReviewModal(false);
+                    setReviewProductId("");
+                    setReviewProductName("");
+                  }}
+                  className="px-4 py-2 border border-light-border hover:bg-slate-50 text-muted-gray text-xs font-bold rounded-xl transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingReview}
+                  className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl shadow-md transition disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                >
+                  {submittingReview && <Loader2 size={12} className="animate-spin" />}
+                  Submit Review
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

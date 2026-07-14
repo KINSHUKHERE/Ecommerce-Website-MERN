@@ -21,6 +21,7 @@ import VendorDetails from "../pages/admin/VendorDetails";
 import UserDetails from "../pages/admin/UserDetails";
 import VendorSupport from "../pages/admin/VendorSupport";
 import SaleManagement from "../pages/admin/SaleManagement";
+import ProductReviews from "../pages/admin/ProductReviews";
 import Profile from "../pages/Profile";
 import Wishlist from "../pages/Wishlist";
 import Checkout from "../pages/Checkout";
@@ -28,7 +29,6 @@ import TermsConditions from "../pages/TermsConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import CompleteProfile from "../pages/CompleteProfile";
 import BecomeSeller from "../pages/BecomeSeller";
-import TrackOrder from "../pages/TrackOrder";
 import { getUserProfile } from "../api/AuthApi";
 
 // Import Admin Layout & New Pages
@@ -186,9 +186,6 @@ const AppRoutes = () => {
     } else if (path === "/contact") {
       title = "Contact Us | YoCart Customer Support";
       desc = "Reach out to our customer support team. Send your inquiries or support tickets.";
-    } else if (path === "/track-order") {
-      title = "Track Your Order | YoCart";
-      desc = "Track your shipment, courier status, and estimated delivery dates dynamically.";
     } else if (path === "/profile" || path === "/admin/profile") {
       title = "My Profile | YoCart";
     } else if (path === "/checkout") {
@@ -216,6 +213,8 @@ const AppRoutes = () => {
         title = "Seller Support | YoCart Panel";
       } else if (path === "/vendor/sale") {
         title = "Festive Sale | YoCart Seller";
+      } else if (path === "/vendor/reviews") {
+        title = "Customer Reviews | YoCart Seller";
       } else {
         title = "Seller Dashboard | YoCart Panel";
       }
@@ -257,7 +256,6 @@ const AppRoutes = () => {
         <Route path="/store/:vendorId" element={<VendorStore />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/track-order" element={<TrackOrder />} />
         <Route path="/terms-conditions" element={<TermsConditions />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
@@ -301,6 +299,9 @@ const AppRoutes = () => {
         
         <Route path="/admin/profile" element={<Profile />} />
         <Route path="/vendor/profile" element={<Profile />} />
+        
+        <Route path="/admin/reviews" element={<ActiveVendorOrAdminRoute><ProductReviews /></ActiveVendorOrAdminRoute>} />
+        <Route path="/vendor/reviews" element={<ActiveVendorOrAdminRoute><ProductReviews /></ActiveVendorOrAdminRoute>} />
         
         <Route path="/admin/support" element={<AdminRoute><VendorSupport /></AdminRoute>} />
         <Route path="/vendor/support" element={<AdminRoute><VendorSupport /></AdminRoute>} />

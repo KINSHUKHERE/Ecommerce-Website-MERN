@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { getProduct } from "../api/ProductApi";
 import { sentToCart } from "../api/CartApi";
 import { toggleWishlist } from "../api/WishlistApi";
-import { ChevronLeft, ChevronRight, Heart, Loader2, ArrowLeft } from "lucide-react";
+import { getProductReviewsApi } from "../api/ReviewApi";
+import { ChevronLeft, ChevronRight, Heart, Loader2, ArrowLeft, Star } from "lucide-react";
 
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -17,6 +18,8 @@ const ProductDetails = () => {
   const minSwipeDistance = 50;
   const navigate = useNavigate();
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   useEffect(() => {
     const checkWishlist = () => {
@@ -82,9 +85,22 @@ const ProductDetails = () => {
     }
   };
 
+  const fetchReviews = async () => {
+    setLoadingReviews(true);
+    try {
+      const res = await getProductReviewsApi(productId);
+      setReviews(res.data.reviews || []);
+    } catch (err) {
+      console.error("Error fetching reviews:", err);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
-  }, []);
+    fetchReviews();
+  }, [productId]);
 
   const [vendorProductsCount, setVendorProductsCount] = useState(0);
 
@@ -420,6 +436,31 @@ const ProductDetails = () => {
           </h1>
 
           {(() => {
+            const totalReviews = reviews.length;
+            const averageRating = totalReviews > 0
+              ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
+              : 0;
+
+            return totalReviews > 0 ? (
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex text-amber-500 gap-0.5 text-sm">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span key={star}>
+                      {star <= Math.round(Number(averageRating)) ? "★" : "☆"}
+                    </span>
+                  ))}
+                </div>
+                <span className="text-xs font-black text-dark-navy">
+                  {averageRating}
+                </span>
+                <span className="text-xs text-muted-gray font-semibold">
+                  ({totalReviews} {totalReviews === 1 ? "review" : "reviews"})
+                </span>
+              </div>
+            ) : null;
+          })()}
+
+          {(() => {
             const hasActiveVariant = activeVariant;
             const currentItem = hasActiveVariant ? activeVariant : product;
             
@@ -586,7 +627,105 @@ const ProductDetails = () => {
           </Link>
         </div>
       </div>
-      
+
+      {/* Customer Reviews Section */}
+      {(() => {
+        const totalReviews = reviews.length;
+        const averageRating = totalReviews > 0
+          ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
+          : 0;
+
+        return (
+          <div className="bg-white border border-light-border/60 rounded-3xl p-6 shadow-2xs mt-8 text-left space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-light-border/30">
+              <div>
+                <h3 className="text-base font-extrabold text-dark-navy uppercase tracking-wider">
+                  Customer Reviews
+                </h3>
+                <p className="text-xs text-muted-gray mt-1 font-semibold">
+                  Read feedback from verified buyers of this product.
+                </p>
+              </div>
+              {totalReviews > 0 && (
+                <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-2xl">
+                  <span className="text-2xl font-black text-dark-navy leading-none">
+                    {averageRating}
+                  </span>
+                  <div>
+                    <div className="flex text-amber-500 gap-0.5 text-xs">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span key={star}>
+                          {star <= Math.round(Number(averageRating)) ? "★" : "☆"}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-[10px] text-muted-gray font-bold uppercase tracking-wider block mt-0.5">
+                      Based on {totalReviews} {totalReviews === 1 ? "review" : "reviews"}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {loadingReviews ? (
+              <div className="py-8 flex flex-col items-center justify-center">
+                <Loader2 className="animate-spin text-primary w-6 h-6 mb-2" />
+                <span className="text-xs text-muted-gray font-semibold uppercase tracking-wider animate-pulse">
+                  Loading Reviews...
+                </span>
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className="py-10 text-center px-4 flex flex-col items-center">
+                <span className="text-3xl mb-2.5">💬</span>
+                <h4 className="text-sm font-extrabold text-dark-navy">No Reviews Yet</h4>
+                <p className="text-xs text-muted-gray mt-1 max-w-xs font-semibold leading-relaxed">
+                  Purchased this item? You can leave a review from your Order History page after placing an order.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-light-border/25 space-y-5">
+                {reviews.map((rev) => (
+                  <div key={rev._id} className="pt-5 first:pt-0 space-y-2.5">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200/50 flex items-center justify-center text-xs font-extrabold text-dark-navy uppercase">
+                          {rev.userName ? rev.userName.charAt(0) : "U"}
+                        </div>
+                        <div>
+                          <span className="text-xs font-extrabold text-dark-navy block leading-none">
+                            {rev.userName || "Verified Buyer"}
+                          </span>
+                          <span className="text-[9px] text-muted-gray font-bold block mt-1">
+                            Reviewed on {new Date(rev.createdAt).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric"
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {/* Review Stars */}
+                      <div className="flex text-amber-500 gap-0.5 text-xs bg-slate-50 border border-slate-100/50 px-2 py-0.5 rounded-lg">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span key={star}>
+                            {star <= rev.rating ? "★" : "☆"}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Review Text */}
+                    <p className="text-xs sm:text-sm text-muted-gray leading-relaxed font-semibold pl-1">
+                      {rev.comment}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
       
       {toast && (
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 md:left-auto md:right-5 md:translate-x-0 z-50 bg-dark-navy border border-light-border/10 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2.5 animate-fadeIn max-w-[90vw] w-max">
