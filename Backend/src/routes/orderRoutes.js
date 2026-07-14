@@ -6,6 +6,7 @@ const {
   getUserOrders,
   updateOrderStatus,
   cancelUserOrder,
+  trackOrder,
 } = require("../controllers/orderController");
 const verifyUser = require("../middleware/verifyUser");
 const verifyVendorOrAdmin = require("../middleware/verifyVendorOrAdmin");
@@ -15,5 +16,6 @@ router.get("/orders", verifyUser, verifyVendorOrAdmin, getAllOrders);
 router.get("/orders/user", verifyUser, getUserOrders);
 router.put("/orders/:orderId", verifyUser, verifyVendorOrAdmin, updateOrderStatus);
 router.put("/orders/:orderId/cancel", verifyUser, cancelUserOrder);
+router.get("/orders/track/:trackingId", trackOrder);
 
 module.exports = router;

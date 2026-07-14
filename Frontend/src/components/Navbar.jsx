@@ -239,6 +239,11 @@ const Navbar = () => {
               Contact
             </Link>
           </li>
+          <li>
+            <Link className={navLink("/track-order")} to="/track-order">
+              Track Order
+            </Link>
+          </li>
           {!currentUser && (
             <li>
               <Link className={navLink("/register?role=vendor")} to="/register?role=vendor">
@@ -425,6 +430,15 @@ const Navbar = () => {
               onClick={() => setIsOpen(false)}
             >
               Contact
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/track-order"
+              className={`block py-1 hover:text-[#15877F] ${isActive("/track-order") ? "text-[#15877F]" : ""}`}
+              onClick={() => setIsOpen(false)}
+            >
+              Track Order
             </Link>
           </li>
           {!currentUser && (

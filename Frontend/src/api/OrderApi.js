@@ -21,3 +21,7 @@ export const updateOrderStatus = async (orderId, status) => {
 export const cancelOrderApi = async (orderId) => {
   return await api.put(`/orders/${orderId}/cancel`);
 };
+
+export const publicTrackOrderApi = async (trackingId) => {
+  return await api.get(`/orders/track/${trackingId}`);
+};
