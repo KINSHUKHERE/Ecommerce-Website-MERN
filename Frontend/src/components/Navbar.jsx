@@ -409,15 +409,6 @@ const Navbar = () => {
           </li>
           <li>
             <Link
-              to="/wishlist"
-              className={`block py-1 hover:text-[#15877F] ${isActive("/wishlist") ? "text-[#15877F]" : ""}`}
-              onClick={() => setIsOpen(false)}
-            >
-              Wishlist
-            </Link>
-          </li>
-          <li>
-            <Link
               to="/about"
               className={`block py-1 hover:text-[#15877F] ${isActive("/about") ? "text-[#15877F]" : ""}`}
               onClick={() => setIsOpen(false)}

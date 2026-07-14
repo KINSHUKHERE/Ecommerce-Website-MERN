@@ -429,7 +429,7 @@ const Checkout = () => {
                 Continue Shopping
               </button>
               <button
-                onClick={() => navigate("/profile", { state: { activeTab: "orders" } })}
+                onClick={() => navigate("/orders")}
                 className="w-full border border-light-border text-dark-navy hover:bg-slate-50 py-3.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <ShoppingBag size={14} />

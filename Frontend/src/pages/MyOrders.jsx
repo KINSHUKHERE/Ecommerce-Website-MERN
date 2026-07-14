@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { getUserOrders, cancelOrderApi } from "../api/OrderApi";
 import { addReviewApi } from "../api/ReviewApi";
@@ -262,26 +262,19 @@ const MyOrders = () => {
     <div className="flex-grow w-full bg-soft-bg/35 py-12 text-dark-navy antialiased min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-        {/* Mockup Title Header section */}
-        <div className="bg-white border border-light-border/40 rounded-[24px] p-6 sm:p-8 shadow-xs flex flex-row items-center justify-between gap-6 relative overflow-hidden text-left">
-          <div className="absolute top-0 left-0 w-2 h-full bg-primary"></div>
-          
-          <div className="space-y-2.5 max-w-xl">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-indigo-50 border border-indigo-100 text-primary rounded-2xl flex items-center justify-center shadow-3xs shrink-0">
-                <ShoppingBag className="w-6 h-6 stroke-[2]" />
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-dark-navy tracking-tight leading-none">
-                My Orders
-              </h1>
+        {/* Compact Title Header */}
+        <div className="bg-white border border-light-border/40 rounded-[20px] px-5 py-4 shadow-xs flex flex-row items-center justify-between gap-4 relative overflow-hidden text-left">
+          <div className="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
+          <div className="flex items-center gap-3 pl-1">
+            <div className="w-9 h-9 bg-indigo-50 border border-indigo-100 text-primary rounded-xl flex items-center justify-center shadow-3xs shrink-0">
+              <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
             </div>
-            <p className="text-xs sm:text-sm text-muted-gray font-semibold leading-relaxed pl-15">
-              Track, manage and review your orders all in one place.
-            </p>
+            <div>
+              <h1 className="text-base font-black text-dark-navy tracking-tight leading-none">My Orders</h1>
+              <p className="text-[11px] text-muted-gray font-semibold mt-0.5">Track, manage and review your orders</p>
+            </div>
           </div>
-
-          {/* 3D Box Drawing from Mockup */}
-          <div className="hidden md:block">
+          <div className="hidden sm:block opacity-60 shrink-0">
             <PackageIllustration />
           </div>
         </div>
@@ -624,25 +617,31 @@ const MyOrders = () => {
                   </h3>
                   <div className="divide-y divide-light-border/20">
                     {selectedOrder.items.map((item, idx) => (
-                      <div key={idx} className="flex gap-4 py-4.5 first:pt-0 last:pb-0 items-start">
-                        {item.image && (
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-14 h-14 object-contain bg-slate-50 border border-light-border/40 p-1 rounded-xl flex-shrink-0"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-xs sm:text-sm font-black text-dark-navy leading-snug truncate">
-                            {item.name}
-                          </h4>
-                          <div className="flex justify-between items-center mt-2 text-xs font-bold text-muted-gray">
-                            <span>Qty: {item.quantity}</span>
-                            <span className="font-extrabold text-dark-navy">₹{item.price.toLocaleString("en-IN")} each</span>
+                      <div key={idx} className="flex flex-col gap-3 py-4.5 first:pt-0 last:pb-0">
+                        <Link
+                          to={`/products/${item.productId}`}
+                          className="flex gap-4 items-start group/item cursor-pointer"
+                        >
+                          {item.image && (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-14 h-14 object-contain bg-slate-50 border border-light-border/40 p-1 rounded-xl flex-shrink-0 group-hover/item:border-primary/40 transition-colors"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-xs sm:text-sm font-black text-dark-navy leading-snug truncate group-hover/item:text-primary transition-colors text-left">
+                              {item.name}
+                            </h4>
+                            <div className="flex justify-between items-center mt-2 text-xs font-bold text-muted-gray">
+                              <span>Qty: {item.quantity}</span>
+                              <span className="font-extrabold text-dark-navy">₹{item.price.toLocaleString("en-IN")} each</span>
+                            </div>
                           </div>
+                        </Link>
                           
                           {/* Write Review Button */}
-                          {selectedOrder.orderStatus !== "Cancelled" && (
+                          {selectedOrder.orderStatus === "Delivered" && (
                             <div className="flex justify-end mt-2 pt-2 border-t border-slate-50">
                               <button
                                 type="button"
@@ -683,8 +682,6 @@ const MyOrders = () => {
                               )}
                             </div>
                           )}
-
-                        </div>
                       </div>
                     ))}
                   </div>

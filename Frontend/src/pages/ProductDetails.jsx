@@ -20,6 +20,8 @@ const ProductDetails = () => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
+  const [showAllReviewsModal, setShowAllReviewsModal] = useState(false);
+  const [starFilter, setStarFilter] = useState("All");
 
   useEffect(() => {
     const checkWishlist = () => {
@@ -683,44 +685,172 @@ const ProductDetails = () => {
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-light-border/25 space-y-5">
-                {reviews.map((rev) => (
-                  <div key={rev._id} className="pt-5 first:pt-0 space-y-2.5">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200/50 flex items-center justify-center text-xs font-extrabold text-dark-navy uppercase">
-                          {rev.userName ? rev.userName.charAt(0) : "U"}
+              <div className="space-y-6">
+                <div className="divide-y divide-light-border/25 space-y-5">
+                  {reviews.slice(0, 3).map((rev) => (
+                    <div key={rev._id} className="pt-5 first:pt-0 space-y-2.5">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200/50 flex items-center justify-center text-xs font-extrabold text-dark-navy uppercase">
+                            {rev.userName ? rev.userName.charAt(0) : "U"}
+                          </div>
+                          <div>
+                            <span className="text-xs font-extrabold text-dark-navy block leading-none">
+                              {rev.userName || "Verified Buyer"}
+                            </span>
+                            <span className="text-[9px] text-muted-gray font-bold block mt-1">
+                              Reviewed on {new Date(rev.createdAt).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric"
+                              })}
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-xs font-extrabold text-dark-navy block leading-none">
-                            {rev.userName || "Verified Buyer"}
-                          </span>
-                          <span className="text-[9px] text-muted-gray font-bold block mt-1">
-                            Reviewed on {new Date(rev.createdAt).toLocaleDateString("en-IN", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric"
-                            })}
-                          </span>
+                        
+                        {/* Review Stars */}
+                        <div className="flex text-amber-500 gap-0.5 text-xs bg-slate-50 border border-slate-100/50 px-2 py-0.5 rounded-lg">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span key={star}>
+                              {star <= rev.rating ? "★" : "☆"}
+                            </span>
+                          ))}
                         </div>
                       </div>
-                      
-                      {/* Review Stars */}
-                      <div className="flex text-amber-500 gap-0.5 text-xs bg-slate-50 border border-slate-100/50 px-2 py-0.5 rounded-lg">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <span key={star}>
-                            {star <= rev.rating ? "★" : "☆"}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
 
-                    {/* Review Text */}
-                    <p className="text-xs sm:text-sm text-muted-gray leading-relaxed font-semibold pl-1">
-                      {rev.comment}
-                    </p>
+                      {/* Review Text */}
+                      <p className="text-xs sm:text-sm text-muted-gray leading-relaxed font-semibold pl-1">
+                        {rev.comment}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {totalReviews > 3 && (
+                  <div className="pt-4 text-center border-t border-light-border/20">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStarFilter("All");
+                        setShowAllReviewsModal(true);
+                      }}
+                      className="px-6 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-650 text-xs font-black uppercase tracking-wider rounded-xl transition duration-300 shadow-2xs border border-indigo-100/40 cursor-pointer"
+                    >
+                      See All Reviews ({totalReviews})
+                    </button>
                   </div>
-                ))}
+                )}
+              </div>
+            )}
+
+            {/* See All Reviews Popup Modal */}
+            {showAllReviewsModal && (
+              <div className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center z-[9999] p-4 animate-fadeIn">
+                <div className="bg-white border border-light-border/60 rounded-3xl p-6 max-w-2xl w-full shadow-2xl flex flex-col max-h-[85vh] text-left animate-scaleUp">
+                  
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between pb-4 border-b border-light-border/30">
+                    <div>
+                      <h3 className="text-base font-extrabold text-dark-navy uppercase tracking-wider">
+                        All Customer Reviews
+                      </h3>
+                      <p className="text-[11px] text-muted-gray mt-0.5 font-bold uppercase tracking-wider">
+                        Based on {totalReviews} reviews • {averageRating} / 5 Rating
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowAllReviewsModal(false)}
+                      className="p-1.5 rounded-xl hover:bg-slate-100 text-muted-gray transition cursor-pointer"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Rating Filters Bar */}
+                  <div className="flex gap-1.5 overflow-x-auto py-3 border-b border-light-border/20 scrollbar-none whitespace-nowrap">
+                    {["All", "5", "4", "3", "2", "1"].map((stars) => {
+                      const isActive = starFilter === stars;
+                      let label = stars === "All" ? "All Stars" : `${stars} ★`;
+                      
+                      // Count matching reviews
+                      const matchingCount = stars === "All" 
+                        ? reviews.length
+                        : reviews.filter(r => r.rating === Number(stars)).length;
+
+                      return (
+                        <button
+                          key={stars}
+                          type="button"
+                          onClick={() => setStarFilter(stars)}
+                          className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer select-none ${
+                            isActive
+                              ? "bg-primary text-white border-primary shadow-xs"
+                              : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100 hover:text-dark-navy"
+                          }`}
+                        >
+                          {label} ({matchingCount})
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Reviews List */}
+                  <div className="flex-1 overflow-y-auto divide-y divide-light-border/20 pr-1 py-2 space-y-4 scrollbar-thin">
+                    {(() => {
+                      const filteredReviews = starFilter === "All"
+                        ? reviews
+                        : reviews.filter(r => r.rating === Number(starFilter));
+
+                      if (filteredReviews.length === 0) {
+                        return (
+                          <div className="py-12 text-center text-muted-gray flex flex-col items-center">
+                            <span className="text-2xl mb-2">⭐</span>
+                            <p className="text-xs font-black uppercase tracking-widest">No matching reviews</p>
+                            <p className="text-[11px] text-muted-gray mt-1 font-semibold">There are no reviews with a {starFilter} star rating.</p>
+                          </div>
+                        );
+                      }
+
+                      return filteredReviews.map((rev) => (
+                        <div key={rev._id} className="pt-4 first:pt-0 space-y-2">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200/50 flex items-center justify-center text-xs font-extrabold text-dark-navy uppercase">
+                                {rev.userName ? rev.userName.charAt(0) : "U"}
+                              </div>
+                              <div>
+                                <span className="text-xs font-extrabold text-dark-navy block leading-none">
+                                  {rev.userName || "Verified Buyer"}
+                                </span>
+                                <span className="text-[9px] text-muted-gray font-bold block mt-1">
+                                  Reviewed on {new Date(rev.createdAt).toLocaleDateString("en-IN", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric"
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex text-amber-500 gap-0.5 text-xs bg-slate-50 border border-slate-100/50 px-2 py-0.5 rounded-lg">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <span key={star}>
+                                  {star <= rev.rating ? "★" : "☆"}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <p className="text-xs sm:text-sm text-muted-gray leading-relaxed font-semibold pl-1">
+                            {rev.comment}
+                          </p>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+
+                </div>
               </div>
             )}
           </div>

@@ -17,16 +17,16 @@ const addReview = async (req, res) => {
       return res.status(400).json({ msg: "Rating must be between 1 and 5" });
     }
 
-    // 1. Verify if the user has purchased this product
+    // 1. Verify if the user has purchased this product and it is delivered
     const hasBought = await Order.findOne({
       userId,
       "items.productId": productId,
-      orderStatus: { $ne: "Cancelled" },
+      orderStatus: "Delivered",
     });
 
     if (!hasBought) {
       return res.status(403).json({
-        msg: "You can only review products that you have purchased.",
+        msg: "You can only review products that have been successfully delivered.",
       });
     }
 
