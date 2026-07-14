@@ -17,6 +17,10 @@ const addReview = async (req, res) => {
       return res.status(400).json({ msg: "Rating must be between 1 and 5" });
     }
 
+    if (comment.length > 1000) {
+      return res.status(400).json({ msg: "Review comment cannot exceed 1000 characters" });
+    }
+
     // 1. Verify if the user has purchased this product and it is delivered
     const hasBought = await Order.findOne({
       userId,

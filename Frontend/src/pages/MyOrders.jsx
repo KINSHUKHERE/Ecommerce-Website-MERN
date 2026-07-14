@@ -151,6 +151,10 @@ const MyOrders = () => {
       showToast("Please enter a review comment", "error");
       return;
     }
+    if (reviewComment.length > 1000) {
+      showToast("Review comment cannot exceed 1000 characters", "error");
+      return;
+    }
     setSubmittingReview(true);
     try {
       await addReviewApi(reviewProductId, Number(reviewRating), reviewComment);
@@ -802,12 +806,18 @@ const MyOrders = () => {
 
               {/* Comment Textarea */}
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
-                  Review Details
-                </label>
+                <div className="flex justify-between items-center">
+                  <label className="block text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+                    Review Details
+                  </label>
+                  <span className={`text-[9px] font-bold ${reviewComment.length >= 950 ? "text-rose-500 font-extrabold" : "text-muted-gray"}`}>
+                    {reviewComment.length} / 1000
+                  </span>
+                </div>
                 <textarea
                   required
                   rows="3"
+                  maxLength={1000}
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
                   placeholder="Share your experience with this product..."

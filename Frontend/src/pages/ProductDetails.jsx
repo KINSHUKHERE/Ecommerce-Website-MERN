@@ -6,6 +6,30 @@ import { toggleWishlist } from "../api/WishlistApi";
 import { getProductReviewsApi } from "../api/ReviewApi";
 import { ChevronLeft, ChevronRight, Heart, Loader2, ArrowLeft, Star } from "lucide-react";
 
+const ExpandableReviewText = ({ text }) => {
+  const [expanded, setExpanded] = useState(false);
+  const limit = 180; // Character limit before truncation
+  
+  if (text.length <= limit) {
+    return <p className="text-xs sm:text-sm text-muted-gray leading-relaxed font-semibold pl-1">{text}</p>;
+  }
+  
+  return (
+    <div className="pl-1">
+      <p className="text-xs sm:text-sm text-muted-gray leading-relaxed font-semibold inline">
+        {expanded ? text : `${text.substring(0, limit)}... `}
+      </p>
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="text-[10px] font-black text-primary hover:underline ml-1.5 uppercase tracking-wider inline-block cursor-pointer bg-transparent border-none p-0 outline-none"
+      >
+        {expanded ? "Show Less" : "Show More"}
+      </button>
+    </div>
+  );
+};
+
 const ProductDetails = () => {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
@@ -719,9 +743,7 @@ const ProductDetails = () => {
                       </div>
 
                       {/* Review Text */}
-                      <p className="text-xs sm:text-sm text-muted-gray leading-relaxed font-semibold pl-1">
-                        {rev.comment}
-                      </p>
+                      <ExpandableReviewText text={rev.comment} />
                     </div>
                   ))}
                 </div>
@@ -842,9 +864,7 @@ const ProductDetails = () => {
                             </div>
                           </div>
 
-                          <p className="text-xs sm:text-sm text-muted-gray leading-relaxed font-semibold pl-1">
-                            {rev.comment}
-                          </p>
+                          <ExpandableReviewText text={rev.comment} />
                         </div>
                       ));
                     })()}
