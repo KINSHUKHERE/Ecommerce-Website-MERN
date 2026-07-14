@@ -169,14 +169,18 @@ const getUserOrders = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    const reviews = await Review.find({ userId }).select("productId");
-    const reviewedProductIds = reviews.map(r => r.productId.toString());
+    const reviews = await Review.find({ userId }).select("productId rating comment").lean();
 
     const updatedOrders = orders.map(order => {
-      const items = order.items.map(item => ({
-        ...item,
-        isReviewed: reviewedProductIds.includes(item.productId.toString())
-      }));
+      const items = order.items.map(item => {
+        const matchingReview = reviews.find(r => r.productId.toString() === item.productId.toString());
+        return {
+          ...item,
+          isReviewed: !!matchingReview,
+          userRating: matchingReview ? matchingReview.rating : null,
+          userComment: matchingReview ? matchingReview.comment : null
+        };
+      });
       return { ...order, items };
     });
 

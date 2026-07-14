@@ -117,12 +117,18 @@ const MyOrders = () => {
     fetchUserOrders();
   }, []);
 
-  const fetchUserOrders = async () => {
+  const fetchUserOrders = async (selectedIdToPreserve = null) => {
     setLoadingOrders(true);
     try {
       const res = await getUserOrders();
       const list = res.data.orders || [];
       setOrders(list);
+      if (selectedIdToPreserve) {
+        const freshSelected = list.find((x) => x._id === selectedIdToPreserve);
+        if (freshSelected) {
+          setSelectedOrder(freshSelected);
+        }
+      }
     } catch (err) {
       console.error(err);
       showToast("Unable to fetch your order history", "error");
@@ -151,21 +157,8 @@ const MyOrders = () => {
       showToast("Review submitted successfully!", "success");
       setShowReviewModal(false);
       
-      // Update local checked status
-      const updatedList = orders.map((o) => {
-        const items = o.items.map((it) => {
-          if (it.productId.toString() === reviewProductId.toString()) {
-            return { ...it, isReviewed: true };
-          }
-          return it;
-        });
-        return { ...o, items };
-      });
-      setOrders(updatedList);
-      if (selectedOrder) {
-        const updatedSel = updatedList.find((x) => x._id === selectedOrder._id);
-        setSelectedOrder(updatedSel);
-      }
+      // Refresh orders list to reflect item as reviewed and retrieve rating/comment info
+      fetchUserOrders(selectedOrder?._id);
     } catch (err) {
       console.error("Error submitting review", err);
       showToast(err.response?.data?.msg || "Failed to submit review", "error");
@@ -666,6 +659,28 @@ const MyOrders = () => {
                               >
                                 <span>{item.isReviewed ? "✓ Reviewed" : "✍️ Review Product"}</span>
                               </button>
+                            </div>
+                          )}
+
+                          {/* Render user's review details if already reviewed */}
+                          {item.isReviewed && (item.userRating || item.userComment) && (
+                            <div className="mt-3 p-3 bg-slate-50 border border-slate-100/80 rounded-xl space-y-1.5 text-left">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black text-dark-navy uppercase tracking-wider">My Review:</span>
+                                <div className="flex text-amber-500 text-[10px] gap-0.5">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <span key={star}>
+                                      {star <= (item.userRating || 5) ? "★" : "☆"}
+                                    </span>
+                                  ))}
+                                </div>
+                                <span className="text-[9px] font-black text-dark-navy">({item.userRating || 5}/5)</span>
+                              </div>
+                              {item.userComment && (
+                                <p className="text-[11px] text-muted-gray font-semibold italic leading-relaxed">
+                                  "{item.userComment}"
+                                </p>
+                              )}
                             </div>
                           )}
 
