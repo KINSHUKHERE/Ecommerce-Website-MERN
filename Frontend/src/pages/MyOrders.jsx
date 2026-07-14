@@ -206,6 +206,13 @@ const MyOrders = () => {
     }
   };
 
+  const getRatingColorClass = (rating) => {
+    const r = Math.round(Number(rating));
+    if (r >= 4) return "text-emerald-500";
+    if (r === 3) return "text-amber-500";
+    return "text-rose-500";
+  };
+
   // Helper for status badge styles (Stripe / Shopify styled badges)
   const getStatusBadge = (status) => {
     switch (status) {
@@ -670,7 +677,7 @@ const MyOrders = () => {
                             <div className="mt-3 p-3 bg-slate-50 border border-slate-100/80 rounded-xl space-y-1.5 text-left">
                               <div className="flex items-center gap-2">
                                 <span className="text-[10px] font-black text-dark-navy uppercase tracking-wider">My Review:</span>
-                                <div className="flex text-amber-500 text-[10px] gap-0.5">
+                                <div className={`flex ${getRatingColorClass(item.userRating || 5)} text-[10px] gap-0.5`}>
                                   {[1, 2, 3, 4, 5].map((star) => (
                                     <span key={star}>
                                       {star <= (item.userRating || 5) ? "★" : "☆"}
@@ -792,7 +799,7 @@ const MyOrders = () => {
                       type="button"
                       onClick={() => setReviewRating(star)}
                       className={`text-xl font-bold cursor-pointer transition active:scale-90 outline-none border-none bg-transparent ${
-                        star <= reviewRating ? "text-amber-500" : "text-slate-200"
+                        star <= reviewRating ? getRatingColorClass(reviewRating) : "text-slate-200"
                       }`}
                     >
                       ★

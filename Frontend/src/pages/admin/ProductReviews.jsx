@@ -14,6 +14,13 @@ import {
 import { Link } from "react-router-dom";
 import { getVendorsApi } from "../../api/AuthApi";
 
+const getRatingColorClass = (rating) => {
+  const r = Math.round(Number(rating));
+  if (r >= 4) return "text-emerald-500";
+  if (r === 3) return "text-amber-500";
+  return "text-rose-500";
+};
+
 const ProductReviews = () => {
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const routePrefix = user.role === "vendor" ? "/vendor" : "/admin";
@@ -179,7 +186,7 @@ const ProductReviews = () => {
                   <span className="text-4xl font-black text-dark-navy block">
                     {metrics.avg} <span className="text-lg font-bold text-muted-gray">/ 5.0</span>
                   </span>
-                  <div className="flex text-amber-500 gap-0.5 text-xs">
+                  <div className={`flex ${getRatingColorClass(metrics.avg)} gap-0.5 text-xs`}>
                     {[1, 2, 3, 4, 5].map((star) => (
                       <span key={star}>
                         {star <= Math.round(Number(metrics.avg)) ? "★" : "☆"}
@@ -313,7 +320,7 @@ const ProductReviews = () => {
                     {/* Center: Star Rating & Comment Text */}
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-center gap-2">
-                        <div className="flex text-amber-500 gap-0.5 text-[11px]">
+                        <div className={`flex ${getRatingColorClass(rev.rating)} gap-0.5 text-[11px]`}>
                           {[1, 2, 3, 4, 5].map((star) => (
                             <span key={star}>
                               {star <= rev.rating ? "★" : "☆"}

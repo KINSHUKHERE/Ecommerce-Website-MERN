@@ -30,6 +30,13 @@ const ExpandableReviewText = ({ text }) => {
   );
 };
 
+const getRatingColorClass = (rating) => {
+  const r = Math.round(Number(rating));
+  if (r >= 4) return "text-emerald-500";
+  if (r === 3) return "text-amber-500";
+  return "text-rose-500";
+};
+
 const ProductDetails = () => {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
@@ -469,7 +476,7 @@ const ProductDetails = () => {
 
             return totalReviews > 0 ? (
               <div className="flex items-center gap-2 mt-2">
-                <div className="flex text-amber-500 gap-0.5 text-sm">
+                <div className={`flex ${getRatingColorClass(averageRating)} gap-0.5 text-sm`}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <span key={star}>
                       {star <= Math.round(Number(averageRating)) ? "★" : "☆"}
@@ -678,7 +685,7 @@ const ProductDetails = () => {
                     {averageRating}
                   </span>
                   <div>
-                    <div className="flex text-amber-500 gap-0.5 text-xs">
+                    <div className={`flex ${getRatingColorClass(averageRating)} gap-0.5 text-xs`}>
                       {[1, 2, 3, 4, 5].map((star) => (
                         <span key={star}>
                           {star <= Math.round(Number(averageRating)) ? "★" : "☆"}
@@ -733,7 +740,7 @@ const ProductDetails = () => {
                         </div>
                         
                         {/* Review Stars */}
-                        <div className="flex text-amber-500 gap-0.5 text-xs bg-slate-50 border border-slate-100/50 px-2 py-0.5 rounded-lg">
+                        <div className={`flex ${getRatingColorClass(rev.rating)} gap-0.5 text-xs bg-slate-50 border border-slate-100/50 px-2 py-0.5 rounded-lg`}>
                           {[1, 2, 3, 4, 5].map((star) => (
                             <span key={star}>
                               {star <= rev.rating ? "★" : "☆"}
@@ -767,8 +774,14 @@ const ProductDetails = () => {
 
             {/* See All Reviews Popup Modal */}
             {showAllReviewsModal && (
-              <div className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center z-[9999] p-4 animate-fadeIn">
-                <div className="bg-white border border-light-border/60 rounded-3xl p-6 max-w-2xl w-full shadow-2xl flex flex-col max-h-[85vh] text-left animate-scaleUp">
+              <div 
+                onClick={() => setShowAllReviewsModal(false)}
+                className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center z-[9999] p-4 animate-fadeIn"
+              >
+                <div 
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-white border border-light-border/60 rounded-3xl p-6 max-w-2xl w-full shadow-2xl flex flex-col max-h-[85vh] text-left animate-scaleUp"
+                >
                   
                   {/* Modal Header */}
                   <div className="flex items-center justify-between pb-4 border-b border-light-border/30">
@@ -855,7 +868,7 @@ const ProductDetails = () => {
                               </div>
                             </div>
                             
-                            <div className="flex text-amber-500 gap-0.5 text-xs bg-slate-50 border border-slate-100/50 px-2 py-0.5 rounded-lg">
+                            <div className={`flex ${getRatingColorClass(rev.rating)} gap-0.5 text-xs bg-slate-50 border border-slate-100/50 px-2 py-0.5 rounded-lg`}>
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <span key={star}>
                                   {star <= rev.rating ? "★" : "☆"}

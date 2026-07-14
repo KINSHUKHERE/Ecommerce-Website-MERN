@@ -4,6 +4,13 @@ import { sentToCart } from "../api/CartApi";
 import { toggleWishlist } from "../api/WishlistApi";
 import { Heart, ShoppingCart, Loader2 } from "lucide-react";
 
+const getRatingColorClass = (rating) => {
+  const r = Math.round(Number(rating));
+  if (r >= 4) return "text-emerald-500";
+  if (r === 3) return "text-amber-500";
+  return "text-rose-500";
+};
+
 const EachProduct = ({ data }) => {
   const navigate = useNavigate();
   const [adding, setAdding] = React.useState(false);
@@ -224,7 +231,7 @@ const EachProduct = ({ data }) => {
             </div>
           )}
           {data.rating?.count > 0 && (
-            <div className="absolute bottom-2 right-2 bg-white/85 backdrop-blur-xs border border-light-border/30 px-2 py-0.5 rounded-lg flex items-center gap-0.5 text-amber-500 font-extrabold text-[9px] sm:text-[10px] shadow-2xs z-10 select-none">
+            <div className={`absolute bottom-2 right-2 bg-white/85 backdrop-blur-xs border border-light-border/30 px-2 py-0.5 rounded-lg flex items-center gap-0.5 ${getRatingColorClass(data.rating.avgRating)} font-extrabold text-[9px] sm:text-[10px] shadow-2xs z-10 select-none`}>
               <span>★</span>
               <span className="text-dark-navy font-black">{data.rating.avgRating}</span>
               <span className="text-muted-gray font-semibold">({data.rating.count})</span>
