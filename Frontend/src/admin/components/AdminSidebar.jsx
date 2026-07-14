@@ -105,6 +105,11 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
             path: "/brands",
             icon: <Layers size={16} />,
           },
+          {
+            title: "Customer Reviews",
+            path: "/admin/reviews",
+            icon: <Star size={16} />,
+          },
         ]
       : []),
     {

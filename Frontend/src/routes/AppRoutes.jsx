@@ -23,6 +23,7 @@ import VendorSupport from "../pages/admin/VendorSupport";
 import SaleManagement from "../pages/admin/SaleManagement";
 import ProductReviews from "../pages/admin/ProductReviews";
 import Profile from "../pages/Profile";
+import MyOrders from "../pages/MyOrders";
 import Wishlist from "../pages/Wishlist";
 import Checkout from "../pages/Checkout";
 import TermsConditions from "../pages/TermsConditions";
@@ -188,6 +189,8 @@ const AppRoutes = () => {
       desc = "Reach out to our customer support team. Send your inquiries or support tickets.";
     } else if (path === "/profile" || path === "/admin/profile") {
       title = "My Profile | YoCart";
+    } else if (path === "/orders") {
+      title = "My Orders | YoCart";
     } else if (path === "/checkout") {
       title = "Secure Checkout | YoCart";
     } else if (path === "/complete-profile") {
@@ -267,6 +270,7 @@ const AppRoutes = () => {
         <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
         <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="/become-seller" element={<ProtectedRoute><BecomeSeller /></ProtectedRoute>} />
       </Route>

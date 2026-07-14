@@ -162,13 +162,27 @@ const getAllOrders = async (req, res) => {
 const getUserOrders = async (req, res) => {
   try {
     const userId = req.user.userId;
+    const Order = require("../models/orderDetails");
+    const Review = require("../models/reviewDetails");
 
     const orders = await Order.find({ userId })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const reviews = await Review.find({ userId }).select("productId");
+    const reviewedProductIds = reviews.map(r => r.productId.toString());
+
+    const updatedOrders = orders.map(order => {
+      const items = order.items.map(item => ({
+        ...item,
+        isReviewed: reviewedProductIds.includes(item.productId.toString())
+      }));
+      return { ...order, items };
+    });
 
     res.status(200).json({
       msg: "Retrieved user orders",
-      orders,
+      orders: updatedOrders,
     });
   } catch (err) {
     res.status(500).json({

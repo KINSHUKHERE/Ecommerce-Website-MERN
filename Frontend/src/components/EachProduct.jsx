@@ -223,6 +223,13 @@ const EachProduct = ({ data }) => {
               </span>
             </div>
           )}
+          {data.rating?.count > 0 && (
+            <div className="absolute bottom-2 right-2 bg-white/85 backdrop-blur-xs border border-light-border/30 px-2 py-0.5 rounded-lg flex items-center gap-0.5 text-amber-500 font-extrabold text-[9px] sm:text-[10px] shadow-2xs z-10 select-none">
+              <span>★</span>
+              <span className="text-dark-navy font-black">{data.rating.avgRating}</span>
+              <span className="text-muted-gray font-semibold">({data.rating.count})</span>
+            </div>
+          )}
         </div>
 
         <div className="pt-3 px-1 pb-1 flex flex-col gap-1 text-left">
@@ -248,17 +255,6 @@ const EachProduct = ({ data }) => {
           <span className="text-[10px] sm:text-[11px] text-muted-gray font-semibold block">
             {data.brandId?.name}
           </span>
-          {data.rating?.count > 0 && (
-            <div className="flex items-center gap-1 mt-1 text-amber-500">
-              <span className="text-[10px] sm:text-[11px]">★</span>
-              <span className="font-extrabold text-dark-navy text-[10px] sm:text-[11px] leading-none">
-                {data.rating.avgRating}
-              </span>
-              <span className="text-muted-gray font-semibold text-[9px] sm:text-[10px] leading-none">
-                ({data.rating.count})
-              </span>
-            </div>
-          )}
         </div>
       </div>
 

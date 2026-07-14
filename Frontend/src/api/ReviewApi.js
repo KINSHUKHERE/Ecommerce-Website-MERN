@@ -8,6 +8,6 @@ export const getProductReviewsApi = (productId) => {
   return api.get(`/reviews/product/${productId}`);
 };
 
-export const getVendorReviewsApi = () => {
-  return api.get("/reviews/vendor");
+export const getVendorReviewsApi = (vendorId) => {
+  return api.get(vendorId ? `/reviews/vendor?vendorId=${vendorId}` : "/reviews/vendor");
 };

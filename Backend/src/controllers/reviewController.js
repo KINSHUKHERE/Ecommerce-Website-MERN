@@ -75,7 +75,10 @@ const getProductReviews = async (req, res) => {
 // Get reviews for a vendor's products
 const getVendorReviews = async (req, res) => {
   try {
-    const vendorId = req.user.userId;
+    let vendorId = req.user.userId;
+    if (req.user.role === "admin" && req.query.vendorId) {
+      vendorId = req.query.vendorId;
+    }
 
     // Find all products belonging to this vendor
     const vendorProducts = await Product.find({ vendorId }).select("_id");

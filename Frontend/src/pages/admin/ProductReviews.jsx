@@ -12,12 +12,18 @@ import {
   Meh
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getVendorsApi } from "../../api/AuthApi";
 
 const ProductReviews = () => {
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const routePrefix = user.role === "vendor" ? "/vendor" : "/admin";
+
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [starFilter, setStarFilter] = useState("All");
+  const [vendorsList, setVendorsList] = useState([]);
+  const [selectedVendorId, setSelectedVendorId] = useState("");
 
   const [message, setMessage] = useState("");
   const [toastType, setToastType] = useState("success");
@@ -29,13 +35,41 @@ const ProductReviews = () => {
   };
 
   useEffect(() => {
-    fetchReviews();
+    if (user.role === "admin") {
+      fetchVendors();
+    } else {
+      fetchReviews();
+    }
   }, []);
 
-  const fetchReviews = async () => {
+  useEffect(() => {
+    if (user.role === "admin" && selectedVendorId) {
+      fetchReviews(selectedVendorId);
+    }
+  }, [selectedVendorId]);
+
+  const fetchVendors = async () => {
     setLoading(true);
     try {
-      const res = await getVendorReviewsApi();
+      const res = await getVendorsApi();
+      const list = res.data.vendors || [];
+      setVendorsList(list);
+      if (list.length > 0) {
+        setSelectedVendorId(list[0]._id);
+      } else {
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error("Error fetching vendors:", err);
+      showToast("Failed to load vendors list", "error");
+      setLoading(false);
+    }
+  };
+
+  const fetchReviews = async (vId = "") => {
+    setLoading(true);
+    try {
+      const res = await getVendorReviewsApi(vId);
       setReviews(res.data.reviews || []);
     } catch (err) {
       console.error(err);
@@ -92,6 +126,29 @@ const ProductReviews = () => {
             </p>
           </div>
         </div>
+
+        {user.role === "admin" && (
+          <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs flex flex-col sm:flex-row gap-4 items-center justify-between text-left">
+            <div className="w-full sm:w-auto">
+              <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block mb-0.5">
+                Super Admin Controls
+              </span>
+              <h4 className="text-sm font-extrabold text-dark-navy">Select a vendor profile to inspect reviews</h4>
+            </div>
+            <select
+              value={selectedVendorId}
+              onChange={(e) => setSelectedVendorId(e.target.value)}
+              className="w-full sm:w-72 px-3.5 py-2.5 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-bold text-dark-navy bg-white transition-all h-[38px] cursor-pointer"
+            >
+              <option value="">Select a Vendor...</option>
+              {vendorsList.map((v) => (
+                <option key={v._id} value={v._id}>
+                  {v.businessName || v.name} ({v.email})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {loading ? (
           <div className="py-24 flex flex-col items-center justify-center bg-white border border-light-border/60 rounded-3xl shadow-2xs">
@@ -228,99 +285,63 @@ const ProductReviews = () => {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredReviews.map((rev) => (
                   <div
                     key={rev._id}
-                    className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs space-y-4 text-left relative overflow-hidden hover:border-primary/50 transition-all duration-300"
+                    className="bg-white border border-light-border/60 rounded-2xl p-3.5 shadow-3xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left hover:border-primary/50 transition-all duration-300"
                   >
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-light-border/30">
-                      
-                      {/* Product details */}
-                      <div className="flex items-center gap-3">
-                        {rev.productId?.imgUrl && (
-                          <img
-                            src={rev.productId.imgUrl}
-                            alt={rev.productId.heading}
-                            className="w-10 h-10 object-contain bg-slate-50 border border-slate-100 rounded-xl p-0.5 flex-shrink-0"
-                          />
-                        )}
-                        <div>
-                          <span className="text-[9px] text-muted-gray block font-bold uppercase tracking-widest leading-none mb-1">
-                            Product Reviewed
-                          </span>
-                          <span className="text-xs font-extrabold text-dark-navy block max-w-xs sm:max-w-md truncate">
-                            {rev.productId?.heading || "Deleted Product"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* External Link button */}
-                      {rev.productId?._id && (
-                        <Link
-                          to={`/products/${rev.productId._id}`}
-                          className="text-[10px] font-extrabold text-primary hover:underline inline-flex items-center gap-1.5 uppercase tracking-wider"
-                        >
-                          View Detail
-                          <ExternalLink size={11} />
-                        </Link>
+                    {/* Left: Product Info */}
+                    <div className="flex items-center gap-3 min-w-0 sm:w-1/3">
+                      {rev.productId?.imgUrl && (
+                        <img
+                          src={rev.productId.imgUrl}
+                          alt={rev.productId.heading}
+                          className="w-10 h-10 object-contain bg-slate-50 border border-slate-100 rounded-xl p-0.5 flex-shrink-0"
+                        />
                       )}
-
+                      <div className="min-w-0">
+                        <span className="text-[11px] font-extrabold text-dark-navy block truncate">
+                          {rev.productId?.heading || "Deleted Product"}
+                        </span>
+                        <span className="text-[9px] text-muted-gray font-semibold block mt-0.5">
+                          Buyer: {rev.userName || "Verified Buyer"} ({rev.userId?.email || "N/A"})
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row justify-between gap-3 items-start sm:items-center">
-                      {/* Buyer Identity */}
+                    {/* Center: Star Rating & Comment Text */}
+                    <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-dark-navy uppercase">
-                          {rev.userName ? rev.userName.charAt(0) : "U"}
-                        </div>
-                        <div>
-                          <span className="text-xs font-extrabold text-dark-navy block leading-none">
-                            {rev.userName || "Verified Buyer"}
-                          </span>
-                          <span className="text-[9px] text-muted-gray font-semibold block mt-1">
-                            Buyer Email: {rev.userId?.email || "N/A"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Stars & Sentiment */}
-                      <div className="flex items-center gap-2 bg-slate-50 border border-slate-100/50 px-2.5 py-1 rounded-xl">
-                        <div className="flex text-amber-500 gap-0.5 text-xs">
+                        <div className="flex text-amber-500 gap-0.5 text-[11px]">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <span key={star}>
                               {star <= rev.rating ? "★" : "☆"}
                             </span>
                           ))}
                         </div>
-                        <span className="text-[10px] font-black text-dark-navy">
-                          ({rev.rating}/5)
-                        </span>
-                        <span className="text-xs">
-                          {rev.rating >= 4 ? (
-                            <Smile size={14} className="text-emerald-500" />
-                          ) : rev.rating === 3 ? (
-                            <Meh size={14} className="text-amber-500" />
-                          ) : (
-                            <Frown size={14} className="text-rose-500" />
-                          )}
+                        <span className="text-[9px] font-black text-dark-navy">({rev.rating}/5)</span>
+                        <span className="text-[9px] text-muted-gray font-semibold">
+                          Submitted: {new Date(rev.createdAt).toLocaleDateString("en-IN")}
                         </span>
                       </div>
-                    </div>
-
-                    {/* Review text comment */}
-                    <div className="p-4 bg-slate-50 border border-slate-100/50 rounded-2xl">
-                      <p className="text-xs sm:text-sm text-muted-gray font-semibold leading-relaxed">
+                      <p className="text-xs text-muted-gray/90 font-semibold line-clamp-1 italic">
                         "{rev.comment}"
                       </p>
                     </div>
 
-                    <div className="text-right">
-                      <span className="text-[9px] text-muted-gray font-semibold">
-                        Submitted: {new Date(rev.createdAt).toLocaleString("en-IN")}
-                      </span>
+                    {/* Right: Actions */}
+                    <div className="flex items-center justify-end gap-3 flex-shrink-0">
+                      {rev.productId?._id && (
+                        <Link
+                          to={`${routePrefix}/products/${rev.productId._id}`}
+                          className="px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-dark-navy text-[10px] font-black uppercase tracking-wider rounded-xl border border-light-border/40 cursor-pointer transition flex items-center gap-1.5"
+                        >
+                          <span>View Detail</span>
+                          <ExternalLink size={10} />
+                        </Link>
+                      )}
                     </div>
-
                   </div>
                 ))}
               </div>

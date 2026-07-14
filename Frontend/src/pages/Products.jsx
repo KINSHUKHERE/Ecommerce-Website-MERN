@@ -50,6 +50,7 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedVendor, setSelectedVendor] = useState("");
+  const [selectedRating, setSelectedRating] = useState("");
 
   // Show more/less states for categories and brands
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -96,7 +97,7 @@ const Products = () => {
   // Reset visibleCount when any filter/search changes
   useEffect(() => {
     setVisibleCount(10);
-  }, [search, selectedCategory, selectedBrand, selectedVendor]);
+  }, [search, selectedCategory, selectedBrand, selectedVendor, selectedRating]);
 
   const fetchProducts = async () => {
     try {
@@ -162,7 +163,12 @@ const Products = () => {
           ? !itemVendorId
           : itemVendorId && itemVendorId.toString() === selectedVendor.toString());
 
-      return matchesSearch && matchesCategory && matchesBrand && matchesVendor;
+      const itemRating = item.rating?.avgRating || 0;
+      const matchesRating =
+        selectedRating === "" ||
+        Number(itemRating) >= Number(selectedRating);
+
+      return matchesSearch && matchesCategory && matchesBrand && matchesVendor && matchesRating;
     });
   }, [
     products,
@@ -170,6 +176,7 @@ const Products = () => {
     selectedCategory,
     selectedBrand,
     selectedVendor,
+    selectedRating,
   ]);
 
   const sortedAndFilteredProducts = useMemo(() => {
@@ -235,6 +242,7 @@ const Products = () => {
     setSearch("");
     setSelectedCategory("");
     setSelectedBrand("");
+    setSelectedRating("");
     setShowAllCategories(false);
     setShowAllBrands(false);
     setSortBy("default");
@@ -296,9 +304,9 @@ const Products = () => {
               }`}
             >
               <SlidersHorizontal size={13} />
-              Filters {selectedCategory || selectedBrand ? "•" : ""}
+              Filters {selectedCategory || selectedBrand || selectedRating ? "•" : ""}
             </button>
-            {(selectedCategory || selectedBrand || search) && (
+            {(selectedCategory || selectedBrand || search || selectedRating) && (
               <button
                 onClick={clearFilters}
                 className="flex items-center gap-1 text-red-500 font-bold text-xs hover:text-red-655 transition cursor-pointer"
@@ -438,6 +446,35 @@ const Products = () => {
                 )}
               </div>
             </div>
+
+            {/* Rating Filter Mobile */}
+            <div>
+              <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-3 text-left">
+                Customer Rating
+              </h3>
+              <div className="flex flex-wrap gap-2 pt-1 pb-2">
+                {[
+                  { value: "", label: "All Ratings" },
+                  { value: "4", label: "4★ & above" },
+                  { value: "3", label: "3★ & above" },
+                  { value: "2", label: "2★ & above" }
+                ].map((r) => (
+                  <button
+                    key={r.value}
+                    onClick={() => setSelectedRating(r.value)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+                      selectedRating === r.value
+                        ? "bg-primary text-white border-primary shadow-xs"
+                        : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span>{r.label}</span>
+                    {r.value !== "" && <span className="text-amber-500">★</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -456,7 +493,7 @@ const Products = () => {
                   <SlidersHorizontal size={16} className="text-primary" />
                   Filters
                 </h2>
-                {(selectedCategory || selectedBrand || search) && (
+                {(selectedCategory || selectedBrand || search || selectedRating) && (
                   <button
                     onClick={clearFilters}
                     className="text-red-500 text-xs font-bold hover:text-red-655 transition flex items-center gap-1 cursor-pointer"
@@ -584,6 +621,34 @@ const Products = () => {
                       {showAllBrands ? "Show Less" : `Show More (+${filteredBrands.length - 6})`}
                     </button>
                   )}
+                </div>
+              </div>
+
+              {/* Rating Filter Section */}
+              <div className="pt-5 mt-5 border-t border-light-border/40 text-left space-y-4">
+                <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest leading-none">
+                  Customer Rating
+                </h3>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { value: "", label: "All Ratings" },
+                    { value: "4", label: "4★ & above" },
+                    { value: "3", label: "3★ & above" },
+                    { value: "2", label: "2★ & above" }
+                  ].map((r) => (
+                    <button
+                      key={r.value}
+                      onClick={() => setSelectedRating(r.value)}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-between ${
+                        selectedRating === r.value
+                          ? "bg-primary text-white border-primary shadow-xs"
+                          : "bg-slate-50 border-light-border/30 text-muted-gray hover:bg-slate-100 hover:text-dark-navy"
+                      }`}
+                    >
+                      <span>{r.label}</span>
+                      {r.value !== "" && <span className="text-amber-500">★</span>}
+                    </button>
+                  ))}
                 </div>
               </div>
 
