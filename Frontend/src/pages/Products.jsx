@@ -59,6 +59,7 @@ const Products = () => {
   const [sortOpen, setSortOpen] = useState(false);
   const [categoriesExpanded, setCategoriesExpanded] = useState(true);
   const [brandsExpanded, setBrandsExpanded] = useState(true);
+  const [ratingExpanded, setRatingExpanded] = useState(true);
 
   useEffect(() => {
     const loadAllData = async () => {
@@ -248,6 +249,7 @@ const Products = () => {
     setSortBy("default");
     setCategoriesExpanded(true);
     setBrandsExpanded(true);
+    setRatingExpanded(true);
   };
 
   return (
@@ -449,29 +451,38 @@ const Products = () => {
 
             {/* Rating Filter Mobile */}
             <div>
-              <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest mb-3 text-left">
-                Customer Rating
-              </h3>
-              <div className="flex flex-wrap gap-2 pt-1 pb-2">
-                {[
-                  { value: "", label: "All Ratings" },
-                  { value: "4", label: "4★ & above" },
-                  { value: "3", label: "3★ & above" },
-                  { value: "2", label: "2★ & above" }
-                ].map((r) => (
-                  <button
-                    key={r.value}
-                    onClick={() => setSelectedRating(r.value)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
-                      selectedRating === r.value
-                        ? "bg-primary text-white border-primary shadow-xs"
-                        : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
-                    }`}
-                  >
-                    <span>{r.label}</span>
-                    {r.value !== "" && <span className="text-amber-500">★</span>}
-                  </button>
-                ))}
+              <div
+                onClick={() => setRatingExpanded(!ratingExpanded)}
+                className="flex justify-between items-center cursor-pointer mb-3 select-none group"
+              >
+                <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest group-hover:text-dark-navy transition-colors">
+                  Customer Rating
+                </h3>
+                <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${ratingExpanded ? "rotate-180" : ""}`} />
+              </div>
+              
+              <div className={`overflow-hidden transition-all duration-350 ${ratingExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}>
+                <div className="flex flex-wrap gap-2 pt-1 pb-2">
+                  {[
+                    { value: "", label: "All Ratings" },
+                    { value: "4", label: "4★ & above" },
+                    { value: "3", label: "3★ & above" },
+                    { value: "2", label: "2★ & above" }
+                  ].map((r) => (
+                    <button
+                      key={r.value}
+                      onClick={() => setSelectedRating(r.value)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
+                        selectedRating === r.value
+                          ? "bg-primary text-white border-primary shadow-xs"
+                          : "bg-slate-50 text-muted-gray border-light-border/40 hover:bg-slate-100"
+                      }`}
+                    >
+                      <span>{r.label}</span>
+                      {r.value !== "" && <span className="text-amber-500">★</span>}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -625,30 +636,39 @@ const Products = () => {
               </div>
 
               {/* Rating Filter Section */}
-              <div className="pt-5 mt-5 border-t border-light-border/40 text-left space-y-4">
-                <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest leading-none">
-                  Customer Rating
-                </h3>
-                <div className="flex flex-col gap-2">
-                  {[
-                    { value: "", label: "All Ratings" },
-                    { value: "4", label: "4★ & above" },
-                    { value: "3", label: "3★ & above" },
-                    { value: "2", label: "2★ & above" }
-                  ].map((r) => (
-                    <button
-                      key={r.value}
-                      onClick={() => setSelectedRating(r.value)}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-between ${
-                        selectedRating === r.value
-                          ? "bg-primary text-white border-primary shadow-xs"
-                          : "bg-slate-50 border-light-border/30 text-muted-gray hover:bg-slate-100 hover:text-dark-navy"
-                      }`}
-                    >
-                      <span>{r.label}</span>
-                      {r.value !== "" && <span className="text-amber-500">★</span>}
-                    </button>
-                  ))}
+              <div className="pt-5 mt-5 border-t border-light-border/40 text-left">
+                <div
+                  onClick={() => setRatingExpanded(!ratingExpanded)}
+                  className="flex justify-between items-center cursor-pointer mb-3 select-none group"
+                >
+                  <h3 className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest group-hover:text-dark-navy transition-colors">
+                    Customer Rating
+                  </h3>
+                  <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${ratingExpanded ? "rotate-180" : ""}`} />
+                </div>
+                
+                <div className={`overflow-hidden transition-all duration-350 ${ratingExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}>
+                  <div className="flex flex-col gap-2">
+                    {[
+                      { value: "", label: "All Ratings" },
+                      { value: "4", label: "4★ & above" },
+                      { value: "3", label: "3★ & above" },
+                      { value: "2", label: "2★ & above" }
+                    ].map((r) => (
+                      <button
+                        key={r.value}
+                        onClick={() => setSelectedRating(r.value)}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-between ${
+                          selectedRating === r.value
+                            ? "bg-primary text-white border-primary shadow-xs"
+                            : "bg-slate-50 border-light-border/30 text-muted-gray hover:bg-slate-100 hover:text-dark-navy"
+                        }`}
+                      >
+                        <span>{r.label}</span>
+                        {r.value !== "" && <span className="text-amber-500">★</span>}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
