@@ -648,38 +648,38 @@ const ProductDetails = () => {
       </div>
 
       {/* Seller / Vendor Info Card (Amazon & Flipkart Style at Bottom) */}
-      <div className="bg-slate-50/50 rounded-3xl p-5 border border-light-border/40 mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 max-w-full">
+      <div className="bg-slate-50/50 rounded-2xl p-4 sm:p-5 border border-light-border/40 mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 max-w-full">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/5 text-primary border border-primary/10 flex items-center justify-center font-bold text-sm">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/5 text-primary border border-primary/10 flex items-center justify-center font-bold text-sm shrink-0">
             🏪
           </div>
           <div>
-            <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block leading-none mb-1 text-left">
+            <span className="text-[9px] sm:text-[10px] font-black text-muted-gray uppercase tracking-widest block leading-none mb-0.5 sm:mb-1 text-left">
               Sold By
             </span>
-            <span className="text-sm font-black text-dark-navy block text-left">
+            <span className="text-xs sm:text-sm font-black text-dark-navy block text-left">
               {product.vendorId?.businessName || "YoCart Official Store"}
             </span>
             {product.vendorId && (
-              <span className="text-[10px] text-muted-gray font-semibold block mt-0.5 text-left">
+              <span className="text-[9px] sm:text-[10px] text-muted-gray font-bold block mt-0.5 text-left">
                 GSTIN: {product.vendorId.gstin || "N/A"}
               </span>
             )}
           </div>
         </div>
 
-        <div className="text-right sm:border-l sm:border-light-border/40 sm:pl-6 flex-shrink-0 flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 sm:gap-0 mt-3 sm:mt-0 pt-3 sm:pt-0 border-t border-light-border/30 sm:border-t-0">
+        <div className="text-right sm:border-l sm:border-light-border/40 sm:pl-5 flex-shrink-0 flex flex-row sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 sm:gap-0 mt-2.5 pt-2.5 border-t border-light-border/20 sm:mt-0 sm:pt-0 sm:border-t-0">
           <div>
-            <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest block leading-none mb-1 text-left sm:text-right">
+            <span className="text-[9px] sm:text-[10px] font-black text-muted-gray uppercase tracking-widest block leading-none mb-0.5 sm:mb-1 text-left sm:text-right">
               Seller Products
             </span>
-            <span className="text-sm font-black text-primary block text-left sm:text-right">
-              {vendorProductsCount} Items
+            <span className="text-xs sm:text-sm font-black text-primary block text-left sm:text-right">
+              {vendorProductsCount} {vendorProductsCount === 1 ? "Item" : "Items"}
             </span>
           </div>
           <Link
             to={product.vendorId?._id ? `/store/${product.vendorId._id}` : "/products"}
-            className="text-[9px] font-extrabold text-accent hover:underline block mt-1 uppercase tracking-wider text-right"
+            className="text-[9px] sm:text-[10px] font-black text-accent hover:underline block uppercase tracking-wider text-right"
           >
             View Store
           </Link>
