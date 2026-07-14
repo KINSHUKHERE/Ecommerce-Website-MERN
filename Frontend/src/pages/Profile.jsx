@@ -504,16 +504,6 @@ const Profile = () => {
         {!isDashboardUser && (
           <button
             onClick={() => {
-              navigate("/orders");
-            }}
-            className="px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider transition-all relative border-b-2 -mb-px outline-none focus:outline-none cursor-pointer whitespace-nowrap flex-shrink-0 text-muted-gray border-transparent hover:text-dark-navy"
-          >
-            My Orders
-          </button>
-        )}
-        {!isDashboardUser && (
-          <button
-            onClick={() => {
               setActiveTab("addresses");
               fetchUserAddresses();
             }}
