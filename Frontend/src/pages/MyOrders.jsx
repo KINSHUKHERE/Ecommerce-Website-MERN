@@ -331,8 +331,25 @@ const MyOrders = () => {
                 )}
               </div>
 
-              {/* Responsive Category Filter Chips */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none scroll-smooth">
+              {/* Responsive Category Filter Dropdown (Mobile) / Pills (Desktop) */}
+              <div className="block sm:hidden relative">
+                <select
+                  value={userOrderStatusFilter}
+                  onChange={(e) => setUserOrderStatusFilter(e.target.value)}
+                  className="w-full pl-4 pr-10 py-2.5 bg-slate-50/50 border border-light-border/60 hover:bg-slate-50 focus:bg-white rounded-xl text-xs font-black uppercase tracking-wider text-dark-navy focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none cursor-pointer h-[38px] text-left"
+                >
+                  <option value="All">All Orders ({countAll})</option>
+                  <option value="Processing">Processing ({countProcessing})</option>
+                  <option value="Shipped">Shipped ({countShipped})</option>
+                  <option value="Delivered">Delivered ({countDelivered})</option>
+                  <option value="Cancelled">Cancelled ({countCancelled})</option>
+                </select>
+                <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-gray">
+                  <ChevronDown size={14} className="stroke-[3]" />
+                </div>
+              </div>
+
+              <div className="hidden sm:flex gap-1.5 overflow-x-auto pb-1 scrollbar-none scroll-smooth">
                 {[
                   { key: "All", count: countAll },
                   { key: "Processing", count: countProcessing },
