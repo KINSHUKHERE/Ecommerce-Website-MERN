@@ -474,13 +474,21 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Mobile Drawer Backdrop Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 top-16 bg-slate-900/35 backdrop-blur-xs z-40 md:hidden animate-fadeIn"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       {/* Mobile Menu Drawer */}
       <div
-        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-y-auto overflow-x-hidden bg-white shadow-xl transition-all duration-300 border-b border-light-border/40 ${
-          isOpen ? "max-h-[calc(100vh-4rem)] opacity-100 py-4 px-5" : "max-h-0 opacity-0 pointer-events-none"
+        className={`md:hidden absolute top-full right-0 z-50 w-[72vw] max-w-[290px] overflow-y-auto overflow-x-hidden bg-white shadow-2xl transition-all duration-300 border-l border-b border-light-border/40 rounded-bl-3xl ${
+          isOpen ? "max-h-[calc(100vh-4rem)] opacity-100 py-5 px-3.5" : "max-h-0 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="flex flex-col gap-6 text-left">
+        <div className="flex flex-col gap-5.5 text-left">
           
           {/* Section 1: Primary Navigation */}
           <div className="space-y-1">
@@ -500,12 +508,12 @@ const Navbar = () => {
                   key={item.label}
                   to={item.path}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3.5 px-4 h-[52px] rounded-2xl transition duration-200 text-xs font-bold ${
+                  className={`flex items-center gap-3 px-3 h-[52px] rounded-2xl transition duration-200 text-xs font-bold ${
                     isActive(item.path) ? "bg-[#15877F]/10 text-[#15877F]" : "text-dark-navy hover:bg-slate-50"
                   }`}
                 >
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.color} shrink-0`}>
-                    <Icon size={15} />
+                    <Icon size={14} />
                   </div>
                   <span>{item.label}</span>
                 </Link>
@@ -517,10 +525,10 @@ const Navbar = () => {
               <Link
                 to="/admin"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3.5 px-4 h-[52px] rounded-2xl text-xs font-bold text-dark-navy hover:bg-slate-50 transition"
+                className="flex items-center gap-3 px-3 h-[52px] rounded-2xl text-xs font-bold text-dark-navy hover:bg-slate-50 transition"
               >
                 <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
-                  <Shield size={15} />
+                  <Shield size={14} />
                 </div>
                 <span>Admin Panel</span>
               </Link>
@@ -529,10 +537,10 @@ const Navbar = () => {
               <Link
                 to="/vendor"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3.5 px-4 h-[52px] rounded-2xl text-xs font-bold text-dark-navy hover:bg-slate-50 transition"
+                className="flex items-center gap-3 px-3 h-[52px] rounded-2xl text-xs font-bold text-dark-navy hover:bg-slate-50 transition"
               >
                 <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
-                  <Shield size={15} />
+                  <Shield size={14} />
                 </div>
                 <span>Seller Portal</span>
               </Link>
@@ -540,40 +548,40 @@ const Navbar = () => {
           </div>
 
           {/* Section 2: User Profile Card OR Guest Login */}
-          <div className="border-t border-slate-100 pt-5">
+          <div className="border-t border-slate-100 pt-4.5">
             {currentUser ? (
               <Link
                 to="/profile"
                 onClick={() => setIsOpen(false)}
-                className="block bg-slate-50 hover:bg-slate-100/80 border border-slate-100 rounded-3xl p-4 transition duration-200"
+                className="block bg-slate-50 hover:bg-slate-100/85 border border-slate-100/60 rounded-3xl p-3.5 transition duration-200"
               >
-                <div className="flex items-center gap-3.5">
+                <div className="flex items-center gap-3">
                   {currentUser.avatar ? (
                     <img 
                       src={currentUser.avatar} 
                       alt={currentUser.name} 
-                      className="w-12 h-12 rounded-full object-cover shadow-inner border border-light-border/40" 
+                      className="w-10 h-10 rounded-full object-cover shadow-inner border border-light-border/40" 
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-primary text-white flex justify-center items-center font-extrabold text-sm uppercase shadow-inner">
+                    <div className="w-10 h-10 rounded-full bg-primary text-white flex justify-center items-center font-extrabold text-xs uppercase shadow-inner">
                       {currentUser.name.charAt(0)}
                     </div>
                   )}
                   <div className="flex-1 min-w-0 text-left">
-                    <span className="block font-black text-xs text-dark-navy truncate leading-normal">
+                    <span className="block font-black text-xs text-dark-navy truncate leading-tight">
                       {currentUser.name}
                     </span>
-                    <span className="block text-[10px] text-muted-gray mt-0.5 font-bold truncate leading-none">
+                    <span className="block text-[9px] text-muted-gray mt-0.5 font-bold truncate leading-none">
                       {currentUser.email}
                     </span>
-                    <span className="inline-flex items-center gap-0.5 text-[10px] text-primary font-extrabold mt-2 hover:underline">
-                      View Profile <span className="text-[9px]">→</span>
+                    <span className="inline-flex items-center gap-0.5 text-[9px] text-primary font-extrabold mt-1.5 hover:underline">
+                      View Profile <span className="text-[8px]">→</span>
                     </span>
                   </div>
                 </div>
               </Link>
             ) : (
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2">
                 <Link
                   to="/login"
                   onClick={() => setIsOpen(false)}
@@ -594,17 +602,17 @@ const Navbar = () => {
 
           {/* Section 3: Logout (if logged in) */}
           {currentUser && (
-            <div className="border-t border-slate-100 pt-4 pb-2">
+            <div className="border-t border-slate-100 pt-3.5 pb-1">
               <button
                 type="button"
                 onClick={() => {
                   setIsOpen(false);
                   handleLogout();
                 }}
-                className="w-full flex items-center gap-3.5 px-4 h-[52px] rounded-2xl text-red-500 hover:bg-red-50 transition duration-200 text-xs font-bold cursor-pointer text-left"
+                className="w-full flex items-center gap-3 px-3 h-[52px] rounded-2xl text-red-500 hover:bg-red-50 transition duration-200 text-xs font-bold cursor-pointer text-left"
               >
                 <div className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center text-red-500 shrink-0">
-                  <LogOut size={15} />
+                  <LogOut size={14} />
                 </div>
                 <span>Logout</span>
               </button>
