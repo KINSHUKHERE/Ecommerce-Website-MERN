@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown } from "lucide-react";
+import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown, User, ShoppingBag, MapPin, Settings } from "lucide-react";
 import logo from "../assets/logo.png";
 import { getDataCart } from "../api/CartApi";
 import { getWishlist } from "../api/WishlistApi";
@@ -9,6 +9,8 @@ import { getGlobalSaleConfig } from "../api/SaleApi";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -16,6 +18,19 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setProfileDropdownOpen(false);
+        setMobileSheetOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -91,6 +106,8 @@ const Navbar = () => {
     fetchCartCount(userObj);
     fetchWishlistCount(userObj);
     fetchGlobalSale();
+    setProfileDropdownOpen(false);
+    setMobileSheetOpen(false);
 
     const updateCart = () => {
       const freshUser = JSON.parse(localStorage.getItem("user"));
@@ -298,22 +315,101 @@ const Navbar = () => {
                 )}
               </Link>
 
-              {/* User Profile Avatar details */}
-              <Link
-                to="/profile"
-                className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
-              >
-                {currentUser.avatar ? (
-                  <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full object-cover shadow-inner" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
-                    {currentUser.name.charAt(0)}
-                  </div>
+              {/* User Profile Avatar with custom Account Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
+                >
+                  {currentUser.avatar ? (
+                    <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full object-cover shadow-inner border border-light-border/40 animate-pulse-slow" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
+                      {currentUser.name.charAt(0)}
+                    </div>
+                  )}
+                  <span className="font-semibold text-gray-700 text-xs hidden lg:block max-w-30 truncate">
+                    {currentUser.name}
+                  </span>
+                  <ChevronDown size={12} className={`text-muted-gray transition-transform duration-300 hidden lg:block ${profileDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {profileDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-45 bg-transparent" onClick={() => setProfileDropdownOpen(false)}></div>
+                    <div className="absolute right-0 top-full mt-2 w-60 bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-50 animate-scaleUp text-left">
+                      {/* User Header */}
+                      <div className="px-3 py-2 flex items-center gap-2.5">
+                        {currentUser.avatar ? (
+                          <img src={currentUser.avatar} alt={currentUser.name} className="w-10 h-10 rounded-full object-cover shadow-sm border border-light-border/40" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-primary text-white flex justify-center items-center font-bold text-sm uppercase shadow-sm">
+                            {currentUser.name.charAt(0)}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-extrabold text-[12px] text-dark-navy truncate leading-tight">{currentUser.name}</h4>
+                          <p className="text-[10px] text-muted-gray font-semibold truncate mt-0.5">{currentUser.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-slate-100/80 my-1.5"></div>
+
+                      {/* Dropdown Items */}
+                      <div className="space-y-0.5">
+                        {[
+                          { label: "My Profile", path: "/profile", icon: User, color: "text-primary bg-indigo-50/50" },
+                          { label: "My Orders", path: "/orders", icon: ShoppingBag, color: "text-amber-500 bg-amber-50/50" },
+                          { label: "Wishlist", path: "/wishlist", icon: Heart, color: "text-rose-500 bg-rose-50/50" },
+                          { label: "Cart", path: "/cart", icon: ShoppingCart, color: "text-indigo-500 bg-indigo-50/50" },
+                          { label: "Saved Addresses", path: "/profile?tab=addresses", icon: MapPin, color: "text-teal-500 bg-teal-50/50" },
+                          { label: "Account Settings", path: "/profile?tab=settings", icon: Settings, color: "text-slate-500 bg-slate-50/50" }
+                        ].map((item) => {
+                          const Icon = item.icon;
+                          const isItemActive = location.pathname + location.search === item.path;
+                          return (
+                            <Link
+                              key={item.label}
+                              to={item.path}
+                              onClick={() => setProfileDropdownOpen(false)}
+                              className={`group flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl transition-all ${
+                                isItemActive ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                              }`}
+                            >
+                              <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${item.color} transition-all duration-200 group-hover:scale-105 shrink-0`}>
+                                <Icon size={12} />
+                              </div>
+                              <span className="text-[11px] font-bold transition-colors">
+                                {item.label}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+
+                      <div className="border-t border-slate-100/80 my-1.5"></div>
+
+                      {/* Logout Action */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          handleLogout();
+                        }}
+                        className="group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-red-500 hover:bg-red-50 transition-all text-left"
+                      >
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-red-50 text-red-500 transition-all duration-200 group-hover:scale-105 shrink-0">
+                          <LogOut size={12} />
+                        </div>
+                        <span className="text-[11px] font-bold">
+                          Logout
+                        </span>
+                      </button>
+                    </div>
+                  </>
                 )}
-                <span className="font-medium text-gray-700 text-sm hidden lg:block max-w-30 truncate">
-                  {currentUser.name}
-                </span>
-              </Link>
+              </div>
 
               {currentUser.role === "admin" && (
                 <Link
@@ -332,14 +428,6 @@ const Navbar = () => {
                   Seller Portal
                 </Link>
               )}
-
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 bg-red-500 text-white px-3.5 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 text-sm font-medium cursor-pointer outline-none focus:outline-none"
-              >
-                <LogOut size={16} />
-                Logout
-              </button>
             </>
           )}
         </div>
@@ -370,6 +458,20 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
+              {/* Mobile User Profile Avatar trigger for Bottom Sheet */}
+              <button
+                type="button"
+                onClick={() => setMobileSheetOpen(true)}
+                className="flex items-center hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
+              >
+                {currentUser.avatar ? (
+                  <img src={currentUser.avatar} alt={currentUser.name} className="w-7 h-7 rounded-full object-cover shadow-inner border border-light-border/40" />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-primary text-white flex justify-center items-center font-bold text-[10px] uppercase shadow-inner">
+                    {currentUser.name.charAt(0)}
+                  </div>
+                )}
+              </button>
             </>
           )}
 
@@ -470,27 +572,35 @@ const Navbar = () => {
           ) : (
             <div className="flex flex-col gap-3 pt-1 border-t border-light-border/40">
               <div className="flex items-center justify-between">
-                <Link
-                  to="/profile"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    setMobileSheetOpen(true);
+                  }}
+                  className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none text-left"
                 >
                   {currentUser.avatar ? (
-                    <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full object-cover" />
+                    <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full object-cover shadow-inner border border-light-border/40" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-primary text-white flex justify-center items-center font-bold text-xs uppercase">
+                    <div className="w-8 h-8 rounded-full bg-primary text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
                       {currentUser.name.charAt(0)}
                     </div>
                   )}
-                  <span className="font-semibold text-dark-navy text-sm">
-                    {currentUser.name}
-                  </span>
-                </Link>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-dark-navy text-xs leading-none">
+                      {currentUser.name}
+                    </span>
+                    <span className="text-[10px] text-primary font-bold mt-1">
+                      View Account Menu
+                    </span>
+                  </div>
+                </button>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1 bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors duration-300 text-sm font-semibold outline-none focus:outline-none"
+                  className="flex items-center gap-1.5 bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors duration-300 text-xs font-bold outline-none focus:outline-none"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={14} />
                   Logout
                 </button>
               </div>
@@ -520,6 +630,89 @@ const Navbar = () => {
         </ul>
       </div>
     </nav>
+
+    {/* Mobile Bottom Sheet Overlay */}
+    {mobileSheetOpen && currentUser && (
+      <>
+        <div 
+          className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300"
+          onClick={() => setMobileSheetOpen(false)}
+        ></div>
+        <div className="fixed bottom-0 left-0 right-0 z-[101] bg-white rounded-t-3xl border-t border-light-border/60 shadow-2xl p-5 pb-8 animate-slideUp max-h-[85vh] overflow-y-auto">
+          {/* Grabber line for sheet */}
+          <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
+          
+          {/* Header info */}
+          <div className="flex items-center gap-3.5 mb-5 text-left">
+            {currentUser.avatar ? (
+              <img src={currentUser.avatar} alt={currentUser.name} className="w-12 h-12 rounded-full object-cover shadow-sm border border-light-border/40" />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-primary text-white flex justify-center items-center font-bold text-base uppercase shadow-sm">
+                {currentUser.name.charAt(0)}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-extrabold text-sm text-dark-navy truncate">{currentUser.name}</h3>
+              <p className="text-[10px] text-muted-gray font-bold truncate mt-0.5">{currentUser.email}</p>
+            </div>
+            <button 
+              type="button"
+              onClick={() => setMobileSheetOpen(false)}
+              className="p-1 rounded-full hover:bg-slate-100 text-muted-gray transition active:scale-95 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Menu options with large touch friendly targets */}
+          <div className="space-y-1 text-left">
+            {[
+              { label: "My Profile", path: "/profile", icon: User, color: "text-primary bg-indigo-50/50" },
+              { label: "My Orders", path: "/orders", icon: ShoppingBag, color: "text-amber-500 bg-amber-50/50" },
+              { label: "Wishlist", path: "/wishlist", icon: Heart, color: "text-rose-500 bg-rose-50/50" },
+              { label: "Cart", path: "/cart", icon: ShoppingCart, color: "text-indigo-500 bg-indigo-50/50" },
+              { label: "Saved Addresses", path: "/profile?tab=addresses", icon: MapPin, color: "text-teal-500 bg-teal-50/50" },
+              { label: "Account Settings", path: "/profile?tab=settings", icon: Settings, color: "text-slate-500 bg-slate-50/50" }
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => {
+                    setMobileSheetOpen(false);
+                    setIsOpen(false); // Close navbar menu drawer too
+                    navigate(item.path);
+                  }}
+                  className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-slate-50 transition active:bg-slate-100 text-xs font-bold text-dark-navy cursor-pointer"
+                >
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.color} shrink-0`}>
+                    <Icon size={16} />
+                  </div>
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+
+            <hr className="border-slate-100 my-2.5" />
+
+            <button
+              type="button"
+              onClick={() => {
+                setMobileSheetOpen(false);
+                handleLogout();
+              }}
+              className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-50 transition active:bg-red-100 text-xs font-bold cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-red-50 text-red-500 shrink-0">
+                <LogOut size={16} />
+              </div>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </>
+    )}
   </div>
   );
 };

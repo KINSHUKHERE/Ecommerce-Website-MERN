@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getUserProfile, updateProfile, uploadAvatarApi } from "../api/AuthApi";
 import { getAddresses, addAddress, updateAddress, deleteAddress } from "../api/AddressApi";
+import { getUserOrders } from "../api/OrderApi";
+import { getWishlist } from "../api/WishlistApi";
 import {
   User,
   Mail,
@@ -17,7 +19,11 @@ import {
   MapPin,
   Trash2,
   Edit,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Heart,
+  ShoppingBag,
+  LogOut,
+  Settings
 } from "lucide-react";
 
 const Profile = () => {
@@ -47,8 +53,14 @@ const Profile = () => {
 
   // Tab controller state
   const [activeTab, setActiveTab] = useState(() => {
-    return sessionStorage.getItem("profileActiveTab") || "settings";
+    const searchParams = new URLSearchParams(window.location.search);
+    const tab = searchParams.get("tab");
+    return tab || "dashboard";
   });
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState(0);
+
   // Toast notifications
   const [message, setMessage] = useState("");
   const [toastType, setToastType] = useState("success");
@@ -78,14 +90,48 @@ const Profile = () => {
 
   const localUserId = localUser?._id;
 
+  // Handle tab switching from URL parameter
   useEffect(() => {
-    sessionStorage.setItem("profileActiveTab", activeTab);
-    if (localUser && localUser._id) {
-      if (activeTab === "addresses") {
-        fetchUserAddresses();
-      }
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    } else {
+      setActiveTab("dashboard");
+    }
+  }, [location.search]);
+
+  // Fetch Dashboard data when activeTab changes
+  useEffect(() => {
+    if (!localUserId) return;
+
+    if (activeTab === "addresses") {
+      fetchUserAddresses();
+    } else if (activeTab === "dashboard") {
+      fetchDashboardData();
     }
   }, [activeTab, localUserId]);
+
+  const fetchDashboardData = async () => {
+    setLoadingOrders(true);
+    try {
+      // 1. Fetch Orders
+      const orderRes = await getUserOrders();
+      setOrders(orderRes.data.orders || []);
+      
+      // 2. Fetch Wishlist items count
+      const wishlistRes = await getWishlist();
+      setWishlistCount((wishlistRes.data.wishlistData || []).length);
+
+      // 3. Fetch Addresses count
+      const addrRes = await getAddresses();
+      setAddresses(addrRes.data.addresses || []);
+    } catch (err) {
+      console.error("Failed to load dashboard summaries", err);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
 
   const fetchUserAddresses = async () => {
     setLoadingAddresses(true);
@@ -371,25 +417,52 @@ const Profile = () => {
         </div>
       )}
 
-      {/* Header */}
-      <div className="mb-6 flex justify-between items-start text-left">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-dark-navy tracking-tight leading-normal">
-            Account Management
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-gray mt-1.5 font-medium leading-relaxed">
-            Update account details or view your e-commerce order transactions.
-          </p>
-        </div>
+      {/* Dynamic Header */}
+      <div className="mb-6 flex justify-between items-start text-left animate-fadeIn">
+        {activeTab === "dashboard" ? (
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-dark-navy tracking-tight leading-normal flex items-center gap-2">
+              Hello, {name.split(" ")[0] || "User"} 👋
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-gray mt-1 font-semibold leading-relaxed">
+              Welcome back to your dashboard.
+            </p>
+          </div>
+        ) : (
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-dark-navy tracking-tight leading-normal">
+              Account Management
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-gray mt-1.5 font-medium leading-relaxed">
+              Update account details or view your e-commerce order transactions.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Tab Navigation */}
       <div className="flex items-center gap-2 border-b border-light-border/60 mb-8 overflow-x-auto pb-1 scrollbar-none">
         <button
-          onClick={() => setActiveTab("settings")}
+          onClick={() => {
+            setActiveTab("dashboard");
+            navigate("/profile");
+          }}
+          className={`px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider transition-all relative border-b-2 -mb-px outline-none focus:outline-none cursor-pointer whitespace-nowrap flex-shrink-0 ${
+            activeTab === "dashboard"
+              ? "text-primary border-primary font-black"
+              : "text-muted-gray border-transparent hover:text-dark-navy"
+          }`}
+        >
+          My Profile
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab("settings");
+            navigate("/profile?tab=settings");
+          }}
           className={`px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider transition-all relative border-b-2 -mb-px outline-none focus:outline-none cursor-pointer whitespace-nowrap flex-shrink-0 ${
             activeTab === "settings"
-              ? "text-primary border-primary"
+              ? "text-primary border-primary font-black"
               : "text-muted-gray border-transparent hover:text-dark-navy"
           }`}
         >
@@ -399,11 +472,12 @@ const Profile = () => {
           <button
             onClick={() => {
               setActiveTab("addresses");
+              navigate("/profile?tab=addresses");
               fetchUserAddresses();
             }}
             className={`px-4 py-2.5 text-xs font-extrabold uppercase tracking-wider transition-all relative border-b-2 -mb-px outline-none focus:outline-none cursor-pointer whitespace-nowrap flex-shrink-0 ${
               activeTab === "addresses"
-                ? "text-primary border-primary"
+                ? "text-primary border-primary font-black"
                 : "text-muted-gray border-transparent hover:text-dark-navy"
             }`}
           >
@@ -411,6 +485,313 @@ const Profile = () => {
           </button>
         )}
       </div>
+
+      {/* RENDER TAB 0: DASHBOARD */}
+      {activeTab === "dashboard" && (
+        <div className="space-y-6 animate-scaleUp">
+          
+          {/* Profile Completion Card */}
+          {(() => {
+            let score = 30; // Name is always present
+            if (phoneNumber) score += 30;
+            if (avatar) score += 20;
+            if (addresses.length > 0) score += 20;
+            
+            return (
+              <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs text-left relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-accent"></div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <h3 className="text-xs font-black text-dark-navy uppercase tracking-widest flex items-center gap-1.5">
+                      Profile Completion
+                      <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                        {score}%
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-muted-gray font-semibold">
+                      {score === 100 
+                        ? "Amazing! Your shopping profile is fully complete." 
+                        : "Complete your profile information to enjoy faster checkouts."}
+                    </p>
+                  </div>
+                  <div className="w-full sm:w-48 bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200/50">
+                    <div 
+                      className="bg-gradient-to-r from-primary to-accent h-full rounded-full transition-all duration-500" 
+                      style={{ width: `${score}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Grid Layout for Personal Info & Quick Summaries */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* Personal Info Card */}
+            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs text-left flex flex-col justify-between hover:shadow-xs transition duration-300">
+              <div className="space-y-4">
+                <h3 className="text-xs font-black text-dark-navy uppercase tracking-widest flex items-center gap-1.5 border-b border-light-border/40 pb-2">
+                  <User size={13} className="text-primary" />
+                  Personal Information
+                </h3>
+                
+                <div className="flex items-center gap-3">
+                  {avatar ? (
+                    <img 
+                      src={avatar} 
+                      alt="Avatar" 
+                      className="w-12 h-12 rounded-full object-cover border border-primary/20 shadow-inner" 
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-primary/15 text-primary flex items-center justify-center font-extrabold text-sm uppercase">
+                      {name ? name.charAt(0).toUpperCase() : <User size={18} />}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-extrabold text-xs text-dark-navy truncate">{name}</h4>
+                    <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-primary/5 text-primary border border-primary/10 uppercase tracking-widest">
+                      {role}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-1 text-[11px] font-semibold text-muted-gray">
+                  <div className="flex items-center gap-2">
+                    <Mail size={12} className="text-slate-400 shrink-0" />
+                    <span className="truncate">{email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone size={12} className="text-slate-400 shrink-0" />
+                    <span>{phoneNumber || "No phone added yet"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-5 mt-auto">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("settings");
+                    navigate("/profile?tab=settings");
+                  }}
+                  className="w-full text-center py-2 bg-primary/5 hover:bg-primary/10 text-primary border border-primary/10 rounded-xl text-xs font-extrabold uppercase tracking-wider transition duration-300 cursor-pointer"
+                >
+                  Edit Profile
+                </button>
+              </div>
+            </div>
+
+            {/* Address Summary Card */}
+            {!isDashboardUser && (
+              <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs text-left flex flex-col justify-between hover:shadow-xs transition duration-300">
+                <div className="space-y-4">
+                  <h3 className="text-xs font-black text-dark-navy uppercase tracking-widest flex items-center gap-1.5 border-b border-light-border/40 pb-2">
+                    <MapPin size={13} className="text-teal-500" />
+                    Saved Addresses
+                  </h3>
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-500 shrink-0">
+                      <MapPin size={18} />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-xs text-dark-navy">
+                        {addresses.length === 0 ? "No saved addresses" : `${addresses.length} Addresses Saved`}
+                      </h4>
+                      <p className="text-[10px] text-muted-gray font-semibold mt-0.5">
+                        {addresses.length === 0 ? "Add your home or office address." : "Manage shipping destinations."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {addresses.length > 0 && (
+                    <div className="bg-slate-50/50 rounded-xl p-3 border border-light-border/40 text-[10px] font-bold text-slate-700">
+                      <p className="text-muted-gray uppercase text-[8px] tracking-widest font-black mb-1">Primary Address</p>
+                      <p className="truncate">{addresses[0].streetAddress}</p>
+                      <p className="text-muted-gray mt-0.5">{addresses[0].city}, {addresses[0].state} - {addresses[0].pinCode}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-5 mt-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("addresses");
+                      navigate("/profile?tab=addresses");
+                      fetchUserAddresses();
+                    }}
+                    className="w-full text-center py-2 bg-teal-500/5 hover:bg-teal-500/10 text-teal-650 border border-teal-500/10 rounded-xl text-xs font-extrabold uppercase tracking-wider transition duration-300 cursor-pointer"
+                  >
+                    Manage Addresses
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Wishlist Card */}
+            {!isDashboardUser && (
+              <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs text-left flex flex-col justify-between hover:shadow-xs transition duration-300">
+                <div className="space-y-4">
+                  <h3 className="text-xs font-black text-dark-navy uppercase tracking-widest flex items-center gap-1.5 border-b border-light-border/40 pb-2">
+                    <Heart size={13} className="text-rose-500" />
+                    My Wishlist
+                  </h3>
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-550 shrink-0">
+                      <Heart size={18} />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-xs text-dark-navy">
+                        {wishlistCount === 0 ? "Your wishlist is empty" : `${wishlistCount} Saved Products`}
+                      </h4>
+                      <p className="text-[10px] text-muted-gray font-semibold mt-0.5">
+                        {wishlistCount === 0 ? "Save items to view them later." : "Items you've added to buy later."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-5 mt-auto">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/wishlist")}
+                    className="w-full text-center py-2 bg-rose-500/5 hover:bg-rose-500/10 text-rose-600 border border-rose-500/10 rounded-xl text-xs font-extrabold uppercase tracking-wider transition duration-300 cursor-pointer"
+                  >
+                    View Wishlist
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Settings shortcut card */}
+            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs text-left flex flex-col justify-between hover:shadow-xs transition duration-300">
+              <div className="space-y-4">
+                <h3 className="text-xs font-black text-dark-navy uppercase tracking-widest flex items-center gap-1.5 border-b border-light-border/40 pb-2">
+                  <Settings size={13} className="text-slate-500" />
+                  Account Security
+                </h3>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500 shrink-0">
+                    <Lock size={18} />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-xs text-dark-navy">Password & Security</h4>
+                    <p className="text-[10px] text-muted-gray font-semibold mt-0.5">Update password and profile credentials.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-5 mt-auto">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("settings");
+                    navigate("/profile?tab=settings");
+                  }}
+                  className="w-full text-center py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 rounded-xl text-xs font-extrabold uppercase tracking-wider transition duration-300 cursor-pointer"
+                >
+                  Manage Security
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Recent Orders section */}
+          {!isDashboardUser && (
+            <div className="bg-white border border-light-border/60 rounded-3xl p-5 shadow-2xs text-left relative overflow-hidden transition hover:shadow-xs">
+              <div className="flex items-center justify-between border-b border-light-border/40 pb-3 mb-4">
+                <h3 className="text-xs font-black text-dark-navy uppercase tracking-widest flex items-center gap-1.5">
+                  <ShoppingBag size={13} className="text-amber-500" />
+                  Recent Orders
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => navigate("/orders")}
+                  className="text-[10px] font-black text-primary hover:text-primary-hover uppercase tracking-wider cursor-pointer"
+                >
+                  View All Orders
+                </button>
+              </div>
+
+              {loadingOrders ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="animate-spin text-primary w-6 h-6 mr-2" />
+                  <span className="text-[11px] font-bold text-muted-gray">Loading orders...</span>
+                </div>
+              ) : orders.length === 0 ? (
+                <div className="py-8 text-center space-y-3">
+                  <p className="text-xs font-bold text-muted-gray">You haven't placed any orders yet.</p>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/products")}
+                    className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold shadow-xs hover:opacity-95 transition cursor-pointer"
+                  >
+                    Start Shopping
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {orders.slice(0, 2).map((order) => (
+                    <div 
+                      key={order._id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl border border-light-border bg-slate-50/50 hover:bg-slate-50 transition"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-black text-dark-navy">#{order._id.slice(-8).toUpperCase()}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border uppercase tracking-widest ${getOrderStatusClass(order.orderStatus)}`}>
+                            {order.orderStatus}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-muted-gray font-semibold">
+                          Placed on: {new Date(order.createdAt).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2.5 sm:pt-0">
+                        <div className="text-left sm:text-right">
+                          <span className="text-[10px] text-muted-gray font-semibold block leading-none">Total Amount</span>
+                          <span className="text-xs font-black text-dark-navy block mt-1">₹{order.totalAmount}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => navigate("/orders")}
+                          className="px-3 py-1.5 border border-light-border hover:bg-white rounded-lg text-[10px] font-extrabold uppercase tracking-wider text-slate-700 transition cursor-pointer"
+                        >
+                          Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Quick Logout shortcut card */}
+          <div className="flex justify-end pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.removeItem("user");
+                localStorage.removeItem("token");
+                localStorage.removeItem("yocart_wishlist_ids");
+                navigate("/");
+                window.dispatchEvent(new Event("storage"));
+              }}
+              className="inline-flex items-center justify-center gap-1.5 border border-red-200 text-red-500 hover:bg-red-50 py-2.5 px-4 rounded-xl text-xs font-extrabold uppercase tracking-widest transition-all cursor-pointer"
+            >
+              <LogOut size={13} />
+              Logout Account
+            </button>
+          </div>
+
+        </div>
+      )}
 
       {/* RENDER TAB 1: PROFILE SETTINGS */}
       {activeTab === "settings" && (
