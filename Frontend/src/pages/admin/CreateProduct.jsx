@@ -21,7 +21,8 @@ import {
   X,
   Plus,
   Info,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ChevronDown
 } from "lucide-react";
 
 const CreateProduct = () => {
@@ -59,6 +60,8 @@ const CreateProduct = () => {
   const [toastType, setToastType] = useState("error");
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [brandDropdownOpen, setBrandDropdownOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadingVariantIndex, setUploadingVariantIndex] = useState(null);
   const [activeImagePickerVariant, setActiveImagePickerVariant] = useState(null);
@@ -600,63 +603,154 @@ const CreateProduct = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Grid for Category & Brand */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="relative z-30">
                 <label className="block mb-1.5 text-xs font-extrabold text-muted-gray uppercase tracking-widest">
                   Category
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none z-10">
                     <Tag size={16} />
                   </span>
-                  <select
-                    value={formData.categoryId}
-                    onChange={handleCategoryChange}
-                    required
-                    className="w-full pl-9 pr-10 py-2 border border-light-border rounded-xl bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-dark-navy text-sm font-semibold appearance-none cursor-pointer h-[38px]"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategoryDropdownOpen(!categoryDropdownOpen);
+                      setBrandDropdownOpen(false);
+                    }}
+                    className="w-full pl-9 pr-10 py-2 border border-light-border rounded-xl bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-dark-navy text-sm font-semibold h-[38px] cursor-pointer flex items-center justify-between text-left shadow-2xs"
                   >
-                    <option value="">Select Category</option>
-                    {categories.map((category) => (
-                      <option key={category._id} value={category._id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                  </span>
+                    <span className="truncate">
+                      {formData.categoryId
+                        ? (categories.find(c => c._id === formData.categoryId)?.name || "Select Category")
+                        : "Select Category"}
+                    </span>
+                    <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${categoryDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {categoryDropdownOpen && (
+                    <>
+                      <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setCategoryDropdownOpen(false)}></div>
+                      <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-20 animate-scaleUp text-left max-h-60 overflow-y-auto">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleCategoryChange({ target: { value: "" } });
+                            setCategoryDropdownOpen(false);
+                          }}
+                          className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-all text-left ${
+                            formData.categoryId === "" ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                          }`}
+                        >
+                          <div className="w-5.5 h-5.5 rounded-md flex items-center justify-center text-primary bg-indigo-50/50 transition-all duration-200 group-hover:scale-105">
+                            <Tag className="w-3 h-3" />
+                          </div>
+                          <span className="text-[11px] font-bold transition-colors">
+                            Select Category
+                          </span>
+                        </button>
+
+                        {categories.map((category) => {
+                          const isSelected = formData.categoryId === category._id;
+                          return (
+                            <button
+                              key={category._id}
+                              type="button"
+                              onClick={() => {
+                                handleCategoryChange({ target: { value: category._id } });
+                                setCategoryDropdownOpen(false);
+                              }}
+                              className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-all text-left mt-0.5 ${
+                                isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                              }`}
+                            >
+                              <div className="w-5.5 h-5.5 rounded-md flex items-center justify-center text-primary bg-indigo-50/50 transition-all duration-200 group-hover:scale-105">
+                                <Tag className="w-3 h-3" />
+                              </div>
+                              <span className="text-[11px] font-bold transition-colors">
+                                {category.name}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
-              <div>
+              <div className="relative z-30">
                 <label className="block mb-1.5 text-xs font-extrabold text-muted-gray uppercase tracking-widest">
                   Brand
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none z-10">
                     <Layers size={16} />
                   </span>
-                  <select
-                    value={formData.brandId}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        brandId: e.target.value,
-                      })
-                    }
-                    required
+                  <button
+                    type="button"
                     disabled={!formData.categoryId}
-                    className="w-full pl-9 pr-10 py-2 border border-light-border rounded-xl bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-dark-navy text-sm font-semibold appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed h-[38px]"
+                    onClick={() => {
+                      setBrandDropdownOpen(!brandDropdownOpen);
+                      setCategoryDropdownOpen(false);
+                    }}
+                    className="w-full pl-9 pr-10 py-2 border border-light-border rounded-xl bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all text-dark-navy text-sm font-semibold h-[38px] cursor-pointer flex items-center justify-between text-left disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
                   >
-                    <option value="">Select Brand</option>
-                    {brands.map((brand) => (
-                      <option key={brand._id} value={brand._id}>
-                        {brand.name}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                  </span>
+                    <span className="truncate">
+                      {formData.brandId
+                        ? (brands.find(b => b._id === formData.brandId)?.name || "Select Brand")
+                        : "Select Brand"}
+                    </span>
+                    <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${brandDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {brandDropdownOpen && (
+                    <>
+                      <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setBrandDropdownOpen(false)}></div>
+                      <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-20 animate-scaleUp text-left max-h-60 overflow-y-auto">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, brandId: "" });
+                            setBrandDropdownOpen(false);
+                          }}
+                          className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-all text-left ${
+                            formData.brandId === "" ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                          }`}
+                        >
+                          <div className="w-5.5 h-5.5 rounded-md flex items-center justify-center text-primary bg-indigo-50/50 transition-all duration-200 group-hover:scale-105">
+                            <Layers className="w-3 h-3" />
+                          </div>
+                          <span className="text-[11px] font-bold transition-colors">
+                            Select Brand
+                          </span>
+                        </button>
+
+                        {brands.map((brand) => {
+                          const isSelected = formData.brandId === brand._id;
+                          return (
+                            <button
+                              key={brand._id}
+                              type="button"
+                              onClick={() => {
+                                setFormData({ ...formData, brandId: brand._id });
+                                setBrandDropdownOpen(false);
+                              }}
+                              className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-all text-left mt-0.5 ${
+                                isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                              }`}
+                            >
+                              <div className="w-5.5 h-5.5 rounded-md flex items-center justify-center text-primary bg-indigo-50/50 transition-all duration-200 group-hover:scale-105">
+                                <Layers className="w-3 h-3" />
+                              </div>
+                              <span className="text-[11px] font-bold transition-colors">
+                                {brand.name}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

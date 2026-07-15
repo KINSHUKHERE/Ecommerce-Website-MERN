@@ -9,7 +9,9 @@ import {
   ExternalLink,
   Smile,
   Frown,
-  Meh
+  Meh,
+  ChevronDown,
+  User
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getVendorsApi } from "../../api/AuthApi";
@@ -31,6 +33,7 @@ const ProductReviews = () => {
   const [starFilter, setStarFilter] = useState("All");
   const [vendorsList, setVendorsList] = useState([]);
   const [selectedVendorId, setSelectedVendorId] = useState("");
+  const [vendorDropdownOpen, setVendorDropdownOpen] = useState(false);
 
   const [message, setMessage] = useState("");
   const [toastType, setToastType] = useState("success");
@@ -142,18 +145,74 @@ const ProductReviews = () => {
               </span>
               <h4 className="text-sm font-extrabold text-dark-navy">Select a vendor profile to inspect reviews</h4>
             </div>
-            <select
-              value={selectedVendorId}
-              onChange={(e) => setSelectedVendorId(e.target.value)}
-              className="w-full sm:w-72 px-3.5 py-2.5 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-bold text-dark-navy bg-white transition-all h-[38px] cursor-pointer"
-            >
-              <option value="">Select a Vendor...</option>
-              {vendorsList.map((v) => (
-                <option key={v._id} value={v._id}>
-                  {v.businessName || v.name} ({v.email})
-                </option>
-              ))}
-            </select>
+            <div className="relative w-full sm:w-72 z-25">
+              <button
+                type="button"
+                onClick={() => setVendorDropdownOpen(!vendorDropdownOpen)}
+                className="w-full px-3.5 py-2.5 border border-light-border rounded-xl focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-bold text-dark-navy bg-white transition-all h-[38px] cursor-pointer flex items-center justify-between shadow-2xs"
+              >
+                <span className="truncate">
+                  {selectedVendorId
+                    ? (vendorsList.find((v) => v._id === selectedVendorId)?.businessName || vendorsList.find((v) => v._id === selectedVendorId)?.name)
+                    : "Select a Vendor..."}
+                </span>
+                <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${vendorDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {vendorDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setVendorDropdownOpen(false)}></div>
+                  <div className="absolute right-0 top-full mt-1.5 w-full bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-20 animate-scaleUp text-left max-h-60 overflow-y-auto">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedVendorId("");
+                        setVendorDropdownOpen(false);
+                      }}
+                      className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-all text-left ${
+                        selectedVendorId === "" ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                      }`}
+                    >
+                      <div className="w-5.5 h-5.5 rounded-md flex items-center justify-center text-primary bg-indigo-50/50 transition-all duration-200 group-hover:scale-105">
+                        <User className="w-3 h-3" />
+                      </div>
+                      <span className="text-[11px] font-bold transition-colors">
+                        Select a Vendor...
+                      </span>
+                    </button>
+
+                    {vendorsList.map((v) => {
+                      const isSelected = selectedVendorId === v._id;
+                      return (
+                        <button
+                          key={v._id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedVendorId(v._id);
+                            setVendorDropdownOpen(false);
+                          }}
+                          className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-all text-left mt-0.5 ${
+                            isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                          }`}
+                        >
+                          <div className="w-5.5 h-5.5 rounded-md flex items-center justify-center text-primary bg-indigo-50/50 transition-all duration-200 group-hover:scale-105">
+                            <User className="w-3 h-3" />
+                          </div>
+                          <div className="flex flex-col truncate">
+                            <span className="text-[11px] font-bold transition-colors truncate">
+                              {v.businessName || v.name}
+                            </span>
+                            <span className="text-[9px] text-muted-gray truncate">
+                              {v.email}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         )}
 

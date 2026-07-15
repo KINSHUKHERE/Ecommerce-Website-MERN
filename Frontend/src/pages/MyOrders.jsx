@@ -84,6 +84,7 @@ const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [userOrderStatusFilter, setUserOrderStatusFilter] = useState("All");
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Review states
@@ -330,20 +331,64 @@ const MyOrders = () => {
 
               {/* Responsive Category Filter Dropdown (Mobile) / Pills (Desktop) */}
               <div className="block sm:hidden relative">
-                <select
-                  value={userOrderStatusFilter}
-                  onChange={(e) => setUserOrderStatusFilter(e.target.value)}
-                  className="w-full pl-4 pr-10 py-2.5 bg-slate-50/50 border border-light-border/60 hover:bg-slate-50 focus:bg-white rounded-xl text-xs font-black uppercase tracking-wider text-dark-navy focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none appearance-none cursor-pointer h-[38px] text-left"
+                <button
+                  type="button"
+                  onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
+                  className="w-full pl-4 pr-10 py-2 bg-slate-50/50 border border-light-border/60 hover:bg-slate-50 focus:bg-white rounded-xl text-xs font-black uppercase tracking-wider text-dark-navy focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none cursor-pointer h-[38px] flex items-center justify-between"
                 >
-                  <option value="All">All Orders ({countAll})</option>
-                  <option value="Processing">Processing ({countProcessing})</option>
-                  <option value="Shipped">Shipped ({countShipped})</option>
-                  <option value="Delivered">Delivered ({countDelivered})</option>
-                  <option value="Cancelled">Cancelled ({countCancelled})</option>
-                </select>
-                <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-gray">
-                  <ChevronDown size={14} className="stroke-[3]" />
-                </div>
+                  <span className="flex items-center gap-2">
+                    {userOrderStatusFilter === "All" && <ShoppingBag className="w-3.5 h-3.5 text-primary" />}
+                    {userOrderStatusFilter === "Processing" && <RotateCcw className="w-3.5 h-3.5 text-amber-500 animate-spin-slow" />}
+                    {userOrderStatusFilter === "Shipped" && <Truck className="w-3.5 h-3.5 text-indigo-500" />}
+                    {userOrderStatusFilter === "Delivered" && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+                    {userOrderStatusFilter === "Cancelled" && <AlertCircle className="w-3.5 h-3.5 text-rose-500" />}
+                    {userOrderStatusFilter} Orders
+                  </span>
+                  <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${statusDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {statusDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setStatusDropdownOpen(false)}></div>
+                    <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-light-border/60 rounded-2xl shadow-lg p-1.5 z-55 animate-scaleUp">
+                      {[
+                        { key: "All", label: "All Orders", count: countAll, icon: ShoppingBag, color: "text-primary bg-indigo-50/50" },
+                        { key: "Processing", label: "Processing", count: countProcessing, icon: RotateCcw, color: "text-amber-500 bg-amber-50/50" },
+                        { key: "Shipped", label: "Shipped", count: countShipped, icon: Truck, color: "text-indigo-500 bg-indigo-50/50" },
+                        { key: "Delivered", label: "Delivered", count: countDelivered, icon: CheckCircle2, color: "text-emerald-500 bg-emerald-50/50" },
+                        { key: "Cancelled", label: "Cancelled", count: countCancelled, icon: AlertCircle, color: "text-rose-500 bg-rose-50/50" }
+                      ].map((item) => {
+                        const Icon = item.icon;
+                        const isSelected = userOrderStatusFilter === item.key;
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => {
+                              setUserOrderStatusFilter(item.key);
+                              setStatusDropdownOpen(false);
+                            }}
+                            className={`group flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 transition-all text-left ${
+                              isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                            }`}
+                          >
+                            <span className="flex items-center gap-3">
+                              <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${item.color} transition-all duration-200 group-hover:scale-105`}>
+                                <Icon className="w-3.5 h-3.5" />
+                              </div>
+                              <span className="text-xs font-bold transition-colors">
+                                {item.label}
+                              </span>
+                            </span>
+                            <span className="text-[10px] bg-slate-100/80 px-2 py-0.5 rounded-full font-extrabold text-muted-gray">
+                              {item.count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="hidden sm:flex gap-1.5 overflow-x-auto pb-1 scrollbar-none scroll-smooth">

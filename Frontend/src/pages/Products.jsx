@@ -682,11 +682,10 @@ const Products = () => {
                 Products found ({sortedAndFilteredProducts.length})
               </h2>
               
-              {/* Overlapping Sort Dropdown */}
               <div className="relative z-25">
                 <button
                   onClick={() => setSortOpen(!sortOpen)}
-                  className="flex items-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl border border-light-border bg-white text-xs font-bold text-dark-navy hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer outline-none"
+                  className="flex items-center gap-2 px-4 py-2 sm:py-2.5 rounded-xl border border-light-border bg-white text-xs font-bold text-dark-navy hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer outline-none h-[38px]"
                 >
                   <ArrowUpDown size={14} className="text-muted-gray" />
                   <span>
@@ -699,41 +698,36 @@ const Products = () => {
                 
                 {sortOpen && (
                   <>
-                    <div className="fixed inset-0 z-10" onClick={() => setSortOpen(false)}></div>
-                    <div className="absolute left-0 lg:left-auto lg:right-0 top-full mt-2 w-48 rounded-2xl bg-white border border-light-border/60 shadow-lg py-1.5 z-20 animate-scaleUp text-left">
-                      <button
-                        onClick={() => {
-                          setSortBy("default");
-                          setSortOpen(false);
-                        }}
-                        className={`w-full px-4 py-2 text-xs font-bold text-left transition-colors ${
-                          sortBy === "default" ? "bg-primary/5 text-primary" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
-                        }`}
-                      >
-                        Default / Newest
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSortBy("price-asc");
-                          setSortOpen(false);
-                        }}
-                        className={`w-full px-4 py-2 text-xs font-bold text-left transition-colors ${
-                          sortBy === "price-asc" ? "bg-primary/5 text-primary" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
-                        }`}
-                      >
-                        Price: Low to High
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSortBy("price-desc");
-                          setSortOpen(false);
-                        }}
-                        className={`w-full px-4 py-2 text-xs font-bold text-left transition-colors ${
-                          sortBy === "price-desc" ? "bg-primary/5 text-primary" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
-                        }`}
-                      >
-                        Price: High to Low
-                      </button>
+                    <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setSortOpen(false)}></div>
+                    <div className="absolute left-0 lg:left-auto lg:right-0 top-full mt-2 w-56 rounded-2xl bg-white border border-light-border/60 shadow-md p-1.5 z-20 animate-scaleUp text-left">
+                      {[
+                        { key: "default", label: "Default / Newest", icon: ArrowUpDown, color: "text-primary bg-indigo-50/50" },
+                        { key: "price-asc", label: "Price: Low to High", icon: ArrowUpDown, color: "text-emerald-500 bg-emerald-50/50" },
+                        { key: "price-desc", label: "Price: High to Low", icon: ArrowUpDown, color: "text-rose-500 bg-rose-50/50" }
+                      ].map((item) => {
+                        const Icon = item.icon;
+                        const isSelected = sortBy === item.key;
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => {
+                              setSortBy(item.key);
+                              setSortOpen(false);
+                            }}
+                            className={`group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-all text-left ${
+                              isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                            }`}
+                          >
+                            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${item.color} transition-all duration-200 group-hover:scale-105`}>
+                              <Icon className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="text-xs font-bold transition-colors">
+                              {item.label}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </>
                 )}
