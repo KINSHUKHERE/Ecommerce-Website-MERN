@@ -19,6 +19,19 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef(null);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -321,7 +334,7 @@ const Navbar = () => {
               </Link>
 
               {/* User Profile Avatar with custom Account Dropdown */}
-              <div className="relative">
+              <div className="relative" ref={profileRef}>
                 <button
                   type="button"
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
@@ -342,7 +355,6 @@ const Navbar = () => {
 
                 {profileDropdownOpen && (
                   <>
-                    <div className="fixed inset-0 z-45 bg-transparent" onClick={() => setProfileDropdownOpen(false)}></div>
                     <div className="absolute right-0 top-full mt-2 w-60 bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-50 animate-scaleUp text-left">
                       {/* User Header */}
                       <div className="px-3 py-2 flex items-center gap-2.5">
