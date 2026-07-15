@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown, User, ShoppingBag, MapPin, Settings } from "lucide-react";
 import logo from "../assets/logo.png";
@@ -613,7 +614,7 @@ const Navbar = () => {
     </nav>
 
     {/* Mobile Bottom Sheet Overlay */}
-    {mobileSheetOpen && currentUser && (
+    {mobileSheetOpen && currentUser && createPortal(
       <>
         <div 
           className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300"
@@ -691,7 +692,8 @@ const Navbar = () => {
             </button>
           </div>
         </div>
-      </>
+      </>,
+      document.body
     )}
   </div>
   );
