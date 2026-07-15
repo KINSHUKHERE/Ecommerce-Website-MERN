@@ -609,24 +609,26 @@ const Profile = () => {
               icon: "🔒",
               action: () => setIsChangingPassword(true)
             },
-            {
-              label: "Manage Addresses",
-              subtitle: "Add, edit, or remove your saved shipping addresses",
-              icon: "📍",
-              action: () => navigate("/addresses")
-            },
-            {
-              label: "Recent Orders",
-              subtitle: "Check order history, delivery status, and invoices",
-              icon: "📦",
-              action: () => navigate("/orders")
-            },
-            {
-              label: "Wishlist Summary",
-              subtitle: "View products you saved for later purchase",
-              icon: "❤️",
-              action: () => navigate("/wishlist")
-            }
+            ...(role !== "admin" && role !== "vendor" ? [
+              {
+                label: "Manage Addresses",
+                subtitle: "Add, edit, or remove your saved shipping addresses",
+                icon: "📍",
+                action: () => navigate("/addresses")
+              },
+              {
+                label: "Recent Orders",
+                subtitle: "Check order history, delivery status, and invoices",
+                icon: "📦",
+                action: () => navigate("/orders")
+              },
+              {
+                label: "Wishlist Summary",
+                subtitle: "View products you saved for later purchase",
+                icon: "❤️",
+                action: () => navigate("/wishlist")
+              }
+            ] : [])
           ].map((card) => (
             <button
               key={card.label}
