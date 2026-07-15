@@ -599,7 +599,7 @@ const BrandManagement = () => {
                 <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setFilterStatusDropdownOpen(false)}></div>
                 <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-20 animate-scaleUp text-left">
                   {[
-                    { key: "", label: "All Statuses", icon: ShoppingBag, color: "text-primary bg-indigo-50/50" },
+                    { key: "", label: "All Statuses", icon: Inbox, color: "text-primary bg-indigo-50/50" },
                     { key: "active", label: "Active", icon: CheckCircle, color: "text-emerald-500 bg-emerald-50/50" },
                     { key: "inactive", label: "Inactive", icon: XCircle, color: "text-rose-500 bg-rose-50/50" }
                   ].map((item) => {
