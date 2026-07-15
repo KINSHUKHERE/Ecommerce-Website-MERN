@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown, User, ShoppingBag, MapPin, Settings, Shield } from "lucide-react";
+import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown, User, ShoppingBag, MapPin, Settings, Shield, Home, Info, Phone, Package } from "lucide-react";
 import logo from "../assets/logo.png";
 import { getDataCart } from "../api/CartApi";
 import { getWishlist } from "../api/WishlistApi";
@@ -171,6 +171,17 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScrollPos, isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const isAuthPage =
     location.pathname === "/register" || location.pathname === "/login";
@@ -465,179 +476,142 @@ const Navbar = () => {
 
       {/* Mobile Menu Drawer */}
       <div
-        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-hidden transition-all duration-300 border-b border-light-border/40 bg-white/95 backdrop-blur-md shadow-lg ${
-          isOpen ? "max-h-125 border-t border-light-border/40" : "max-h-0"
+        className={`md:hidden absolute top-full left-0 right-0 z-50 overflow-y-auto overflow-x-hidden bg-white shadow-xl transition-all duration-300 border-b border-light-border/40 ${
+          isOpen ? "max-h-[calc(100vh-4rem)] opacity-100 py-4 px-5" : "max-h-0 opacity-0 pointer-events-none"
         }`}
       >
-        <ul className="px-6 py-5 flex flex-col gap-4 font-medium text-gray-700">
-          <li>
-            <Link
-              to="/"
-              className={`block py-1 hover:text-[#15877F] ${isActive("/") ? "text-[#15877F]" : ""}`}
-              onClick={() => setIsOpen(false)}
-            >
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/products"
-              className={`block py-1 hover:text-[#15877F] ${isActive("/products") ? "text-[#15877F]" : ""}`}
-              onClick={() => setIsOpen(false)}
-            >
-              Products
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/about"
-              className={`block py-1 hover:text-[#15877F] ${isActive("/about") ? "text-[#15877F]" : ""}`}
-              onClick={() => setIsOpen(false)}
-            >
-              About
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/contact"
-              className={`block py-1 hover:text-[#15877F] ${isActive("/contact") ? "text-[#15877F]" : ""}`}
-              onClick={() => setIsOpen(false)}
-            >
-              Contact
-            </Link>
-          </li>
-          {!currentUser && (
-            <li>
-              <Link
-                to="/register?role=vendor"
-                className={`block py-1 hover:text-[#15877F] ${isActive("/register?role=vendor") ? "text-[#15877F]" : ""}`}
-                onClick={() => setIsOpen(false)}
-              >
-                Become a Seller
-              </Link>
-            </li>
-          )}
-
-          <hr className="border-gray-200 my-2" />
-
-          {!currentUser ? (
-            <div className="flex flex-col gap-2 pt-1">
-              <Link
-                to="/login"
-                onClick={() => setIsOpen(false)}
-                className="w-full text-center py-2.5 border border-primary/20 text-primary rounded-xl font-semibold hover:bg-slate-50 transition"
-              >
-                Log In
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setIsOpen(false)}
-                className="w-full text-center py-2.5 bg-gradient-to-r from-primary to-accent text-white rounded-xl font-semibold hover:opacity-95 transition"
-              >
-                Sign Up
-              </Link>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3.5 pt-3 border-t border-light-border/40 text-left">
-              {/* User Greeting Block */}
-              <div className="flex items-center gap-2.5 px-1 py-1">
-                {currentUser.avatar ? (
-                  <img src={currentUser.avatar} alt={currentUser.name} className="w-9 h-9 rounded-full object-cover shadow-inner border border-light-border/40" />
-                ) : (
-                  <div className="w-9 h-9 rounded-full bg-primary text-white flex justify-center items-center font-bold text-sm uppercase shadow-inner">
-                    {currentUser.name.charAt(0)}
+        <div className="flex flex-col gap-6 text-left">
+          
+          {/* Section 1: Primary Navigation */}
+          <div className="space-y-1">
+            {[
+              { label: "Home", path: "/", icon: Home, color: "text-[#15877F] bg-teal-50" },
+              { label: "Products", path: "/products", icon: ShoppingBag, color: "text-indigo-500 bg-indigo-50" },
+              { label: "About", path: "/about", icon: Info, color: "text-amber-500 bg-amber-50" },
+              { label: "Contact", path: "/contact", icon: Phone, color: "text-teal-600 bg-teal-50" },
+              ...(currentUser ? [
+                { label: "My Orders", path: "/orders", icon: Package, color: "text-orange-500 bg-orange-50" },
+                { label: "Saved Addresses", path: "/addresses", icon: MapPin, color: "text-emerald-500 bg-emerald-50" }
+              ] : [])
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.label}
+                  to={item.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center gap-3.5 px-4 h-[52px] rounded-2xl transition duration-200 text-xs font-bold ${
+                    isActive(item.path) ? "bg-[#15877F]/10 text-[#15877F]" : "text-dark-navy hover:bg-slate-50"
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.color} shrink-0`}>
+                    <Icon size={15} />
                   </div>
-                )}
-                <div className="flex flex-col min-w-0">
-                  <span className="font-extrabold text-dark-navy text-xs leading-none truncate">
-                    {currentUser.name}
-                  </span>
-                  <span className="text-[9px] text-muted-gray mt-1 font-semibold truncate leading-none">
-                    {currentUser.email}
-                  </span>
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+
+            {/* Admin / Vendor Panel Options */}
+            {currentUser && currentUser.role === "admin" && (
+              <Link
+                to="/admin"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3.5 px-4 h-[52px] rounded-2xl text-xs font-bold text-dark-navy hover:bg-slate-50 transition"
+              >
+                <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                  <Shield size={15} />
                 </div>
-              </div>
+                <span>Admin Panel</span>
+              </Link>
+            )}
+            {currentUser && currentUser.role === "vendor" && (
+              <Link
+                to="/vendor"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3.5 px-4 h-[52px] rounded-2xl text-xs font-bold text-dark-navy hover:bg-slate-50 transition"
+              >
+                <div className="w-8 h-8 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                  <Shield size={15} />
+                </div>
+                <span>Seller Portal</span>
+              </Link>
+            )}
+          </div>
 
-              <div className="border-t border-slate-100/80 my-1"></div>
-
-              {/* Navigation Options */}
-              <ul className="flex flex-col gap-3 font-medium text-gray-700">
-                {[
-                  { label: "My Profile", path: "/profile", icon: User, color: "text-primary" },
-                  { label: "My Orders", path: "/orders", icon: ShoppingBag, color: "text-amber-500" },
-                  { label: "Wishlist", path: "/wishlist", icon: Heart, color: "text-rose-500" },
-                  { label: "Cart", path: "/cart", icon: ShoppingCart, color: "text-indigo-500" },
-                  { label: "Saved Addresses", path: "/addresses", icon: MapPin, color: "text-teal-500" }
-                ].map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <li key={item.label}>
-                      <Link
-                        to={item.path}
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 py-1 hover:text-[#15877F] transition duration-200 text-xs font-bold text-dark-navy"
-                      >
-                        <div className={`w-7 h-7 rounded-xl bg-slate-50 flex items-center justify-center ${item.color} shrink-0`}>
-                          <Icon size={14} />
-                        </div>
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-
-                {currentUser.role === "admin" && (
-                  <li>
-                    <Link
-                      to="/admin"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 py-1 hover:text-[#15877F] transition duration-200 text-xs font-bold text-dark-navy"
-                    >
-                      <div className="w-7 h-7 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
-                        <Shield size={14} />
-                      </div>
-                      <span>Admin Panel</span>
-                    </Link>
-                  </li>
-                )}
-
-                {currentUser.role === "vendor" && (
-                  <li>
-                    <Link
-                      to="/vendor"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 py-1 hover:text-[#15877F] transition duration-200 text-xs font-bold text-dark-navy"
-                    >
-                      <div className="w-7 h-7 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
-                        <Shield size={14} />
-                      </div>
-                      <span>Seller Portal</span>
-                    </Link>
-                  </li>
-                )}
-
-                <div className="border-t border-slate-100/80 my-1"></div>
-
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsOpen(false);
-                      handleLogout();
-                    }}
-                    className="w-full flex items-center gap-3 py-1 text-red-500 hover:text-red-655 transition duration-200 text-xs font-bold cursor-pointer text-left"
-                  >
-                    <div className="w-7 h-7 rounded-xl bg-red-50 flex items-center justify-center text-red-500 shrink-0">
-                      <LogOut size={14} />
+          {/* Section 2: User Profile Card OR Guest Login */}
+          <div className="border-t border-slate-100 pt-5">
+            {currentUser ? (
+              <Link
+                to="/profile"
+                onClick={() => setIsOpen(false)}
+                className="block bg-slate-50 hover:bg-slate-100/80 border border-slate-100 rounded-3xl p-4 transition duration-200"
+              >
+                <div className="flex items-center gap-3.5">
+                  {currentUser.avatar ? (
+                    <img 
+                      src={currentUser.avatar} 
+                      alt={currentUser.name} 
+                      className="w-12 h-12 rounded-full object-cover shadow-inner border border-light-border/40" 
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-primary text-white flex justify-center items-center font-extrabold text-sm uppercase shadow-inner">
+                      {currentUser.name.charAt(0)}
                     </div>
-                    <span>Logout</span>
-                  </button>
-                </li>
-              </ul>
+                  )}
+                  <div className="flex-1 min-w-0 text-left">
+                    <span className="block font-black text-xs text-dark-navy truncate leading-normal">
+                      {currentUser.name}
+                    </span>
+                    <span className="block text-[10px] text-muted-gray mt-0.5 font-bold truncate leading-none">
+                      {currentUser.email}
+                    </span>
+                    <span className="inline-flex items-center gap-0.5 text-[10px] text-primary font-extrabold mt-2 hover:underline">
+                      View Profile <span className="text-[9px]">→</span>
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center py-2.5 border border-primary/20 text-primary rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-slate-50 transition"
+                >
+                  Log In
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center py-2.5 bg-gradient-to-r from-primary to-accent text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-95 transition"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
 
+          {/* Section 3: Logout (if logged in) */}
+          {currentUser && (
+            <div className="border-t border-slate-100 pt-4 pb-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  handleLogout();
+                }}
+                className="w-full flex items-center gap-3.5 px-4 h-[52px] rounded-2xl text-red-500 hover:bg-red-50 transition duration-200 text-xs font-bold cursor-pointer text-left"
+              >
+                <div className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+                  <LogOut size={15} />
+                </div>
+                <span>Logout</span>
+              </button>
             </div>
           )}
-        </ul>
+
+        </div>
       </div>
     </nav>
 
