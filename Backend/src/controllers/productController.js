@@ -99,7 +99,9 @@ const addProduct = async (req, res) => {
         price: req.body.price || 999,
         quantity: req.body.quantity || 10,
         images: [product.imgUrl],
-        attributes: []
+        attributes: [],
+        onSale: !!req.body.onSale,
+        salePrice: req.body.onSale ? Number(req.body.salePrice || 0) : 0
       });
     }
 
