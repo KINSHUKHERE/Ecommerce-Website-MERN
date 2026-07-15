@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown, User, ShoppingBag, MapPin, Settings } from "lucide-react";
+import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown, User, ShoppingBag, MapPin, Settings, Shield } from "lucide-react";
 import logo from "../assets/logo.png";
 import { getDataCart } from "../api/CartApi";
 import { getWishlist } from "../api/WishlistApi";
@@ -451,20 +451,6 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
-              {/* Mobile User Profile Avatar trigger for Bottom Sheet */}
-              <button
-                type="button"
-                onClick={() => setMobileSheetOpen(true)}
-                className="flex items-center hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none"
-              >
-                {currentUser.avatar ? (
-                  <img src={currentUser.avatar} alt={currentUser.name} className="w-7 h-7 rounded-full object-cover shadow-inner border border-light-border/40" />
-                ) : (
-                  <div className="w-7 h-7 rounded-full bg-primary text-white flex justify-center items-center font-bold text-[10px] uppercase shadow-inner">
-                    {currentUser.name.charAt(0)}
-                  </div>
-                )}
-              </button>
             </>
           )}
 
@@ -552,60 +538,102 @@ const Navbar = () => {
               </Link>
             </div>
           ) : (
-            <div className="flex flex-col gap-3 pt-1 border-t border-light-border/40">
-              <div className="flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsOpen(false);
-                    setMobileSheetOpen(true);
-                  }}
-                  className="flex items-center gap-2 hover:opacity-85 transition-opacity duration-300 cursor-pointer outline-none focus:outline-none text-left"
-                >
-                  {currentUser.avatar ? (
-                    <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-full object-cover shadow-inner border border-light-border/40" />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-primary text-white flex justify-center items-center font-bold text-xs uppercase shadow-inner">
-                      {currentUser.name.charAt(0)}
-                    </div>
-                  )}
-                  <div className="flex flex-col">
-                    <span className="font-bold text-dark-navy text-xs leading-none">
-                      {currentUser.name}
-                    </span>
-                    <span className="text-[10px] text-primary font-bold mt-1">
-                      View Account Menu
-                    </span>
+            <div className="flex flex-col gap-3.5 pt-3 border-t border-light-border/40 text-left">
+              {/* User Greeting Block */}
+              <div className="flex items-center gap-2.5 px-1 py-1">
+                {currentUser.avatar ? (
+                  <img src={currentUser.avatar} alt={currentUser.name} className="w-9 h-9 rounded-full object-cover shadow-inner border border-light-border/40" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-primary text-white flex justify-center items-center font-bold text-sm uppercase shadow-inner">
+                    {currentUser.name.charAt(0)}
                   </div>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-1.5 bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors duration-300 text-xs font-bold outline-none focus:outline-none"
-                >
-                  <LogOut size={14} />
-                  Logout
-                </button>
+                )}
+                <div className="flex flex-col min-w-0">
+                  <span className="font-extrabold text-dark-navy text-xs leading-none truncate">
+                    {currentUser.name}
+                  </span>
+                  <span className="text-[9px] text-muted-gray mt-1 font-semibold truncate leading-none">
+                    {currentUser.email}
+                  </span>
+                </div>
               </div>
 
-              {currentUser.role === "admin" && (
-                <Link
-                  to="/admin"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl font-bold text-xs uppercase tracking-wider transition"
-                >
-                  Admin Panel
-                </Link>
-              )}
+              <div className="border-t border-slate-100/80 my-1"></div>
 
-              {currentUser.role === "vendor" && (
-                <Link
-                  to="/vendor"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-center py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl font-bold text-xs uppercase tracking-wider transition"
-                >
-                  Seller Portal
-                </Link>
-              )}
+              {/* Navigation Options */}
+              <ul className="flex flex-col gap-3 font-medium text-gray-700">
+                {[
+                  { label: "My Profile", path: "/profile", icon: User, color: "text-primary" },
+                  { label: "My Orders", path: "/orders", icon: ShoppingBag, color: "text-amber-500" },
+                  { label: "Wishlist", path: "/wishlist", icon: Heart, color: "text-rose-500" },
+                  { label: "Cart", path: "/cart", icon: ShoppingCart, color: "text-indigo-500" },
+                  { label: "Saved Addresses", path: "/addresses", icon: MapPin, color: "text-teal-500" }
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <li key={item.label}>
+                      <Link
+                        to={item.path}
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 py-1 hover:text-[#15877F] transition duration-200 text-xs font-bold text-dark-navy"
+                      >
+                        <div className={`w-7 h-7 rounded-xl bg-slate-50 flex items-center justify-center ${item.color} shrink-0`}>
+                          <Icon size={14} />
+                        </div>
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+
+                {currentUser.role === "admin" && (
+                  <li>
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 py-1 hover:text-[#15877F] transition duration-200 text-xs font-bold text-dark-navy"
+                    >
+                      <div className="w-7 h-7 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                        <Shield size={14} />
+                      </div>
+                      <span>Admin Panel</span>
+                    </Link>
+                  </li>
+                )}
+
+                {currentUser.role === "vendor" && (
+                  <li>
+                    <Link
+                      to="/vendor"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 py-1 hover:text-[#15877F] transition duration-200 text-xs font-bold text-dark-navy"
+                    >
+                      <div className="w-7 h-7 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                        <Shield size={14} />
+                      </div>
+                      <span>Seller Portal</span>
+                    </Link>
+                  </li>
+                )}
+
+                <div className="border-t border-slate-100/80 my-1"></div>
+
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center gap-3 py-1 text-red-500 hover:text-red-655 transition duration-200 text-xs font-bold cursor-pointer text-left"
+                  >
+                    <div className="w-7 h-7 rounded-xl bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+                      <LogOut size={14} />
+                    </div>
+                    <span>Logout</span>
+                  </button>
+                </li>
+              </ul>
 
             </div>
           )}
@@ -613,88 +641,6 @@ const Navbar = () => {
       </div>
     </nav>
 
-    {/* Mobile Bottom Sheet Overlay */}
-    {mobileSheetOpen && currentUser && createPortal(
-      <>
-        <div 
-          className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300"
-          onClick={() => setMobileSheetOpen(false)}
-        ></div>
-        <div className="fixed bottom-0 left-0 right-0 z-[101] bg-white rounded-t-3xl border-t border-light-border/60 shadow-2xl p-5 pb-8 animate-slideUp max-h-[85vh] overflow-y-auto">
-          {/* Grabber line for sheet */}
-          <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-5"></div>
-          
-          {/* Header info */}
-          <div className="flex items-center gap-3.5 mb-5 text-left">
-            {currentUser.avatar ? (
-              <img src={currentUser.avatar} alt={currentUser.name} className="w-12 h-12 rounded-full object-cover shadow-sm border border-light-border/40" />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-primary text-white flex justify-center items-center font-bold text-base uppercase shadow-sm">
-                {currentUser.name.charAt(0)}
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-extrabold text-sm text-dark-navy truncate">{currentUser.name}</h3>
-              <p className="text-[10px] text-muted-gray font-bold truncate mt-0.5">{currentUser.email}</p>
-            </div>
-            <button 
-              type="button"
-              onClick={() => setMobileSheetOpen(false)}
-              className="p-1 rounded-full hover:bg-slate-100 text-muted-gray transition active:scale-95 cursor-pointer"
-            >
-              <X size={18} />
-            </button>
-          </div>
-
-          {/* Menu options with large touch friendly targets */}
-          <div className="space-y-1 text-left">
-            {[
-              { label: "My Profile", path: "/profile", icon: User, color: "text-primary bg-indigo-50/50" },
-              { label: "My Orders", path: "/orders", icon: ShoppingBag, color: "text-amber-500 bg-amber-50/50" },
-              { label: "Wishlist", path: "/wishlist", icon: Heart, color: "text-rose-500 bg-rose-50/50" },
-              { label: "Cart", path: "/cart", icon: ShoppingCart, color: "text-indigo-500 bg-indigo-50/50" },
-              { label: "Saved Addresses", path: "/addresses", icon: MapPin, color: "text-teal-500 bg-teal-50/50" }
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={() => {
-                    setMobileSheetOpen(false);
-                    setIsOpen(false); // Close navbar menu drawer too
-                    navigate(item.path);
-                  }}
-                  className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-slate-50 transition active:bg-slate-100 text-xs font-bold text-dark-navy cursor-pointer"
-                >
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.color} shrink-0`}>
-                    <Icon size={16} />
-                  </div>
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-
-            <hr className="border-slate-100 my-2.5" />
-
-            <button
-              type="button"
-              onClick={() => {
-                setMobileSheetOpen(false);
-                handleLogout();
-              }}
-              className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-50 transition active:bg-red-100 text-xs font-bold cursor-pointer"
-            >
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-red-50 text-red-500 shrink-0">
-                <LogOut size={16} />
-              </div>
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
-      </>,
-      document.body
-    )}
   </div>
   );
 };
