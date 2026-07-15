@@ -332,10 +332,13 @@ const ProductDetails = () => {
     }
   };
 
-  const allImages =
-    activeVariant && activeVariant.images && activeVariant.images.length > 0
-      ? activeVariant.images
-      : [product.imgUrl, ...(product.images || [])].filter(Boolean);
+  const allImages = Array.from(
+    new Set([
+      ...(activeVariant && activeVariant.images && activeVariant.images.length > 0 ? activeVariant.images : []),
+      product.imgUrl,
+      ...(product.images || [])
+    ])
+  ).filter(Boolean);
 
   const onTouchStart = (e) => {
     setTouchEnd(null);

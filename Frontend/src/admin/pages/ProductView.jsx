@@ -38,9 +38,15 @@ const [touchStartX, setTouchStartX] = useState(null);
   });
 
   const selectedVariant = (selectedVariantIndex !== null && product?.variants?.[selectedVariantIndex]) || null;
-  const allImages = selectedVariant && selectedVariant.images && selectedVariant.images.length > 0
-    ? selectedVariant.images
-    : (product ? [product.imgUrl, ...(product.images || [])].filter(Boolean) : []);
+  const allImages = product
+    ? Array.from(
+        new Set([
+          ...(selectedVariant && selectedVariant.images && selectedVariant.images.length > 0 ? selectedVariant.images : []),
+          product.imgUrl,
+          ...(product.images || [])
+        ])
+      ).filter(Boolean)
+    : [];
 
   const nextSlide = () => {
     setActiveImgIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
