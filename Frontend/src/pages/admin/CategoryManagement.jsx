@@ -19,7 +19,8 @@ import {
   Trash2,
   Check,
   X,
-  Plus
+  Plus,
+  ChevronDown
 } from "lucide-react";
 
 const CategoryManagement = () => {
@@ -38,6 +39,7 @@ const CategoryManagement = () => {
   // Search & Filter states
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
@@ -334,19 +336,55 @@ const CategoryManagement = () => {
           </div>
 
           {/* Status Filter */}
-          <div className="relative min-w-[140px]">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-3 pr-8 py-2 rounded-xl border border-light-border bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none text-xs font-semibold text-dark-navy appearance-none cursor-pointer h-[36px]"
+          <div className="relative min-w-[140px] z-30">
+            <button
+              type="button"
+              onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
+              className="w-full pl-3 pr-8 py-2 rounded-xl border border-light-border bg-white text-xs font-bold text-dark-navy hover:bg-slate-50 transition-all outline-none cursor-pointer h-[36px] flex items-center justify-between shadow-2xs"
             >
-              <option value="">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-gray pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </span>
+              <span>
+                {statusFilter === "" && "All Statuses"}
+                {statusFilter === "active" && "Active"}
+                {statusFilter === "inactive" && "Inactive"}
+              </span>
+              <ChevronDown size={12} className={`text-muted-gray transition-transform duration-300 ${statusDropdownOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {statusDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setStatusDropdownOpen(false)}></div>
+                <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-20 animate-scaleUp text-left">
+                  {[
+                    { key: "", label: "All Statuses", icon: Inbox, color: "text-primary bg-indigo-50/50" },
+                    { key: "active", label: "Active", icon: CheckCircle, color: "text-emerald-500 bg-emerald-50/50" },
+                    { key: "inactive", label: "Inactive", icon: XCircle, color: "text-rose-500 bg-rose-50/50" }
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    const isSelected = statusFilter === item.key;
+                    return (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => {
+                          setStatusFilter(item.key);
+                          setStatusDropdownOpen(false);
+                        }}
+                        className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-2 py-2 transition-all text-left ${
+                          isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                        }`}
+                      >
+                        <div className={`w-5.5 h-5.5 rounded-md flex items-center justify-center ${item.color} transition-all duration-200 group-hover:scale-105`}>
+                          <Icon className="w-3 h-3" />
+                        </div>
+                        <span className="text-[11px] font-bold transition-colors">
+                          {item.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Reset Filters */}

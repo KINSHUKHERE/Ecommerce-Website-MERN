@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signUpApi, googleLogin, uploadAvatarApi } from "../api/AuthApi";
 import { GoogleLogin } from "@react-oauth/google";
-import { Eye, EyeOff, Loader2, User, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Loader2, User, ArrowLeft, ChevronDown } from "lucide-react";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -31,6 +31,7 @@ const SignUp = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [vendorSuccess, setVendorSuccess] = useState(false);
+  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -333,20 +334,61 @@ const SignUp = () => {
               Account Type
             </label>
 
-            <select
-              id="signupRole"
-              name="role"
-              required
-              value={formData.role}
-              onChange={handleChange}
-              className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white cursor-pointer ${
-                errors.role ? "border-red-500" : "border-light-border"
-              }`}
-            >
-              <option value="">Select Account Type</option>
-              <option value="user">User</option>
-              <option value="vendor">Vendor</option>
-            </select>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
+                className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-sm font-semibold bg-white cursor-pointer flex items-center justify-between text-left ${
+                  errors.role ? "border-red-500" : "border-light-border"
+                }`}
+              >
+                <span>
+                  {formData.role === "user" && "User"}
+                  {formData.role === "vendor" && "Vendor"}
+                  {!formData.role && "Select Account Type"}
+                </span>
+                <ChevronDown size={16} className={`text-muted-gray transition-transform duration-300 ${roleDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {roleDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setRoleDropdownOpen(false)}></div>
+                  <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-20 animate-scaleUp text-left">
+                    {[
+                      { key: "user", label: "User", description: "Regular customer shopping profile", color: "text-primary bg-indigo-50/50" },
+                      { key: "vendor", label: "Vendor", description: "Seller profile to create/manage products", color: "text-amber-500 bg-amber-50/50" }
+                    ].map((item) => {
+                      const isSelected = formData.role === item.key;
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => {
+                            handleChange({ target: { name: "role", value: item.key } });
+                            setRoleDropdownOpen(false);
+                          }}
+                          className={`group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-all text-left ${
+                            isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.color} transition-all duration-200 group-hover:scale-105 shrink-0`}>
+                            <User className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold transition-colors">
+                              {item.label}
+                            </span>
+                            <span className="text-[10px] text-muted-gray leading-tight">
+                              {item.description}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
             {errors.role && (
               <p className="text-red-500 text-[11px] font-bold mt-1.5 ml-1">
                 ⚠️ {errors.role}

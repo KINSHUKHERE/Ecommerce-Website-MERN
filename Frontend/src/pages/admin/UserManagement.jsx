@@ -14,7 +14,8 @@ import {
   X,
   Clock,
   CheckCircle,
-  XCircle
+  XCircle,
+  ChevronDown
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { allUsers, deleteUserApi, toggleUserSuspensionApi } from "../../api/AuthApi";
@@ -25,6 +26,7 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState(""); // "", "active", "suspended"
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [toastType, setToastType] = useState("success");
   
@@ -219,16 +221,55 @@ const UserManagement = () => {
           />
         </div>
 
-        <div className="flex gap-2 w-full sm:w-auto">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-light-border rounded-xl px-3 py-2 text-xs font-semibold text-dark-navy bg-white focus:outline-none focus:ring-4 focus:ring-primary/5 h-[38px] cursor-pointer flex-1 sm:flex-none"
+        <div className="flex gap-2 w-full sm:w-auto relative z-30">
+          <button
+            type="button"
+            onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
+            className="border border-light-border rounded-xl px-3 py-2 text-xs font-bold text-dark-navy bg-white hover:bg-slate-50 transition-all outline-none h-[38px] cursor-pointer flex-1 sm:flex-none flex items-center justify-between gap-6 shadow-2xs min-w-[140px]"
           >
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="suspended">Suspended</option>
-          </select>
+            <span>
+              {statusFilter === "" && "All Statuses"}
+              {statusFilter === "active" && "Active"}
+              {statusFilter === "suspended" && "Suspended"}
+            </span>
+            <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${statusDropdownOpen ? "rotate-180" : ""}`} />
+          </button>
+
+          {statusDropdownOpen && (
+            <>
+              <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setStatusDropdownOpen(false)}></div>
+              <div className="absolute right-0 top-full mt-1.5 w-full bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-20 animate-scaleUp text-left min-w-[140px]">
+                {[
+                  { key: "", label: "All Statuses", icon: Users, color: "text-primary bg-indigo-50/50" },
+                  { key: "active", label: "Active", icon: CheckCircle, color: "text-emerald-500 bg-emerald-50/50" },
+                  { key: "suspended", label: "Suspended", icon: XCircle, color: "text-rose-500 bg-rose-50/50" }
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const isSelected = statusFilter === item.key;
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => {
+                        setStatusFilter(item.key);
+                        setStatusDropdownOpen(false);
+                      }}
+                      className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all text-left ${
+                        isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                      }`}
+                    >
+                      <div className={`w-5.5 h-5.5 rounded-md flex items-center justify-center ${item.color} transition-all duration-200 group-hover:scale-105`}>
+                        <Icon className="w-3 h-3" />
+                      </div>
+                      <span className="text-[11px] font-bold transition-colors">
+                        {item.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
 

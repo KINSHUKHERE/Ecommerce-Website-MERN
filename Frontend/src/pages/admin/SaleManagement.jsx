@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Sparkles, Flame, Percent, Check, Loader2, RefreshCw, AlertTriangle, ToggleLeft, ToggleRight, Settings2, Info } from "lucide-react";
+import { Sparkles, Flame, Percent, Check, Loader2, RefreshCw, AlertTriangle, ToggleLeft, ToggleRight, Settings2, Info, ChevronDown, Palette } from "lucide-react";
 import { getGlobalSaleConfig, updateGlobalSaleConfig } from "../../api/SaleApi";
 import { getProduct, updateProduct } from "../../api/ProductApi";
 
@@ -13,6 +13,7 @@ const SaleManagement = () => {
   const [saleName, setSaleName] = useState("");
   const [saleTheme, setSaleTheme] = useState("normal");
   const [configLoading, setConfigLoading] = useState(false);
+  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
 
   // Vendor Specific States
   const [products, setProducts] = useState([]);
@@ -277,21 +278,63 @@ const SaleManagement = () => {
                     className="w-full bg-slate-50 border border-light-border rounded-xl px-4 py-2.5 text-xs font-bold text-dark-navy outline-none focus:bg-white focus:border-primary transition-all"
                   />
                 </div>
-                <div className="w-full sm:w-64 space-y-1.5 text-left">
-                  <label className="text-[10px] font-black text-muted-gray uppercase tracking-widest">Select Festival Theme</label>
-                  <select
-                    value={saleTheme}
-                    onChange={(e) => setSaleTheme(e.target.value)}
-                    className="w-full bg-slate-50 border border-light-border rounded-xl px-4 py-2.5 text-xs font-bold text-dark-navy outline-none focus:bg-white focus:border-primary transition-all h-[38px] cursor-pointer"
+                <div className="w-full sm:w-64 space-y-1.5 text-left relative z-20">
+                  <label className="text-[10px] font-black text-muted-gray uppercase tracking-widest block">Select Festival Theme</label>
+                  <button
+                    type="button"
+                    onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
+                    className="w-full bg-slate-50 border border-light-border rounded-xl px-4 py-2.5 text-xs font-bold text-dark-navy outline-none hover:bg-slate-100 transition-all h-[38px] cursor-pointer flex items-center justify-between shadow-2xs"
                   >
-                    <option value="normal">Normal (Default Theme)</option>
-                    <option value="diwali">Diwali (Warm Orange/Gold)</option>
-                    <option value="summer">Summer (Sunny Sky Blue/Yellow)</option>
-                    <option value="winter">Winter (Cool Frost Cyan/Blue)</option>
-                    <option value="holi">Holi (Vibrant Multi-Color Splash)</option>
-                    <option value="christmas">Christmas (Festive Red/Green)</option>
-                    <option value="yocart">YoCart Special (Premium Neon Violet)</option>
-                  </select>
+                    <span>
+                      {saleTheme === "normal" && "Normal (Default Theme)"}
+                      {saleTheme === "diwali" && "Diwali (Warm Orange/Gold)"}
+                      {saleTheme === "summer" && "Summer (Sunny Sky Blue/Yellow)"}
+                      {saleTheme === "winter" && "Winter (Cool Frost Cyan/Blue)"}
+                      {saleTheme === "holi" && "Holi (Multi-Color Splash)"}
+                      {saleTheme === "christmas" && "Christmas (Red/Green)"}
+                      {saleTheme === "yocart" && "YoCart Special (Neon Violet)"}
+                    </span>
+                    <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${themeDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {themeDropdownOpen && (
+                    <>
+                      <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setThemeDropdownOpen(false)}></div>
+                      <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-20 animate-scaleUp text-left max-h-60 overflow-y-auto">
+                        {[
+                          { key: "normal", label: "Normal (Default Theme)", color: "text-slate-500 bg-slate-50/50" },
+                          { key: "diwali", label: "Diwali (Warm Orange/Gold)", color: "text-amber-500 bg-amber-50/50" },
+                          { key: "summer", label: "Summer (Sunny Sky Blue/Yellow)", color: "text-yellow-500 bg-yellow-50/50" },
+                          { key: "winter", label: "Winter (Cool Frost Cyan/Blue)", color: "text-cyan-500 bg-cyan-50/50" },
+                          { key: "holi", label: "Holi (Vibrant Multi-Color Splash)", color: "text-rose-500 bg-rose-50/50" },
+                          { key: "christmas", label: "Christmas (Festive Red/Green)", color: "text-emerald-500 bg-emerald-50/50" },
+                          { key: "yocart", label: "YoCart Special (Premium Neon Violet)", color: "text-primary bg-indigo-50/50" }
+                        ].map((item) => {
+                          const isSelected = saleTheme === item.key;
+                          return (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => {
+                                setSaleTheme(item.key);
+                                setThemeDropdownOpen(false);
+                              }}
+                              className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 transition-all text-left mt-0.5 ${
+                                isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                              }`}
+                            >
+                              <div className={`w-5.5 h-5.5 rounded-md flex items-center justify-center ${item.color} transition-all duration-200 group-hover:scale-105 shrink-0`}>
+                                <Palette className="w-3 h-3" />
+                              </div>
+                              <span className="text-[11px] font-bold transition-colors">
+                                {item.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="flex justify-end">

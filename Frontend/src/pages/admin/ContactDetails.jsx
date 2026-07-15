@@ -11,7 +11,10 @@ import {
   Inbox,
   Check,
   X,
-  Users
+  Users,
+  ChevronDown,
+  Calendar,
+  ArrowUpDown
 } from "lucide-react";
 
 const ContactDetails = () => {
@@ -24,6 +27,8 @@ const ContactDetails = () => {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("all"); // 'all', 'today', 'week'
   const [sortOrder, setSortOrder] = useState("newest"); // 'newest', 'oldest'
+  const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [queryTypeFilter, setQueryTypeFilter] = useState("user"); // 'user', 'vendor'
 
   const fetchContact = async () => {
@@ -225,24 +230,111 @@ const ContactDetails = () => {
           </div>
 
           <div className="flex gap-2">
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="border border-light-border rounded-xl px-3 py-2 text-xs font-semibold text-dark-navy bg-white focus:outline-none focus:ring-4 focus:ring-primary/5 h-[38px] cursor-pointer"
-            >
-              <option value="all">All Dates</option>
-              <option value="today">Received Today</option>
-              <option value="week">Past 7 Days</option>
-            </select>
+            <div className="relative min-w-[130px] z-30">
+              <button
+                type="button"
+                onClick={() => {
+                  setDateDropdownOpen(!dateDropdownOpen);
+                  setSortDropdownOpen(false);
+                }}
+                className="w-full border border-light-border rounded-xl px-3 py-2 text-xs font-bold text-dark-navy bg-white hover:bg-slate-50 transition-all outline-none h-[38px] cursor-pointer flex items-center justify-between gap-4 shadow-2xs"
+              >
+                <span>
+                  {dateFilter === "all" && "All Dates"}
+                  {dateFilter === "today" && "Received Today"}
+                  {dateFilter === "week" && "Past 7 Days"}
+                </span>
+                <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${dateDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
 
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="border border-light-border rounded-xl px-3 py-2 text-xs font-semibold text-dark-navy bg-white focus:outline-none focus:ring-4 focus:ring-primary/5 h-[38px] cursor-pointer"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-            </select>
+              {dateDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setDateDropdownOpen(false)}></div>
+                  <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-20 animate-scaleUp text-left min-w-[140px]">
+                    {[
+                      { key: "all", label: "All Dates", icon: Calendar, color: "text-primary bg-indigo-50/50" },
+                      { key: "today", label: "Received Today", icon: Clock, color: "text-amber-500 bg-amber-50/50" },
+                      { key: "week", label: "Past 7 Days", icon: Clock, color: "text-indigo-500 bg-indigo-50/50" }
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      const isSelected = dateFilter === item.key;
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => {
+                            setDateFilter(item.key);
+                            setDateDropdownOpen(false);
+                          }}
+                          className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-2 py-2 transition-all text-left ${
+                            isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                          }`}
+                        >
+                          <div className={`w-5.5 h-5.5 rounded-md flex items-center justify-center ${item.color} transition-all duration-200 group-hover:scale-105`}>
+                            <Icon className="w-3 h-3" />
+                          </div>
+                          <span className="text-[11px] font-bold transition-colors">
+                            {item.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="relative min-w-[130px] z-30">
+              <button
+                type="button"
+                onClick={() => {
+                  setSortDropdownOpen(!sortDropdownOpen);
+                  setDateDropdownOpen(false);
+                }}
+                className="w-full border border-light-border rounded-xl px-3 py-2 text-xs font-bold text-dark-navy bg-white hover:bg-slate-50 transition-all outline-none h-[38px] cursor-pointer flex items-center justify-between gap-4 shadow-2xs"
+              >
+                <span>
+                  {sortOrder === "newest" && "Newest First"}
+                  {sortOrder === "oldest" && "Oldest First"}
+                </span>
+                <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${sortDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {sortDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setSortDropdownOpen(false)}></div>
+                  <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-light-border/60 rounded-2xl shadow-md p-1.5 z-20 animate-scaleUp text-left min-w-[140px]">
+                    {[
+                      { key: "newest", label: "Newest First", icon: ArrowUpDown, color: "text-primary bg-indigo-50/50" },
+                      { key: "oldest", label: "Oldest First", icon: ArrowUpDown, color: "text-indigo-500 bg-indigo-50/50" }
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      const isSelected = sortOrder === item.key;
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => {
+                            setSortOrder(item.key);
+                            setSortDropdownOpen(false);
+                          }}
+                          className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-2 py-2 transition-all text-left ${
+                            isSelected ? "bg-primary/5 text-primary font-black" : "text-muted-gray hover:bg-slate-50 hover:text-dark-navy"
+                          }`}
+                        >
+                          <div className={`w-5.5 h-5.5 rounded-md flex items-center justify-center ${item.color} transition-all duration-200 group-hover:scale-105`}>
+                            <Icon className="w-3 h-3" />
+                          </div>
+                          <span className="text-[11px] font-bold transition-colors">
+                            {item.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
 
             <button
               onClick={handleResetFilters}
