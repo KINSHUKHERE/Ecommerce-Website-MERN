@@ -356,8 +356,7 @@ const Navbar = () => {
                           { label: "My Orders", path: "/orders", icon: ShoppingBag, color: "text-amber-500 bg-amber-50/50" },
                           { label: "Wishlist", path: "/wishlist", icon: Heart, color: "text-rose-500 bg-rose-50/50" },
                           { label: "Cart", path: "/cart", icon: ShoppingCart, color: "text-indigo-500 bg-indigo-50/50" },
-                          { label: "Saved Addresses", path: "/profile?tab=addresses", icon: MapPin, color: "text-teal-500 bg-teal-50/50" },
-                          { label: "Account Settings", path: "/profile?tab=settings", icon: Settings, color: "text-slate-500 bg-slate-50/50" }
+                          { label: "Saved Addresses", path: "/addresses", icon: MapPin, color: "text-teal-500 bg-teal-50/50" }
                         ].map((item) => {
                           const Icon = item.icon;
                           const isItemActive = location.pathname + location.search === item.path;
@@ -653,8 +652,7 @@ const Navbar = () => {
               { label: "My Orders", path: "/orders", icon: ShoppingBag, color: "text-amber-500 bg-amber-50/50" },
               { label: "Wishlist", path: "/wishlist", icon: Heart, color: "text-rose-500 bg-rose-50/50" },
               { label: "Cart", path: "/cart", icon: ShoppingCart, color: "text-indigo-500 bg-indigo-50/50" },
-              { label: "Saved Addresses", path: "/profile?tab=addresses", icon: MapPin, color: "text-teal-500 bg-teal-50/50" },
-              { label: "Account Settings", path: "/profile?tab=settings", icon: Settings, color: "text-slate-500 bg-slate-50/50" }
+              { label: "Saved Addresses", path: "/addresses", icon: MapPin, color: "text-teal-500 bg-teal-50/50" }
             ].map((item) => {
               const Icon = item.icon;
               return (

@@ -23,6 +23,7 @@ import VendorSupport from "../pages/admin/VendorSupport";
 import SaleManagement from "../pages/admin/SaleManagement";
 import ProductReviews from "../pages/admin/ProductReviews";
 import Profile from "../pages/Profile";
+import Addresses from "../pages/Addresses";
 import MyOrders from "../pages/MyOrders";
 import Wishlist from "../pages/Wishlist";
 import Checkout from "../pages/Checkout";
@@ -151,7 +152,7 @@ const AppRoutes = () => {
         }
       } catch (err) {
         localStorage.removeItem("user");
-        const protectedPaths = ["/cart", "/profile", "/checkout", "/admin", "/create-product", "/contact-details", "/order-details", "/categories", "/brands", "/complete-profile"];
+        const protectedPaths = ["/cart", "/profile", "/addresses", "/checkout", "/admin", "/create-product", "/contact-details", "/order-details", "/categories", "/brands", "/complete-profile"];
         const isProtected = protectedPaths.some(path => location.pathname.startsWith(path));
         if (isProtected) {
           navigate("/login", { replace: true });
@@ -270,6 +271,7 @@ const AppRoutes = () => {
         <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
         <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/addresses" element={<ProtectedRoute><Addresses /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
         <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="/become-seller" element={<ProtectedRoute><BecomeSeller /></ProtectedRoute>} />
