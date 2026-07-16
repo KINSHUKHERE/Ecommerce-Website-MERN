@@ -37,7 +37,7 @@ const CompleteProfile = lazy(() => import("../pages/CompleteProfile"));
 const BecomeSeller = lazy(() => import("../pages/BecomeSeller"));
 
 // Import Admin Layout & New Pages
-const AdminLayout = lazy(() => import("../admin/components/AdminLayout"));
+import AdminLayout from "../admin/components/AdminLayout";
 const AdminProducts = lazy(() => import("../admin/pages/AdminProducts"));
 const ProductView = lazy(() => import("../admin/pages/ProductView"));
 const ProductEdit = lazy(() => import("../admin/pages/ProductEdit"));
@@ -55,7 +55,14 @@ const UserLayout = () => {
     <div className="flex flex-col min-h-screen w-full">
       <Navbar />
       <main className="flex-grow flex flex-col w-full">
-        <Outlet />
+        <Suspense fallback={
+          <div className="flex flex-col items-center justify-center py-20 w-full min-h-[300px]">
+            <Loader2 className="animate-spin text-primary w-8 h-8 mb-2" />
+            <span className="text-xs font-semibold text-muted-gray">Loading page...</span>
+          </div>
+        }>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );

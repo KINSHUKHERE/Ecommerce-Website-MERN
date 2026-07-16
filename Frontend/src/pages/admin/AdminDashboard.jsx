@@ -34,6 +34,20 @@ const ChartFallback = () => (
   </div>
 );
 
+const LeaderboardSkeleton = () => (
+  <div className="space-y-3">
+    {[1, 2, 3, 4].map((i) => (
+      <div key={i} className="p-3 bg-slate-50/65 border border-slate-100/50 rounded-xl flex items-center justify-between animate-pulse h-[50px]">
+        <div className="flex items-center gap-2.5 w-1/2">
+          <span className="w-5 h-5 rounded-full bg-slate-200 shrink-0"></span>
+          <div className="h-3.5 w-24 bg-slate-200 rounded"></div>
+        </div>
+        <div className="h-3.5 w-16 bg-slate-200 rounded"></div>
+      </div>
+    ))}
+  </div>
+);
+
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTimeFilter, setSelectedTimeFilter] = useState("all");
@@ -364,13 +378,6 @@ const AdminDashboard = () => {
 
   const firstName = currentUser?.name ? currentUser.name.split(" ")[0] : "User";
 
-  if (loading) {
-    return (
-      <div className="py-6 sm:py-8 px-2">
-        <DashboardSkeleton />
-      </div>
-    );
-  }
 
   if (isVendorPendingOrSuspended) {
     return (
@@ -438,31 +445,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-10 text-dark-navy antialiased bg-[#F8FAFC]/30 p-1 sm:p-6 rounded-[24px]">
-      {/* Insufficient Wallet Warning Banner */}
-      {isVendorInsufficientBalance && (
-        <div className="bg-red-50 border border-red-100 rounded-3xl p-5 sm:p-6 text-left flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fadeIn">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0 border border-red-100">
-              <AlertTriangle size={24} />
-            </div>
-            <div>
-              <h3 className="text-sm font-extrabold text-red-655 uppercase tracking-widest leading-none mb-1.5">
-                Listing & Selling Locked: Insufficient Balance
-              </h3>
-              <p className="text-xs text-muted-gray leading-relaxed font-semibold">
-                Your prepaid wallet balance of <strong className="text-dark-navy">₹{(walletData.walletBalance || 0).toLocaleString("en-IN")}</strong> is below the minimum required balance of <strong className="text-dark-navy">₹{(walletData.requiredMinBalance || 0).toLocaleString("en-IN")}</strong>. Recharge to unlock product creation.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowRechargeModal(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-5 py-3 rounded-xl cursor-pointer transition shrink-0 flex items-center justify-center gap-1.5 shadow-md"
-          >
-            + Recharge Wallet
-          </button>
-        </div>
-      )}
-
       {/* 1. Hero / Header Welcome & Date Panel */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-slate-200/80 text-left">
         <div>
@@ -531,63 +513,91 @@ const AdminDashboard = () => {
                 </span>
               </div>
               <p className="mt-1.5 text-xl sm:text-2xl font-black text-dark-navy tracking-tight leading-none">
-                ₹{analytics.totalRev.toLocaleString("en-IN")}
+                {loading ? (
+                  <span className="inline-block h-7 w-32 bg-slate-200 rounded animate-pulse mt-1"></span>
+                ) : (
+                  `₹${analytics.totalRev.toLocaleString("en-IN")}`
+                )}
               </p>
 
               {/* Cash vs Prepaid Breakdown */}
               <div className="mt-3 grid grid-cols-2 gap-4 border-t border-teal-100/40 pt-2 text-[10px] sm:text-[11px] font-semibold text-muted-gray">
                 <div>
                   <span className="block text-[8px] uppercase tracking-widest text-[#64748B]">Prepaid Sales</span>
-                  <span className="text-dark-navy font-bold text-xs">₹{analytics.prepaidRev.toLocaleString("en-IN")}</span>
+                  {loading ? (
+                    <span className="inline-block h-4 w-16 bg-slate-200 rounded animate-pulse mt-0.5"></span>
+                  ) : (
+                    <span className="text-dark-navy font-bold text-xs">₹{analytics.prepaidRev.toLocaleString("en-IN")}</span>
+                  )}
                 </div>
                 <div>
                   <span className="block text-[8px] uppercase tracking-widest text-[#64748B]">Cash Sales (COD)</span>
-                  <span className="text-dark-navy font-bold text-xs">₹{analytics.cashRev.toLocaleString("en-IN")}</span>
+                  {loading ? (
+                    <span className="inline-block h-4 w-16 bg-slate-200 rounded animate-pulse mt-0.5"></span>
+                  ) : (
+                    <span className="text-dark-navy font-bold text-xs">₹{analytics.cashRev.toLocaleString("en-IN")}</span>
+                  )}
                 </div>
               </div>
             </div>
             <div className="mt-3 pt-3 border-t border-teal-100/40 flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold">
-              {analytics.revChange >= 0 ? (
-                <span className="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-extrabold flex items-center gap-0.5">
-                  ↑ {analytics.revChange.toFixed(1)}%
-                </span>
+              {loading ? (
+                <span className="inline-block h-4 w-24 bg-slate-100 rounded animate-pulse"></span>
               ) : (
-                <span className="text-red-500 bg-red-50 px-1.5 py-0.5 rounded font-extrabold flex items-center gap-0.5">
-                  ↓ {Math.abs(analytics.revChange).toFixed(1)}%
-                </span>
+                <>
+                  {analytics.revChange >= 0 ? (
+                    <span className="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-extrabold flex items-center gap-0.5">
+                      ↑ {analytics.revChange.toFixed(1)}%
+                    </span>
+                  ) : (
+                    <span className="text-red-500 bg-red-50 px-1.5 py-0.5 rounded font-extrabold flex items-center gap-0.5">
+                      ↓ {Math.abs(analytics.revChange).toFixed(1)}%
+                    </span>
+                  )}
+                  <span className="text-muted-gray/80 font-bold">vs last month</span>
+                </>
               )}
-              <span className="text-[#64748B]">Compared to last month</span>
             </div>
           </div>
 
-          {/* Prepaid Wallet Card (Vendor Only) */}
-          {isVendor && (
+          {/* Wallet Status Card (Vendor Only) */}
+          {!isAdmin && (
             <div className="bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 border border-indigo-100 rounded-2xl p-4 sm:p-5 shadow-2xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group text-left flex flex-col justify-between min-h-[150px]">
               <div className="absolute -bottom-4 -right-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none transform rotate-12">
-                <IndianRupee size={90} className="text-indigo-600" />
+                <IndianRupee size={90} className="text-indigo-650" />
               </div>
               <div>
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] sm:text-xs font-extrabold text-[#64748B] uppercase tracking-widest block">
-                    Prepaid Wallet
+                    Wallet Balance
                   </span>
-                  <button
+                  <button 
                     onClick={() => setShowRechargeModal(true)}
-                    className="flex items-center gap-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider rounded-xl shadow-xs hover:shadow-md transition-all active:scale-95 cursor-pointer outline-none border-none"
+                    className="text-[9px] font-extrabold uppercase bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-full tracking-wider hover:bg-indigo-600 hover:text-white cursor-pointer transition-colors"
                   >
-                    <Plus size={11} className="stroke-[3]" />
-                    <span>Recharge</span>
+                    + Top Up
                   </button>
                 </div>
                 <p className="mt-1.5 text-xl sm:text-2xl font-black text-dark-navy tracking-tight leading-none">
-                  ₹{(walletData.walletBalance || 0).toLocaleString("en-IN")}
+                  {loading ? (
+                    <span className="inline-block h-7 w-24 bg-slate-200 rounded animate-pulse mt-1"></span>
+                  ) : (
+                    `₹${(walletData.walletBalance || 0).toLocaleString("en-IN")}`
+                  )}
                 </p>
                 <div className="mt-2 text-[10px] text-muted-gray font-semibold">
-                  Required Minimum: <span className="font-extrabold text-dark-navy">₹{(walletData.requiredMinBalance || 0).toLocaleString("en-IN")}</span>
+                  Required Minimum:{" "}
+                  {loading ? (
+                    <span className="inline-block h-3.5 w-12 bg-slate-200 rounded animate-pulse align-middle"></span>
+                  ) : (
+                    <span className="font-extrabold text-dark-navy">₹{(walletData.requiredMinBalance || 0).toLocaleString("en-IN")}</span>
+                  )}
                 </div>
               </div>
               <div className="mt-3 pt-3 border-t border-indigo-100/40 text-[10px] sm:text-[11px] font-semibold text-[#64748B]">
-                {walletData.walletBalance < walletData.requiredMinBalance ? (
+                {loading ? (
+                  <span className="inline-block h-3.5 w-32 bg-slate-100 rounded animate-pulse"></span>
+                ) : walletData.walletBalance < walletData.requiredMinBalance ? (
                   <span className="text-red-500 font-bold">⚠️ Insufficient Wallet Balance</span>
                 ) : (
                   <span className="text-emerald-600 font-bold">✓ Wallet Status Healthy</span>
@@ -602,12 +612,14 @@ const AdminDashboard = () => {
             icon={ShoppingCart}
             badge="Billing"
             change={analytics.ordChange}
+            loading={loading}
           />
           <KpiCard
             title="Listed Products"
             value={rawData.totalPro}
             icon={Package}
             badge="Catalog"
+            loading={loading}
           />
           {isAdmin ? (
             <KpiCard
@@ -616,6 +628,7 @@ const AdminDashboard = () => {
               icon={Users}
               badge="Growth"
               change={analytics.custChange}
+              loading={loading}
             />
           ) : (
             <KpiCard
@@ -623,6 +636,7 @@ const AdminDashboard = () => {
               value={analytics.pendingOrdersCount}
               icon={Clock}
               badge="Fulfillment"
+              loading={loading}
             />
           )}
         </div>
@@ -641,24 +655,28 @@ const AdminDashboard = () => {
               icon={Users}
               badge="Partners"
               change={analytics.vendChange}
+              loading={loading}
             />
             <KpiCard
               title="Pending Approvals"
               value={rawData.pendingVendors}
               icon={Clock}
               badge="Requests"
+              loading={loading}
             />
             <KpiCard
               title="Active Sellers"
               value={rawData.activeVendors}
               icon={Users}
               badge="Live"
+              loading={loading}
             />
             <KpiCard
               title="Queries Received"
               value={rawData.totalCon}
               icon={MessageSquare}
               badge="Support"
+              loading={loading}
             />
           </div>
         </div>
@@ -683,10 +701,11 @@ const AdminDashboard = () => {
 
           <form onSubmit={handleSaveCommissionSettings} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div>
-              <label className="block mb-1.5 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+              <label htmlFor="priceThreshold" className="block mb-1.5 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
                 Price Threshold (₹)
               </label>
               <input
+                id="priceThreshold"
                 type="number"
                 value={settingsFormData.priceThreshold}
                 onChange={(e) => setSettingsFormData(prev => ({ ...prev, priceThreshold: e.target.value }))}
@@ -695,10 +714,11 @@ const AdminDashboard = () => {
               />
             </div>
             <div>
-              <label className="block mb-1.5 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+              <label htmlFor="commissionUnderThreshold" className="block mb-1.5 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
                 Under Threshold Rate (%)
               </label>
               <input
+                id="commissionUnderThreshold"
                 type="number"
                 value={settingsFormData.commissionUnderThreshold}
                 onChange={(e) => setSettingsFormData(prev => ({ ...prev, commissionUnderThreshold: e.target.value }))}
@@ -707,10 +727,11 @@ const AdminDashboard = () => {
               />
             </div>
             <div>
-              <label className="block mb-1.5 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
+              <label htmlFor="commissionOverThreshold" className="block mb-1.5 text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">
                 At/Over Threshold Rate (%)
               </label>
               <input
+                id="commissionOverThreshold"
                 type="number"
                 value={settingsFormData.commissionOverThreshold}
                 onChange={(e) => setSettingsFormData(prev => ({ ...prev, commissionOverThreshold: e.target.value }))}
@@ -813,15 +834,17 @@ const AdminDashboard = () => {
             </Link>
           )}
 
-          <div
+          <button
+            type="button"
             onClick={handleExportCSV}
-            className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer"
+            aria-label="Export Sales data to CSV"
+            className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-pointer w-full"
           >
-            <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2">
+            <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F9D8A] flex items-center justify-center group-hover:scale-110 transition-transform mb-2 mx-auto">
               <Download size={20} />
             </div>
             <span className="text-[13px] font-extrabold text-[#0F172A]">Export Sales</span>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -829,16 +852,20 @@ const AdminDashboard = () => {
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-2 min-h-[350px]">
           <Suspense fallback={<ChartFallback />}>
-            <SalesTrendChart
-              data={analytics.salesTrendData}
-              timeFilter={selectedTimeFilter}
-              setTimeFilter={setSelectedTimeFilter}
-            />
+            {loading ? (
+              <ChartFallback />
+            ) : (
+              <SalesTrendChart
+                data={analytics.salesTrendData}
+                timeFilter={selectedTimeFilter}
+                setTimeFilter={setSelectedTimeFilter}
+              />
+            )}
           </Suspense>
         </div>
         <div className="min-h-[350px]">
           <Suspense fallback={<ChartFallback />}>
-            <OrdersPieChart data={analytics.ordersPieData} />
+            {loading ? <ChartFallback /> : <OrdersPieChart data={analytics.ordersPieData} />}
           </Suspense>
         </div>
       </div>
@@ -854,7 +881,11 @@ const AdminDashboard = () => {
               {isAdmin ? "Commission Earned" : "Commission Paid"}
             </span>
             <span className="text-lg font-black text-[#0F9D8A] block mt-2">
-              ₹{(isAdmin ? analytics.totalCommissionEarned : (analytics.vendorCommStats?.totalCommissionAllTime || 0)).toLocaleString("en-IN")}
+              {loading ? (
+                <span className="inline-block h-5 w-20 bg-slate-200 rounded animate-pulse mt-0.5"></span>
+              ) : (
+                `₹${(isAdmin ? analytics.totalCommissionEarned : (analytics.vendorCommStats?.totalCommissionAllTime || 0)).toLocaleString("en-IN")}`
+              )}
             </span>
             <span className="text-[10px] text-muted-gray/80 mt-1 block font-bold uppercase tracking-wider">Dynamic Tier</span>
           </div>
@@ -864,7 +895,11 @@ const AdminDashboard = () => {
               Avg Order Value
             </span>
             <span className="text-lg font-black text-dark-navy block mt-2">
-              ₹{Math.round(analytics.avgOrderValue).toLocaleString("en-IN")}
+              {loading ? (
+                <span className="inline-block h-5 w-20 bg-slate-200 rounded animate-pulse mt-0.5"></span>
+              ) : (
+                `₹${Math.round(analytics.avgOrderValue).toLocaleString("en-IN")}`
+              )}
             </span>
             <span className="text-[10px] text-muted-gray/80 mt-1 block font-bold uppercase tracking-wider">AOV this period</span>
           </div>
@@ -874,7 +909,11 @@ const AdminDashboard = () => {
               Conversion Rate
             </span>
             <span className="text-lg font-black text-emerald-600 block mt-2">
-              {analytics.conversionRate}%
+              {loading ? (
+                <span className="inline-block h-5 w-16 bg-slate-200 rounded animate-pulse mt-0.5"></span>
+              ) : (
+                `${analytics.conversionRate}%`
+              )}
             </span>
             <span className="text-[10px] text-muted-gray/80 mt-1 block font-bold uppercase tracking-wider">Delivered Ratio</span>
           </div>
@@ -883,28 +922,40 @@ const AdminDashboard = () => {
             <span className="text-[11px] font-extrabold text-muted-gray uppercase tracking-wider block leading-tight">
               Monthly Growth
             </span>
-            <span className={`text-lg font-black block mt-2 ${analytics.revChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-              {analytics.revChange >= 0 ? "+" : ""}{analytics.revChange.toFixed(1)}%
-            </span>
+            {loading ? (
+              <span className="inline-block h-5 w-16 bg-slate-200 rounded animate-pulse mt-2.5"></span>
+            ) : (
+              <span className={`text-lg font-black block mt-2 ${analytics.revChange >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                {analytics.revChange >= 0 ? "+" : ""}{analytics.revChange.toFixed(1)}%
+              </span>
+            )}
             <span className="text-[10px] text-muted-gray/80 mt-1 block font-bold uppercase tracking-wider">MoM Revenue Delta</span>
           </div>
 
           <div className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg transition-all duration-300">
-            <span className="text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider block leading-tight truncate">
+            <span className="text-[11px] font-extrabold text-[#475569] uppercase tracking-wider block leading-tight truncate">
               Top Category
             </span>
             <span className="text-sm sm:text-base font-black text-dark-navy block mt-2 truncate">
-              {analytics.topCategory}
+              {loading ? (
+                <span className="inline-block h-5 w-20 bg-slate-200 rounded animate-pulse mt-0.5"></span>
+              ) : (
+                analytics.topCategory
+              )}
             </span>
             <span className="text-[10px] text-muted-gray/80 mt-1.5 block font-bold uppercase tracking-wider">Top Volume</span>
           </div>
 
           <div className="bg-white border border-slate-200/80 rounded-[20px] p-5 shadow-2xs hover:shadow-lg transition-all duration-300">
-            <span className="text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider block leading-tight truncate">
+            <span className="text-[11px] font-extrabold text-[#475569] uppercase tracking-wider block leading-tight truncate">
               Best Selling Brand
             </span>
             <span className="text-sm sm:text-base font-black text-dark-navy block mt-2 truncate">
-              {analytics.topBrand}
+              {loading ? (
+                <span className="inline-block h-5 w-20 bg-slate-200 rounded animate-pulse mt-0.5"></span>
+              ) : (
+                analytics.topBrand
+              )}
             </span>
             <span className="text-[10px] text-muted-gray/80 mt-1.5 block font-bold uppercase tracking-wider">Top Brand</span>
           </div>
@@ -925,7 +976,13 @@ const AdminDashboard = () => {
           </p>
         </div>
         <div className="bg-gradient-to-br from-teal-500/10 to-teal-500/5 border border-teal-100 rounded-xl p-5 flex flex-col justify-center h-full text-left">
-          {isAdmin ? (
+          {loading ? (
+            <div className="animate-pulse space-y-2">
+              <div className="h-3 w-32 bg-slate-200 rounded"></div>
+              <div className="h-6 w-24 bg-slate-200 rounded"></div>
+              <div className="h-2 w-28 bg-slate-100 rounded"></div>
+            </div>
+          ) : isAdmin ? (
             <>
               <span className="text-[10px] font-extrabold text-muted-gray uppercase tracking-widest">Total Commission Collected</span>
               <span className="text-2xl font-black text-[#0F9D8A] mt-1">₹{analytics.totalCommissionEarned.toLocaleString("en-IN")}</span>
@@ -948,12 +1005,12 @@ const AdminDashboard = () => {
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         <div>
           <Suspense fallback={<ChartFallback />}>
-            <CategoryChart data={analytics.categoryCountData} />
+            {loading ? <ChartFallback /> : <CategoryChart data={analytics.categoryCountData} />}
           </Suspense>
         </div>
         <div>
           <Suspense fallback={<ChartFallback />}>
-            <InventoryChart data={analytics.inventoryData} />
+            {loading ? <ChartFallback /> : <InventoryChart data={analytics.inventoryData} />}
           </Suspense>
         </div>
       </div>
@@ -962,7 +1019,17 @@ const AdminDashboard = () => {
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 text-left">
         {/* Top Products */}
         <div>
-          <TopProductsChart data={analytics.topProductsData} />
+          {loading ? (
+            <div className="bg-white border border-slate-200/80 rounded-[20px] p-6 shadow-2xs h-full flex flex-col justify-between">
+              <div>
+                <div className="h-4 w-36 bg-slate-200 rounded mb-1"></div>
+                <div className="h-3 w-56 bg-slate-100 rounded mb-5"></div>
+              </div>
+              <LeaderboardSkeleton />
+            </div>
+          ) : (
+            <TopProductsChart data={analytics.topProductsData} />
+          )}
         </div>
 
         {isAdmin ? (
@@ -973,7 +1040,9 @@ const AdminDashboard = () => {
                 <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
                   Top Performing Vendors
                 </h3>
-                {analytics.topVendors.length === 0 ? (
+                {loading ? (
+                  <LeaderboardSkeleton />
+                ) : analytics.topVendors.length === 0 ? (
                   <p className="text-xs text-muted-gray font-bold py-6 text-center">No vendor statistics compiled</p>
                 ) : (
                   <div className="space-y-3">
@@ -1014,7 +1083,9 @@ const AdminDashboard = () => {
                 <h3 className="text-sm font-extrabold text-dark-navy tracking-tight mb-4">
                   Top Customer Buyers
                 </h3>
-                {analytics.topBuyers.length === 0 ? (
+                {loading ? (
+                  <LeaderboardSkeleton />
+                ) : analytics.topBuyers.length === 0 ? (
                   <p className="text-xs text-muted-gray font-bold py-6 text-center">No customer statistics compiled</p>
                 ) : (
                   <div className="space-y-3">
@@ -1082,7 +1153,13 @@ const AdminDashboard = () => {
             <h3 className="text-[20px] font-black text-dark-navy tracking-tight mb-4">
               Recent Orders List
             </h3>
-            {analytics.recentOrders.length === 0 ? (
+            {loading ? (
+              <div className="space-y-3 py-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-10 bg-slate-100 rounded-xl animate-pulse w-full"></div>
+                ))}
+              </div>
+            ) : analytics.recentOrders.length === 0 ? (
               <p className="text-xs text-muted-gray font-bold py-12 text-center">No recent orders found</p>
             ) : (
               <div className="overflow-x-auto">
@@ -1139,28 +1216,44 @@ const AdminDashboard = () => {
             Recent Activity Feed
           </h3>
           <div className="relative border-l border-slate-100 ml-3.5 pl-6 space-y-6">
-            {analytics.sortedActivities.map((act, idx) => (
-              <div key={idx} className="relative">
-                {/* Icon wrapper badge */}
-                <span className="absolute -left-[37px] top-0.5 w-6 h-6 rounded-full bg-white border border-slate-200/80 shadow-xs flex items-center justify-center text-xs">
-                  {act.icon}
-                </span>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[13px] font-bold text-dark-navy leading-none">{act.text}</span>
-                    <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${act.badgeColor}`}>
-                      {act.type}
-                    </span>
+            {loading ? (
+              <div className="space-y-4 py-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex gap-3 animate-pulse">
+                    <div className="w-8 h-8 rounded-full bg-slate-200 shrink-0"></div>
+                    <div className="space-y-1.5 w-full">
+                      <div className="h-3.5 w-3/4 bg-slate-200 rounded"></div>
+                      <div className="h-2.5 w-1/2 bg-slate-100 rounded"></div>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-muted-gray font-semibold mt-1">{act.meta}</p>
-                  <span className="text-[10px] text-slate-400 font-bold block mt-1.5">
-                    {new Date(act.timestamp).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })} • {new Date(act.timestamp).toLocaleDateString("en-IN", { day: 'numeric', month: 'short' })}
-                  </span>
-                </div>
+                ))}
               </div>
-            ))}
-            {analytics.sortedActivities.length === 0 && (
-              <p className="text-xs text-muted-gray text-center py-6">No recent platform activities recorded.</p>
+            ) : (
+              <>
+                {analytics.sortedActivities.map((act, idx) => (
+                  <div key={idx} className="relative">
+                    {/* Icon wrapper badge */}
+                    <span className="absolute -left-[37px] top-0.5 w-6 h-6 rounded-full bg-white border border-slate-200/80 shadow-xs flex items-center justify-center text-xs">
+                      {act.icon}
+                    </span>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[13px] font-bold text-dark-navy leading-none">{act.text}</span>
+                        <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${act.badgeColor}`}>
+                          {act.type}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-gray font-semibold mt-1">{act.meta}</p>
+                      <span className="text-[10px] text-slate-400 font-bold block mt-1.5">
+                        {new Date(act.timestamp).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })} • {new Date(act.timestamp).toLocaleDateString("en-IN", { day: 'numeric', month: 'short' })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                {analytics.sortedActivities.length === 0 && (
+                  <p className="text-xs text-muted-gray text-center py-6">No recent platform activities recorded.</p>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -1220,6 +1313,31 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Insufficient Wallet Warning Banner (Rendered at bottom to prevent CLS shift of above-the-fold content) */}
+      {isVendorInsufficientBalance && (
+        <div className="bg-red-50 border border-red-100 rounded-3xl p-5 sm:p-6 text-left flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fadeIn mt-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center shrink-0 border border-red-100">
+              <AlertTriangle size={24} />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-red-655 uppercase tracking-widest leading-none mb-1.5">
+                Listing & Selling Locked: Insufficient Balance
+              </h3>
+              <p className="text-xs text-muted-gray leading-relaxed font-semibold">
+                Your prepaid wallet balance of <strong className="text-dark-navy">₹{(walletData.walletBalance || 0).toLocaleString("en-IN")}</strong> is below the minimum required balance of <strong className="text-dark-navy">₹{(walletData.requiredMinBalance || 0).toLocaleString("en-IN")}</strong>. Recharge to unlock product creation.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowRechargeModal(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-5 py-3 rounded-xl cursor-pointer transition shrink-0 flex items-center justify-center gap-1.5 shadow-md"
+          >
+            + Recharge Wallet
+          </button>
+        </div>
+      )}
+
       {/* WALLET RECHARGE MODAL */}
       {showRechargeModal && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fadeIn">
@@ -1234,8 +1352,9 @@ const AdminDashboard = () => {
               </p>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest block">Recharge Amount (₹)</label>
+              <label htmlFor="walletRechargeAmount" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest block">Recharge Amount (₹)</label>
               <input
+                id="walletRechargeAmount"
                 type="number"
                 placeholder="Enter amount (e.g. 500)"
                 value={rechargeAmount}

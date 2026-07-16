@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
-import { Menu, LogOut, ChevronDown, User, Shield } from "lucide-react";
+import { Menu, LogOut, ChevronDown, User, Shield, Loader2 } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 import logo from "../../assets/logo.png";
 import { getGlobalSaleConfig } from "../../api/SaleApi";
@@ -106,6 +106,7 @@ const AdminLayout = ({ children }) => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
+              aria-label="Open Sidebar Menu"
               className="p-1.5 text-muted-gray hover:text-dark-navy rounded-xl hover:bg-slate-50 lg:hidden cursor-pointer"
             >
               <Menu size={20} />
@@ -195,7 +196,14 @@ const AdminLayout = ({ children }) => {
 
         {/* Scrollable Content Body */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-6 pb-20 bg-soft-bg">
-          {children || <Outlet />}
+          <Suspense fallback={
+            <div className="flex flex-col items-center justify-center py-20 w-full min-h-[300px]">
+              <Loader2 className="animate-spin text-primary w-8 h-8 mb-2" />
+              <span className="text-xs font-semibold text-muted-gray">Loading page content...</span>
+            </div>
+          }>
+            {children || <Outlet />}
+          </Suspense>
         </main>
       </div>
     </div>

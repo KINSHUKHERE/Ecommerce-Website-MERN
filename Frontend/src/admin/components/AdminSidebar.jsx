@@ -189,6 +189,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           </Link>
           <button
             onClick={() => setIsOpen(false)}
+            aria-label="Close Sidebar Navigation"
             className="p-1.5 text-muted-gray hover:text-dark-navy lg:hidden cursor-pointer"
           >
             <X size={20} />

@@ -1,6 +1,6 @@
 import React from "react";
 
-const KpiCard = ({ title, value, icon: IconComponent, badge, change, comparisonLabel = "vs last month" }) => {
+const KpiCard = ({ title, value, icon: IconComponent, badge, change, loading = false, comparisonLabel = "vs last month" }) => {
   const isPositive = typeof change === "number" && change > 0;
   const isNegative = typeof change === "number" && change < 0;
   const isZero = typeof change === "number" && change === 0;
@@ -24,11 +24,19 @@ const KpiCard = ({ title, value, icon: IconComponent, badge, change, comparisonL
         </h3>
         
         <p className="mt-1.5 text-xl sm:text-2xl font-black text-dark-navy tracking-tight leading-none break-words">
-          {value}
+          {loading ? (
+            <span className="inline-block h-6 w-16 bg-slate-200 rounded animate-pulse mt-1"></span>
+          ) : (
+            value
+          )}
         </p>
       </div>
 
-      {typeof change === "number" && (
+      {loading ? (
+        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center h-[26px]">
+          <span className="inline-block h-3.5 w-24 bg-slate-100 rounded animate-pulse"></span>
+        </div>
+      ) : typeof change === "number" && (
         <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[10px] sm:text-[11px] font-semibold">
           {isPositive && (
             <span className="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded flex items-center gap-0.5 font-extrabold">

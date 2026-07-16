@@ -172,6 +172,7 @@ const NotificationBell = () => {
               <button
                 onClick={fetchNotifications}
                 title="Refresh notifications"
+                aria-label="Refresh notifications"
                 className="p-1 text-muted-gray hover:text-primary rounded-lg hover:bg-slate-100 cursor-pointer outline-none transition-colors"
               >
                 <RefreshCw size={12} />
@@ -231,6 +232,7 @@ const NotificationBell = () => {
                     onClick={(e) => handleDelete(e, notif._id)}
                     className="absolute top-3.5 right-3.5 p-1 text-muted-gray/40 hover:text-red-500 rounded-md hover:bg-slate-100 opacity-0 group-hover:opacity-100 transition-all cursor-pointer outline-none"
                     title="Delete notification"
+                    aria-label="Delete notification"
                   >
                     <Trash2 size={12} />
                   </button>
