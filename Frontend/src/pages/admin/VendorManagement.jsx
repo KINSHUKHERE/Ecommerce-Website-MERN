@@ -523,10 +523,10 @@ const VendorManagement = () => {
                               handleUpdateStatus(vendor._id, "active");
                             }}
                             disabled={actionId === vendor._id}
-                            className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-100 flex items-center justify-center cursor-pointer disabled:opacity-50 transition"
+                            className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-100 flex items-center justify-center cursor-pointer disabled:opacity-50 transition min-w-[30px] min-h-[30px]"
                             title="Approve Seller"
                           >
-                            <Check size={14} />
+                            {actionId === vendor._id ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                           </button>
                         )}
                         {vendor.vendorStatus !== "suspended" && (
@@ -536,10 +536,10 @@ const VendorManagement = () => {
                               handleUpdateStatus(vendor._id, "suspended");
                             }}
                             disabled={actionId === vendor._id}
-                            className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg border border-amber-100 flex items-center justify-center cursor-pointer disabled:opacity-50 transition"
+                            className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg border border-amber-100 flex items-center justify-center cursor-pointer disabled:opacity-50 transition min-w-[30px] min-h-[30px]"
                             title="Suspend Seller"
                           >
-                            <X size={14} />
+                            {actionId === vendor._id ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
                           </button>
                         )}
                         <button

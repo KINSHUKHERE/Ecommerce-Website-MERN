@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { postContact } from "../api/ContactApi";
+import { SmoothInput } from "../components/SmoothInput";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -123,7 +124,7 @@ const Contact = () => {
                 <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 mb-1">
                   Name
                 </label>
-                <input
+                <SmoothInput
                   type="text"
                   id="contact-name"
                   onChange={(e) => formDetails(e)}
@@ -138,7 +139,7 @@ const Contact = () => {
                 <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
-                <input
+                <SmoothInput
                   type="email"
                   id="contact-email"
                   name="Email"

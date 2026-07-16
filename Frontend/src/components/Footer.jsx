@@ -7,6 +7,7 @@ import {
   MapPin, 
   Phone
 } from "lucide-react";
+import { SmoothInput } from "./SmoothInput";
 
 const Footer = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -132,7 +133,7 @@ const Footer = () => {
             Subscribe to receive exclusive deals, early launches, and tech reviews.
           </p>
           <form onSubmit={handleNewsletterSubmit} className="flex border border-light-border rounded-xl overflow-hidden focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/5 transition-all mt-1.5 bg-white p-1 shadow-2xs">
-            <input
+            <SmoothInput
               type="email"
               id="newsletter-email"
               name="newsletter-email"

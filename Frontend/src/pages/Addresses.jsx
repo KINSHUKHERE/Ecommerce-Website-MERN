@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getAddresses, addAddress, updateAddress, deleteAddress } from "../api/AddressApi";
 import { MapPin, Loader2, Edit, Trash2, X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SmoothInput } from "../components/SmoothInput";
 
 const Addresses = () => {
   const navigate = useNavigate();
@@ -209,7 +210,7 @@ const Addresses = () => {
             <form onSubmit={handleAddressSubmit} className="space-y-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">Street Address (Flat/House No., Colony)</label>
-                <input
+                <SmoothInput
                   type="text"
                   id="profile-street"
                   name="street-address"
@@ -225,7 +226,7 @@ const Addresses = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="profile-city" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">Town / City</label>
-                  <input
+                  <SmoothInput
                     type="text"
                     id="profile-city"
                     name="city"
@@ -239,7 +240,7 @@ const Addresses = () => {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="profile-state" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">State / Province</label>
-                  <input
+                  <SmoothInput
                     type="text"
                     id="profile-state"
                     name="state"
@@ -256,7 +257,7 @@ const Addresses = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="profile-pincode" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">PIN / Postal Code</label>
-                  <input
+                  <SmoothInput
                     type="text"
                     id="profile-pincode"
                     name="pincode"
@@ -271,7 +272,7 @@ const Addresses = () => {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="profile-country" className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">Country</label>
-                  <input
+                  <SmoothInput
                     type="text"
                     id="profile-country"
                     name="country"

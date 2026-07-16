@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Store, MapPin, FileText, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
 import { becomeSellerApi } from "../api/AuthApi";
+import { SmoothInput } from "../components/SmoothInput";
 
 // Simple alert toast helper
 const showToast = (msg, type = "success") => {
@@ -166,7 +167,7 @@ const BecomeSeller = () => {
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                 <Store size={15} />
               </span>
-              <input
+              <SmoothInput
                 type="text"
                 id="businessName"
                 name="businessName"
@@ -195,7 +196,7 @@ const BecomeSeller = () => {
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                 <FileText size={15} />
               </span>
-              <input
+              <SmoothInput
                 type="text"
                 id="gstin"
                 name="gstin"

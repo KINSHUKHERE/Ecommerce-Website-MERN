@@ -23,6 +23,8 @@ const OrderDetails = () => {
   const [sortOrder, setSortOrder] = useState("newest");
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+
 
   // Success/error messages
   const [message, setMessage] = useState("");
@@ -54,6 +56,7 @@ const OrderDetails = () => {
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
+      setActionLoadingId(orderId);
       const res = await updateOrderStatus(orderId, newStatus);
       showToast(`Order status updated to ${newStatus}`, "success");
 
@@ -66,8 +69,10 @@ const OrderDetails = () => {
         )
       );
     } catch (err) {
-      console.error("Failed to update status", err);
-      showToast("Failed to update order status", "error");
+      console.error("Failed to update order status", err);
+      showToast(err.response?.data?.msg || "Failed to update status", "error");
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -451,11 +456,12 @@ const OrderDetails = () => {
 
                     {/* Order Status Select Dropdown */}
                     <td className="py-4 px-6">
-                      <div className="relative inline-block">
+                      <div className="relative inline-flex items-center gap-1.5">
                         <select
                           value={order.orderStatus}
                           onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                          className={`appearance-none pl-3 pr-7 py-1.5 rounded-xl text-xs font-bold border outline-none cursor-pointer focus:ring-4 focus:ring-primary/5 transition-all ${
+                          disabled={actionLoadingId === order._id}
+                          className={`appearance-none pl-3 pr-7 py-1.5 rounded-xl text-xs font-bold border outline-none cursor-pointer focus:ring-4 focus:ring-primary/5 transition-all disabled:opacity-50 ${
                             order.orderStatus === "Delivered"
                               ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                               : order.orderStatus === "Shipped"
@@ -478,6 +484,7 @@ const OrderDetails = () => {
                             Cancelled
                           </option>
                         </select>
+                        {actionLoadingId === order._id && <Loader2 size={12} className="animate-spin text-primary" />}
                         <span className={`absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none ${
                           order.orderStatus === "Delivered" ? "text-emerald-600" :
                           order.orderStatus === "Shipped" ? "text-blue-600" :

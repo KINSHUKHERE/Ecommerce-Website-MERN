@@ -56,6 +56,7 @@ const CreateProduct = () => {
   const [bulkQty, setBulkQty] = useState("");
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [toastType, setToastType] = useState("error");
   const [categories, setCategories] = useState([]);
@@ -545,6 +546,7 @@ const CreateProduct = () => {
     }
 
     try {
+      setSubmitting(true);
       await postProduct(finalData);
       setIsSubmitted(true);
       setFormData({
@@ -564,6 +566,8 @@ const CreateProduct = () => {
     } catch (err) {
       console.log("Unable to post data:", err);
       showToast(err.response?.data?.msg || "Unable to save product details.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -1200,8 +1204,10 @@ const CreateProduct = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider mt-4 h-[44px] active:scale-95"
+              disabled={submitting}
+              className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider mt-4 h-[44px] active:scale-95 disabled:opacity-50"
             >
+              {submitting ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
               Submit Product details
             </button>
           </form>

@@ -13,6 +13,7 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
+import { SmoothInput } from "../components/SmoothInput";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -361,7 +362,7 @@ const Profile = () => {
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                   <User size={15} />
                 </span>
-                <input
+                <SmoothInput
                   type="text"
                   name="name"
                   value={name}
@@ -387,7 +388,7 @@ const Profile = () => {
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                   <Mail size={15} />
                 </span>
-                <input
+                <SmoothInput
                   type="email"
                   value={email}
                   disabled
@@ -408,7 +409,7 @@ const Profile = () => {
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                   <Phone size={15} />
                 </span>
-                <input
+                <SmoothInput
                   type="tel"
                   name="phone"
                   value={phoneNumber}
@@ -427,7 +428,7 @@ const Profile = () => {
                   <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">
                     Business / Store Name
                   </label>
-                  <input
+                  <SmoothInput
                     type="text"
                     name="businessName"
                     value={businessName}
@@ -443,7 +444,7 @@ const Profile = () => {
                   <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-0.5">
                     GSTIN / Tax ID
                   </label>
-                  <input
+                  <SmoothInput
                     type="text"
                     name="gstin"
                     value={gstin}
@@ -516,7 +517,7 @@ const Profile = () => {
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                   <Lock size={15} />
                 </span>
-                <input
+                <SmoothInput
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={password}
@@ -544,7 +545,7 @@ const Profile = () => {
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-gray pointer-events-none">
                   <Lock size={15} />
                 </span>
-                <input
+                <SmoothInput
                   type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   value={confirmPassword}

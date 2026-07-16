@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { signUpApi, googleLogin, uploadAvatarApi } from "../api/AuthApi";
 import { GoogleLogin } from "@react-oauth/google";
 import { Eye, EyeOff, Loader2, User, ArrowLeft, ChevronDown } from "lucide-react";
+import { SmoothInput } from "../components/SmoothInput";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -309,7 +310,7 @@ const SignUp = () => {
           <div>
             <label htmlFor="signupName" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Full Name</label>
 
-            <input
+            <SmoothInput
               type="text"
               id="signupName"
               name="name"
@@ -413,7 +414,7 @@ const SignUp = () => {
               {/* Business Name */}
               <div>
                 <label htmlFor="signupBusinessName" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Business Name</label>
-                <input
+                <SmoothInput
                   type="text"
                   id="signupBusinessName"
                   name="businessName"
@@ -435,7 +436,7 @@ const SignUp = () => {
               {/* GSTIN */}
               <div>
                 <label htmlFor="signupGstin" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">GSTIN / TAX ID</label>
-                <input
+                <SmoothInput
                   type="text"
                   id="signupGstin"
                   name="gstin"
@@ -484,7 +485,7 @@ const SignUp = () => {
               Phone Number
             </label>
 
-            <input
+            <SmoothInput
               type="tel"
               id="signupPhoneNumber"
               name="phoneNumber"
@@ -509,7 +510,7 @@ const SignUp = () => {
               Email Address
             </label>
 
-            <input
+            <SmoothInput
               type="email"
               id="signupEmail"
               name="email"
@@ -534,7 +535,7 @@ const SignUp = () => {
             <label htmlFor="signupPassword" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Password</label>
 
             <div className="relative">
-              <input
+              <SmoothInput
                 type={showPassword ? "text" : "password"}
                 id="signupPassword"
                 name="password"

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login, googleLogin } from "../api/AuthApi";
 import { GoogleLogin } from "@react-oauth/google";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
+import { SmoothInput } from "../components/SmoothInput";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -171,7 +172,7 @@ const Login = () => {
               Email Address
             </label>
 
-            <input
+            <SmoothInput
               type="email"
               id="loginEmail"
               name="email"
@@ -195,7 +196,7 @@ const Login = () => {
             <label htmlFor="loginPassword" className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Password</label>
 
             <div className="relative">
-              <input
+              <SmoothInput
                 type={showPassword ? "text" : "password"}
                 id="loginPassword"
                 name="password"

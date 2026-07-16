@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { completeProfile, uploadAvatarApi } from "../api/AuthApi";
 import { Eye, EyeOff, Loader2, User } from "lucide-react";
+import { SmoothInput } from "../components/SmoothInput";
 
 const CompleteProfile = () => {
   const navigate = useNavigate();
@@ -220,7 +221,7 @@ const CompleteProfile = () => {
             <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">
               Phone Number <span className="text-red-500">*</span>
             </label>
-            <input
+            <SmoothInput
               type="tel"
               name="phoneNumber"
               required
@@ -308,7 +309,7 @@ const CompleteProfile = () => {
             <div className="mb-4">
               <label className="block text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">New Password</label>
               <div className="relative">
-                <input
+                <SmoothInput
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
@@ -340,7 +341,7 @@ const CompleteProfile = () => {
                   Confirm Password <span className="text-red-555">*</span>
                 </label>
                 <div className="relative">
-                  <input
+                  <SmoothInput
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     required={!!formData.password}

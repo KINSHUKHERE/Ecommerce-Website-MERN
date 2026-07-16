@@ -41,6 +41,8 @@ const BrandManagement = () => {
   const [message, setMessage] = useState("");
   const [toastType, setToastType] = useState("success");
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
 
   // Search & Filters State
   const [search, setSearch] = useState("");
@@ -215,6 +217,7 @@ const BrandManagement = () => {
     }
 
     try {
+      setSubmitting(true);
       await addBrand({
         name: brandName,
         categoryId,
@@ -227,6 +230,8 @@ const BrandManagement = () => {
     } catch (err) {
       showToast(err.response?.data?.msg || "Failed to add brand", "error");
       console.log(err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -243,6 +248,7 @@ const BrandManagement = () => {
     }
 
     try {
+      setSubmitting(true);
       await updateBrand(id, {
         name: editBrandName,
         categoryId: editCategoryId,
@@ -256,17 +262,22 @@ const BrandManagement = () => {
     } catch (err) {
       showToast(err.response?.data?.msg || "Failed to update brand", "error");
       console.log(err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleToggleStatus = async (id) => {
     try {
+      setActionLoadingId(id);
       await toggleBrandStatus(id);
       showToast("Brand status updated successfully", "success");
       fetchBrands();
     } catch (err) {
       showToast("Failed to update brand status", "error");
       console.log(err);
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -278,12 +289,15 @@ const BrandManagement = () => {
     if (!confirmDelete) return;
 
     try {
+      setActionLoadingId(id);
       await deleteBrand(id);
       showToast("Brand deleted successfully", "success");
       fetchBrands();
     } catch (err) {
       showToast("Failed to delete brand", "error");
       console.log(err);
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -473,9 +487,10 @@ const BrandManagement = () => {
           {/* Submit Action */}
           <button
             type="submit"
-            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer h-[38px] active:scale-95"
+            disabled={submitting}
+            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-2xs transition-all cursor-pointer h-[38px] active:scale-95 disabled:opacity-50"
           >
-            <Plus size={15} />
+            {submitting ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
             Add Brand
           </button>
         </form>
@@ -788,9 +803,10 @@ const BrandManagement = () => {
                                           </button>
                                           <button
                                             onClick={() => handleUpdateInline(brand._id)}
-                                            className="px-4 py-2 bg-primary hover:bg-primary/95 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                                            disabled={submitting}
+                                            className="px-4 py-2 bg-primary hover:bg-primary/95 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                                           >
-                                            <Check size={14} />
+                                            {submitting ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                                             Save Changes
                                           </button>
                                         </div>
@@ -808,11 +824,12 @@ const BrandManagement = () => {
 
                                   <td className="py-3.5 px-6">
                                     <div className="flex items-center justify-center gap-2.5">
-                                      <label className="relative inline-flex items-center cursor-pointer">
+                                      <label className={`relative inline-flex items-center cursor-pointer ${actionLoadingId === brand._id ? "opacity-50 pointer-events-none" : ""}`}>
                                         <input
                                           type="checkbox"
                                           checked={brand.isActive ?? true}
                                           onChange={() => handleToggleStatus(brand._id)}
+                                          disabled={actionLoadingId === brand._id || submitting}
                                           className="sr-only peer"
                                         />
                                         <div className="w-8 h-4.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[14px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-primary"></div>
@@ -824,6 +841,7 @@ const BrandManagement = () => {
                                             : "bg-rose-500/10 text-rose-600 border border-rose-500/20"
                                         }`}
                                       >
+                                        {actionLoadingId === brand._id && <Loader2 size={10} className="animate-spin mr-1" />}
                                         {(brand.isActive ?? true) ? "Active" : "Inactive"}
                                       </span>
                                     </div>
@@ -833,17 +851,19 @@ const BrandManagement = () => {
                                     <div className="flex justify-center gap-2">
                                       <button
                                         onClick={() => handleEdit(brand)}
-                                        className="p-1.5 text-muted-gray hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
+                                        disabled={actionLoadingId === brand._id || submitting}
+                                        className="p-1.5 text-muted-gray hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer disabled:opacity-50"
                                         title="Edit Brand"
                                       >
                                         <Edit3 size={15} />
                                       </button>
                                       <button
                                         onClick={() => handleDelete(brand._id)}
-                                        className="p-1.5 text-muted-gray hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
+                                        disabled={actionLoadingId === brand._id || submitting}
+                                        className="p-1.5 text-muted-gray hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center min-w-[28px] min-h-[28px]"
                                         title="Delete Brand"
                                       >
-                                        <Trash2 size={15} />
+                                        {actionLoadingId === brand._id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
                                       </button>
                                     </div>
                                   </td>

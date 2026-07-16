@@ -7,6 +7,7 @@ import {
   getCategories,
   getBrands,
 } from "../api/CategoryAndBrandApi";
+import { SmoothInput } from "../components/SmoothInput";
 
 // Premium Skeleton Card Loader Component
 const ProductSkeleton = () => (
@@ -271,7 +272,7 @@ const Products = () => {
             <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-muted-gray/80">
               <Search size={18} />
             </span>
-            <input
+            <SmoothInput
               type="text"
               placeholder="Search by product name, category, or brand..."
               value={search}

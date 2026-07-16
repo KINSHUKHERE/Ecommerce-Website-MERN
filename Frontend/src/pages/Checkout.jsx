@@ -6,6 +6,7 @@ import { createOrder } from "../api/OrderApi";
 import { getUserProfile } from "../api/AuthApi";
 import { getAddresses, addAddress } from "../api/AddressApi";
 import { createRazorpayOrderApi, verifyRazorpayPaymentApi } from "../api/PaymentApi";
+import { SmoothInput } from "../components/SmoothInput";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -469,7 +470,7 @@ const Checkout = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="flex flex-col gap-1">
                       <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Full Name (Recipient)</label>
-                      <input
+                      <SmoothInput
                         type="text"
                         required
                         id="checkout-name"
@@ -483,7 +484,7 @@ const Checkout = () => {
                     </div>
                     <div className="flex flex-col gap-1">
                       <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Contact Mobile Number</label>
-                      <input
+                      <SmoothInput
                         type="text"
                         required
                         id="checkout-phone"
@@ -600,7 +601,7 @@ const Checkout = () => {
                     <div className="space-y-5 animate-fadeIn">
                       <div className="flex flex-col gap-1">
                         <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Street Address (Flat/House No., Colony)</label>
-                        <input
+                        <SmoothInput
                           type="text"
                           required
                           id="checkout-address"
@@ -616,7 +617,7 @@ const Checkout = () => {
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                         <div className="flex flex-col gap-1">
                           <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">Town / City</label>
-                          <input
+                          <SmoothInput
                             type="text"
                             required
                             id="checkout-city"
@@ -630,7 +631,7 @@ const Checkout = () => {
                         </div>
                         <div className="flex flex-col gap-1">
                           <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">State / Province</label>
-                          <input
+                          <SmoothInput
                             type="text"
                             required
                             id="checkout-state"
@@ -644,7 +645,7 @@ const Checkout = () => {
                         </div>
                         <div className="flex flex-col gap-1">
                           <label className="text-xs font-extrabold text-muted-gray uppercase tracking-widest mb-1.5">PIN / Postal Code</label>
-                          <input
+                          <SmoothInput
                             type="text"
                             required
                             id="checkout-pincode"
