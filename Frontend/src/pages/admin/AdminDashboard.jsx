@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
@@ -19,11 +19,20 @@ import { Plus, Loader2, Settings, ShieldCheck } from "lucide-react";
 // Import Reusable Dashboard Subcomponents
 import DashboardSkeleton from "../../components/dashboard/DashboardSkeleton";
 import KpiCard from "../../components/dashboard/KpiCard";
-import SalesTrendChart from "../../components/dashboard/SalesTrendChart";
-import OrdersPieChart from "../../components/dashboard/OrdersPieChart";
-import CategoryChart from "../../components/dashboard/CategoryChart";
-import InventoryChart from "../../components/dashboard/InventoryChart";
 import TopProductsChart from "../../components/dashboard/TopProductsChart";
+
+// Lazy-loaded Charts
+const SalesTrendChart = lazy(() => import("../../components/dashboard/SalesTrendChart"));
+const OrdersPieChart = lazy(() => import("../../components/dashboard/OrdersPieChart"));
+const CategoryChart = lazy(() => import("../../components/dashboard/CategoryChart"));
+const InventoryChart = lazy(() => import("../../components/dashboard/InventoryChart"));
+
+const ChartFallback = () => (
+  <div className="h-[350px] flex flex-col items-center justify-center bg-slate-50/50 rounded-2xl border border-slate-100/50 animate-pulse text-xs font-semibold text-muted-gray w-full">
+    <Loader2 className="animate-spin text-primary w-6 h-6 mb-2" />
+    <span>Loading dashboard chart...</span>
+  </div>
+);
 
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -819,14 +828,18 @@ const AdminDashboard = () => {
       {/* 5. Revenue Trend area chart & Orders pie chart */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-2 min-h-[350px]">
-          <SalesTrendChart
-            data={analytics.salesTrendData}
-            timeFilter={selectedTimeFilter}
-            setTimeFilter={setSelectedTimeFilter}
-          />
+          <Suspense fallback={<ChartFallback />}>
+            <SalesTrendChart
+              data={analytics.salesTrendData}
+              timeFilter={selectedTimeFilter}
+              setTimeFilter={setSelectedTimeFilter}
+            />
+          </Suspense>
         </div>
         <div className="min-h-[350px]">
-          <OrdersPieChart data={analytics.ordersPieData} />
+          <Suspense fallback={<ChartFallback />}>
+            <OrdersPieChart data={analytics.ordersPieData} />
+          </Suspense>
         </div>
       </div>
 
@@ -934,10 +947,14 @@ const AdminDashboard = () => {
       {/* 8. Secondary charts row: Category and Stock inventory */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         <div>
-          <CategoryChart data={analytics.categoryCountData} />
+          <Suspense fallback={<ChartFallback />}>
+            <CategoryChart data={analytics.categoryCountData} />
+          </Suspense>
         </div>
         <div>
-          <InventoryChart data={analytics.inventoryData} />
+          <Suspense fallback={<ChartFallback />}>
+            <InventoryChart data={analytics.inventoryData} />
+          </Suspense>
         </div>
       </div>
 

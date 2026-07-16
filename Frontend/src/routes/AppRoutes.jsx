@@ -1,43 +1,46 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Routes, Route, Navigate, Outlet, useNavigate, useLocation } from "react-router-dom";
-import Home from "../pages/Home";
-import Products from "../pages/Products";
-import ProductDetails from "../pages/ProductDetails";
-import About from "../pages/About";
-import Contact from "../pages/Contact";
-import Cart from "../pages/Cart";
-import LogIn from "../pages/Login";
-import SignUp from "../pages/SignUp";
-import VendorStore from "../pages/VendorStore";
-import AdminDashboard from "../pages/admin/AdminDashboard";
-import CreateProduct from "../pages/admin/CreateProduct";
-import ContactDetails from "../pages/admin/ContactDetails";
-import OrderDetails from "../pages/admin/OrderDetails";
-import CategoryManagement from "../pages/admin/CategoryManagement";
-import BrandManagement from "../pages/admin/BrandManagement";
-import VendorManagement from "../pages/admin/VendorManagement";
-import UserManagement from "../pages/admin/UserManagement";
-import VendorDetails from "../pages/admin/VendorDetails";
-import UserDetails from "../pages/admin/UserDetails";
-import VendorSupport from "../pages/admin/VendorSupport";
-import SaleManagement from "../pages/admin/SaleManagement";
-import ProductReviews from "../pages/admin/ProductReviews";
-import Profile from "../pages/Profile";
-import Addresses from "../pages/Addresses";
-import MyOrders from "../pages/MyOrders";
-import Wishlist from "../pages/Wishlist";
-import Checkout from "../pages/Checkout";
-import TermsConditions from "../pages/TermsConditions";
-import PrivacyPolicy from "../pages/PrivacyPolicy";
-import CompleteProfile from "../pages/CompleteProfile";
-import BecomeSeller from "../pages/BecomeSeller";
+import { Loader2 } from "lucide-react";
 import { getUserProfile } from "../api/AuthApi";
 
+// Lazy Loaded Pages
+const Home = lazy(() => import("../pages/Home"));
+const Products = lazy(() => import("../pages/Products"));
+const ProductDetails = lazy(() => import("../pages/ProductDetails"));
+const About = lazy(() => import("../pages/About"));
+const Contact = lazy(() => import("../pages/Contact"));
+const Cart = lazy(() => import("../pages/Cart"));
+const LogIn = lazy(() => import("../pages/Login"));
+const SignUp = lazy(() => import("../pages/SignUp"));
+const VendorStore = lazy(() => import("../pages/VendorStore"));
+const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
+const CreateProduct = lazy(() => import("../pages/admin/CreateProduct"));
+const ContactDetails = lazy(() => import("../pages/admin/ContactDetails"));
+const OrderDetails = lazy(() => import("../pages/admin/OrderDetails"));
+const CategoryManagement = lazy(() => import("../pages/admin/CategoryManagement"));
+const BrandManagement = lazy(() => import("../pages/admin/BrandManagement"));
+const VendorManagement = lazy(() => import("../pages/admin/VendorManagement"));
+const UserManagement = lazy(() => import("../pages/admin/UserManagement"));
+const VendorDetails = lazy(() => import("../pages/admin/VendorDetails"));
+const UserDetails = lazy(() => import("../pages/admin/UserDetails"));
+const VendorSupport = lazy(() => import("../pages/admin/VendorSupport"));
+const SaleManagement = lazy(() => import("../pages/admin/SaleManagement"));
+const ProductReviews = lazy(() => import("../pages/admin/ProductReviews"));
+const Profile = lazy(() => import("../pages/Profile"));
+const Addresses = lazy(() => import("../pages/Addresses"));
+const MyOrders = lazy(() => import("../pages/MyOrders"));
+const Wishlist = lazy(() => import("../pages/Wishlist"));
+const Checkout = lazy(() => import("../pages/Checkout"));
+const TermsConditions = lazy(() => import("../pages/TermsConditions"));
+const PrivacyPolicy = lazy(() => import("../pages/PrivacyPolicy"));
+const CompleteProfile = lazy(() => import("../pages/CompleteProfile"));
+const BecomeSeller = lazy(() => import("../pages/BecomeSeller"));
+
 // Import Admin Layout & New Pages
-import AdminLayout from "../admin/components/AdminLayout";
-import AdminProducts from "../admin/pages/AdminProducts";
-import ProductView from "../admin/pages/ProductView";
-import ProductEdit from "../admin/pages/ProductEdit";
+const AdminLayout = lazy(() => import("../admin/components/AdminLayout"));
+const AdminProducts = lazy(() => import("../admin/pages/AdminProducts"));
+const ProductView = lazy(() => import("../admin/pages/ProductView"));
+const ProductEdit = lazy(() => import("../admin/pages/ProductEdit"));
 
 import Navbar from "../components/Navbar";
 
@@ -250,80 +253,90 @@ const AppRoutes = () => {
   }, [location.pathname]);
 
   return (
-    <Routes>
-      {/* Customer / Public / Guest Routes wrapped in UserLayout */}
-      <Route element={<UserLayout />}>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/products/:productId" element={<ProductDetails />} />
-        <Route path="/store/:vendorId" element={<VendorStore />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/terms-conditions" element={<TermsConditions />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
+        <Loader2 className="animate-spin text-primary w-10 h-10 mb-4" />
+        <p className="text-xs font-semibold text-muted-gray animate-pulse">
+          Loading page content...
+        </p>
+      </div>
+    }>
+      <Routes>
+        {/* Customer / Public / Guest Routes wrapped in UserLayout */}
+        <Route element={<UserLayout />}>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/products/:productId" element={<ProductDetails />} />
+          <Route path="/store/:vendorId" element={<VendorStore />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/terms-conditions" element={<TermsConditions />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
-        {/* Guest-only Routes */}
-        <Route path="/login" element={<GuestRoute><LogIn /></GuestRoute>} />
-        <Route path="/register" element={<GuestRoute><SignUp /></GuestRoute>} />
+          {/* Guest-only Routes */}
+          <Route path="/login" element={<GuestRoute><LogIn /></GuestRoute>} />
+          <Route path="/register" element={<GuestRoute><SignUp /></GuestRoute>} />
 
-        {/* Protected User Routes */}
-        <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-        <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/addresses" element={<ProtectedRoute><Addresses /></ProtectedRoute>} />
-        <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
-        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-        <Route path="/become-seller" element={<ProtectedRoute><BecomeSeller /></ProtectedRoute>} />
-      </Route>
+          {/* Protected User Routes */}
+          <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/addresses" element={<ProtectedRoute><Addresses /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+          <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+          <Route path="/become-seller" element={<ProtectedRoute><BecomeSeller /></ProtectedRoute>} />
+        </Route>
 
-      {/* Complete Profile (no navbar) */}
-      <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
+        {/* Complete Profile (no navbar) */}
+        <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
 
-      {/* Protected Admin-only Routes wrapped in AdminLayout */}
-      <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/vendor" element={<AdminDashboard />} />
+        {/* Protected Admin-only Routes wrapped in AdminLayout */}
+        <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/vendor" element={<AdminDashboard />} />
 
-        <Route path="/admin/sale" element={<SaleManagement />} />
-        <Route path="/vendor/sale" element={<SaleManagement />} />
-        
-        <Route path="/admin/products" element={<ActiveVendorOrAdminRoute><AdminProducts /></ActiveVendorOrAdminRoute>} />
-        <Route path="/vendor/products" element={<ActiveVendorOrAdminRoute><AdminProducts /></ActiveVendorOrAdminRoute>} />
-        
-        <Route path="/admin/products/:productId" element={<ActiveVendorOrAdminRoute><ProductView /></ActiveVendorOrAdminRoute>} />
-        <Route path="/vendor/products/:productId" element={<ActiveVendorOrAdminRoute><ProductView /></ActiveVendorOrAdminRoute>} />
-        
-        <Route path="/admin/products/edit/:productId" element={<ActiveVendorOrAdminRoute><ProductEdit /></ActiveVendorOrAdminRoute>} />
-        <Route path="/vendor/products/edit/:productId" element={<ActiveVendorOrAdminRoute><ProductEdit /></ActiveVendorOrAdminRoute>} />
-        
-        <Route path="/create-product" element={<ActiveVendorOrAdminRoute><CreateProduct /></ActiveVendorOrAdminRoute>} />
-        <Route path="/vendor/create-product" element={<ActiveVendorOrAdminRoute><CreateProduct /></ActiveVendorOrAdminRoute>} />
-        
-        <Route path="/order-details" element={<ActiveVendorOrAdminRoute><OrderDetails /></ActiveVendorOrAdminRoute>} />
-        <Route path="/vendor/order-details" element={<ActiveVendorOrAdminRoute><OrderDetails /></ActiveVendorOrAdminRoute>} />
-        
-        <Route path="/admin/profile" element={<Profile />} />
-        <Route path="/vendor/profile" element={<Profile />} />
-        
-        <Route path="/admin/reviews" element={<ActiveVendorOrAdminRoute><ProductReviews /></ActiveVendorOrAdminRoute>} />
-        <Route path="/vendor/reviews" element={<ActiveVendorOrAdminRoute><ProductReviews /></ActiveVendorOrAdminRoute>} />
-        
-        <Route path="/admin/support" element={<AdminRoute><VendorSupport /></AdminRoute>} />
-        <Route path="/vendor/support" element={<AdminRoute><VendorSupport /></AdminRoute>} />
+          <Route path="/admin/sale" element={<SaleManagement />} />
+          <Route path="/vendor/sale" element={<SaleManagement />} />
+          
+          <Route path="/admin/products" element={<ActiveVendorOrAdminRoute><AdminProducts /></ActiveVendorOrAdminRoute>} />
+          <Route path="/vendor/products" element={<ActiveVendorOrAdminRoute><AdminProducts /></ActiveVendorOrAdminRoute>} />
+          
+          <Route path="/admin/products/:productId" element={<ActiveVendorOrAdminRoute><ProductView /></ActiveVendorOrAdminRoute>} />
+          <Route path="/vendor/products/:productId" element={<ActiveVendorOrAdminRoute><ProductView /></ActiveVendorOrAdminRoute>} />
+          
+          <Route path="/admin/products/edit/:productId" element={<ActiveVendorOrAdminRoute><ProductEdit /></ActiveVendorOrAdminRoute>} />
+          <Route path="/vendor/products/edit/:productId" element={<ActiveVendorOrAdminRoute><ProductEdit /></ActiveVendorOrAdminRoute>} />
+          
+          <Route path="/create-product" element={<ActiveVendorOrAdminRoute><CreateProduct /></ActiveVendorOrAdminRoute>} />
+          <Route path="/vendor/create-product" element={<ActiveVendorOrAdminRoute><CreateProduct /></ActiveVendorOrAdminRoute>} />
+          
+          <Route path="/order-details" element={<ActiveVendorOrAdminRoute><OrderDetails /></ActiveVendorOrAdminRoute>} />
+          <Route path="/vendor/order-details" element={<ActiveVendorOrAdminRoute><OrderDetails /></ActiveVendorOrAdminRoute>} />
+          
+          <Route path="/admin/profile" element={<Profile />} />
+          <Route path="/vendor/profile" element={<Profile />} />
+          
+          <Route path="/admin/reviews" element={<ActiveVendorOrAdminRoute><ProductReviews /></ActiveVendorOrAdminRoute>} />
+          <Route path="/vendor/reviews" element={<ActiveVendorOrAdminRoute><ProductReviews /></ActiveVendorOrAdminRoute>} />
+          
+          <Route path="/admin/support" element={<AdminRoute><VendorSupport /></AdminRoute>} />
+          <Route path="/vendor/support" element={<AdminRoute><VendorSupport /></AdminRoute>} />
 
-        {/* Admin-only Routes */}
-        <Route path="/contact-details" element={<AdminRoute><ContactDetails /></AdminRoute>} />
-        <Route path="/categories" element={<AdminRoute><CategoryManagement /></AdminRoute>} />
-        <Route path="/brands" element={<AdminRoute><BrandManagement /></AdminRoute>} />
-        <Route path="/admin/vendors" element={<AdminRoute><VendorManagement /></AdminRoute>} />
-        <Route path="/admin/vendors/:vendorId" element={<AdminRoute><VendorDetails /></AdminRoute>} />
-        <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
-        <Route path="/admin/users/:userId" element={<AdminRoute><UserDetails /></AdminRoute>} />
-      </Route>
-    </Routes>
+          {/* Admin-only Routes */}
+          <Route path="/contact-details" element={<AdminRoute><ContactDetails /></AdminRoute>} />
+          <Route path="/categories" element={<AdminRoute><CategoryManagement /></AdminRoute>} />
+          <Route path="/brands" element={<AdminRoute><BrandManagement /></AdminRoute>} />
+          <Route path="/admin/vendors" element={<AdminRoute><VendorManagement /></AdminRoute>} />
+          <Route path="/admin/vendors/:vendorId" element={<AdminRoute><VendorDetails /></AdminRoute>} />
+          <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+          <Route path="/admin/users/:userId" element={<AdminRoute><UserDetails /></AdminRoute>} />
+        </Route>
+      </Routes>
+    </Suspense>
   );
 };
+
 
 export default AppRoutes;
 

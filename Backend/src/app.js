@@ -28,7 +28,6 @@ const allowedOrigins = [
   "http://localhost:5174/",
   "http://localhost",
   "https://localhost",
-  "capacitor://localhost",
 ];
 
 app.use(cookieParser());
