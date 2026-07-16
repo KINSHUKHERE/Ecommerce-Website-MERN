@@ -15,8 +15,10 @@ const saleRoutes = require("./routes/saleRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
+
 
 const allowedOrigins = [
   "https://yocart.onrender.com",
@@ -105,6 +107,8 @@ app.use("/", saleRoutes);
 app.use("/", notificationRoutes);
 app.use("/", paymentRoutes);
 app.use("/", reviewRoutes);
+app.use("/", dashboardRoutes);
+
 
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
