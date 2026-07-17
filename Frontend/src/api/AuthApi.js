@@ -71,12 +71,4 @@ export const deleteUserApi = async (userId) => {
 
 export const toggleUserSuspensionApi = async (userId) => {
   return await api.put(`/users/${userId}/suspend`);
-};
-
-export const forgotPassword = async (email) => {
-  return await api.post("/forgot-password", { email });
-};
-
-export const resetPassword = async (token, password) => {
-  return await api.post(`/reset-password/${token}`, { password });
 };

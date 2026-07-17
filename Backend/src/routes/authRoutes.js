@@ -18,8 +18,6 @@ const {
   deleteUser,
   toggleUserSuspension,
   getPublicVendor,
-  forgotPassword,
-  resetPassword,
 } = require("../controllers/authController");
 const verifyUser = require("../middleware/verifyUser");
 const verifyAdmin = require("../middleware/verifyAdmin");
@@ -28,8 +26,6 @@ router.post("/signup", signup);
 router.post("/login", login);
 router.post("/google", googleLogin);
 router.post("/logout", logout);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password/:token", resetPassword);
 router.get("/all-users", verifyUser, verifyAdmin, getAllUsers);
 router.get("/user-profile", verifyUser, getUserProfile);
 router.put("/update-profile", verifyUser, updateProfile);

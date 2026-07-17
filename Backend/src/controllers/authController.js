@@ -2,8 +2,6 @@ const User = require("../models/authDetails");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
-const crypto = require("crypto");
-const sendEmail = require("../utils/sendEmail");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -574,82 +572,6 @@ const getPublicVendor = async (req, res) => {
   }
 };
 
-const forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(200).json({
-        msg: "If a user is registered with this email, a password reset link has been dispatched.",
-      });
-    }
-
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
-    await user.save();
-
-    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
-    const text = `You are receiving this email because you (or someone else) have requested the reset of the password for your YoCart account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 16px;">
-        <h2 style="color: #0F9D8A; margin-bottom: 20px;">YoCart Password Reset</h2>
-        <p style="font-size: 14px; color: #475569; line-height: 1.5;">You are receiving this email because you (or someone else) have requested a password reset for your YoCart account.</p>
-        <p style="font-size: 14px; color: #475569; line-height: 1.5;">Please click the button below to set a new password. This link is valid for 15 minutes:</p>
-        <div style="margin: 30px 0; text-align: center;">
-          <a href="${resetUrl}" style="background-color: #0F9D8A; color: white; padding: 12px 24px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px; display: inline-block;">Reset Password</a>
-        </div>
-        <p style="font-size: 12px; color: #64748B;">If you did not request this, please ignore this email and your password will remain secure.</p>
-      </div>
-    `;
-
-    await sendEmail({
-      email: user.email,
-      subject: "YoCart Password Reset Link Request",
-      text,
-      html,
-    });
-
-    res.status(200).json({
-      msg: "If a user is registered with this email, a password reset link has been dispatched.",
-      resetToken: resetToken,
-    });
-  } catch (err) {
-    console.error("Forgot Password Error: ", err);
-    res.status(500).json({ msg: "Server error during forgot password processing." });
-  }
-};
-
-const resetPassword = async (req, res) => {
-  try {
-    const { token } = req.params;
-    const { password } = req.body;
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-
-    const user = await User.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.status(400).json({ msg: "Invalid or expired password reset token." });
-    }
-
-    user.password = await bcrypt.hash(password, 10);
-    user.resetPasswordToken = "";
-    user.resetPasswordExpires = null;
-    await user.save();
-
-    res.status(200).json({
-      msg: "Password reset successful! You can now log in with your new password.",
-    });
-  } catch (err) {
-    console.error("Reset Password Error: ", err);
-    res.status(500).json({ msg: "Server error during password reset processing." });
-  }
-};
-
 module.exports = {
   signup,
   login,
@@ -668,7 +590,5 @@ module.exports = {
   deleteUser,
   toggleUserSuspension,
   getPublicVendor,
-  forgotPassword,
-  resetPassword,
 };
 

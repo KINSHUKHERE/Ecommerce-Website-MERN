@@ -196,6 +196,8 @@ const Navbar = () => {
     };
   }, [isOpen]);
 
+  const isAuthPage =
+    location.pathname === "/register" || location.pathname === "/login";
   const isActive = (path) => location.pathname === path;
 
   const navLink = (path) =>
@@ -215,6 +217,8 @@ const Navbar = () => {
     setIsOpen(false);
     navigate("/");
   };
+
+  if (isAuthPage) return null;
 
   return (
     <div ref={navRef} className={`sticky top-0 z-50 w-full transition-all duration-300 ${

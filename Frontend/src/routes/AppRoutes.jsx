@@ -41,8 +41,6 @@ import AdminLayout from "../admin/components/AdminLayout";
 const AdminProducts = lazy(() => import("../admin/pages/AdminProducts"));
 const ProductView = lazy(() => import("../admin/pages/ProductView"));
 const ProductEdit = lazy(() => import("../admin/pages/ProductEdit"));
-const ForgotPassword = lazy(() => import("../pages/ForgotPassword"));
-const ResetPassword = lazy(() => import("../pages/ResetPassword"));
 
 import Navbar from "../components/Navbar";
 
@@ -212,12 +210,6 @@ const AppRoutes = () => {
       title = "Log In | YoCart Account";
     } else if (path === "/register") {
       title = "Create Account | YoCart";
-    } else if (path === "/forgot-password") {
-      title = "Forgot Password | YoCart Security";
-      desc = "Recover your YoCart account password securely by email.";
-    } else if (path.startsWith("/reset-password/")) {
-      title = "Reset Password | YoCart Security";
-      desc = "Set a new password for your YoCart account.";
     } else if (path.startsWith("/admin")) {
       title = "Admin Dashboard | YoCart Panel";
     } else if (path.startsWith("/vendor")) {
@@ -289,6 +281,10 @@ const AppRoutes = () => {
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
+          {/* Guest-only Routes */}
+          <Route path="/login" element={<GuestRoute><LogIn /></GuestRoute>} />
+          <Route path="/register" element={<GuestRoute><SignUp /></GuestRoute>} />
+
           {/* Protected User Routes */}
           <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
@@ -298,12 +294,6 @@ const AppRoutes = () => {
           <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
           <Route path="/become-seller" element={<ProtectedRoute><BecomeSeller /></ProtectedRoute>} />
         </Route>
-
-        {/* Guest-only Routes (without Navbar) */}
-        <Route path="/login" element={<GuestRoute><LogIn /></GuestRoute>} />
-        <Route path="/register" element={<GuestRoute><SignUp /></GuestRoute>} />
-        <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
-        <Route path="/reset-password/:token" element={<GuestRoute><ResetPassword /></GuestRoute>} />
 
         {/* Complete Profile (no navbar) */}
         <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
