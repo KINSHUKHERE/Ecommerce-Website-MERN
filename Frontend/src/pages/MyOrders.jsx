@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { getUserOrders, cancelOrderApi } from "../api/OrderApi";
+import { getUserOrders, cancelOrderApi, buyAgainApi } from "../api/OrderApi";
 import { addReviewApi } from "../api/ReviewApi";
 import {
   Loader2,
@@ -104,6 +104,11 @@ const MyOrders = () => {
   // Search input state
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Buy Again states
+  const [buyAgainLoading, setBuyAgainLoading] = useState(false);
+  const [buyAgainResult, setBuyAgainResult] = useState(null);
+  const [showBuyAgainModal, setShowBuyAgainModal] = useState(false);
+
   // Toast states
   const [message, setMessage] = useState("");
   const [toastType, setToastType] = useState("success");
@@ -112,6 +117,26 @@ const MyOrders = () => {
     setMessage(msg);
     setToastType(type);
     setTimeout(() => setMessage(""), 2500);
+  };
+
+  const handleBuyAgain = async (orderId) => {
+    try {
+      setBuyAgainLoading(true);
+      const res = await buyAgainApi(orderId);
+      setBuyAgainResult(res.data);
+      setShowBuyAgainModal(true);
+      window.dispatchEvent(new Event("cartUpdated"));
+      
+      // Dynamic summary toast
+      const addText = res.data.addedCount === 1 ? "1 product added" : `${res.data.addedCount} products added`;
+      const skipText = res.data.skippedCount === 1 ? "1 product skipped" : `${res.data.skippedCount} products skipped`;
+      showToast(`${addText}. ${res.data.skippedCount > 0 ? skipText : ""}`);
+    } catch (err) {
+      console.error(err);
+      showToast(err.response?.data?.msg || "Unable to process buy again reorder", "error");
+    } finally {
+      setBuyAgainLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -799,6 +824,25 @@ const MyOrders = () => {
                   </div>
                 )}
 
+                {/* Buy Again Action */}
+                {selectedOrder.orderStatus === "Delivered" && (
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="button"
+                      onClick={() => handleBuyAgain(selectedOrder._id)}
+                      disabled={buyAgainLoading}
+                      className="px-5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 disabled:bg-slate-50 disabled:text-slate-350 disabled:border-light-border text-xs font-black uppercase tracking-wider rounded-xl border border-emerald-150 transition cursor-pointer active:scale-95 flex items-center gap-1.5 outline-none focus:outline-none"
+                    >
+                      {buyAgainLoading ? (
+                        <Loader2 size={13} className="animate-spin text-current" />
+                      ) : (
+                        <RotateCcw size={13} className="stroke-[2.5]" />
+                      )}
+                      <span>Buy Again</span>
+                    </button>
+                  </div>
+                )}
+
               </div>
             )}
           </div>
@@ -942,6 +986,102 @@ const MyOrders = () => {
                 }`}
               >
                 {cancellingOrderId !== null ? "Cancelling..." : "Yes, Cancel"}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Buy Again Confirmation Summary Modal */}
+      {showBuyAgainModal && buyAgainResult && createPortal(
+        <div className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center z-[9999] p-4 animate-fadeIn">
+          <div className="bg-white border border-light-border/60 rounded-3xl p-6 max-w-md w-full shadow-2xl text-left space-y-4 relative animate-scaleUp">
+            <button
+              onClick={() => setShowBuyAgainModal(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-xl hover:bg-slate-100 text-muted-gray transition cursor-pointer outline-none focus:outline-none"
+            >
+              <X size={15} />
+            </button>
+            
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 border border-emerald-100 flex items-center justify-center">
+                <Check size={18} className="stroke-[3]" />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-dark-navy uppercase tracking-wider">
+                  Reorder Summary
+                </h3>
+                <p className="text-[10px] text-muted-gray font-bold uppercase tracking-widest mt-0.5">
+                  Products processed from previous purchase
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4 py-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+              {/* Added Products Section */}
+              {buyAgainResult.added?.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Added to Cart ({buyAgainResult.addedCount})
+                  </h4>
+                  <div className="space-y-1.5 pl-2.5">
+                    {buyAgainResult.added.map((item, idx) => (
+                      <div key={idx} className="text-xs font-semibold text-dark-navy flex flex-col">
+                        <div className="flex justify-between">
+                          <span className="truncate max-w-[280px]">✓ {item.name}</span>
+                          <span className="text-muted-gray text-[11px] font-bold">Qty: {item.quantity}</span>
+                        </div>
+                        {item.isPartial && (
+                          <span className="text-[9px] text-amber-600 font-extrabold uppercase mt-0.5 leading-none">
+                            ⚠ Partial Fulfillment: {item.details}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Skipped Products Section */}
+              {buyAgainResult.skipped?.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <h4 className="text-[10px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                    Skipped Products ({buyAgainResult.skippedCount})
+                  </h4>
+                  <div className="space-y-1.5 pl-2.5">
+                    {buyAgainResult.skipped.map((item, idx) => (
+                      <div key={idx} className="text-xs font-semibold text-slate-500 flex justify-between items-start gap-2">
+                        <span className="truncate max-w-[200px]">✕ {item.name}</span>
+                        <span className="text-rose-500 text-[10px] font-bold uppercase whitespace-nowrap bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                          {item.reason}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 justify-end pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowBuyAgainModal(false)}
+                className="px-4 py-2 border border-light-border hover:bg-slate-50 text-muted-gray text-xs font-bold rounded-xl transition cursor-pointer outline-none"
+              >
+                Continue Shopping
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowBuyAgainModal(false);
+                  navigate("/cart");
+                }}
+                className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl shadow-md transition active:scale-95 cursor-pointer outline-none"
+              >
+                Go To Cart
               </button>
             </div>
           </div>

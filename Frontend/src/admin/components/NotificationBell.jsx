@@ -140,24 +140,24 @@ const NotificationBell = () => {
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      {/* Bell Button */}
+    <div className="fixed bottom-6 right-6 z-45 text-left" ref={dropdownRef}>
+      {/* Bell Button (Floating FAB) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-muted-gray hover:text-dark-navy hover:bg-slate-50 rounded-xl transition-all cursor-pointer outline-none focus:outline-none"
+        className="w-12 h-12 rounded-full bg-slate-900/95 backdrop-blur-md border border-slate-800 text-white flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer outline-none focus:outline-none relative z-50 hover:bg-slate-800"
         aria-label="View notifications"
       >
         <Bell size={20} className={unreadCount > 0 ? "animate-wiggle" : ""} />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-red-500 text-[9px] font-extrabold text-white ring-2 ring-white">
+          <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] px-1.5 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white ring-2 ring-white">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
-      {/* Dropdown Popover */}
+      {/* Dropdown Popover panel above the FAB */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-light-border rounded-2xl shadow-xl z-50 overflow-hidden animate-slideDown">
+        <div className="absolute bottom-full right-0 mb-3.5 w-80 sm:w-96 bg-white border border-light-border rounded-3xl shadow-2xl z-40 overflow-hidden animate-slideUp">
           {/* Header */}
           <div className="px-4 py-3 border-b border-light-border/40 flex items-center justify-between bg-slate-50/50">
             <div>

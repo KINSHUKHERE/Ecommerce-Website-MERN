@@ -105,7 +105,7 @@ const ProductEdit = () => {
         const categoryRes = await getCategories();
         setCategories(categoryRes.data.categories || []);
 
-        const productRes = await getProduct();
+        const productRes = await getProduct(null, true);
         const product = productRes.data.data.find((p) => p._id === productId);
 
         if (product) {

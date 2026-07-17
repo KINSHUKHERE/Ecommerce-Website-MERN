@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { sentToCart } from "../api/CartApi";
 import { toggleWishlist } from "../api/WishlistApi";
-import { Heart, ShoppingCart, Loader2 } from "lucide-react";
+import { Heart, ShoppingCart, Loader2, Scale } from "lucide-react";
 
 const getRatingColorClass = (rating) => {
   const r = Math.round(Number(rating));
@@ -35,6 +35,54 @@ const EachProduct = ({ data }) => {
       window.removeEventListener("wishlistUpdated", checkWishlist);
     };
   }, [data._id]);
+
+  const [isCompared, setIsCompared] = React.useState(false);
+  const [isCompareLimitReached, setIsCompareLimitReached] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkCompare = () => {
+      const cached = localStorage.getItem("yocart_compare_ids");
+      if (cached) {
+        const compareIds = JSON.parse(cached);
+        setIsCompared(compareIds.includes(data._id));
+        setIsCompareLimitReached(compareIds.length >= 4);
+      } else {
+        setIsCompared(false);
+        setIsCompareLimitReached(false);
+      }
+    };
+    checkCompare();
+
+    window.addEventListener("compareUpdated", checkCompare);
+    return () => {
+      window.removeEventListener("compareUpdated", checkCompare);
+    };
+  }, [data._id]);
+
+  const handleCompareToggle = (e) => {
+    e.stopPropagation();
+    const cached = localStorage.getItem("yocart_compare_ids");
+    let compareIds = cached ? JSON.parse(cached) : [];
+    
+    if (compareIds.includes(data._id)) {
+      compareIds = compareIds.filter(id => id !== data._id);
+      localStorage.setItem("yocart_compare_ids", JSON.stringify(compareIds));
+      window.dispatchEvent(new Event("compareUpdated"));
+      setToast(`Removed from comparison.`);
+      setTimeout(() => setToast(""), 2000);
+    } else {
+      if (compareIds.length >= 4) {
+        setToast("You can compare up to 4 products.");
+        setTimeout(() => setToast(""), 2500);
+        return;
+      }
+      compareIds.push(data._id);
+      localStorage.setItem("yocart_compare_ids", JSON.stringify(compareIds));
+      window.dispatchEvent(new Event("compareUpdated"));
+      setToast(`Added to comparison! ⚖`);
+      setTimeout(() => setToast(""), 2000);
+    }
+  };
 
   const handleWishlistToggle = async (e) => {
     e.stopPropagation();
@@ -215,6 +263,33 @@ const EachProduct = ({ data }) => {
                 isWishlisted ? "fill-red-500 text-red-500" : "text-muted-gray"
               }`}
             />
+          </button>
+
+          {/* Compare Button */}
+          <button
+            type="button"
+            onClick={handleCompareToggle}
+            disabled={isCompareLimitReached && !isCompared}
+            className={`absolute top-13 right-3 p-2 rounded-full transition-all duration-300 z-10 shadow-xs border outline-none focus:outline-none flex items-center justify-center ${
+              isCompared
+                ? "bg-primary border-primary text-white hover:bg-primary-hover cursor-pointer"
+                : isCompareLimitReached
+                  ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                  : "bg-white hover:bg-slate-50 text-muted-gray hover:text-primary border-light-border/40 cursor-pointer"
+            }`}
+            title={
+              isCompared
+                ? "Remove from compare"
+                : isCompareLimitReached
+                  ? "Comparison limit (4) reached"
+                  : "Compare product"
+            }
+          >
+            {isCompareLimitReached && !isCompared ? (
+              <span className="text-[8px] font-black uppercase px-0.5 leading-none">Max</span>
+            ) : (
+              <Scale size={14} className={isCompared ? "stroke-[2.5]" : ""} />
+            )}
           </button>
           
           <img

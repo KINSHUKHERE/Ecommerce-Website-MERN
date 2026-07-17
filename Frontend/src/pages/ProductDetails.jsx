@@ -4,7 +4,7 @@ import { getProduct } from "../api/ProductApi";
 import { sentToCart } from "../api/CartApi";
 import { toggleWishlist } from "../api/WishlistApi";
 import { getProductReviewsApi } from "../api/ReviewApi";
-import { ChevronLeft, ChevronRight, Heart, Loader2, ArrowLeft, Star, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Loader2, ArrowLeft, Star, X, Scale } from "lucide-react";
 
 const ExpandableReviewText = ({ text }) => {
   const [expanded, setExpanded] = useState(false);
@@ -69,6 +69,51 @@ const ProductDetails = () => {
       window.removeEventListener("wishlistUpdated", checkWishlist);
     };
   }, [productId]);
+
+  const [isCompared, setIsCompared] = useState(false);
+  const [isCompareLimitReached, setIsCompareLimitReached] = useState(false);
+
+  useEffect(() => {
+    const checkCompare = () => {
+      const cached = localStorage.getItem("yocart_compare_ids");
+      if (cached) {
+        const compareIds = JSON.parse(cached);
+        setIsCompared(compareIds.includes(productId));
+        setIsCompareLimitReached(compareIds.length >= 4);
+      } else {
+        setIsCompared(false);
+        setIsCompareLimitReached(false);
+      }
+    };
+    checkCompare();
+
+    window.addEventListener("compareUpdated", checkCompare);
+    return () => {
+      window.removeEventListener("compareUpdated", checkCompare);
+    };
+  }, [productId]);
+
+  const handleCompareToggle = (e) => {
+    e.stopPropagation();
+    const cached = localStorage.getItem("yocart_compare_ids");
+    let compareIds = cached ? JSON.parse(cached) : [];
+    
+    if (compareIds.includes(productId)) {
+      compareIds = compareIds.filter(id => id !== productId);
+      localStorage.setItem("yocart_compare_ids", JSON.stringify(compareIds));
+      window.dispatchEvent(new Event("compareUpdated"));
+      showToast("Removed from comparison.");
+    } else {
+      if (compareIds.length >= 4) {
+        showToast("You can compare up to 4 products.", "error");
+        return;
+      }
+      compareIds.push(productId);
+      localStorage.setItem("yocart_compare_ids", JSON.stringify(compareIds));
+      window.dispatchEvent(new Event("compareUpdated"));
+      showToast("Added to comparison! ⚖");
+    }
+  };
 
   const [globalSaleActive, setGlobalSaleActive] = useState(() => {
     try {
@@ -581,8 +626,8 @@ const ProductDetails = () => {
             </div>
           )}
 
-          {/* Add to Wishlist + Add to Cart — right below variants */}
-          <div className="flex gap-3 mt-1">
+          {/* Add to Wishlist + Add to Cart + Compare — right below variants */}
+          <div className="flex flex-wrap sm:flex-nowrap gap-3 mt-1">
             <button
               onClick={handleWishlistToggle}
               className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold transition-all duration-300 border cursor-pointer outline-none text-xs flex-shrink-0 ${
@@ -596,6 +641,31 @@ const ProductDetails = () => {
                 className={isWishlisted ? "fill-rose-500 text-rose-500" : "text-muted-gray"}
               />
               <span>{isWishlisted ? "Wishlisted" : "Add to Wishlist"}</span>
+            </button>
+
+            {/* Compare Button */}
+            <button
+              onClick={handleCompareToggle}
+              disabled={isCompareLimitReached && !isCompared}
+              className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold transition-all duration-300 border text-xs flex-shrink-0 outline-none ${
+                isCompared
+                  ? "bg-primary/10 border-primary/20 text-primary hover:bg-primary/20 cursor-pointer"
+                  : isCompareLimitReached
+                    ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                    : "bg-white border-light-border text-dark-navy hover:bg-slate-50 cursor-pointer"
+              }`}
+            >
+              <Scale
+                size={16}
+                className={isCompared ? "text-primary stroke-[2.5]" : "text-muted-gray"}
+              />
+              <span>
+                {isCompared
+                  ? "Added to Compare"
+                  : isCompareLimitReached
+                    ? "Limit Reached (4)"
+                    : "Compare"}
+              </span>
             </button>
 
             <button
@@ -661,9 +731,11 @@ const ProductDetails = () => {
               Sold By
             </span>
             <span className="text-xs sm:text-sm font-black text-dark-navy block text-left">
-              {product.vendorId?.businessName || "YoCart Official Store"}
+              {!product.vendorId || product.vendorId.role === "admin"
+                ? "YoCart Official Store"
+                : (product.vendorId.businessName || "YoCart Official Store")}
             </span>
-            {product.vendorId && (
+            {product.vendorId && product.vendorId.role !== "admin" && (
               <span className="text-[9px] sm:text-[10px] text-muted-gray font-bold block mt-0.5 text-left">
                 GSTIN: {product.vendorId.gstin || "N/A"}
               </span>

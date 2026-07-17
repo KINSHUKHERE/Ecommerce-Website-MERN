@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense } from "react";
-import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
-import { Menu, LogOut, ChevronDown, User, Shield, Loader2 } from "lucide-react";
+import { useNavigate, useLocation, Outlet } from "react-router-dom";
+import { Menu, Loader2 } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 import logo from "../../assets/logo.png";
 import { getGlobalSaleConfig } from "../../api/SaleApi";
@@ -8,7 +8,6 @@ import NotificationBell from "./NotificationBell";
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,13 +17,6 @@ const AdminLayout = ({ children }) => {
   };
 
   const routePrefix = user?.role === "vendor" ? "/vendor" : "/admin";
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/");
-    window.location.reload();
-  };
 
   const [globalSale, setGlobalSale] = useState(() => {
     try {
@@ -71,7 +63,7 @@ const AdminLayout = ({ children }) => {
       <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       {/* Main Layout Area */}
-      <div className="flex-1 flex flex-col lg:pl-64 min-w-0">
+      <div className="flex-1 flex flex-col lg:pl-64 min-w-0 relative">
         {(() => {
           const getBannerGradient = (theme) => {
             switch (theme) {
@@ -101,7 +93,7 @@ const AdminLayout = ({ children }) => {
           );
         })()}
         {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-white/75 backdrop-blur-md border-b border-light-border/40 h-16 px-4 sm:px-6 flex items-center justify-between shadow-2xs">
+        <header className="sticky top-0 z-30 bg-white/75 backdrop-blur-md border-b border-light-border/40 h-16 px-4 sm:px-6 flex items-center justify-between shadow-2xs lg:hidden">
           {/* Left Side: Mobile Hamburger & Logo */}
           <div className="flex items-center gap-3">
             <button
@@ -116,81 +108,9 @@ const AdminLayout = ({ children }) => {
             </div>
           </div>
 
-          {/* Right Side: Profile & Controls */}
+          {/* Right Side: Clean empty spacer or additional buttons if needed */}
           <div className="flex items-center gap-4">
-            {/* Notifications Bell */}
-            <NotificationBell />
-
-            {/* User Profile Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2.5 py-1.5 px-2.5 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer outline-none focus:outline-none"
-              >
-                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-extrabold text-sm border-2 border-white shadow-xs overflow-hidden">
-                  {user?.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user?.name || "Profile"}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    (user?.name?.[0] || "P").toUpperCase()
-                  )}
-                </div>
-                <div className="hidden sm:block text-left select-none">
-                  <span className="block text-xs font-bold text-dark-navy leading-tight">
-                    {user?.name || "Prachi Jain"}
-                  </span>
-                  <span className="text-[10px] text-muted-gray font-bold uppercase leading-none mt-0.5 block">
-                    {user?.role || "admin"}
-                  </span>
-                </div>
-                <ChevronDown size={14} className="text-muted-gray" />
-              </button>
-
-              {profileMenuOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setProfileMenuOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-1.5 w-48 bg-white border border-light-border rounded-2xl shadow-lg py-1.5 z-20 animate-slideDown">
-                    <div className="px-4 py-2 border-b border-light-border/40">
-                      <p className="text-[10px] text-muted-gray font-extrabold uppercase tracking-wider">
-                        Account
-                      </p>
-                      <p className="text-xs font-semibold text-dark-navy mt-0.5 truncate">
-                        {user?.email || "herekinshuk@gmail.com"}
-                      </p>
-                    </div>
-                    <Link
-                      to={routePrefix}
-                      onClick={() => setProfileMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-muted-gray hover:bg-slate-50 hover:text-dark-navy font-bold uppercase tracking-wider transition-colors outline-none focus:outline-none"
-                    >
-                      <Shield size={14} className="text-primary" />
-                      {user?.role === "vendor" ? "Seller Portal" : "Admin Panel"}
-                    </Link>
-                    <Link
-                      to={`${routePrefix}/profile`}
-                      onClick={() => setProfileMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-muted-gray hover:bg-slate-50 hover:text-dark-navy font-bold uppercase tracking-wider transition-colors outline-none focus:outline-none"
-                    >
-                      <User size={14} className="text-primary" />
-                      My Profile
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-655 hover:bg-red-50 hover:text-red-700 font-bold uppercase tracking-wider transition-colors border-t border-light-border/40 cursor-pointer outline-none focus:outline-none"
-                    >
-                      <LogOut size={14} />
-                      Logout
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+            {/* Kept clean / Empty spacer */}
           </div>
         </header>
 
@@ -205,6 +125,9 @@ const AdminLayout = ({ children }) => {
             {children || <Outlet />}
           </Suspense>
         </main>
+
+        {/* Floating Notification FAB Widget */}
+        <NotificationBell />
       </div>
     </div>
   );

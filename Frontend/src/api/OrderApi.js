@@ -21,3 +21,7 @@ export const updateOrderStatus = async (orderId, status) => {
 export const cancelOrderApi = async (orderId) => {
   return await api.put(`/orders/${orderId}/cancel`);
 };
+
+export const buyAgainApi = async (orderId) => {
+  return await api.post(`/orders/${orderId}/buy-again`);
+};

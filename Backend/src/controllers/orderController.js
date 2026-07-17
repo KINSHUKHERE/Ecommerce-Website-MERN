@@ -251,7 +251,7 @@ const updateOrderStatus = async (req, res) => {
       // Process commission deduction or earnings release for each vendor
       for (const [vendorId, vendorItems] of Object.entries(vendorItemsMap)) {
         const vendor = await User.findById(vendorId);
-        if (vendor) {
+        if (vendor && vendor.role !== "admin") {
           if (isCOD) {
             // COD: Deduct commission from vendor's wallet balance
             let totalCommissionForVendor = 0;
@@ -373,10 +373,135 @@ const cancelUserOrder = async (req, res) => {
   }
 };
 
+const buyAgain = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const userId = req.user.userId;
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ msg: "Order not found" });
+    }
+
+    if (order.userId.toString() !== userId) {
+      return res.status(403).json({ msg: "Forbidden: You are not the owner of this order" });
+    }
+
+    if (order.orderStatus !== "Delivered") {
+      return res.status(400).json({ msg: "Only delivered orders can be reordered" });
+    }
+
+    const added = [];
+    const skipped = [];
+
+    for (const item of order.items) {
+      let maxStock = 0;
+      let finalQty = item.quantity;
+      let skipReason = null;
+      let isPartial = false;
+      let partialDetails = "";
+
+      if (item.variantId) {
+        const variant = await Variant.findOne({ _id: item.variantId, isDeleted: false });
+        if (!variant) {
+          skipReason = "Variant unavailable";
+        } else {
+          // Check product status too
+          const parentProduct = await Product.findById(item.productId);
+          if (!parentProduct || parentProduct.status !== "active") {
+            skipReason = "Product inactive or deleted";
+          } else {
+            maxStock = variant.quantity || 0;
+          }
+        }
+      } else {
+        const product = await Product.findById(item.productId);
+        if (!product || product.status !== "active") {
+          skipReason = "Product inactive or deleted";
+        } else {
+          maxStock = product.quantity || 0;
+        }
+      }
+
+      if (skipReason) {
+        skipped.push({ name: item.name, reason: skipReason });
+        continue;
+      }
+
+      if (maxStock <= 0) {
+        skipped.push({ name: item.name, reason: "Out of Stock" });
+        continue;
+      }
+
+      // Check for partial stock
+      if (maxStock < item.quantity) {
+        finalQty = maxStock;
+        isPartial = true;
+        partialDetails = `${item.quantity - maxStock} remaining units unavailable due to stock limits`;
+      }
+
+      // Cart merge logic
+      let cartItem = await Cart.findOne({
+        userId,
+        productId: item.productId,
+        variantId: item.variantId || null
+      });
+
+      if (cartItem) {
+        if (cartItem.quantity >= maxStock) {
+          skipped.push({ name: item.name, reason: "Cart already holds maximum available stock" });
+        } else {
+          const qtyToAdd = Math.min(finalQty, maxStock - cartItem.quantity);
+          if (qtyToAdd <= 0) {
+            skipped.push({ name: item.name, reason: "Cart already holds maximum available stock" });
+          } else {
+            cartItem.quantity += qtyToAdd;
+            await cartItem.save();
+            added.push({
+              name: item.name,
+              quantity: qtyToAdd,
+              isPartial: isPartial || (qtyToAdd < finalQty),
+              details: isPartial ? partialDetails : ""
+            });
+          }
+        }
+      } else {
+        await Cart.create({
+          userId,
+          productId: item.productId,
+          variantId: item.variantId || null,
+          quantity: finalQty
+        });
+        added.push({
+          name: item.name,
+          quantity: finalQty,
+          isPartial,
+          details: partialDetails
+        });
+      }
+    }
+
+    res.status(200).json({
+      msg: "Buy again processed successfully",
+      addedCount: added.length,
+      skippedCount: skipped.length,
+      added,
+      skipped
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      msg: "Unable to process buy again order",
+      Error: err.message
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   getAllOrders,
   getUserOrders,
   updateOrderStatus,
   cancelUserOrder,
+  buyAgain,
 };

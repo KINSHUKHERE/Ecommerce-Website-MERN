@@ -1,7 +1,15 @@
 import api from "./api";
 
-export const getProduct = (vendorId) => {
-  return api.get(vendorId ? `/get-product-data?vendorId=${vendorId}` : "/get-product-data");
+export const getProduct = (vendorId, isAdminPanel = false, ids = null) => {
+  let url = "/get-product-data";
+  const params = [];
+  if (vendorId) params.push(`vendorId=${vendorId}`);
+  if (isAdminPanel) params.push(`isAdminPanel=true`);
+  if (ids) params.push(`ids=${ids}`);
+  if (params.length > 0) {
+    url += `?${params.join("&")}`;
+  }
+  return api.get(url);
 };
 
 export const postProduct = (data) => {
@@ -24,4 +32,8 @@ export const uploadProductImage = (file) => {
       "Content-Type": "multipart/form-data",
     },
   });
+};
+
+export const bulkActionProducts = (data) => {
+  return api.patch("/product-bulk-action", data);
 };

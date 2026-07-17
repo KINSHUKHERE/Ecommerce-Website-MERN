@@ -35,6 +35,7 @@ const TermsConditions = lazy(() => import("../pages/TermsConditions"));
 const PrivacyPolicy = lazy(() => import("../pages/PrivacyPolicy"));
 const CompleteProfile = lazy(() => import("../pages/CompleteProfile"));
 const BecomeSeller = lazy(() => import("../pages/BecomeSeller"));
+const Compare = lazy(() => import("../pages/Compare"));
 
 // Import Admin Layout & New Pages
 import AdminLayout from "../admin/components/AdminLayout";
@@ -43,6 +44,7 @@ const ProductView = lazy(() => import("../admin/pages/ProductView"));
 const ProductEdit = lazy(() => import("../admin/pages/ProductEdit"));
 
 import Navbar from "../components/Navbar";
+import CompareFloatingBar from "../components/CompareFloatingBar";
 
 // Customer Layout Wrapper
 const UserLayout = () => {
@@ -52,7 +54,7 @@ const UserLayout = () => {
     if (user.role === "vendor") return <Navigate to="/vendor" replace />;
   }
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="flex flex-col min-h-screen w-full relative">
       <Navbar />
       <main className="flex-grow flex flex-col w-full">
         <Suspense fallback={
@@ -64,6 +66,7 @@ const UserLayout = () => {
           <Outlet />
         </Suspense>
       </main>
+      <CompareFloatingBar />
     </div>
   );
 };
@@ -275,6 +278,7 @@ const AppRoutes = () => {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:productId" element={<ProductDetails />} />
+          <Route path="/compare" element={<Compare />} />
           <Route path="/store/:vendorId" element={<VendorStore />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />

@@ -51,7 +51,7 @@ const SaleManagement = () => {
     if (!isVendor) return;
     try {
       setProductsLoading(true);
-      const res = await getProduct(user._id);
+      const res = await getProduct(user._id, true);
       setProducts(res.data.data || []);
     } catch (err) {
       console.error("Failed to load vendor products:", err);

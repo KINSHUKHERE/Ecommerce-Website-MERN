@@ -14,7 +14,7 @@ import {
   Check,
   Inbox,
 } from "lucide-react";
-import { getProduct, deleteProduct } from "../../api/ProductApi";
+import { getProduct, deleteProduct, bulkActionProducts } from "../../api/ProductApi";
 import { getCategories, getBrands } from "../../api/CategoryAndBrandApi";
 import ProductStats from "../components/ProductStats";
 
@@ -100,6 +100,14 @@ const AdminProducts = () => {
   // Delete Modal State
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  // Bulk Actions State
+  const [selectedProductIds, setSelectedProductIds] = useState([]);
+  const [bulkAction, setBulkAction] = useState(null); // 'price', 'stock', etc.
+  const [bulkOperation, setBulkOperation] = useState(""); // 'increase_percent', etc.
+  const [bulkValue, setBulkValue] = useState("");
+  const [isBulkLoading, setIsBulkLoading] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+
   // Check navigation state for redirects (e.g., successful creations/deletions)
   useEffect(() => {
     if (location.state?.message) {
@@ -117,7 +125,7 @@ const AdminProducts = () => {
       const vendorId = isVendor ? user._id : null;
 
       const [productRes, categoryRes, brandRes] = await Promise.all([
-        getProduct(vendorId),
+        getProduct(vendorId, true),
         getCategories(),
         getBrands(),
       ]);
@@ -327,6 +335,84 @@ const AdminProducts = () => {
     showToast("Filters reset successfully", "success");
   };
 
+  // Handle individual product selection
+  const handleSelectProduct = (productId) => {
+    setSelectedProductIds((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  // Handle Select All visible filtered products
+  const handleSelectAllVisible = () => {
+    const visibleIds = visibleProducts.map((p) => p._id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedProductIds.includes(id));
+
+    if (allSelected) {
+      // Deselect all visible
+      setSelectedProductIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
+    } else {
+      // Select all visible
+      setSelectedProductIds((prev) => {
+        const union = new Set([...prev, ...visibleIds]);
+        return Array.from(union);
+      });
+    }
+  };
+
+  // Reset bulk state
+  const resetBulkState = () => {
+    setBulkAction(null);
+    setBulkOperation("");
+    setBulkValue("");
+    setIsBulkLoading(false);
+  };
+
+  // Submit bulk action API request
+  const handleConfirmBulkAction = async () => {
+    if (selectedProductIds.length === 0 || !bulkAction) return;
+
+    // Validation for operations needing values
+    if (["price", "stock"].includes(bulkAction)) {
+      if (!bulkOperation || bulkValue === "" || isNaN(Number(bulkValue)) || Number(bulkValue) < 0) {
+        showToast("Please specify a valid positive value", "error");
+        return;
+      }
+    }
+
+    setIsBulkLoading(true);
+
+    try {
+      const payload = {
+        productIds: selectedProductIds,
+        action: bulkAction,
+        operation: bulkOperation || undefined,
+        value: bulkValue !== "" ? Number(bulkValue) : undefined,
+      };
+
+      const res = await bulkActionProducts(payload);
+      const { summary } = res.data;
+
+      showToast(
+        `Updated ${summary.updated} products successfully.`,
+        "success"
+      );
+
+      // Reset selection and close modals
+      setSelectedProductIds([]);
+      resetBulkState();
+      
+      // Reload products list
+      await loadAllData();
+    } catch (err) {
+      showToast("Bulk operation failed. Try again.", "error");
+      console.error("Bulk update failure:", err);
+    } finally {
+      setIsBulkLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] py-12 bg-soft-bg/30">
@@ -478,6 +564,14 @@ const AdminProducts = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-soft-bg/80 text-muted-gray border-b border-light-border/40 text-xs font-extrabold uppercase tracking-wider">
+                    <th className="py-3.5 px-6 w-12 text-center">
+                      <input
+                        type="checkbox"
+                        checked={visibleProducts.length > 0 && visibleProducts.every(p => selectedProductIds.includes(p._id))}
+                        onChange={handleSelectAllVisible}
+                        className="rounded border-light-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                      />
+                    </th>
                     <th className="py-3.5 px-6 w-20">Image</th>
                     <th className="py-3.5 px-6 min-w-[200px]">Product</th>
                     <th className="py-3.5 px-6">Category</th>
@@ -495,7 +589,15 @@ const AdminProducts = () => {
                     const priceDisplay = getProductPriceDisplay(p);
 
                     return (
-                      <tr key={p._id} className="hover:bg-slate-50/20 transition-all">
+                      <tr key={p._id} className={`transition-all hover:bg-slate-50/20 ${selectedProductIds.includes(p._id) ? "bg-primary/5 hover:bg-primary/5" : ""}`}>
+                        <td className="py-3.5 px-6 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedProductIds.includes(p._id)}
+                            onChange={() => handleSelectProduct(p._id)}
+                            className="rounded border-light-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                          />
+                        </td>
                         <td className="py-3.5 px-6">
                           <img
                             src={p.imgUrl}
@@ -526,17 +628,32 @@ const AdminProducts = () => {
                           {getProductTotalStock(p)}
                         </td>
                         <td className="py-3.5 px-6">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${
-                              status === "In Stock"
-                                ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                                : status === "Low Stock"
-                                ? "bg-amber-50 text-amber-600 border border-amber-100"
-                                : "bg-red-50 text-red-655 border border-red-100"
-                            }`}
-                          >
-                            {isSold ? "Sold" : status}
-                          </span>
+                          <div className="flex flex-col gap-1.5 items-start">
+                            {/* Publishing Status Badge */}
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                                p.status === "active"
+                                  ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                                  : p.status === "draft"
+                                  ? "bg-slate-100 text-slate-600 border-slate-200"
+                                  : "bg-red-50 text-red-600 border-red-100"
+                              }`}
+                            >
+                              {p.status === "active" ? "Published" : p.status === "draft" ? "Draft" : "Archived"}
+                            </span>
+                            {/* Inventory Status Badge */}
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                                status === "In Stock"
+                                  ? "bg-blue-50 text-blue-600 border-blue-100"
+                                  : status === "Low Stock"
+                                  ? "bg-amber-50 text-amber-600 border-amber-100"
+                                  : "bg-red-50 text-red-600 border-red-100"
+                              }`}
+                            >
+                              {isSold ? "Out of Stock" : status}
+                            </span>
+                          </div>
                         </td>
                         <td className="py-3.5 px-6">
                           <div className="flex items-center justify-center gap-1">
@@ -582,22 +699,49 @@ const AdminProducts = () => {
               return (
                 <div
                   key={p._id}
-                  className="bg-white border border-light-border/60 rounded-3xl p-4.5 shadow-2xs flex flex-col gap-3.5 relative overflow-hidden"
+                  className={`bg-white border rounded-3xl p-4.5 shadow-2xs flex flex-col gap-3.5 relative overflow-hidden transition-all ${
+                    selectedProductIds.includes(p._id)
+                      ? "border-primary bg-primary/0.5 ring-4 ring-primary/5"
+                      : "border-light-border/60"
+                  }`}
                 >
-                  {/* Status Badge in Top Right */}
-                  <span
-                    className={`absolute top-4.5 right-4.5 inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${
-                      status === "In Stock"
-                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                        : status === "Low Stock"
-                        ? "bg-amber-50 text-amber-600 border border-amber-100"
-                        : "bg-red-50 text-red-655 border border-red-100"
-                    }`}
-                  >
-                    {isSold ? "Sold" : status}
-                  </span>
+                  {/* Status Badges in Top Right */}
+                  <div className="absolute top-4 right-4 flex flex-col gap-1 items-end z-10">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                        p.status === "active"
+                          ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                          : p.status === "draft"
+                          ? "bg-slate-100 text-slate-600 border-slate-200"
+                          : "bg-red-50 text-red-600 border-red-100"
+                      }`}
+                    >
+                      {p.status === "active" ? "Published" : p.status === "draft" ? "Draft" : "Archived"}
+                    </span>
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                        status === "In Stock"
+                          ? "bg-blue-50 text-blue-600 border-blue-100"
+                          : status === "Low Stock"
+                          ? "bg-amber-50 text-amber-600 border-amber-100"
+                          : "bg-red-50 text-red-650 border-red-100"
+                      }`}
+                    >
+                      {isSold ? "Out of Stock" : status}
+                    </span>
+                  </div>
 
                   <div className="flex gap-4">
+                    {/* Checkbox for selection */}
+                    <div className="flex items-center justify-center pl-0.5">
+                      <input
+                        type="checkbox"
+                        checked={selectedProductIds.includes(p._id)}
+                        onChange={() => handleSelectProduct(p._id)}
+                        className="rounded border-light-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                      />
+                    </div>
+
                     {/* Left: Product Image */}
                     <div className="w-16 h-16 flex-shrink-0 flex items-center justify-center bg-soft-bg border border-light-border/30 rounded-xl p-1.5">
                       <img
@@ -716,6 +860,198 @@ const AdminProducts = () => {
                 className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer h-[38px] active:scale-95"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Bulk Actions Toolbar */}
+      {selectedProductIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 backdrop-blur-md text-white border border-slate-800 rounded-2xl px-5 py-3 shadow-2xl flex items-center gap-4 animate-slideUp max-w-[95%] w-max">
+          <div className="flex items-center gap-2 border-r border-slate-800 pr-4">
+            <span className="w-2.5 h-2.5 bg-primary rounded-full animate-pulse"></span>
+            <span className="text-xs font-extrabold uppercase tracking-wider">
+              {selectedProductIds.length} Selected
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 text-left">
+            <select
+              value={bulkAction || ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                setBulkAction(val);
+                if (val === "price") setBulkOperation("increase_percent");
+                else if (val === "stock") setBulkOperation("add_qty");
+              }}
+              className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold text-white hover:bg-slate-750 focus:outline-none focus:border-primary transition cursor-pointer uppercase tracking-wider h-[34px]"
+            >
+              <option value="">Bulk Actions</option>
+              <option value="price">Update Price</option>
+              <option value="stock">Update Stock</option>
+              <option value="publish">Publish</option>
+              <option value="unpublish">Unpublish</option>
+            </select>
+
+            <button
+              onClick={() => {
+                if (!bulkAction) return;
+                if (["publish", "unpublish"].includes(bulkAction)) {
+                  setShowPublishConfirm(true);
+                }
+              }}
+              disabled={!bulkAction || isBulkLoading}
+              className="px-4 py-1.5 bg-primary hover:bg-primary/90 disabled:bg-slate-800 text-white text-xs font-extrabold uppercase tracking-wider rounded-xl transition cursor-pointer h-[34px] flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Apply
+            </button>
+
+            <button
+              onClick={() => {
+                setSelectedProductIds([]);
+                resetBulkState();
+              }}
+              className="text-xs font-bold text-slate-400 hover:text-white px-2 py-1 transition cursor-pointer"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Action Configuration Modal */}
+      {bulkAction && ["price", "stock"].includes(bulkAction) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white border border-light-border rounded-3xl max-w-md w-full p-6 shadow-2xl z-10 relative overflow-hidden animate-scaleUp text-left">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-primary"></div>
+            
+            <h3 className="font-extrabold text-dark-navy text-base uppercase tracking-wider">
+              Bulk Update {bulkAction === "price" ? "Price" : "Stock"}
+            </h3>
+            <p className="text-xs text-muted-gray mt-1 font-semibold">
+              Applying changes to {selectedProductIds.length} selected products.
+            </p>
+
+            <div className="mt-4.5 space-y-4">
+              {bulkAction === "price" ? (
+                <div>
+                  <label className="block text-xs font-bold text-dark-navy uppercase tracking-wider mb-2">Operation</label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      { label: "Increase by Percentage (%)", value: "increase_percent" },
+                      { label: "Decrease by Percentage (%)", value: "decrease_percent" },
+                      { label: "Increase by Fixed Amount (₹)", value: "increase_fixed" },
+                      { label: "Decrease by Fixed Amount (₹)", value: "decrease_fixed" },
+                      { label: "Set Fixed Price (₹)", value: "set_fixed" }
+                    ].map(op => (
+                      <label key={op.value} className="flex items-center gap-2.5 p-2.5 rounded-xl border border-light-border/40 hover:bg-slate-50 cursor-pointer transition">
+                        <input
+                          type="radio"
+                          name="priceOperation"
+                          checked={bulkOperation === op.value}
+                          onChange={() => setBulkOperation(op.value)}
+                          className="text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                        />
+                        <span className="text-xs font-bold text-dark-navy">{op.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-bold text-dark-navy uppercase tracking-wider mb-2">Operation</label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      { label: "Add Quantity", value: "add_qty" },
+                      { label: "Remove Quantity", value: "remove_qty" },
+                      { label: "Set Exact Quantity", value: "set_qty" }
+                    ].map(op => (
+                      <label key={op.value} className="flex items-center gap-2.5 p-2.5 rounded-xl border border-light-border/40 hover:bg-slate-50 cursor-pointer transition">
+                        <input
+                          type="radio"
+                          name="stockOperation"
+                          checked={bulkOperation === op.value}
+                          onChange={() => setBulkOperation(op.value)}
+                          className="text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                        />
+                        <span className="text-xs font-bold text-dark-navy">{op.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-dark-navy uppercase tracking-wider mb-2">Value</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={bulkValue}
+                  onChange={(e) => setBulkValue(e.target.value)}
+                  placeholder="Enter positive value"
+                  className="w-full border border-light-border rounded-xl px-3.5 py-2 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 text-xs font-bold transition h-[38px]"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={resetBulkState}
+                disabled={isBulkLoading}
+                className="px-4 py-2 border border-light-border text-muted-gray hover:bg-slate-50 text-xs font-bold rounded-xl transition cursor-pointer h-[38px] disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmBulkAction}
+                disabled={isBulkLoading}
+                className="px-5 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer h-[38px] active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                {isBulkLoading && <Loader2 className="animate-spin w-3.5 h-3.5" />}
+                Apply Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish/Unpublish Confirmation Modal */}
+      {showPublishConfirm && bulkAction && ["publish", "unpublish"].includes(bulkAction) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white border border-light-border rounded-3xl max-w-sm w-full p-6 shadow-2xl z-10 relative overflow-hidden animate-scaleUp text-left">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-primary"></div>
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                <Check size={20} />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-dark-navy text-sm capitalize">
+                  Bulk {bulkAction} Products
+                </h3>
+                <p className="text-xs text-muted-gray mt-1.5 leading-relaxed font-semibold">
+                  Are you sure you want to {bulkAction} the {selectedProductIds.length} selected products?
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowPublishConfirm(false)}
+                disabled={isBulkLoading}
+                className="px-4 py-2 border border-light-border text-muted-gray hover:bg-slate-50 text-xs font-bold rounded-xl transition cursor-pointer h-[38px] disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  await handleConfirmBulkAction();
+                  setShowPublishConfirm(false);
+                }}
+                disabled={isBulkLoading}
+                className="px-5 py-2 bg-primary hover:bg-primary/95 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer h-[38px] active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                {isBulkLoading && <Loader2 className="animate-spin w-3.5 h-3.5" />}
+                Confirm
               </button>
             </div>
           </div>

@@ -383,13 +383,31 @@ const getDashboardStats = async (req, res) => {
     // Calculate total marketplace commission for admin
     let totalCommissionEarned = 0;
     if (isAdmin) {
+      // 1. Commission from third-party vendors
       vendors.forEach(vendor => {
+        if (vendor.role === "admin") return;
         const vendorProducts = products.filter(
           p => p.vendorId && (p.vendorId.toString() === vendor._id.toString() || p.vendorId._id?.toString() === vendor._id.toString())
         );
         const commStats = calculateVendorCommission(orders, vendorProducts, commissionSettings);
         totalCommissionEarned += commStats.totalCommissionAllTime;
       });
+
+      // 2. Direct profit (100% of price) from admin/official products
+      const adminIds = new Set(vendors.filter(v => v.role === "admin").map(a => a._id.toString()));
+      let adminProductsProfit = 0;
+
+      orders.forEach((order) => {
+        if (order.orderStatus !== "Delivered") return;
+        order.items.forEach((item) => {
+          const matchedProd = products.find(p => p._id.toString() === (item.productId?._id ? item.productId._id.toString() : item.productId?.toString()));
+          const isOfficial = !matchedProd || !matchedProd.vendorId || adminIds.has(matchedProd.vendorId.toString()) || matchedProd.vendorId.role === "admin";
+          if (isOfficial) {
+            adminProductsProfit += (item.price * (item.quantity || 1));
+          }
+        });
+      });
+      totalCommissionEarned += adminProductsProfit;
     }
 
     // Calculate specific vendor statistics

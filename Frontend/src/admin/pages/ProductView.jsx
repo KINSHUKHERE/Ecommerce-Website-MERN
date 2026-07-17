@@ -86,7 +86,7 @@ const [touchStartX, setTouchStartX] = useState(null);
 
   const fetchProductDetails = async () => {
     try {
-      const response = await getProduct();
+      const response = await getProduct(null, true);
       const found = response.data.data.find((p) => p._id === productId);
       if (found) {
         setProduct(found);

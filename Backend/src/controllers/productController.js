@@ -54,15 +54,17 @@ const addProduct = async (req, res) => {
       return res.status(404).json({ msg: "Vendor not found" });
     }
 
-    const lifetimeSales = await getVendorLifetimeSales(vendorId);
-    const requiredMinBalance = await getRequiredMinimumBalance(lifetimeSales, vendor);
+    if (vendor.role !== "admin") {
+      const lifetimeSales = await getVendorLifetimeSales(vendorId);
+      const requiredMinBalance = await getRequiredMinimumBalance(lifetimeSales, vendor);
 
-    if ((vendor.walletBalance || 0) < requiredMinBalance) {
-      return res.status(403).json({
-        msg: `Insufficient wallet balance. You must maintain a minimum balance of ₹${requiredMinBalance} based on your lifetime sales of ₹${lifetimeSales}. Your current balance is ₹${vendor.walletBalance || 0}. Please recharge your wallet before listing new products.`,
-        requiredMinBalance,
-        currentBalance: vendor.walletBalance || 0
-      });
+      if ((vendor.walletBalance || 0) < requiredMinBalance) {
+        return res.status(403).json({
+          msg: `Insufficient wallet balance. You must maintain a minimum balance of ₹${requiredMinBalance} based on your lifetime sales of ₹${lifetimeSales}. Your current balance is ₹${vendor.walletBalance || 0}. Please recharge your wallet before listing new products.`,
+          requiredMinBalance,
+          currentBalance: vendor.walletBalance || 0
+        });
+      }
     }
     
     const product = await Product.create(productData);
@@ -144,31 +146,45 @@ const addProduct = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const User = require("../models/authDetails");
-    let filter = { status: "active" };
+    let filter = {};
+
+    const isAdminPanel = req.query.isAdminPanel === "true";
 
     if (req.query.vendorId) {
       filter = { vendorId: req.query.vendorId };
-      if (!req.query.isAdminPanel) {
+      if (!isAdminPanel) {
         filter.status = "active";
       }
     } else {
-      // Find all active vendors
-      const activeVendors = await User.find({ role: "vendor", vendorStatus: "active" }).select("_id");
-      const activeVendorIds = activeVendors.map((v) => v._id);
+      if (isAdminPanel) {
+        // Admin panel views all products
+        filter = {};
+      } else {
+        // Public storefront catalog: show active products from active vendors and admins
+        const activeVendors = await User.find({ role: "vendor", vendorStatus: "active" }).select("_id");
+        const activeVendorIds = activeVendors.map((v) => v._id);
 
-      filter = {
-        status: "active",
-        $or: [
-          { vendorId: null },
-          { vendorId: { $in: activeVendorIds } }
-        ]
-      };
+        const admins = await User.find({ role: "admin" }).select("_id");
+        const adminIds = admins.map((a) => a._id);
+
+        filter = {
+          status: "active",
+          $or: [
+            { vendorId: null },
+            { vendorId: { $in: [...activeVendorIds, ...adminIds] } }
+          ]
+        };
+      }
+    }
+
+    if (req.query.ids) {
+      filter._id = { $in: req.query.ids.split(",") };
     }
 
     const products = await Product.find(filter)
       .populate("categoryId")
       .populate("brandId")
-      .populate("vendorId", "name email phoneNumber businessName businessAddress gstin")
+      .populate("vendorId", "name email role phoneNumber businessName businessAddress gstin")
       .lean();
 
     const productIds = products.map(p => p._id);
@@ -380,9 +396,305 @@ const updateProduct = async (req, res) => {
   }
 };
 
+const BulkActionLog = require("../models/bulkActionLog");
+
+// Helper to update prices in bulk
+const updateBulkPrice = async (productIds, operation, value, vendorId) => {
+  const filter = { _id: { $in: productIds } };
+  if (vendorId) filter.vendorId = vendorId;
+
+  const products = await Product.find(filter).lean();
+  const foundProductIds = products.map(p => p._id.toString());
+  
+  if (foundProductIds.length === 0) {
+    return { updatedIds: [], skippedIds: productIds, failedIds: [] };
+  }
+
+  const skippedIds = productIds.filter(id => !foundProductIds.includes(id));
+  const updatedIds = [];
+  const failedIds = [];
+
+  const productBulkOps = [];
+  const variantBulkOps = [];
+
+  for (const product of products) {
+    const productIdStr = product._id.toString();
+    try {
+      // Find all active variants for this product
+      const variants = await Variant.find({ productId: product._id, isDeleted: false });
+
+      // Determine if product has custom variants (attributes.length > 0)
+      const hasCustomVariants = variants.some(v => v.attributes && v.attributes.length > 0);
+
+      // If it doesn't have custom variants, update parent price as well
+      if (!hasCustomVariants) {
+        let newParentPrice = product.price || 0;
+        if (operation === "increase_percent") newParentPrice = newParentPrice * (1 + value / 100);
+        else if (operation === "decrease_percent") newParentPrice = newParentPrice * (1 - value / 100);
+        else if (operation === "increase_fixed") newParentPrice = newParentPrice + value;
+        else if (operation === "decrease_fixed") newParentPrice = newParentPrice - value;
+        else if (operation === "set_fixed") newParentPrice = value;
+
+        newParentPrice = Math.max(0, Math.round(newParentPrice * 100) / 100);
+
+        productBulkOps.push({
+          updateOne: {
+            filter: { _id: product._id },
+            update: { $set: { price: newParentPrice } }
+          }
+        });
+      }
+
+      // Update variant prices
+      for (const variant of variants) {
+        let newPrice = variant.price || 0;
+        if (operation === "increase_percent") newPrice = newPrice * (1 + value / 100);
+        else if (operation === "decrease_percent") newPrice = newPrice * (1 - value / 100);
+        else if (operation === "increase_fixed") newPrice = newPrice + value;
+        else if (operation === "decrease_fixed") newPrice = newPrice - value;
+        else if (operation === "set_fixed") newPrice = value;
+
+        newPrice = Math.max(0, Math.round(newPrice * 100) / 100);
+
+        variantBulkOps.push({
+          updateOne: {
+            filter: { _id: variant._id },
+            update: { $set: { price: newPrice } }
+          }
+        });
+      }
+
+      updatedIds.push(productIdStr);
+    } catch (err) {
+      console.error(`Failed to calculate price for product ${productIdStr}:`, err);
+      failedIds.push(productIdStr);
+    }
+  }
+
+  // Execute updates using bulkWrite
+  if (productBulkOps.length > 0) {
+    await Product.bulkWrite(productBulkOps);
+  }
+  if (variantBulkOps.length > 0) {
+    await Variant.bulkWrite(variantBulkOps);
+  }
+
+  return { updatedIds, skippedIds, failedIds };
+};
+
+// Helper to update stock/quantity in bulk
+const updateBulkStock = async (productIds, operation, value, vendorId) => {
+  const filter = { _id: { $in: productIds } };
+  if (vendorId) filter.vendorId = vendorId;
+
+  const products = await Product.find(filter).lean();
+  const foundProductIds = products.map(p => p._id.toString());
+
+  if (foundProductIds.length === 0) {
+    return { updatedIds: [], skippedIds: productIds, failedIds: [] };
+  }
+
+  const skippedIds = productIds.filter(id => !foundProductIds.includes(id));
+  const updatedIds = [];
+  const failedIds = [];
+
+  const productBulkOps = [];
+  const variantBulkOps = [];
+
+  for (const product of products) {
+    const productIdStr = product._id.toString();
+    try {
+      const variants = await Variant.find({ productId: product._id, isDeleted: false });
+
+      // Determine if product has custom variants
+      const hasCustomVariants = variants.some(v => v.attributes && v.attributes.length > 0);
+
+      // If it doesn't have custom variants, update parent quantity as well
+      if (!hasCustomVariants) {
+        let newParentQty = product.quantity || 0;
+        if (operation === "add_qty") newParentQty = newParentQty + value;
+        else if (operation === "remove_qty") newParentQty = newParentQty - value;
+        else if (operation === "set_qty") newParentQty = value;
+
+        newParentQty = Math.max(0, Math.round(newParentQty));
+
+        productBulkOps.push({
+          updateOne: {
+            filter: { _id: product._id },
+            update: { $set: { quantity: newParentQty, sold: newParentQty === 0 } }
+          }
+        });
+      }
+
+      // Update variant quantities
+      for (const variant of variants) {
+        let newQty = variant.quantity || 0;
+        if (operation === "add_qty") newQty = newQty + value;
+        else if (operation === "remove_qty") newQty = newQty - value;
+        else if (operation === "set_qty") newQty = value;
+
+        newQty = Math.max(0, Math.round(newQty));
+
+        variantBulkOps.push({
+          updateOne: {
+            filter: { _id: variant._id },
+            update: { $set: { quantity: newQty } }
+          }
+        });
+      }
+
+      updatedIds.push(productIdStr);
+    } catch (err) {
+      console.error(`Failed to calculate stock for product ${productIdStr}:`, err);
+      failedIds.push(productIdStr);
+    }
+  }
+
+  // Execute updates using bulkWrite
+  if (productBulkOps.length > 0) {
+    await Product.bulkWrite(productBulkOps);
+  }
+  if (variantBulkOps.length > 0) {
+    await Variant.bulkWrite(variantBulkOps);
+  }
+
+  return { updatedIds, skippedIds, failedIds };
+};
+
+// Helper to publish products in bulk
+const publishProducts = async (productIds, vendorId) => {
+  const filter = { _id: { $in: productIds } };
+  if (vendorId) filter.vendorId = vendorId;
+
+  const products = await Product.find(filter).select("_id").lean();
+  const foundProductIds = products.map(p => p._id.toString());
+
+  if (foundProductIds.length === 0) {
+    return { updatedIds: [], skippedIds: productIds, failedIds: [] };
+  }
+
+  const skippedIds = productIds.filter(id => !foundProductIds.includes(id));
+  const updatedIds = [];
+  const failedIds = [];
+
+  try {
+    await Product.updateMany(
+      { _id: { $in: foundProductIds } },
+      { $set: { status: "active" } }
+    );
+    updatedIds.push(...foundProductIds);
+  } catch (err) {
+    console.error("Bulk publish operation failed:", err);
+    failedIds.push(...foundProductIds);
+  }
+
+  return { updatedIds, skippedIds, failedIds };
+};
+
+// Helper to unpublish products in bulk
+const unpublishProducts = async (productIds, vendorId) => {
+  const filter = { _id: { $in: productIds } };
+  if (vendorId) filter.vendorId = vendorId;
+
+  const products = await Product.find(filter).select("_id").lean();
+  const foundProductIds = products.map(p => p._id.toString());
+
+  if (foundProductIds.length === 0) {
+    return { updatedIds: [], skippedIds: productIds, failedIds: [] };
+  }
+
+  const skippedIds = productIds.filter(id => !foundProductIds.includes(id));
+  const updatedIds = [];
+  const failedIds = [];
+
+  try {
+    await Product.updateMany(
+      { _id: { $in: foundProductIds } },
+      { $set: { status: "draft" } }
+    );
+    updatedIds.push(...foundProductIds);
+  } catch (err) {
+    console.error("Bulk unpublish operation failed:", err);
+    failedIds.push(...foundProductIds);
+  }
+
+  return { updatedIds, skippedIds, failedIds };
+};
+
+// Main dispatcher controller for product bulk actions
+const bulkActionProducts = async (req, res) => {
+  try {
+    const { productIds, action, operation, value } = req.body;
+    const vendorId = req.user.role === "vendor" ? req.user.userId : null;
+
+    if (!Array.isArray(productIds) || productIds.length === 0 || !action) {
+      return res.status(400).json({ msg: "Invalid request payload. Must provide productIds and action." });
+    }
+
+    let results = { updatedIds: [], skippedIds: [], failedIds: [] };
+
+    switch (action) {
+      case "price":
+        if (value === undefined || value < 0) {
+          return res.status(400).json({ msg: "Invalid value specified for price modification." });
+        }
+        results = await updateBulkPrice(productIds, operation, Number(value), vendorId);
+        break;
+      case "stock":
+        if (value === undefined || value < 0) {
+          return res.status(400).json({ msg: "Invalid value specified for stock modification." });
+        }
+        results = await updateBulkStock(productIds, operation, Number(value), vendorId);
+        break;
+      case "publish":
+        results = await publishProducts(productIds, vendorId);
+        break;
+      case "unpublish":
+        results = await unpublishProducts(productIds, vendorId);
+        break;
+      default:
+        return res.status(400).json({ msg: `Unsupported bulk action: ${action}` });
+    }
+
+    // Write audit log asynchronously
+    if (results.updatedIds.length > 0) {
+      try {
+        await BulkActionLog.create({
+          vendorId: req.user.userId,
+          action,
+          operation,
+          productsCount: results.updatedIds.length,
+          productIds: results.updatedIds,
+          details: { value, operation },
+        });
+      } catch (logErr) {
+        console.error("Failed to write bulk action audit log:", logErr);
+      }
+    }
+
+    const summary = {
+      total: productIds.length,
+      updated: results.updatedIds.length,
+      skipped: results.skippedIds.length,
+      failed: results.failedIds.length,
+    };
+
+    return res.status(200).json({
+      msg: "Bulk action completed successfully",
+      summary,
+      details: results,
+    });
+
+  } catch (err) {
+    console.error("Bulk action failed:", err);
+    return res.status(500).json({ msg: "Internal Server Error during bulk action processing", error: err.message });
+  }
+};
+
 module.exports = {
   addProduct,
   getProducts,
   deleteProduct,
   updateProduct,
+  bulkActionProducts,
 };

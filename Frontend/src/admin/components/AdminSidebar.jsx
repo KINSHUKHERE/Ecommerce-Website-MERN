@@ -18,6 +18,8 @@ import {
   BarChart3,
   Flame,
   Star,
+  User,
+  Shield,
 } from "lucide-react";
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
@@ -27,6 +29,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
     location.pathname.startsWith("/admin/products") ||
       location.pathname === "/create-product",
   );
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -197,7 +200,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* Navigation Links */}
-        <div className="flex-1 px-4 py-6 overflow-y-auto space-y-2 select-none text-left">
+        <div className="flex-1 px-4 py-6 overflow-y-auto space-y-2 select-none text-left custom-scrollbar">
           {menuItems.map((item, idx) => {
             if (item.submenu) {
               const isSubmenuActive = isActive("/admin/products") || isActive("/create-product");
@@ -289,8 +292,87 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
           })}
         </div>
 
-        {/* Footer / Logout */}
-        <div className="p-4 border-t border-light-border/40">
+        {/* Footer / User Profile & Logout */}
+        <div className="p-4 border-t border-light-border/40 space-y-3.5 relative">
+          {/* User Profile Card */}
+          <div className="relative">
+            <button
+              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              className="w-full flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition duration-300 cursor-pointer text-left outline-none focus:outline-none"
+            >
+              <div className="flex items-center gap-3">
+                {/* Avatar with status indicator */}
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-extrabold text-sm border-2 border-white shadow-xs overflow-hidden">
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user?.name || "Profile"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      (user?.name?.[0] || "P").toUpperCase()
+                    )}
+                  </div>
+                  {/* Online indicator dot */}
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                </div>
+
+                <div className="min-w-0 select-none">
+                  <span className="block text-xs font-bold text-dark-navy leading-tight truncate max-w-[120px]">
+                    {user?.name || "Prachi Jain"}
+                  </span>
+                  <span className="text-[10px] text-muted-gray font-bold uppercase leading-none mt-0.5 block">
+                    {user?.role || "admin"}
+                  </span>
+                </div>
+              </div>
+              <ChevronDown size={14} className={`text-muted-gray transition-transform duration-300 ${profileMenuOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {/* Upward Dropdown Popup Menu */}
+            {profileMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40 cursor-default"
+                  onClick={() => setProfileMenuOpen(false)}
+                />
+                <div className="absolute bottom-full left-0 right-0 z-50 mb-2 bg-white border border-light-border rounded-2xl shadow-xl py-1.5 animate-slideUp">
+                  <div className="px-4 py-2 border-b border-light-border/40 text-left">
+                    <p className="text-[9px] text-muted-gray font-extrabold uppercase tracking-wider">
+                      Account
+                    </p>
+                    <p className="text-[11px] font-semibold text-dark-navy mt-0.5 truncate">
+                      {user?.email || "herekinshuk@gmail.com"}
+                    </p>
+                  </div>
+                  <Link
+                    to={routePrefix}
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      setIsOpen(false);
+                    }}
+                    className="flex items-center gap-2.5 px-4 py-2 text-[11px] text-muted-gray hover:bg-slate-50 hover:text-dark-navy font-bold uppercase tracking-wider transition-colors outline-none focus:outline-none text-left"
+                  >
+                    <Shield size={14} className="text-primary" />
+                    {user?.role === "vendor" ? "Seller Portal" : "Admin Panel"}
+                  </Link>
+                  <Link
+                    to={`${routePrefix}/profile`}
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      setIsOpen(false);
+                    }}
+                    className="flex items-center gap-2.5 px-4 py-2 text-[11px] text-muted-gray hover:bg-slate-50 hover:text-dark-navy font-bold uppercase tracking-wider transition-colors outline-none focus:outline-none text-left"
+                  >
+                    <User size={14} className="text-primary" />
+                    My Profile
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider text-red-655 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
