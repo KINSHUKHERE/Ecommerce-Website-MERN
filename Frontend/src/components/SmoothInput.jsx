@@ -111,9 +111,6 @@ export const SmoothInput = forwardRef(({
   // Expose the input element to parent components
   useImperativeHandle(ref, () => inputRef.current);
 
-  const hasTextSecuritySupport = typeof window !== "undefined" &&
-    (CSS.supports("-webkit-text-security", "disc") || CSS.supports("text-security", "disc"));
-
   const syncMeasureSpan = () => {
     const input = inputRef.current;
     const measureSpan = measureRef.current;
@@ -140,14 +137,6 @@ export const SmoothInput = forwardRef(({
     measureSpan.style.fontFeatureSettings = styles.fontFeatureSettings;
     measureSpan.style.fontVariationSettings = styles.fontVariationSettings;
     measureSpan.style.textTransform = styles.textTransform;
-
-    if (isPassword && hasTextSecuritySupport) {
-      measureSpan.style.webkitTextSecurity = "disc";
-      measureSpan.style.textSecurity = "disc";
-    } else {
-      measureSpan.style.webkitTextSecurity = "none";
-      measureSpan.style.textSecurity = "none";
-    }
   };
 
   const measurePrefixWidth = (text) => {
@@ -225,7 +214,7 @@ export const SmoothInput = forwardRef(({
     }
 
     const isPassword = type === "password";
-    const textBeforeCaret = isPassword && !hasTextSecuritySupport
+    const textBeforeCaret = isPassword
       ? PASSWORD_CHAR.repeat(caretIndex)
       : target.value.slice(0, caretIndex);
 
