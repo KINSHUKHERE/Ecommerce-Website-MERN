@@ -42,6 +42,10 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState("");
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 2500);
+  };
   const [activeImgIndex, setActiveImgIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [touchStart, setTouchStart] = useState(null);
