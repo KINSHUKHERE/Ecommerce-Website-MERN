@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
@@ -11,7 +11,6 @@ import {
   Layers,
   Tag,
   Box,
-  IndianRupee,
   Check,
   X,
   ChevronLeft,

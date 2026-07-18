@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Store, MapPin, FileText, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
+import { Store, MapPin, FileText, Loader2, ArrowRight } from "lucide-react";
 import { becomeSellerApi } from "../api/AuthApi";
 import { SmoothInput } from "../components/SmoothInput";
 

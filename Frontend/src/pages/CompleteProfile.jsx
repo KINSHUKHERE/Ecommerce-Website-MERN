@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { completeProfile, uploadAvatarApi } from "../api/AuthApi";
 import { Eye, EyeOff, Loader2, User } from "lucide-react";
@@ -9,7 +9,7 @@ const CompleteProfile = () => {
   const [user, setUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("user"));
-    } catch (e) {
+    } catch {
       return null;
     }
   });

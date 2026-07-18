@@ -1,4 +1,3 @@
-import React from "react";
 import { Award, ShoppingCart } from "lucide-react";
 
 const TopProductsChart = ({ data }) => {

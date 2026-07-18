@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { postProduct, uploadProductImage } from "../../api/ProductApi";
 import {
@@ -27,9 +27,7 @@ import {
 
 const CreateProduct = () => {
   const navigate = useNavigate();
-  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
-  const isAdmin = currentUser.role === "admin";
-  
+
   // Basic Form Info
   const [formData, setFormData] = useState({
     categoryId: "",
@@ -173,7 +171,7 @@ const CreateProduct = () => {
     e.dataTransfer.setData("text/plain", index);
   };
 
-  const handleDragOver = (e, index) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
   };
 

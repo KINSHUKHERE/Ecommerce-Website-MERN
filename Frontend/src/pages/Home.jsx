@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Hero from "../components/Hero";
 import FeaturedProduct from "../components/FeaturedProduct";
 import { CategoryGrid, TrustBadges } from "../components/HomeFeatures";

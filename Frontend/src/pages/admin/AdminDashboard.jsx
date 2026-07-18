@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, lazy, Suspense } from "react";
+import { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
@@ -12,12 +12,10 @@ import {
   Download
 } from "lucide-react";
 import { getDashboardData } from "../../api/DashboardApi";
-import { calculateVendorCommission } from "../../utils/commissionHelper";
 import { getVendorWalletStatusApi, createVendorRechargeOrderApi, verifyVendorRechargePaymentApi, getCommissionSettingsApi, updateCommissionSettingsApi } from "../../api/PaymentApi";
 import { Plus, Loader2, Settings, ShieldCheck } from "lucide-react";
 
 // Import Reusable Dashboard Subcomponents
-import DashboardSkeleton from "../../components/dashboard/DashboardSkeleton";
 import KpiCard from "../../components/dashboard/KpiCard";
 import TopProductsChart from "../../components/dashboard/TopProductsChart";
 

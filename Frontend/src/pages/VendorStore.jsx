@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
   ArrowLeft, 
-  Store, 
   Mail, 
   Phone, 
-  FileText, 
-  MapPin, 
-  Calendar,
+  MapPin,
   Loader2,
   Package
 } from "lucide-react";

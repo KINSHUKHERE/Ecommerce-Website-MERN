@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, RotateCcw, Loader2, ArrowUpDown, ChevronDown } from "lucide-react";
 import EachProduct from "../components/EachProduct";
 import { getProduct } from "../api/ProductApi";

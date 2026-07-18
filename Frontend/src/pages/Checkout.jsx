@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, X, Loader2, Lock, CheckSquare, Home, ShoppingBag, MapPin, ChevronDown, CreditCard, Banknote } from "lucide-react";
 import { getDataCart } from "../api/CartApi";

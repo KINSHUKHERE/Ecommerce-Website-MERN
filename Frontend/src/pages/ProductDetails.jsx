@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getProduct } from "../api/ProductApi";
 import { sentToCart } from "../api/CartApi";
 import { toggleWishlist } from "../api/WishlistApi";
 import { getProductReviewsApi } from "../api/ReviewApi";
-import { ChevronLeft, ChevronRight, Heart, Loader2, ArrowLeft, Star, X, Scale } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Loader2, ArrowLeft, X, Scale } from "lucide-react";
 
 const ExpandableReviewText = ({ text }) => {
   const [expanded, setExpanded] = useState(false);

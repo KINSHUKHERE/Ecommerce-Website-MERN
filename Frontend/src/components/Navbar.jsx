@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown, User, ShoppingBag, MapPin, Settings, Shield, Home, Info, Phone, Package } from "lucide-react";
+import { ShoppingCart, Heart, Menu, X, LogOut, ChevronDown, User, ShoppingBag, MapPin, Shield, Home, Info, Phone, Package } from "lucide-react";
 import logo from "../assets/logo.png";
 import { getDataCart } from "../api/CartApi";
 import { getWishlist } from "../api/WishlistApi";

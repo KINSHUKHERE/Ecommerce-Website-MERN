@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getAddresses, addAddress, updateAddress, deleteAddress } from "../api/AddressApi";
 import { MapPin, Loader2, Edit, Trash2, X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";

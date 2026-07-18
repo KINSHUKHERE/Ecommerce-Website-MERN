@@ -1,4 +1,3 @@
-import React from "react";
 
 const KpiCard = ({ title, value, icon: IconComponent, badge, change, loading = false, comparisonLabel = "vs last month" }) => {
   const isPositive = typeof change === "number" && change > 0;

@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getContact } from "../../api/ContactApi";
 import {
   MessageSquare,
-  Mail,
   User,
   Clock,
   Search,

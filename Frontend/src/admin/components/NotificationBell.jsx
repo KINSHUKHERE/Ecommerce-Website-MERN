@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell, ShoppingBag, UserPlus, Store, Package, Trash2, CheckCheck, Clock, RefreshCw, Info } from "lucide-react";
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from "../../api/NotificationApi";
 
@@ -18,7 +18,7 @@ const formatRelativeTime = (dateString) => {
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays === 1) return "Yesterday";
     return `${diffDays}d ago`;
-  } catch (e) {
+  } catch {
     return "";
   }
 };

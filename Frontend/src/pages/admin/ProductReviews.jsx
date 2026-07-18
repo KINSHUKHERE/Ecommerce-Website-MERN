@@ -1,15 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getVendorReviewsApi } from "../../api/ReviewApi";
 import {
-  Star,
   Search,
   Loader2,
   SlidersHorizontal,
   MessageSquare,
   ExternalLink,
-  Smile,
-  Frown,
-  Meh,
   ChevronDown,
   User
 } from "lucide-react";

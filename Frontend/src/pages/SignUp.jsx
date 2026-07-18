@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signUpApi, googleLogin, uploadAvatarApi } from "../api/AuthApi";
 import { GoogleLogin } from "@react-oauth/google";
@@ -228,7 +228,7 @@ const SignUp = () => {
       } else {
         navigate("/");
       }
-    } catch (err) {
+    } catch {
       setErrors((prev) => ({ ...prev, general: "Google Sign Up Failed" }));
       setIsSubmitting(false);
     }

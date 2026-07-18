@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   addBrand,
   getBrands,
@@ -54,7 +54,6 @@ const BrandManagement = () => {
   const [catDropdownOpen, setCatDropdownOpen] = useState(false);
   const [filterCatDropdownOpen, setFilterCatDropdownOpen] = useState(false);
   const [filterStatusDropdownOpen, setFilterStatusDropdownOpen] = useState(false);
-  const [editCatDropdownOpen, setEditCatDropdownOpen] = useState(false);
 
   useEffect(() => {
     setCurrentPage(1);

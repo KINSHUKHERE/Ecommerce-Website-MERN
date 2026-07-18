@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import logo from "../assets/logo.png";
 import paymentGatewaysImg from "../assets/pngegg.png";
 import { Link, useLocation } from "react-router-dom";

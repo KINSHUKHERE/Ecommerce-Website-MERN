@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { getUserOrders, cancelOrderApi, buyAgainApi } from "../api/OrderApi";
@@ -14,11 +14,8 @@ import {
   Truck,
   Headphones,
   RotateCcw,
-  FileText,
   CheckCircle2,
-  Calendar,
   AlertCircle,
-  HelpCircle,
   ChevronDown
 } from "lucide-react";
 
@@ -633,7 +630,6 @@ const MyOrders = () => {
                           { step: 4, label: "Delivered", desc: "At your door", match: ["Delivered"] }
                         ].map((node) => {
                           const isDone = node.match.includes(selectedOrder.orderStatus);
-                          const isActive = selectedOrder.orderStatus === node.label;
                           return (
                             <div key={node.step} className="flex flex-col items-center text-center z-10 flex-1">
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 transition-all duration-300 ${

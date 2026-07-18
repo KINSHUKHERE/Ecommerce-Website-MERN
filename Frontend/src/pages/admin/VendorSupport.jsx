@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { postContact } from "../../api/ContactApi";
 import { MessageSquare, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 

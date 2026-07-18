@@ -1,4 +1,3 @@
-import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 const INVENTORY_COLORS = {

@@ -151,7 +151,7 @@ const AppRoutes = () => {
           navigate("/complete-profile", { replace: true });
           return;
         }
-      } catch (e) {
+      } catch {
         // Ignore json parse error
       }
 
@@ -163,7 +163,7 @@ const AppRoutes = () => {
         if (updatedUser && updatedUser.role !== "admin" && updatedUser.isProfileComplete === false && !isDeferred && location.pathname !== "/complete-profile") {
           navigate("/complete-profile", { replace: true });
         }
-      } catch (err) {
+      } catch {
         localStorage.removeItem("user");
         const protectedPaths = ["/cart", "/profile", "/addresses", "/checkout", "/admin", "/create-product", "/contact-details", "/order-details", "/categories", "/brands", "/complete-profile"];
         const isProtected = protectedPaths.some(path => location.pathname.startsWith(path));

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getWishlist, removeFromWishlist } from "../api/WishlistApi";
 import { sentToCart } from "../api/CartApi";

@@ -1,4 +1,3 @@
-import React from "react";
 import { Package, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 
 const ProductStats = ({ products = [], activeFilter = "", onCardClick }) => {

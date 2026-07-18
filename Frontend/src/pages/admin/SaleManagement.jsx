@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Sparkles, Flame, Percent, Check, Loader2, RefreshCw, AlertTriangle, ToggleLeft, ToggleRight, Settings2, Info, ChevronDown, Palette } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Sparkles, Flame, Percent, Check, Loader2, RefreshCw, AlertTriangle, ToggleLeft, ToggleRight, Settings2, ChevronDown, Palette } from "lucide-react";
 import { getGlobalSaleConfig, updateGlobalSaleConfig } from "../../api/SaleApi";
 import { getProduct, updateProduct } from "../../api/ProductApi";
 

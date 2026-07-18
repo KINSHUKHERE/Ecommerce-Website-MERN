@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useImperativeHandle, useState, useEffect } from "react";
+import { forwardRef, useRef, useImperativeHandle, useState, useEffect } from "react";
 import { motion, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
 
 // Helper to split styling between wrapper and inner input
@@ -190,7 +190,7 @@ export const SmoothInput = forwardRef(({
       return target.selectionDirection === "backward"
         ? selectionStart
         : selectionEnd;
-    } catch (e) {
+    } catch {
       // Fallback for inputs that do not support selectionStart (e.g., email, number)
       return target.value.length;
     }
@@ -209,7 +209,7 @@ export const SmoothInput = forwardRef(({
       selectionEnd = target.selectionEnd ?? 0;
       hasSelection = selectionStart !== selectionEnd;
       caretIndex = getCaretIndex(target);
-    } catch (e) {
+    } catch {
       caretIndex = target.value.length;
     }
 

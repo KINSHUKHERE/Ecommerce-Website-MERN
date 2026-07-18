@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import EachProduct from "./EachProduct";
 import { Link } from "react-router-dom";
 import { getProduct } from "../api/ProductApi";
@@ -38,7 +38,7 @@ const FeaturedProduct = (props) => {
     try {
       const res = await getProduct();
       setProducts(res.data.data);
-    } catch (err) {
+    } catch {
       console.log("Unable to get product");
     } finally {
       setLoading(false);

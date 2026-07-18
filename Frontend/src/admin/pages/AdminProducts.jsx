@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
-  SlidersHorizontal,
   Eye,
   Pencil,
   Trash2,

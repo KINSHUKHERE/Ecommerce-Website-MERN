@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login, googleLogin } from "../api/AuthApi";
 import { GoogleLogin } from "@react-oauth/google";
@@ -115,7 +115,7 @@ const Login = () => {
       } else {
         navigate("/");
       }
-    } catch (err) {
+    } catch {
       setErrors({ email: "", password: "", general: "Google Login Failed" });
       setIsLoggingIn(false);
     }

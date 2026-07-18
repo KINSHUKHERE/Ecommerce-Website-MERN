@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getProduct } from "../api/ProductApi";
 import { sentToCart } from "../api/CartApi";
@@ -6,11 +6,9 @@ import {
   Scale,
   ArrowLeft,
   X,
-  Star,
   Check,
   ShoppingBag,
-  Loader2,
-  AlertCircle
+  Loader2
 } from "lucide-react";
 
 // dynamic specs helper

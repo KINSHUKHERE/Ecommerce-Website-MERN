@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { Menu, Loader2 } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
@@ -15,8 +15,6 @@ const AdminLayout = ({ children }) => {
     name: "Prachi Jain",
     role: "admin",
   };
-
-  const routePrefix = user?.role === "vendor" ? "/vendor" : "/admin";
 
   const [globalSale, setGlobalSale] = useState(() => {
     try {

@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { 
   Users, 
   CheckCircle, 
-  AlertTriangle, 
   XCircle, 
   Search, 
   Clock, 
@@ -12,10 +11,6 @@ import {
   Store,
   Trash2,
   Plus,
-  Mail,
-  Lock,
-  Phone,
-  FileText,
   Settings
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
