@@ -5,6 +5,12 @@ const Cart = require("../models/cartDetails");
 const User = require("../models/authDetails");
 const WalletTransaction = require("../models/walletTransaction");
 const { getVendorLifetimeSales, getRequiredMinimumBalance } = require("../utils/walletHelper");
+const {
+  computeOrderTotals,
+  reserveStock,
+  releaseStock,
+  createOrderNotifications,
+} = require("../utils/orderHelper");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -64,29 +70,66 @@ const verifyRazorpayPayment = async (req, res) => {
       return res.status(400).json({ msg: "Payment verification failed. Signature mismatch." });
     }
 
-    // Signature verified — create the order in DB
     const userId = req.user.userId;
 
-    const newOrder = await Order.create({
-      userId,
-      items: orderData.items,
-      totalAmount: orderData.totalAmount,
-      shippingAddress: orderData.shippingAddress,
-      paymentMethod: "Razorpay",
-      transactionId: razorpay_payment_id,
-      paymentStatus: "Paid",
-      orderStatus: "Processing",
-    });
+    // Recompute the order authoritatively from the DB — the client's prices/totals
+    // are never trusted. This is what an item/price is actually worth server-side.
+    let totals;
+    try {
+      totals = await computeOrderTotals(orderData.items);
+    } catch (priceErr) {
+      return res.status(priceErr.statusCode || 400).json({ msg: priceErr.message });
+    }
+
+    // Cross-check what was actually paid against what the order is worth. The
+    // signature only proves the (order_id, payment_id) pair is authentic; it says
+    // nothing about the amount. Fetch the real Razorpay order and compare.
+    const paidOrder = await razorpay.orders.fetch(razorpay_order_id);
+    const expectedPaise = Math.round(totals.expectedTotal * 100);
+    const paidPaise = Number(paidOrder.amount);
+
+    // Allow ₹1 of float slack; block any real tampering.
+    if (Math.abs(paidPaise - expectedPaise) > 100) {
+      return res.status(400).json({
+        msg: "Payment amount does not match the order total. Order rejected.",
+      });
+    }
+
+    // Reserve stock atomically (prevents overselling under concurrency).
+    const reservation = await reserveStock(totals.pricedItems);
+    if (!reservation.ok) {
+      return res.status(409).json({ msg: reservation.message });
+    }
+
+    let newOrder;
+    try {
+      newOrder = await Order.create({
+        userId,
+        items: totals.pricedItems,
+        totalAmount: totals.expectedTotal,
+        shippingAddress: orderData.shippingAddress,
+        paymentMethod: "Razorpay",
+        transactionId: razorpay_payment_id,
+        paymentStatus: "Paid",
+        orderStatus: "Processing",
+      });
+    } catch (createErr) {
+      // Roll back the reserved stock if we couldn't persist the order.
+      await releaseStock(totals.pricedItems);
+      throw createErr;
+    }
 
     // Clear the user's cart
-    await Cart.findOneAndDelete({ userId });
-    
+    await Cart.deleteMany({ userId });
+
+    await createOrderNotifications(newOrder, totals.pricedItems);
+
     return res.status(201).json({
       msg: "Payment verified and order placed successfully",
       order: newOrder,
     });
   } catch (err) {
-    console.error("Razorpay payment verification failed:", err);
+    console.error("Razorpay payment verification failed:", err.message);
     return res.status(500).json({ msg: "Order creation failed after payment. Contact support." });
   }
 };
@@ -128,8 +171,14 @@ const verifyVendorRechargePayment = async (req, res) => {
       return res.status(400).json({ msg: "Missing recharge verification fields" });
     }
 
-    // Support simulated payment bypass in development/testing
-    if (razorpay_payment_id === "simulated_payment" && razorpay_signature === "simulated_signature") {
+    // Support simulated payment bypass ONLY in non-production (dev/testing).
+    // In production this branch is disabled so a vendor cannot credit their
+    // wallet for free with hard-coded sentinel values.
+    if (
+      process.env.NODE_ENV !== "production" &&
+      razorpay_payment_id === "simulated_payment" &&
+      razorpay_signature === "simulated_signature"
+    ) {
       const vendorId = req.user.userId;
       const vendor = await User.findById(vendorId);
       if (!vendor) {

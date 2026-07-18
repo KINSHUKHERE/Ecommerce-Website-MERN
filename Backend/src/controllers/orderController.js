@@ -6,100 +6,73 @@ const User = require("../models/authDetails");
 const WalletTransaction = require("../models/walletTransaction");
 const Category = require("../models/categoryDetails");
 const { getVendorLifetimeSales, getRequiredMinimumBalance } = require("../utils/walletHelper");
+const {
+  computeOrderTotals,
+  reserveStock,
+  releaseStock,
+  createOrderNotifications,
+} = require("../utils/orderHelper");
 
 const createOrder = async (req, res) => {
   try {
     const {
       items,
-      totalAmount,
       shippingAddress,
       paymentMethod,
       transactionId,
     } = req.body;
     const userId = req.user.userId;
 
-    if (!items || items.length === 0 || !totalAmount || !shippingAddress || !paymentMethod || !transactionId) {
+    if (!items || items.length === 0 || !shippingAddress || !paymentMethod || !transactionId) {
       return res.status(400).json({
         msg: "Missing required fields for order creation",
       });
     }
 
-    // Create the order
-    const newOrder = await Order.create({
-      userId,
-      items,
-      totalAmount,
-      shippingAddress,
-      paymentMethod,
-      transactionId,
-      paymentStatus: "Paid",
-      orderStatus: "Processing",
-    });
+    // Only allow gateway-less methods (COD) through this endpoint. Card/UPI/
+    // Razorpay orders must go through the signature-verified payment flow so the
+    // amount is proven paid before an order is recorded.
+    if (paymentMethod !== "COD") {
+      return res.status(400).json({
+        msg: "Online payments must be completed through the secure payment flow.",
+      });
+    }
 
-    // Update variant and product quantities
-    for (const item of items) {
-      if (item.variantId) {
-        const variant = await Variant.findById(item.variantId);
-        if (variant) {
-          variant.quantity = Math.max(0, variant.quantity - item.quantity);
-          await variant.save();
-        }
-      } else {
-        // Fallback for older flat products
-        const product = await Product.findById(item.productId);
-        if (product) {
-          product.quantity = Math.max(0, (product.quantity ?? 10) - item.quantity);
-          if (product.quantity <= 0) {
-            product.sold = true;
-          }
-          await product.save();
-        }
-      }
+    // Recompute prices & totals authoritatively from the DB (never trust client).
+    let totals;
+    try {
+      totals = await computeOrderTotals(items);
+    } catch (priceErr) {
+      return res.status(priceErr.statusCode || 400).json({ msg: priceErr.message });
+    }
+
+    // Reserve stock atomically before creating the order (prevents overselling).
+    const reservation = await reserveStock(totals.pricedItems);
+    if (!reservation.ok) {
+      return res.status(409).json({ msg: reservation.message });
+    }
+
+    let newOrder;
+    try {
+      newOrder = await Order.create({
+        userId,
+        items: totals.pricedItems,
+        totalAmount: totals.expectedTotal,
+        shippingAddress,
+        paymentMethod,
+        transactionId,
+        paymentStatus: "Paid",
+        orderStatus: "Processing",
+      });
+    } catch (createErr) {
+      await releaseStock(totals.pricedItems);
+      throw createErr;
     }
 
     // Clear user's cart
     await Cart.deleteMany({ userId });
 
-    // Create notifications for vendors & admin
-    try {
-      const Notification = require("../models/notificationDetails");
-      
-      // Group items by vendor
-      const vendorItemsMap = {};
-      for (const item of items) {
-        const prod = await Product.findById(item.productId);
-        if (prod && prod.vendorId) {
-          const vIdStr = prod.vendorId.toString();
-          if (!vendorItemsMap[vIdStr]) {
-            vendorItemsMap[vIdStr] = [];
-          }
-          vendorItemsMap[vIdStr].push(item);
-        }
-      }
-
-      // 1. Create vendor notifications
-      for (const [vendorId, vendorItems] of Object.entries(vendorItemsMap)) {
-        const itemNames = vendorItems.map(item => item.name).join(", ");
-        await Notification.create({
-          recipient: vendorId,
-          title: "New Order Received",
-          message: `You received a new order for: ${itemNames}.`,
-          type: "order",
-          link: "/vendor/order-details"
-        });
-      }
-
-      // 2. Create admin notification
-      await Notification.create({
-        recipient: null,
-        title: "New Order Placed",
-        message: `Order #${newOrder._id.toString().slice(-8)} has been placed for a total of ₹${totalAmount}.`,
-        type: "order",
-        link: "/order-details"
-      });
-    } catch (notifErr) {
-      console.error("Failed to generate order notifications:", notifErr);
-    }
+    await createOrderNotifications(newOrder, totals.pricedItems);
 
     res.status(201).json({
       msg: "Order created successfully and cart cleared",

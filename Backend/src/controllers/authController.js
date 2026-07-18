@@ -5,11 +5,31 @@ const { OAuth2Client } = require("google-auth-library");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Cookie options: mark Secure + SameSite=None in production (cross-site HTTPS),
+// fall back to a dev-friendly Lax cookie locally.
+const getCookieOptions = () => {
+  const isProd = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+};
+
+// Never let a client assign itself a privileged role at self-registration.
+const sanitizeSignupRole = (role) => (role === "vendor" ? "vendor" : "user");
+
 const signup = async (req, res) => {
   try {
     const { name, role, phoneNumber, email, password, avatar, businessName, businessAddress, gstin } = req.body;
-    const existUser = await User.findOne({ email });
-    console.log(existUser);
+
+    if (!email || !password) {
+      return res.status(400).json({ msg: "Email and password are required" });
+    }
+
+    // Cast to string so query-operator objects (e.g. {"$gt":""}) can't reach Mongo.
+    const existUser = await User.findOne({ email: String(email) });
     if (existUser) {
       return res.status(409).json({
         msg: "User already Exist",
@@ -18,11 +38,12 @@ const signup = async (req, res) => {
 
     const hashPassword = await bcrypt.hash(password, 10);
 
-    const isVendor = role === "vendor";
+    const safeRole = sanitizeSignupRole(role);
+    const isVendor = safeRole === "vendor";
 
     const data = await User.create({
       name,
-      role,
+      role: safeRole,
       phoneNumber,
       email,
       password: hashPassword,
@@ -58,9 +79,12 @@ const signup = async (req, res) => {
     } catch (notifErr) {
       console.error("Failed to generate signup notification:", notifErr);
     }
+    const dataObj = data.toObject();
+    delete dataObj.password;
+
     res.status(201).json({
       msg: "User Created",
-      data,
+      data: dataObj,
     });
   } catch (err) {
     res.status(500).json({
@@ -74,7 +98,11 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ msg: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ email: String(email) });
 
     if (!user) {
       return res.status(404).json({
@@ -106,20 +134,18 @@ const login = async (req, res) => {
         expiresIn: "7d",
       },
     );
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie("token", token, getCookieOptions());
+
+    const userObj = user.toObject();
+    delete userObj.password;
 
     res.status(200).json({
       msg: "Login successful",
-      user,
+      user: userObj,
       token,
     });
   } catch (err) {
-    console.log(err);
+    console.error("Login error:", err.message);
     res.status(500).json({
       msg: "Unable to login. Please signup!",
     });
@@ -170,20 +196,18 @@ const googleLogin = async (req, res) => {
       }
     );
 
-    res.cookie("token", jwtToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie("token", jwtToken, getCookieOptions());
+
+    const userObj = user.toObject();
+    delete userObj.password;
 
     res.status(200).json({
       msg: "Google Login Successful",
       token: jwtToken,
-      user,
+      user: userObj,
     });
   } catch (err) {
-    console.log(err);
+    console.error("Google login error:", err.message);
 
     res.status(500).json({
       msg: "Google Login Failed",
@@ -193,8 +217,7 @@ const googleLogin = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
-    console.log(users);
+    const users = await User.find().select("-password");
     res.json(users);
   } catch (err) {
     res.status(500).json({

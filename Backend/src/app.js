@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
@@ -25,11 +26,18 @@ const allowedOrigins = [
   "https://ecommerce-website-mern-1-luv9.onrender.com",
   "http://localhost:5173",
   "http://localhost:3000",
-  "http://localhost:5174/",
+  "http://localhost:5174",
   "http://localhost",
   "https://localhost",
 ];
 
+// Security headers. crossOriginResourcePolicy is relaxed so the separately
+// hosted frontend can consume this API cross-origin.
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
 app.use(cookieParser());
 app.use(
   cors({
