@@ -54,8 +54,12 @@ const markAsRead = async (req, res) => {
       return res.status(404).json({ msg: "Notification not found" });
     }
 
-    // Authorization check
-    if (notification.recipient && notification.recipient.toString() !== userId) {
+    // Authorization: must own it, or be an admin acting on a global alert.
+    // Global admin notifications have recipient=null and must not be touchable
+    // by regular users.
+    const isOwner = notification.recipient && notification.recipient.toString() === userId;
+    const isAdminGlobal = !notification.recipient && role === "admin";
+    if (!isOwner && !isAdminGlobal) {
       return res.status(403).json({ msg: "Unauthorized to update this notification" });
     }
 
@@ -114,7 +118,9 @@ const deleteNotification = async (req, res) => {
       return res.status(404).json({ msg: "Notification not found" });
     }
 
-    if (notification.recipient && notification.recipient.toString() !== userId && req.user.role !== "admin") {
+    const isOwner = notification.recipient && notification.recipient.toString() === userId;
+    const isAdminGlobal = !notification.recipient && req.user.role === "admin";
+    if (!isOwner && !isAdminGlobal) {
       return res.status(403).json({ msg: "Unauthorized to delete this notification" });
     }
 

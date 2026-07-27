@@ -90,8 +90,22 @@ const sensitiveLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Throttle file uploads. /upload-avatar must stay public (used during signup,
+// before the account exists), so a limiter is what curbs Cloudinary abuse.
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 30,
+  message: {
+    msg: "Too many uploads from this IP, please try again later."
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Apply rate limiters
 app.use(generalLimiter);
+app.use("/upload-avatar", uploadLimiter);
+app.use("/upload", uploadLimiter);
 app.use("/login", sensitiveLimiter);
 app.use("/signup", sensitiveLimiter);
 app.use("/become-seller", sensitiveLimiter);
