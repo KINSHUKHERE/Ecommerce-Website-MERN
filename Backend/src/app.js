@@ -102,6 +102,17 @@ const uploadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Health check / keep-alive. Defined BEFORE the rate limiters so uptime pings
+// stay cheap, never touch the database, and never count against the limit.
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Apply rate limiters
 app.use(generalLimiter);
 app.use("/upload-avatar", uploadLimiter);
